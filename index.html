@@ -23,8 +23,10 @@
   --text:#f2f6fa;--text2:#c2d0e0;--text3:#95a8be;
   --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
   --shadow:0 12px 40px rgba(0,0,0,.35);
+  --shadow-sm:0 4px 16px rgba(0,0,0,.22);
   --r:12px;--r2:8px;--r3:6px;
   --font:'DM Sans',sans-serif;--font2:'Space Grotesk',sans-serif;
+  --accent-line:linear-gradient(90deg,var(--gold),transparent);
 }
 [data-theme="light"]{
   --bg:#eef1f6;--bg2:#ffffff;--bg3:#f5f7fa;--bg4:#e8ecf2;--bg5:#d8dfe8;
@@ -54,9 +56,17 @@ h1,h2,h3,h4{font-family:var(--font2)}
 #app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
 
 /* TOPBAR */
-#topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);min-height:54px;flex-shrink:0;position:relative;z-index:50}
-.logo{font-family:var(--font2);font-size:17px;font-weight:700;color:var(--gold);white-space:nowrap;letter-spacing:-.3px}
-.logo em{font-style:normal;color:var(--text3);font-size:11px;font-weight:400;margin-left:5px;letter-spacing:0}
+#topbar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--bg2);border-bottom:1px solid var(--border);min-height:58px;flex-shrink:0;position:relative;z-index:50;box-shadow:var(--shadow-sm)}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent-line);opacity:.85}
+.logo-wrap{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.logo{font-family:var(--font2);font-size:18px;font-weight:700;color:var(--gold);white-space:nowrap;letter-spacing:-.4px;line-height:1.1}
+.logo em{font-style:normal;color:var(--text);font-size:18px;font-weight:700}
+.logo-sub{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.6px;text-transform:uppercase}
+#status-bar{display:flex;gap:8px;padding:7px 18px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;align-items:center}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:600;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);white-space:nowrap;transition:.15s}
+.status-pill.ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green2)}
+.status-pill.warn{border-color:var(--yellow-border);background:var(--yellow-bg);color:var(--yellow2)}
+.status-pill.info{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue2)}
 #search-wrap{flex:1;max-width:560px;position:relative}
 #search-wrap .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.6}
 #global-search{padding:10px 40px 10px 40px;height:40px;font-size:14px;border-radius:22px;background:var(--bg3)}
@@ -175,23 +185,37 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .excel-panel-h{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
 .excel-file-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
 .excel-file-name{font-size:12px;color:var(--green2);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cust-docs-panel{margin-top:10px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
-.cust-docs-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-.cust-docs-toolbar select{flex:1;min-width:120px}
-.cust-docs-toolbar input[type=text]{flex:2;min-width:140px}
-.cust-doc-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2)}
-.cust-doc-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--border);transition:.12s}
+.cust-docs-panel{margin-top:0;padding:0;background:transparent;border:none;border-radius:0}
+.cust-docs-toolbar{display:grid;grid-template-columns:140px 1fr auto;gap:10px;align-items:center;margin-bottom:12px}
+.doc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.doc-stat{padding:12px 10px;border-radius:var(--r2);background:var(--bg3);border:1px solid var(--border2);text-align:center}
+.doc-stat strong{display:block;font-family:var(--font2);font-size:20px;font-weight:700;line-height:1.2;margin-bottom:2px}
+.doc-stat.verordnung strong{color:var(--blue2)}
+.doc-stat.genehmigung strong{color:var(--green2)}
+.doc-stat.sonstiges strong{color:var(--text2)}
+.doc-stat span{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
+.doc-upload-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:22px 16px;text-align:center;transition:.2s;cursor:pointer;background:var(--bg2);margin-bottom:12px}
+.doc-upload-zone:hover,.doc-upload-zone.drag{border-color:var(--gold);background:var(--gold3)}
+.doc-upload-zone .du-icon{font-size:28px;margin-bottom:6px;opacity:.85}
+.doc-upload-zone .du-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.doc-upload-zone .du-sub{font-size:11px;color:var(--text3);line-height:1.45}
+.cust-doc-list{max-height:260px;overflow-y:auto;border:1px solid var(--border2);border-radius:var(--r2);background:var(--bg2)}
+.cust-doc-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-bottom:1px solid var(--border);transition:.12s;border-left:3px solid transparent}
 .cust-doc-item:last-child{border-bottom:none}
 .cust-doc-item:hover{background:var(--bg4)}
-.cust-doc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--bg4)}
+.cust-doc-item.verordnung{border-left-color:var(--blue)}
+.cust-doc-item.genehmigung{border-left-color:var(--green)}
+.cust-doc-item.sonstiges{border-left-color:var(--text3)}
+.cust-doc-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--bg4)}
 .cust-doc-item.verordnung .cust-doc-icon{background:var(--blue-bg)}
 .cust-doc-item.genehmigung .cust-doc-icon{background:var(--green-bg)}
 .cust-doc-info{flex:1;min-width:0}
-.cust-doc-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cust-doc-meta{font-size:10px;color:var(--text3);margin-top:2px}
-.cust-doc-btns{display:flex;gap:4px;flex-shrink:0}
-.cust-doc-empty{padding:16px;text-align:center;font-size:11px;color:var(--text3);line-height:1.5}
-.cust-doc-hint{font-size:10px;color:var(--text3);margin-top:8px;line-height:1.55}
+.cust-doc-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-doc-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.cust-doc-btns{display:flex;gap:5px;flex-shrink:0}
+.cust-doc-empty{padding:28px 20px;text-align:center;font-size:12px;color:var(--text3);line-height:1.6}
+.cust-doc-empty .de-icon{font-size:36px;margin-bottom:8px;opacity:.5}
+.cust-doc-hint{font-size:10px;color:var(--text3);margin-top:10px;line-height:1.55;padding:10px 12px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)}
 .excel-detail-box{margin-top:12px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
 .excel-detail-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .cloud-step{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r2);font-size:12px;color:var(--text2);margin-bottom:4px;background:var(--bg3);border:1px solid var(--border)}
@@ -228,8 +252,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .sch-addr::before{content:'· ';color:var(--text3)}
 .sch-now{position:relative;height:0;margin:0 16px;border-top:2px solid var(--red);z-index:5}
 .sch-now::before{content:'';position:absolute;left:-6px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--red)}
-.sch-empty{padding:40px 20px;text-align:center;color:var(--text3);font-size:13px}
-.sch-empty .ei{font-size:36px;margin-bottom:8px}
+.sch-empty{padding:48px 24px;text-align:center;color:var(--text3);font-size:14px;line-height:1.6}
+.sch-empty .ei{font-size:44px;margin-bottom:10px;opacity:.4;display:block}
 /* Week view timeline blocks */
 .day-tl{display:grid;grid-template-columns:52px 1fr;flex:1;min-height:1440px}
 .t-col{border-right:1px solid var(--border)}
@@ -325,8 +349,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .cust-local-search{max-width:200px;min-width:140px;height:34px;padding:7px 12px;font-size:13px;border-radius:var(--r2)}
 .cust-sort-sel{width:auto;min-width:130px;height:34px;padding:6px 10px;font-size:12px}
 .cust-count-badge{font-size:12px;color:var(--text3);font-weight:500;margin-left:6px}
-.cust-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px;cursor:pointer;transition:.2s;position:relative}
-.cust-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px)}
+.cust-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px;cursor:pointer;transition:.18s;position:relative;box-shadow:0 1px 0 rgba(255,255,255,.03)}
+.cust-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
 .cust-card.gc-card{border-left:3px solid var(--blue)}
 .cust-card.gc-card .cc-src{font-size:9px;color:var(--blue2);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:4px}
 .cc-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px}
@@ -368,20 +392,39 @@ h1,h2,h3,h4{font-family:var(--font2)}
 /* MODALS */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(5px)}
 .overlay.hidden{display:none}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow)}
-.modal-lg{max-width:640px}
-.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 0;margin-bottom:14px}
-.mh h3{font-size:16px;font-weight:700}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.modal-lg{max-width:720px}
+.modal-pro{overflow:hidden}
+.modal-pro .mbody{overflow-y:auto;flex:1;padding:0 18px 18px}
+.mh{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 18px 14px;margin-bottom:0;flex-shrink:0}
+.mh-pro{border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--bg3) 0%,var(--bg2) 100%)}
+.mh h3{font-size:17px;font-weight:700;letter-spacing:-.2px}
+.mh-sub{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500}
+.modal-tabs{display:flex;gap:2px;padding:0 18px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-x:auto}
+.modal-tab{padding:12px 14px;font-size:11px;font-weight:700;color:var(--text3);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;transition:.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.modal-tab:hover{color:var(--text)}
+.modal-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:9px;font-weight:700;background:var(--bg4);color:var(--text2);display:inline-flex;align-items:center;justify-content:center}
+.modal-tab.active .tab-badge{background:var(--gold3);color:var(--gold)}
+.cust-tab-pane{display:none;padding-top:16px;animation:fadeIn .2s ease}
+.cust-tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.pro-panel{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.pro-panel-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.pro-panel-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--gold3);flex-shrink:0;border:1px solid rgba(245,166,35,.2)}
+.pro-panel-title{font-size:14px;font-weight:700;letter-spacing:-.2px}
+.pro-panel-desc{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.55;max-width:480px}
+.fsec{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.fsec::after{content:'';flex:1;height:1px;background:var(--border)}
 .mclose{width:30px;height:30px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text2);transition:.12s}
 .mclose:hover{background:var(--bg4)}
 .mbody{padding:0 18px 18px}
-.mfooter{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--border)}
+.mfooter{display:flex;gap:8px;justify-content:flex-end;padding:14px 18px;border-top:1px solid var(--border);background:var(--bg3);flex-shrink:0}
 .fr{margin-bottom:12px}
 .fr label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;letter-spacing:.2px}
 .fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.fdiv{border:none;border-top:1px solid var(--border);margin:14px 0}
-.fsec{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.fdiv{border:none;border-top:1px solid var(--border);margin:16px 0}
 /* radio */
 .rg{display:flex;gap:6px;flex-wrap:wrap}
 .ro{flex:1;min-width:70px}
@@ -412,13 +455,21 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .btn-sm{padding:5px 10px;font-size:11px}
 /* autocomplete */
 .ac-wrap{position:relative}
-.ac-list{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);z-index:600;max-height:200px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
+@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);z-index:600;max-height:240px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
 .ac-list.show{display:block}
-.ac-item{padding:8px 13px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s}
-.ac-item:hover{background:var(--bg4)}
+.ac-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s}
 .ac-item:last-child{border-bottom:none}
-.ac-main{font-size:12px;font-weight:600}
-.ac-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.ac-item:hover{background:var(--bg4)}
+.ac-main{font-size:13px;font-weight:600}
+.ac-sub{font-size:11px;color:var(--text3);margin-top:2px}
+@media(max-width:700px){
+  .cust-docs-toolbar{grid-template-columns:1fr}
+  .doc-stats{grid-template-columns:1fr 1fr 1fr}
+  .logo-sub{display:none}
+  #status-bar{padding:6px 12px}
+  .modal-tabs{padding:0 12px}
+}
 .ac-tag{display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
 .ac-tag.hosp{background:var(--red-bg);color:var(--red2);border-color:var(--red-border)}
 .ac-loading{padding:10px 13px;font-size:11px;color:var(--text3)}
@@ -447,14 +498,19 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .fab{position:fixed;bottom:22px;right:22px;width:50px;height:50px;border-radius:50%;background:var(--gold);color:#000;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(245,166,35,.45);cursor:pointer;transition:.18s;z-index:100;font-weight:700}
 .fab:hover{transform:scale(1.1)}
 /* TOAST */
-.toast-wrap{position:fixed;top:62px;right:14px;z-index:3000;display:flex;flex-direction:column;gap:7px}
-.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:9px;box-shadow:var(--shadow);animation:tIn .25s ease;min-width:220px;max-width:300px}
-.toast.ok{border-color:var(--green-border)}
-.toast.warn{border-color:var(--yellow-border)}
-.toast.err{border-color:var(--red-border)}
-.ti{font-size:16px}
-.tt{flex:1;font-size:12px;font-weight:500}
-@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast-wrap{position:fixed;top:96px;right:16px;z-index:3000;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;box-shadow:var(--shadow);animation:tIn .3s cubic-bezier(.2,.8,.2,1);min-width:260px;max-width:340px;border-left:3px solid var(--green)}
+.toast.ok{border-left-color:var(--green)}
+.toast.warn{border-left-color:var(--yellow)}
+.toast.err{border-left-color:var(--red)}
+.ti{font-size:18px;line-height:1;flex-shrink:0;margin-top:1px}
+.tt{flex:1;font-size:13px;font-weight:500;line-height:1.45;color:var(--text)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--text3);text-align:center;padding:32px 24px}
+.empty .ei{font-size:48px;margin-bottom:4px;opacity:.45}
+.empty p{font-size:14px;max-width:280px;line-height:1.6;color:var(--text2)}
+.empty .empty-hint{font-size:11px;color:var(--text3);margin-top:4px}
+.tr-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;transition:.18s;box-shadow:0 1px 0 rgba(255,255,255,.02)}
+.tr-card:hover{border-color:var(--border2);background:var(--bg3);box-shadow:var(--shadow-sm)}
 /* GOOGLE CONTACTS PANEL */
 .gc-panel{background:var(--bg2);border:1px solid var(--blue-border);border-radius:var(--r);padding:16px;margin-bottom:14px}
 .gc-panel h4{font-size:13px;font-weight:700;color:var(--blue2);margin-bottom:8px;display:flex;align-items:center;gap:7px}
@@ -468,12 +524,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .gc-contact-item .gci-meta{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gc-contact-item .gci-action{font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0}
 /* empty */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--text3);text-align:center;padding:20px}
-.empty .ei{font-size:44px;margin-bottom:4px}
-.empty p{font-size:13px;max-width:220px;line-height:1.5}
-/* today rides */
-.tr-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:9px;cursor:pointer;transition:.15s}
-.tr-card:hover{border-color:var(--border2);background:var(--bg3)}
+
 .tr-card.krank{border-left:3px solid var(--red)}
 .tr-card.rechn{border-left:3px solid var(--yellow)}
 .tr-card.privat{border-left:3px solid var(--green)}
@@ -553,20 +604,29 @@ h1,h2,h3,h4{font-family:var(--font2)}
 
 <!-- TOPBAR -->
 <div id="topbar">
-  <div class="logo">TaxiPro <em>Dispatch</em></div>
+  <div class="logo-wrap">
+    <div class="logo">TaxiPro <em>Dispatch</em></div>
+    <div class="logo-sub">Taxi Meckenheim GmbH</div>
+  </div>
   <div id="search-wrap">
     <span class="si">🔍</span>
-    <input type="text" id="global-search" placeholder="Kunden, Kontakte, Fahrten suchen…" autocomplete="off"/>
+    <input type="text" id="global-search" placeholder="Kunden, Fahrten, Dokumente suchen…" autocomplete="off"/>
     <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
     <div id="search-results"></div>
   </div>
   <div id="topbar-btns">
-    <button class="tb-btn gc" id="gc-sync-btn" onclick="initiateGoogleSync()">🔵 Google Kontakte</button>
-    <button class="tb-btn gc" id="gcal-sync-btn" onclick="initiateGCalSync()">📅 Google Kalender</button>
-    <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel umschalten">🌙</button>
+    <button class="tb-btn gc" id="gc-sync-btn" onclick="initiateGoogleSync()">🔵 Kontakte</button>
+    <button class="tb-btn gc" id="gcal-sync-btn" onclick="initiateGCalSync()">📅 Kalender</button>
+    <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel">🌙</button>
     <button class="tb-btn primary" onclick="openRideModal()">＋ Fahrt</button>
     <button class="tb-btn" onclick="openCustomerModal()">👤 Kunde</button>
   </div>
+</div>
+<div id="status-bar">
+  <span class="status-pill" id="status-gcal">📅 Kalender</span>
+  <span class="status-pill" id="status-cloud">☁️ Cloud</span>
+  <span class="status-pill info" id="status-rides">🚗 Heute: 0</span>
+  <span class="status-pill" id="status-cust">👥 0 Kunden</span>
 </div>
 
 <!-- MAIN -->
@@ -698,7 +758,13 @@ h1,h2,h3,h4{font-family:var(--font2)}
 <!-- ═══ MODAL: FAHRT ═══ -->
 <div class="overlay hidden" id="modal-ride">
 <div class="modal">
-  <div class="mh"><h3 id="modal-ride-title">Neue Fahrt</h3><button class="mclose" onclick="closeM('modal-ride')">✕</button></div>
+  <div class="mh mh-pro">
+    <div>
+      <h3 id="modal-ride-title">Neue Fahrt</h3>
+      <div class="mh-sub">Fahrt planen und optional an Fahrer senden</div>
+    </div>
+    <button class="mclose" onclick="closeM('modal-ride')">✕</button>
+  </div>
   <div class="mbody">
     <div class="fr">
       <label>Fahrttyp</label>
@@ -813,113 +879,148 @@ h1,h2,h3,h4{font-family:var(--font2)}
 
 <!-- ═══ MODAL: KUNDE ═══ -->
 <div class="overlay hidden" id="modal-customer">
-<div class="modal modal-lg">
-  <div class="mh"><h3 id="modal-cust-title">Neuer Kunde</h3><button class="mclose" onclick="closeM('modal-customer')">✕</button></div>
+<div class="modal modal-lg modal-pro">
+  <div class="mh mh-pro">
+    <div>
+      <h3 id="modal-cust-title">Neuer Kunde</h3>
+      <div class="mh-sub" id="modal-cust-sub">Stammdaten und Dokumente verwalten</div>
+    </div>
+    <button class="mclose" onclick="closeM('modal-customer')">✕</button>
+  </div>
+  <div class="modal-tabs" id="cust-modal-tabs">
+    <button type="button" class="modal-tab active" data-tab="stamm" onclick="switchCustTab('stamm')">👤 Stammdaten</button>
+    <button type="button" class="modal-tab" data-tab="kts" onclick="switchCustTab('kts')">🏥 KTS &amp; Krankenhaus</button>
+    <button type="button" class="modal-tab" data-tab="docs" onclick="switchCustTab('docs')">📄 Dokumente <span class="tab-badge" id="cust-tab-docs-badge">0</span></button>
+    <button type="button" class="modal-tab" data-tab="excel" onclick="switchCustTab('excel')">📊 Abrechnung</button>
+  </div>
   <div class="mbody">
-    <div class="fsec">Persönliche Daten</div>
-    <div class="fr2 fr">
-      <div><label>Vorname *</label><input type="text" id="c-fname" placeholder="Max"/></div>
-      <div><label>Nachname *</label><input type="text" id="c-lname" placeholder="Mustermann"/></div>
-    </div>
-    <div class="fr2 fr">
-      <div><label>Telefon</label><input type="tel" id="c-phone" placeholder="+49 171 1234567"/></div>
-      <div><label>Geburtsdatum</label><input type="date" id="c-birth"/></div>
-    </div>
-    <div class="fr2 fr">
-      <div><label>E-Mail</label><input type="email" id="c-email" placeholder="max@mail.de"/></div>
-      <div><label>Firma / Organisation</label><input type="text" id="c-org" placeholder="Optional"/></div>
-    </div>
-    <hr class="fdiv"/>
-    <div class="fsec">Adresse</div>
-    <div class="fr"><label>Straße & Nr.</label><input type="text" id="c-street" placeholder="Musterstraße 12"/></div>
-    <div class="fr2 fr">
-      <div><label>PLZ</label><input type="text" id="c-plz" placeholder="12345" maxlength="6"/></div>
-      <div><label>Stadt</label><input type="text" id="c-city" placeholder="Berlin"/></div>
-    </div>
-    <hr class="fdiv"/>
-    <div class="fsec">Kundentyp</div>
-    <div class="fr">
-      <div class="rg">
-        <div class="ro"><input type="radio" name="ct" id="ct-kts" value="kts" checked onchange="onCTChange()"/><label for="ct-kts">🏥 KTS</label></div>
-        <div class="ro"><input type="radio" name="ct" id="ct-re" value="re" onchange="onCTChange()"/><label for="ct-re">🟡 Rechnung</label></div>
-        <div class="ro"><input type="radio" name="ct" id="ct-privat" value="privat" onchange="onCTChange()"/><label for="ct-privat">🟢 Privat</label></div>
-        <div class="ro"><input type="radio" name="ct" id="ct-firma" value="firma" onchange="onCTChange()"/><label for="ct-firma">🏢 Firma</label></div>
-        <div class="ro"><input type="radio" name="ct" id="ct-stamm" value="stamm" onchange="onCTChange()"/><label for="ct-stamm">⭐ Stamm</label></div>
-      </div>
-    </div>
-    <div id="kts-cust-fields">
+    <div class="cust-tab-pane active" id="cust-tab-stamm">
+      <div class="fsec">Persönliche Daten</div>
       <div class="fr2 fr">
-        <div><label>Krankenkasse</label><input type="text" id="c-kk" placeholder="AOK, TK, Barmer…"/></div>
-        <div><label>Versichertennr.</label><input type="text" id="c-vnr" placeholder="A123456789"/></div>
+        <div><label>Vorname *</label><input type="text" id="c-fname" placeholder="Max"/></div>
+        <div><label>Nachname *</label><input type="text" id="c-lname" placeholder="Mustermann"/></div>
       </div>
-      <div class="fr">
-        <label>Zuzahlungsstatus</label>
-        <div class="rg">
-          <div class="ro"><input type="radio" name="cz" id="cz-ja" value="ja" checked/><label for="cz-ja">€ Zuzahlung</label></div>
-          <div class="ro"><input type="radio" name="cz" id="cz-nein" value="nein"/><label for="cz-nein">✓ Befreit</label></div>
+      <div class="fr2 fr">
+        <div><label>Telefon</label><input type="tel" id="c-phone" placeholder="+49 171 1234567"/></div>
+        <div><label>Geburtsdatum</label><input type="date" id="c-birth"/></div>
+      </div>
+      <div class="fr2 fr">
+        <div><label>E-Mail</label><input type="email" id="c-email" placeholder="max@mail.de"/></div>
+        <div><label>Firma / Organisation</label><input type="text" id="c-org" placeholder="Optional"/></div>
+      </div>
+      <div class="fsec">Adresse</div>
+      <div class="fr"><label>Straße &amp; Nr.</label><input type="text" id="c-street" placeholder="Musterstraße 12"/></div>
+      <div class="fr2 fr">
+        <div><label>PLZ</label><input type="text" id="c-plz" placeholder="53340" maxlength="6"/></div>
+        <div><label>Stadt</label><input type="text" id="c-city" placeholder="Meckenheim"/></div>
+      </div>
+    </div>
+    <div class="cust-tab-pane" id="cust-tab-kts">
+      <div class="pro-panel">
+        <div class="pro-panel-head">
+          <div class="pro-panel-icon">🏥</div>
+          <div>
+            <div class="pro-panel-title">Kundentyp &amp; Krankenkasse</div>
+            <div class="pro-panel-desc">KTS-Felder, Zuzahlung und Stammkrankenhaus für wiederkehrende Fahrten.</div>
+          </div>
         </div>
+        <div class="fr">
+          <label>Kundentyp</label>
+          <div class="rg">
+            <div class="ro"><input type="radio" name="ct" id="ct-kts" value="kts" checked onchange="onCTChange()"/><label for="ct-kts">🏥 KTS</label></div>
+            <div class="ro"><input type="radio" name="ct" id="ct-re" value="re" onchange="onCTChange()"/><label for="ct-re">🟡 Rechnung</label></div>
+            <div class="ro"><input type="radio" name="ct" id="ct-privat" value="privat" onchange="onCTChange()"/><label for="ct-privat">🟢 Privat</label></div>
+            <div class="ro"><input type="radio" name="ct" id="ct-firma" value="firma" onchange="onCTChange()"/><label for="ct-firma">🏢 Firma</label></div>
+            <div class="ro"><input type="radio" name="ct" id="ct-stamm" value="stamm" onchange="onCTChange()"/><label for="ct-stamm">⭐ Stamm</label></div>
+          </div>
+        </div>
+        <div id="kts-cust-fields">
+          <div class="fr2 fr" style="margin-top:12px">
+            <div><label>Krankenkasse</label><input type="text" id="c-kk" placeholder="AOK, TK, Barmer…"/></div>
+            <div><label>Versichertennr.</label><input type="text" id="c-vnr" placeholder="A123456789"/></div>
+          </div>
+          <div class="fr">
+            <label>Zuzahlungsstatus</label>
+            <div class="rg">
+              <div class="ro"><input type="radio" name="cz" id="cz-ja" value="ja" checked/><label for="cz-ja">€ Zuzahlung</label></div>
+              <div class="ro"><input type="radio" name="cz" id="cz-nein" value="nein"/><label for="cz-nein">✓ Befreit</label></div>
+            </div>
+          </div>
+        </div>
+        <div class="fsec" style="margin-top:14px">Stammkrankenhaus</div>
+        <div class="fr">
+          <div class="ac-wrap">
+            <input type="text" id="c-hosp" placeholder="Krankenhaus suchen…" oninput="onCHospSearch(this.value)" autocomplete="off"/>
+            <div class="ac-list" id="c-hosp-ac"></div>
+          </div>
+        </div>
+        <div class="fr"><label>Notiz</label><textarea id="c-note" rows="3" placeholder="Rollstuhl, Sauerstoff, Besonderheiten…"></textarea></div>
       </div>
     </div>
-    <hr class="fdiv"/>
-    <div class="fsec">Stammkrankenhaus (optional)</div>
-    <div class="fr">
-      <div class="ac-wrap">
-        <input type="text" id="c-hosp" placeholder="Krankenhaus suchen…" oninput="onCHospSearch(this.value)" autocomplete="off"/>
-        <div class="ac-list" id="c-hosp-ac"></div>
-      </div>
-    </div>
-    <div class="fr"><label>Notiz</label><textarea id="c-note" rows="2" placeholder="Rollstuhl, Sauerstoff, Besonderheiten…"></textarea></div>
-    <hr class="fdiv"/>
-    <div class="fsec">📄 Verordnungen &amp; Genehmigungen</div>
-    <div class="cust-docs-panel">
-      <div style="font-size:11px;color:var(--text2);line-height:1.55;margin-bottom:10px">
-        Verordnungen und Genehmigungen scannen oder hochladen – pro Kunde ein eigener Ordner.
-        Mit Microsoft Cloud → automatisch in SharePoint unter <strong>Kunden-Unterlagen</strong>.
-      </div>
-      <div class="cust-docs-toolbar">
-        <select id="c-doc-type">
-          <option value="verordnung">📋 Verordnung</option>
-          <option value="genehmigung">✅ Genehmigung</option>
-          <option value="sonstiges">📎 Sonstiges</option>
-        </select>
-        <input type="text" id="c-doc-title" placeholder="Bezeichnung (z.B. Dialyse-Verordnung)"/>
-        <label class="btn btn-blue btn-sm" style="cursor:pointer;margin:0">
-          📷 Scannen / Hochladen
+    <div class="cust-tab-pane" id="cust-tab-docs">
+      <div class="pro-panel">
+        <div class="pro-panel-head">
+          <div class="pro-panel-icon">📄</div>
+          <div>
+            <div class="pro-panel-title">Verordnungen &amp; Genehmigungen</div>
+            <div class="pro-panel-desc">Scannen oder hochladen – pro Kunde ein Ordner. Mit Microsoft Cloud automatisch in SharePoint unter <strong>Kunden-Unterlagen</strong>.</div>
+          </div>
+        </div>
+        <div class="doc-stats" id="c-doc-stats">
+          <div class="doc-stat verordnung"><strong id="c-doc-stat-v">0</strong><span>Verordnungen</span></div>
+          <div class="doc-stat genehmigung"><strong id="c-doc-stat-g">0</strong><span>Genehmigungen</span></div>
+          <div class="doc-stat sonstiges"><strong id="c-doc-stat-s">0</strong><span>Sonstiges</span></div>
+        </div>
+        <label class="doc-upload-zone" id="c-doc-dropzone" for="c-doc-file">
+          <div class="du-icon">📷</div>
+          <div class="du-title">Dokument scannen oder hochladen</div>
+          <div class="du-sub">Foto, PDF · Kamera oder Datei auswählen</div>
           <input type="file" id="c-doc-file" accept="image/*,application/pdf" capture="environment" style="display:none" onchange="handleCustDocUpload(this)"/>
         </label>
+        <div class="cust-docs-toolbar">
+          <select id="c-doc-type">
+            <option value="verordnung">📋 Verordnung</option>
+            <option value="genehmigung">✅ Genehmigung</option>
+            <option value="sonstiges">📎 Sonstiges</option>
+          </select>
+          <input type="text" id="c-doc-title" placeholder="Bezeichnung (z.B. Dialyse-Verordnung Q2/2026)"/>
+        </div>
+        <div class="fr" style="margin-bottom:10px">
+          <input type="text" id="c-doc-search" placeholder="🔍 Dokumente durchsuchen…" oninput="renderCustDocs()" autocomplete="off"/>
+        </div>
+        <div class="cust-doc-list" id="c-doc-list"></div>
+        <div class="cust-doc-hint" id="c-doc-cloud-hint"></div>
       </div>
-      <div class="fr" style="margin-bottom:8px">
-        <input type="text" id="c-doc-search" placeholder="🔍 Dokumente durchsuchen…" oninput="renderCustDocs()" autocomplete="off"/>
-      </div>
-      <div class="cust-doc-list" id="c-doc-list"></div>
-      <div class="cust-doc-hint" id="c-doc-cloud-hint"></div>
     </div>
-    <hr class="fdiv"/>
-    <div class="fsec">📊 Excel-Abrechnung (KTS / Rechnung)</div>
-    <div class="excel-panel">
-      <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:8px">
-        Excel läuft über <strong>Microsoft Cloud</strong> (Sidebar → ☁️ Microsoft Cloud).
-        Datei wird automatisch nach Name + Jahr in SharePoint gesucht.
-      </div>
-      <div class="excel-file-row">
-        <button type="button" class="btn btn-blue btn-sm" onclick="openCloudModal()">☁️ Cloud einrichten</button>
-        <span class="excel-file-name" id="c-excel-name">–</span>
-      </div>
-      <div class="fr2 fr" style="margin-top:10px">
-        <div><label>Standard km</label><input type="number" id="c-excel-km" placeholder="z.B. 13" min="1" max="999"/></div>
-        <div><label>Standard Ziel (Fahrstrecke)</label><input type="text" id="c-excel-dest" placeholder="z.B. Marienhospital"/></div>
-      </div>
-      <div class="fr" style="margin-top:8px">
-        <label>Vorlagen-Typ</label>
-        <select id="c-excel-type">
-          <option value="kts">KTS-Bestätigung (monatliche Blätter)</option>
-          <option value="rechn">Rechnungsfahrt (gleiche Struktur)</option>
-        </select>
+    <div class="cust-tab-pane" id="cust-tab-excel">
+      <div class="pro-panel">
+        <div class="pro-panel-head">
+          <div class="pro-panel-icon">📊</div>
+          <div>
+            <div class="pro-panel-title">Excel-Abrechnung (KTS / Rechnung)</div>
+            <div class="pro-panel-desc">Automatische Suche der Excel-Datei nach Name und Jahr in SharePoint.</div>
+          </div>
+        </div>
+        <div class="excel-file-row">
+          <button type="button" class="btn btn-blue btn-sm" onclick="openCloudModal()">☁️ Cloud einrichten</button>
+          <span class="excel-file-name" id="c-excel-name">–</span>
+        </div>
+        <div class="fr2 fr" style="margin-top:12px">
+          <div><label>Standard km</label><input type="number" id="c-excel-km" placeholder="z.B. 13" min="1" max="999"/></div>
+          <div><label>Standard Ziel (Fahrstrecke)</label><input type="text" id="c-excel-dest" placeholder="z.B. UKB Bonn"/></div>
+        </div>
+        <div class="fr" style="margin-top:8px">
+          <label>Vorlagen-Typ</label>
+          <select id="c-excel-type">
+            <option value="kts">KTS-Bestätigung (monatliche Blätter)</option>
+            <option value="rechn">Rechnungsfahrt (gleiche Struktur)</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
   <div class="mfooter">
-    <button class="btn btn-danger btn-sm" id="c-delete-btn" style="display:none;margin-right:auto" onclick="deleteCurrentCustomer()">🗑️</button>
+    <button class="btn btn-danger btn-sm" id="c-delete-btn" style="display:none;margin-right:auto" onclick="deleteCurrentCustomer()">🗑️ Löschen</button>
     <button class="btn btn-secondary" onclick="closeM('modal-customer')">Abbrechen</button>
     <button class="btn btn-wa" id="c-wa-btn" onclick="shareCustomerWA()">📱 Teilen</button>
     <button class="btn btn-primary" onclick="saveCustomer()">💾 Speichern</button>
@@ -1560,7 +1661,7 @@ function renderDayV(container){
 
   const list=document.createElement('div');list.className='sch-list';
   if(!timed.length&&!allday.length){
-    list.innerHTML='<div class="sch-empty"><div class="ei">📋</div>Keine Fahrten an diesem Tag</div>';
+    list.innerHTML='<div class="sch-empty"><span class="ei">📋</span>Keine Fahrten an diesem Tag<div class="empty-hint">＋ Fahrt anlegen oder Google Kalender synchronisieren</div></div>';
   } else {
     let nowInserted=false;
     timed.forEach(item=>{
@@ -1877,6 +1978,8 @@ function openCustDetail(id){
   document.getElementById('c-doc-title').value='';
   onCTChange();
   updateCustomerExcelUI(c);
+  updateCustModalSub(c);
+  switchCustTab('stamm');
   renderCustDocs();
   openM('modal-customer');
 }
@@ -1901,6 +2004,9 @@ function openGCDetail(id){
   document.getElementById('c-hosp').value='';document.getElementById('c-note').value='';
   document.getElementById('c-delete-btn').style.display='none';
   onCTChange();
+  updateCustModalSub(null);
+  switchCustTab('stamm');
+  renderCustDocs();
   openM('modal-customer');
 }
 
@@ -2168,22 +2274,63 @@ async function deleteCustDocBlob(id){
 
 function getCustomerById(id){return customers.find(c=>c.id===id);}
 
+function switchCustTab(tab){
+  document.querySelectorAll('#cust-modal-tabs .modal-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.cust-tab-pane').forEach(p=>p.classList.toggle('active',p.id==='cust-tab-'+tab));
+  if(tab==='docs') renderCustDocs();
+}
+
+function updateCustModalSub(c){
+  const el=document.getElementById('modal-cust-sub');
+  if(!el) return;
+  if(!c) el.textContent='Neuen Kunden anlegen – Stammdaten, Dokumente & Abrechnung';
+  else{
+    const addr=[c.plz,c.city].filter(Boolean).join(' ');
+    el.textContent=[c.fname,c.lname].filter(Boolean).join(' ')+(addr?' · '+addr:'')+' · '+(TYPE_LABELS[c.type]||'KTS');
+  }
+}
+
+function initCustDocDropzone(){
+  const zone=document.getElementById('c-doc-dropzone');
+  if(!zone||zone.dataset.init) return;
+  zone.dataset.init='1';
+  ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('drag');}));
+  zone.addEventListener('drop',e=>{
+    const file=e.dataTransfer?.files?.[0];
+    if(!file) return;
+    const inp=document.getElementById('c-doc-file');
+    if(inp){handleCustDocUpload({files:[file],value:''});}
+  });
+}
+
 function renderCustDocs(){
   const listEl=document.getElementById('c-doc-list');
   const hintEl=document.getElementById('c-doc-cloud-hint');
+  const badge=document.getElementById('cust-tab-docs-badge');
   if(!listEl) return;
+  initCustDocDropzone();
   if(!editCustId){
-    listEl.innerHTML='<div class="cust-doc-empty">Kunde zuerst speichern – danach Verordnungen &amp; Genehmigungen scannen.</div>';
+    listEl.innerHTML='<div class="cust-doc-empty"><div class="de-icon">💾</div>Bitte Kunde zuerst <strong>speichern</strong>,<br>dann Verordnungen &amp; Genehmigungen scannen.</div>';
     if(hintEl) hintEl.textContent='';
+    if(badge) badge.textContent='0';
+    ['c-doc-stat-v','c-doc-stat-g','c-doc-stat-s'].forEach(id=>{const e=document.getElementById(id);if(e) e.textContent='0';});
     return;
   }
   const c=getCustomerById(editCustId);
+  const allDocs=c?.documents||[];
+  const counts={verordnung:0,genehmigung:0,sonstiges:0};
+  allDocs.forEach(d=>{if(counts[d.type]!=null) counts[d.type]++; else counts.sonstiges++;});
+  const sv=document.getElementById('c-doc-stat-v');if(sv) sv.textContent=counts.verordnung;
+  const sg=document.getElementById('c-doc-stat-g');if(sg) sg.textContent=counts.genehmigung;
+  const ss=document.getElementById('c-doc-stat-s');if(ss) ss.textContent=counts.sonstiges;
+  if(badge) badge.textContent=String(allDocs.length);
   const q=document.getElementById('c-doc-search')?.value?.trim().toLowerCase()||'';
-  let docs=[...(c?.documents||[])];
+  let docs=[...allDocs];
   if(q) docs=docs.filter(d=>(d.title||'').toLowerCase().includes(q)||(d.fileName||'').toLowerCase().includes(q)||docTypeLabel(d.type).toLowerCase().includes(q));
   docs.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.uploaded||'').localeCompare(a.uploaded||''));
   if(!docs.length){
-    listEl.innerHTML='<div class="cust-doc-empty">Noch keine Dokumente.<br>📷 Verordnung oder Genehmigung scannen / hochladen.</div>';
+    listEl.innerHTML='<div class="cust-doc-empty"><div class="de-icon">📄</div>Noch keine Dokumente.<br>Oben scannen oder Datei ablegen.</div>';
   }else{
     listEl.innerHTML=docs.map(d=>`<div class="cust-doc-item ${d.type||'sonstiges'}">
       <div class="cust-doc-icon">${docTypeIcon(d.type)}</div>
@@ -2201,8 +2348,8 @@ function renderCustDocs(){
   if(hintEl){
     const name=c?custFolderName(c):'';
     hintEl.innerHTML=msCloudReady()
-      ?`☁️ SharePoint-Ordner: <code>${CUST_DOCS_ROOT}/${name}/Verordnungen</code> &amp; <code>Genehmigungen</code>`
-      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openCloudModal()">Microsoft Cloud verbinden</span> für SharePoint-Backup';
+      ?`☁️ SharePoint: <code>${CUST_DOCS_ROOT}/${name}/</code> mit Unterordnern Verordnungen &amp; Genehmigungen`
+      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openCloudModal()">Microsoft Cloud verbinden</span> für automatisches SharePoint-Backup';
   }
 }
 
@@ -2242,9 +2389,10 @@ async function handleCustDocUpload(input){
       }catch(e){console.warn('SharePoint upload',e);toast('Lokal gespeichert – SharePoint-Upload fehlgeschlagen','warn');}
     }
     document.getElementById('c-doc-title').value='';
+    switchCustTab('docs');
     renderCustDocs();
     renderCustomers();
-    toast('📄 Dokument gespeichert','ok');
+    toast('Dokument gespeichert','ok');
   }catch(e){
     toast('Speichern fehlgeschlagen','err');
   }
@@ -2314,6 +2462,8 @@ function openCustomerModal(){
   updateCustomerExcelUI(null);
   document.getElementById('c-doc-search').value='';
   document.getElementById('c-doc-title').value='';
+  updateCustModalSub(null);
+  switchCustTab('stamm');
   renderCustDocs();
   openM('modal-customer');
 }
@@ -2971,6 +3121,7 @@ function updateGCalBtn(){
     nav.classList.remove('connected');
     nb.textContent='–';
   }
+  updateStatusBar();
 }
 
 function renderGCalPreview(){
@@ -3676,13 +3827,32 @@ function toast(msg,type='ok'){
   w.appendChild(el);setTimeout(()=>el.remove(),3500);
 }
 
+function updateStatusBar(){
+  const gcal=document.getElementById('status-gcal');
+  const cloud=document.getElementById('status-cloud');
+  const ridesEl=document.getElementById('status-rides');
+  const custEl=document.getElementById('status-cust');
+  const today=rides.filter(r=>r.date===fmtD(new Date())).length;
+  if(gcal){
+    gcal.className='status-pill'+(gcalConnected?' ok':'');
+    gcal.textContent=gcalConnected?'📅 Google Kalender verbunden':'📅 Kalender nicht verbunden';
+  }
+  if(cloud){
+    cloud.className='status-pill'+(msCloudReady()?' ok':msConnected?' warn':'');
+    cloud.textContent=msCloudReady()?'☁️ SharePoint aktiv':msConnected?'☁️ Ordner verknüpfen':'☁️ Cloud offline';
+  }
+  if(ridesEl) ridesEl.textContent='🚗 Heute: '+today+' Fahrten';
+  if(custEl) custEl.textContent='👥 '+customers.length+' Kunden';
+}
+
 function updateCounts(){
   document.getElementById('nb-cust').textContent=customers.length;
   document.getElementById('nb-today').textContent=rides.filter(r=>r.date===fmtD(new Date())).length;
   document.getElementById('nb-gc').textContent=gcContacts.length;
   document.getElementById('nb-drivers').textContent=drivers.length;
   const gcBtn=document.getElementById('gc-sync-btn');
-  if(gcContacts.length>0){gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length} Kontakte`;}
+  if(gcContacts.length>0){gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length}`;}
+  updateStatusBar();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4178,6 +4348,7 @@ function updateCloudUI(){
   if(stepFolder&&msCloudReady()) stepFolder.querySelector('.cloud-step-icon').textContent='✓';
   if(stepMs&&!connected) stepMs.querySelector('.cloud-step-icon').textContent='1';
   if(stepFolder&&!msCloudReady()) stepFolder.querySelector('.cloud-step-icon').textContent='2';
+  updateStatusBar();
 }
 
 function openCloudModal(){
