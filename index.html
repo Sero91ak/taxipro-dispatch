@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.min.js"></script>
 <style>
 :root,[data-theme="dark"]{
   --bg:#1a2433;--bg2:#222e3f;--bg3:#2a384c;--bg4:#33465c;--bg5:#3d5269;
@@ -891,6 +890,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
         <button class="btn btn-blue" id="ms-connect-btn" onclick="connectMicrosoft()">☁️ Mit Microsoft verbinden</button>
+        <button class="btn btn-secondary" id="ms-reload-lib-btn" onclick="reloadMsalLibrary()" style="display:none">🔄 Bibliothek neu laden</button>
         <button class="btn btn-secondary" id="ms-disconnect-btn" onclick="disconnectMicrosoft()" style="display:none">Trennen</button>
       </div>
       <div id="cloud-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
@@ -3116,6 +3116,7 @@ function toggleTheme(){
 // ═══════════════════════════════════════════════════════════════
 let msalInstance=null;
 let msalInitPromise=null;
+let msalLoadPromise=null;
 let msConnected=false;
 let msFolderShareUrl=localStorage.getItem('tp_ms_folder_url')||DEFAULT_MS_FOLDER_URL;
 let msFolderDriveId=localStorage.getItem('tp_ms_folder_drive')||'';
@@ -3169,9 +3170,67 @@ function formatMsError(e){
   return 'Fehler: '+(msg||code||'Unbekannt');
 }
 
+function msalGlobalReady(){
+  return !!(window.msal?.PublicClientApplication);
+}
+
+function loadMsalLibrary(force=false){
+  if(!force&&msalGlobalReady()) return Promise.resolve();
+  if(msalLoadPromise&&!force) return msalLoadPromise;
+  msalLoadPromise=new Promise((resolve,reject)=>{
+    const urls=[
+      'https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.min.js',
+      'https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.4/lib/msal-browser.min.js',
+      'https://unpkg.com/@azure/msal-browser@2.38.4/lib/msal-browser.min.js'
+    ];
+    let idx=0;
+    const tryNext=()=>{
+      if(msalGlobalReady()){resolve();return;}
+      if(idx>=urls.length){reject(new Error('MSAL_LOAD_FAIL'));return;}
+      const url=urls[idx++];
+      const existing=document.querySelector('script[data-msal-src="'+url+'"]');
+      if(existing){existing.addEventListener('load',()=>msalGlobalReady()?resolve():tryNext());existing.addEventListener('error',tryNext);return;}
+      const s=document.createElement('script');
+      s.src=url;
+      s.async=true;
+      s.dataset.msalSrc=url;
+      s.onload=()=>{if(msalGlobalReady()) resolve(); else tryNext();};
+      s.onerror=()=>{s.remove();tryNext();};
+      document.head.appendChild(s);
+    };
+    tryNext();
+  });
+  return msalLoadPromise;
+}
+
+async function reloadMsalLibrary(){
+  msalLoadPromise=null;
+  msalInstance=null;
+  msalInitPromise=null;
+  hideCloudError();
+  toast('Microsoft-Bibliothek wird geladen…');
+  try{
+    await loadMsalLibrary(true);
+    toast('Bibliothek geladen ✓');
+    document.getElementById('ms-reload-lib-btn').style.display='none';
+    updateCloudUI();
+  }catch(e){
+    showCloudError('<strong>Microsoft-Bibliothek blockiert</strong><br>AdBlocker/Firewall deaktivieren oder IT-Freigabe für <code>alcdn.msauth.net</code> und <code>cdn.jsdelivr.net</code> anfordern.');
+    toast('Bibliothek konnte nicht geladen werden','err');
+  }
+}
+
 async function ensureMsalReady(){
-  if(!window.msal||!MS_CLIENT_ID||MS_CLIENT_ID==='YOUR_MS_CLIENT_ID'){
-    showCloudError('Microsoft-Bibliothek lädt noch… Seite neu laden (Strg+F5).');
+  if(!MS_CLIENT_ID||MS_CLIENT_ID==='YOUR_MS_CLIENT_ID'){
+    showCloudError(getMsSetupHTML());
+    return false;
+  }
+  try{
+    await loadMsalLibrary();
+  }catch(e){
+    showCloudError('<strong>Microsoft-Bibliothek blockiert</strong><br>1. AdBlocker für diese Seite ausschalten<br>2. <strong>🔄 Bibliothek neu laden</strong> klicken<br>3. Seite mit Strg+F5 neu laden');
+    const rb=document.getElementById('ms-reload-lib-btn');
+    if(rb) rb.style.display='inline-flex';
     return false;
   }
   if(!msalInstance){
@@ -3190,7 +3249,7 @@ async function ensureMsalReady(){
   return true;
 }
 
-function initMsal(){return !!window.msal&&!!MS_CLIENT_ID&&MS_CLIENT_ID!=='YOUR_MS_CLIENT_ID';}
+function initMsal(){return msalGlobalReady()&&!!MS_CLIENT_ID&&MS_CLIENT_ID!=='YOUR_MS_CLIENT_ID';}
 
 async function getMsAccount(){
   if(!msalInstance) return null;
@@ -3241,12 +3300,14 @@ async function finishMicrosoftConnect(account){
 
 async function connectMicrosoft(){
   const btn=document.getElementById('ms-connect-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Verbinde…';}
+  if(btn){btn.disabled=true;btn.textContent='⏳ Lade Bibliothek…';}
   hideCloudError();
   openM('modal-cloud');
   try{
+    if(btn) btn.textContent='⏳ Verbinde…';
     if(!await ensureMsalReady()){
-      toast('Microsoft API nicht bereit – Strg+F5','err');return;
+      toast('Microsoft-Bibliothek nicht geladen','err');
+      return;
     }
     const redirectResult=await msalInstance.handleRedirectPromise();
     if(redirectResult?.account){
@@ -3535,7 +3596,15 @@ function openCloudModal(){
 
 async function initMicrosoftCloud(){
   try{
-    if(!await ensureMsalReady()){updateCloudUI();return;}
+    await loadMsalLibrary().catch(()=>{});
+    if(!await ensureMsalReady()){
+      updateCloudUI();
+      if(!sessionStorage.getItem('tp_cloud_modal_shown')){
+        sessionStorage.setItem('tp_cloud_modal_shown','1');
+        setTimeout(()=>openCloudModal(),1200);
+      }
+      return;
+    }
     const redirectResult=await msalInstance.handleRedirectPromise();
     if(redirectResult?.account){
       msConnected=true;
