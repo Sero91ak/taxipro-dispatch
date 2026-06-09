@@ -879,7 +879,9 @@ h1,h2,h3,h4{font-family:var(--font2)}
         <button class="btn btn-secondary" id="gcal-refresh-btn" onclick="fullGCalSync()" style="display:none">🔄 Jetzt synchronisieren</button>
         <button class="btn btn-secondary" id="gcal-disconnect-btn" onclick="disconnectGCal()" style="display:none">Trennen</button>
         <button class="btn btn-secondary" id="gcal-reset-btn" onclick="resetGoogleAuth()" style="display:none">↺ Zurücksetzen</button>
+        <button class="btn btn-danger" id="gcal-purge-btn" onclick="purgeDemoFromGoogleCalendar(false)" style="display:none">🗑️ Demo-Termine aus Google löschen</button>
       </div>
+      <div id="gcal-purge-status" style="display:none;margin-top:10px;padding:10px 12px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r2);font-size:11px;color:var(--yellow2);line-height:1.6"></div>
       <div id="gcal-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
     </div>
     <div class="tog-row" id="gcal-sync-toggle" style="display:none">
@@ -1010,9 +1012,11 @@ const HOSPITALS=[
 // GOOGLE API – Client ID hier eintragen (Cloud Console)
 // ═══════════════════════════════════════════════════════════════
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
-const SCOPE_CALENDAR='https://www.googleapis.com/auth/calendar.readonly';
+const SCOPE_CALENDAR_READ='https://www.googleapis.com/auth/calendar.readonly';
+const SCOPE_CALENDAR_WRITE='https://www.googleapis.com/auth/calendar.events';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
-const SCOPE_ALL=SCOPE_CALENDAR+' '+SCOPE_CONTACTS;
+const SCOPE_ALL=SCOPE_CALENDAR_READ+' '+SCOPE_CALENDAR_WRITE+' '+SCOPE_CONTACTS;
+const GCAL_PURGE_KEY='tp_gcal_demo_purged_v3';
 const GCAL_PUSH_ENABLED=false; // Nur Google → App, nie App → Google
 const DEMO_PHONES=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
   '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
@@ -1049,6 +1053,28 @@ function isExcludedGCalEvent(raw){
   if(!raw) return true;
   if(raw.extendedProperties?.private?.taxiproRideId) return true;
   return textHasDemoContent(raw.summary,raw.description,raw.location);
+}
+function isTaxiProAppEvent(raw){
+  if(!raw||raw.status==='cancelled') return false;
+  if(raw.extendedProperties?.private?.taxiproRideId) return true;
+  const sum=raw.summary||'';
+  const desc=raw.description||'';
+  if(/^[🚖🚕]/.test(sum)) return true;
+  if(desc.includes('── TaxiPro')||desc.includes('TaxiPro Fahrt')) return true;
+  if(desc.includes('Abholung:')&&desc.includes('Ziel:')) return true;
+  if(textHasDemoContent(sum,desc,raw.location)) return true;
+  if(rides.some(r=>r.googleEventId===raw.id)) return true;
+  return false;
+}
+function isDispatchTestEvent(raw){
+  if(!raw||raw.status==='cancelled') return false;
+  const sum=raw.summary||'';
+  const blob=demoTextBlob(sum,raw.location,raw.description);
+  if(!/(kts|\bkt\b|ukb|charité|charite|marien|uniklin|dhz|klinik|hospital|hämo|hosp)/i.test(blob)) return false;
+  return /[-–→]/.test(sum)||sum.includes(' Ab ');
+}
+function shouldDeleteFromGoogleCalendar(raw){
+  return isTaxiProAppEvent(raw)||isDispatchTestEvent(raw);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2036,6 +2062,7 @@ function renderGCalModal(){
   document.getElementById('gcal-refresh-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-disconnect-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-reset-btn').style.display='inline-flex';
+  document.getElementById('gcal-purge-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-sync-toggle').style.display=connected?'flex':'none';
   document.getElementById('gcal-cal-select-wrap').style.display=connected?'block':'none';
   document.getElementById('gcal-import-toggle').style.display=connected?'flex':'none';
@@ -2202,6 +2229,60 @@ async function deleteGoogleEvent(ride){
   if(!GCAL_PUSH_ENABLED||!ride?.googleEventId||!gcalConnected) return;
   const cal=encodeURIComponent(gcalCalendarId);
   await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ride.googleEventId)}`,'DELETE');
+}
+
+async function fetchAllGCalEventsWide(){
+  const cal=encodeURIComponent(gcalCalendarId);
+  const now=new Date();
+  const timeMin=new Date(now);timeMin.setMonth(timeMin.getMonth()-6);
+  const timeMax=new Date(now);timeMax.setMonth(timeMax.getMonth()+12);
+  let pageToken='',all=[];
+  do{
+    let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin.toISOString())}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=250`;
+    if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
+    const res=await gcalApi(url);
+    if(!res||!res.ok) throw new Error(res?.status===403?'Kein Löschzugriff – bitte neu verbinden':'API Fehler');
+    const data=await res.json();
+    all=all.concat(data.items||[]);
+    pageToken=data.nextPageToken||'';
+  }while(pageToken);
+  return all;
+}
+
+async function purgeDemoFromGoogleCalendar(auto=false){
+  if(!gcalConnected||!gcalToken){toast('Bitte zuerst Google Kalender verbinden','warn');return;}
+  const statusEl=document.getElementById('gcal-purge-status');
+  if(statusEl){statusEl.style.display='block';statusEl.textContent='Suche Demo-Termine in Google Kalender…';}
+  try{
+    const all=await fetchAllGCalEventsWide();
+    const targets=all.filter(shouldDeleteFromGoogleCalendar);
+    if(!targets.length){
+      if(statusEl) statusEl.textContent='Keine Demo-/TaxiPro-Termine gefunden.';
+      localStorage.setItem(GCAL_PURGE_KEY,'done');
+      if(!auto) toast('Keine Demo-Termine in Google gefunden');
+      return;
+    }
+    if(!auto&&!confirm(`${targets.length} Demo-/Test-Termine in Google Kalender löschen?\n\nDeine echten privaten Termine bleiben erhalten.\nGelöschte Termine liegen 30 Tage im Google-Papierkorb.`)) return;
+    if(statusEl) statusEl.textContent=`Lösche ${targets.length} Termine aus Google Kalender…`;
+    const cal=encodeURIComponent(gcalCalendarId);
+    let deleted=0,failed=0;
+    for(const ev of targets){
+      const res=await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ev.id)}`,'DELETE');
+      if(res&&(res.ok||res.status===404||res.status===410)) deleted++;
+      else failed++;
+    }
+    const deletedIds=new Set(targets.map(e=>e.id));
+    rides=rides.filter(r=>!r.googleEventId||!deletedIds.has(r.googleEventId));
+    save();updateCounts();
+    await fetchGCalEvents();
+    localStorage.setItem(GCAL_PURGE_KEY,'done');
+    if(statusEl) statusEl.innerHTML=`<strong>✅ ${deleted} Demo-Termine aus Google Kalender entfernt</strong>${failed?` · ${failed} fehlgeschlagen`:''}<br><span style="color:var(--text3)">Prüfe die Google Kalender App – sollte jetzt leer von Testfahrten sein.</span>`;
+    toast(`🗑️ ${deleted} Demo-Termine aus Google gelöscht`,deleted?'ok':'warn');
+    renderGCalModal();
+  }catch(e){
+    if(statusEl) statusEl.innerHTML=`<strong>Fehler:</strong> ${e.message}<br>Bitte ↺ Zurücksetzen und neu verbinden (Lösch-Berechtigung erforderlich).`;
+    toast('Google-Löschung fehlgeschlagen – neu verbinden','err');
+  }
 }
 
 function syncFromGoogle(rawEvents){
@@ -2919,7 +3000,12 @@ updateGCalBtn();
 renderMiniCal();
 renderCalendar();
 renderCustomers();
-if(gcalConnected){loadGCalendars().then(()=>fullGCalSync());}
+if(gcalConnected){
+  loadGCalendars().then(async()=>{
+    await fullGCalSync();
+    if(localStorage.getItem(GCAL_PURGE_KEY)!=='done') await purgeDemoFromGoogleCalendar(true);
+  });
+}
 setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
 </script>
 </body>
