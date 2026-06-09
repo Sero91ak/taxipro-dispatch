@@ -1,0 +1,2628 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0a1628"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>TaxiPro Dispatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root,[data-theme="dark"]{
+  --bg:#1a2433;--bg2:#222e3f;--bg3:#2a384c;--bg4:#33465c;--bg5:#3d5269;
+  --gold:#f5a623;--gold2:#e8941a;--gold3:rgba(245,166,35,.15);
+  --red:#e84444;--red2:#ff8a8a;--red-bg:rgba(232,68,68,.14);--red-border:rgba(232,68,68,.4);
+  --yellow:#f5c842;--yellow2:#ffe08a;--yellow-bg:rgba(245,200,66,.12);--yellow-border:rgba(245,200,66,.35);
+  --green:#2ed573;--green2:#8ef5b0;--green-bg:rgba(46,213,115,.12);--green-border:rgba(46,213,115,.35);
+  --blue:#4a9eff;--blue2:#8ec0ff;--blue-bg:rgba(74,158,255,.12);--blue-border:rgba(74,158,255,.35);
+  --purple:#a29bfe;--purple-bg:rgba(162,155,254,.12);--purple-border:rgba(162,155,254,.35);
+  --orange:#fd9644;--orange-bg:rgba(253,150,68,.12);--orange-border:rgba(253,150,68,.35);
+  --text:#f2f6fa;--text2:#c2d0e0;--text3:#95a8be;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --shadow:0 12px 40px rgba(0,0,0,.35);
+  --r:12px;--r2:8px;--r3:6px;
+  --font:'DM Sans',sans-serif;--font2:'Space Grotesk',sans-serif;
+}
+[data-theme="light"]{
+  --bg:#eef1f6;--bg2:#ffffff;--bg3:#f5f7fa;--bg4:#e8ecf2;--bg5:#d8dfe8;
+  --gold:#d4890a;--gold2:#b87408;--gold3:rgba(212,137,10,.12);
+  --red:#d63030;--red2:#c0392b;--red-bg:rgba(214,48,48,.08);--red-border:rgba(214,48,48,.25);
+  --yellow:#c9a000;--yellow2:#a68500;--yellow-bg:rgba(201,160,0,.08);--yellow-border:rgba(201,160,0,.25);
+  --green:#1e9e55;--green2:#178f4c;--green-bg:rgba(30,158,85,.08);--green-border:rgba(30,158,85,.25);
+  --blue:#2563eb;--blue2:#1d4ed8;--blue-bg:rgba(37,99,235,.08);--blue-border:rgba(37,99,235,.25);
+  --purple:#6d5ce8;--purple-bg:rgba(109,92,232,.08);--purple-border:rgba(109,92,232,.25);
+  --orange:#e67e22;--orange-bg:rgba(230,126,34,.08);--orange-border:rgba(230,126,34,.25);
+  --text:#1a2332;--text2:#3d5068;--text3:#5c7088;
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --shadow:0 8px 28px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overscroll-behavior:none}
+button{cursor:pointer;border:none;background:none;font-family:var(--font);color:var(--text)}
+input,select,textarea{font-family:var(--font);color:var(--text);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 13px;width:100%;font-size:13px;outline:none;transition:.18s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.12)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+select option{background:var(--bg3);color:var(--text)}
+h1,h2,h3,h4{font-family:var(--font2)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:4px}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+
+/* TOPBAR */
+#topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);min-height:54px;flex-shrink:0;position:relative;z-index:50}
+.logo{font-family:var(--font2);font-size:17px;font-weight:700;color:var(--gold);white-space:nowrap;letter-spacing:-.3px}
+.logo em{font-style:normal;color:var(--text3);font-size:11px;font-weight:400;margin-left:5px;letter-spacing:0}
+#search-wrap{flex:1;max-width:420px;position:relative}
+#search-wrap .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;opacity:.5}
+#global-search{padding:8px 36px 8px 36px;height:36px;font-size:13px;border-radius:20px}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--bg5);border:none;border-radius:50%;width:18px;height:18px;font-size:10px;color:var(--text2);cursor:pointer;display:none;align-items:center;justify-content:center}
+.search-clear.show{display:flex}
+#search-results{position:absolute;top:42px;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);z-index:500;max-height:340px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
+#search-results.show{display:block}
+.sr-section{padding:8px 14px 4px;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.sr-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.12s}
+.sr-item:hover{background:var(--bg4)}
+.sr-item:last-child{border-bottom:none}
+.sr-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.sr-info{flex:1;min-width:0}
+.sr-name{font-weight:600;font-size:13px}
+.sr-meta{font-size:11px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-source{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;flex-shrink:0}
+.sr-source.app{background:var(--gold3);color:var(--gold);border:1px solid rgba(245,166,35,.3)}
+.sr-source.gc{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
+
+#topbar-btns{display:flex;gap:6px;flex-shrink:0}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--r2);font-size:12px;font-weight:600;transition:.15s;background:var(--bg3);border:1px solid var(--border2);white-space:nowrap}
+.tb-btn:hover{background:var(--bg4)}
+.tb-btn.primary{background:var(--gold);color:#000;border-color:var(--gold)}
+.tb-btn.primary:hover{background:var(--gold2)}
+.tb-btn.gc{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.tb-btn.gc.synced{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+
+/* MAIN */
+#main{display:flex;flex:1;overflow:hidden}
+#sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* SIDEBAR */
+.mini-cal{padding:10px;margin:8px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)}
+.mini-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mini-cal-header span{font-weight:600;font-size:12px}
+.mini-cal-nav{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;background:var(--bg4);font-size:11px;cursor:pointer;color:var(--text2);transition:.12s}
+.mini-cal-nav:hover{background:var(--bg5)}
+.mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
+.mini-dow{font-size:9px;color:var(--text3);padding:2px 0;font-weight:700}
+.mini-day{font-size:10px;padding:3px 1px;border-radius:5px;cursor:pointer;transition:.12s;color:var(--text2);position:relative}
+.mini-day:hover{background:var(--bg4);color:var(--text)}
+.mini-day.today{background:rgba(245,166,35,.18);color:var(--gold);font-weight:700}
+.mini-day.sel{background:var(--gold);color:#000;font-weight:700}
+.mini-day.dot::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--gold)}
+.mini-day.sel.dot::after{background:#000}
+.mini-day.emp{opacity:0;pointer-events:none}
+
+.nav-sec{padding:12px 12px 3px;font-size:9px;font-weight:700;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;border-radius:7px;margin:1px 5px;font-size:12px;font-weight:500;color:var(--text2);transition:.12s}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--gold3);color:var(--gold)}
+.nav-icon{width:16px;text-align:center;flex-shrink:0;font-size:13px}
+.nav-badge{margin-left:auto;background:var(--bg4);border-radius:20px;padding:1px 7px;font-size:10px;color:var(--text2)}
+.nav-item.active .nav-badge{background:rgba(245,166,35,.2);color:var(--gold)}
+.nav-item.gc-item.connected{color:var(--green2)}
+.nav-item.gc-item.connected .nav-icon-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;margin-left:auto;margin-right:4px}
+
+/* VIEWS */
+.view{display:none;flex:1;overflow:hidden;flex-direction:column}
+.view.active{display:flex}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2);flex-wrap:wrap}
+.toolbar h2{font-size:15px;font-weight:700;flex:1;min-width:0}
+.view-tabs{display:flex;gap:3px;background:var(--bg3);border-radius:var(--r2);padding:3px}
+.view-tab{padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;transition:.12s}
+.view-tab.active{background:var(--gold);color:#000}
+.cal-nav{display:flex;gap:3px}
+.cal-nav-btn{width:30px;height:30px;border-radius:var(--r2);background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;font-size:13px}
+.cal-nav-btn:hover{background:var(--bg4)}
+.today-btn{padding:5px 11px;border-radius:var(--r2);background:var(--bg3);border:1px solid var(--border2);font-size:11px;font-weight:600;cursor:pointer;transition:.12s;color:var(--text2)}
+.today-btn:hover{background:var(--bg4)}
+.cal-title{font-family:var(--font2);font-size:14px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-x:auto}
+.s-chip{display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);white-space:nowrap;flex-shrink:0;font-size:11px}
+.s-chip strong{font-family:var(--font2);font-size:13px}
+.s-chip.red{border-color:var(--red-border);background:var(--red-bg)}
+.s-chip.red strong{color:var(--red2)}
+.s-chip.yellow{border-color:var(--yellow-border);background:var(--yellow-bg)}
+.s-chip.yellow strong{color:var(--yellow2)}
+.s-chip.gold strong{color:var(--gold)}
+.s-chip.green strong{color:var(--green)}
+.s-chip.blue{border-color:var(--blue-border);background:var(--blue-bg)}
+.s-chip.blue strong{color:var(--blue2)}
+
+/* CALENDAR - DAY (Schedule / Agenda wie Google) */
+.day-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.day-sched-wrap{flex:1;overflow-y:auto;padding:0}
+.sch-allday{padding:10px 16px 6px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.sch-allday-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.sch-allday-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12px;cursor:pointer}
+.sch-allday-item .sch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sch-allday-item .sch-dot.krank{background:var(--red)}
+.sch-allday-item .sch-dot.rechn{background:var(--yellow)}
+.sch-allday-item .sch-dot.privat{background:var(--green)}
+.sch-allday-item .sch-dot.gcal{background:var(--blue)}
+.sch-list{padding:4px 0;background:var(--bg)}
+.sch-row{display:grid;grid-template-columns:14px 54px 1fr auto;gap:0 12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;min-height:46px;background:var(--bg2)}
+.sch-row:nth-child(even){background:var(--bg3)}
+.sch-row:hover{background:var(--bg4)!important}
+.sch-del{width:30px;height:30px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0;opacity:.45}
+.sch-row:hover .sch-del{opacity:1}
+@media(max-width:700px){.sch-del{opacity:.85}}
+.sch-del:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red2)}
+.cc-btn.del{border-color:var(--red-border);color:var(--red2);background:var(--red-bg)}
+.cc-btn.del:hover{background:rgba(232,68,68,.2)}
+.sch-row:active{background:var(--bg4)}
+.sch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;justify-self:center}
+.sch-row.krank .sch-dot{background:var(--red);box-shadow:0 0 0 2px var(--red-bg)}
+.sch-row.rechn .sch-dot{background:var(--yellow);box-shadow:0 0 0 2px var(--yellow-bg)}
+.sch-row.privat .sch-dot{background:var(--green);box-shadow:0 0 0 2px var(--green-bg)}
+.sch-row.gcal .sch-dot{background:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
+.sch-time{font-size:13px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sch-row.krank .sch-time{color:var(--red2)}
+.sch-row.rechn .sch-time{color:var(--yellow2)}
+.sch-row.privat .sch-time{color:var(--green2)}
+.sch-row.gcal .sch-time{color:var(--blue2)}
+.sch-body{min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow:hidden}
+.sch-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;flex-shrink:0;max-width:42%}
+.sch-code{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;flex-shrink:0}
+.sch-row.krank .sch-code{background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
+.sch-row.rechn .sch-code{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.sch-row.privat .sch-code{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+.sch-row.gcal .sch-code{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
+.sch-addr{font-size:13px;color:var(--text2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.sch-addr::before{content:'· ';color:var(--text3)}
+.sch-now{position:relative;height:0;margin:0 16px;border-top:2px solid var(--red);z-index:5}
+.sch-now::before{content:'';position:absolute;left:-6px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--red)}
+.sch-empty{padding:40px 20px;text-align:center;color:var(--text3);font-size:13px}
+.sch-empty .ei{font-size:36px;margin-bottom:8px}
+/* Week view timeline blocks */
+.day-tl{display:grid;grid-template-columns:52px 1fr;flex:1;min-height:1440px}
+.t-col{border-right:1px solid var(--border)}
+.t-slot{height:60px;border-bottom:1px solid var(--border);padding:3px 6px;font-size:9px;color:var(--text3);font-weight:600}
+.r-col{position:relative}
+.h-line{position:absolute;left:0;right:0;border-top:1px solid var(--border);pointer-events:none}
+.ride-block{position:absolute;left:4px;right:4px;border-radius:8px;padding:5px 8px;cursor:pointer;overflow:hidden;transition:.18s;z-index:2;border:1px solid transparent}
+.ride-block:hover{filter:brightness(1.2);z-index:10;transform:scaleX(1.01)}
+.ride-block.krank{background:var(--red-bg);border-color:var(--red-border);border-left:3px solid var(--red)}
+.ride-block.rechn{background:var(--yellow-bg);border-color:var(--yellow-border);border-left:3px solid var(--yellow)}
+.ride-block.privat{background:var(--green-bg);border-color:var(--green-border);border-left:3px solid var(--green)}
+.rb-time{font-size:9px;font-weight:700}
+.rb-name{font-size:11px;font-weight:600;margin-top:1px}
+.rb-dest{font-size:10px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ride-block.krank .rb-time{color:var(--red2)}
+.ride-block.rechn .rb-time{color:var(--yellow2)}
+.ride-block.privat .rb-time{color:var(--green2)}
+.ride-block.gcal{background:var(--blue-bg);border-color:var(--blue-border);border-left:3px solid var(--blue);z-index:1}
+.ride-block.gcal .rb-time{color:var(--blue2)}
+.ride-block.gcal .rb-name{color:var(--blue2)}
+.ride-block.gcal .rb-dest{color:var(--text2)}
+.ride-block.synced::after{content:'📅';position:absolute;top:4px;right:5px;font-size:9px;opacity:.7}
+.ride-block{position:relative}
+.now-line{position:absolute;left:0;right:0;height:2px;background:var(--gold);z-index:8;pointer-events:none}
+.now-line::before{content:'';position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+
+/* WEEK */
+.wk-head{display:flex;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg2)}
+.wk-spacer{width:52px;border-right:1px solid var(--border);flex-shrink:0}
+.wk-dcol-h{flex:1;padding:7px 4px;text-align:center;border-right:1px solid var(--border);cursor:pointer;transition:.12s}
+.wk-dcol-h:hover{background:var(--bg3)}
+.wk-dn{font-size:18px;font-weight:700;line-height:1;font-family:var(--font2)}
+.wk-dname{font-size:9px;color:var(--text2);margin-top:2px;font-weight:600}
+.wk-dcol-h.today .wk-dn,.wk-dcol-h.today .wk-dname{color:var(--gold)}
+.wk-body{flex:1;overflow-y:auto;display:flex}
+.wk-tc{width:52px;flex-shrink:0;border-right:1px solid var(--border)}
+.wk-area{flex:1;display:grid;overflow:hidden}
+.wk-col{border-right:1px solid var(--border);position:relative;min-height:1440px}
+
+/* MONTH */
+.mo-wrap{flex:1;overflow:hidden;padding:8px;display:flex;flex-direction:column;gap:4px}
+.mo-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mo-dow{text-align:center;font-size:9px;font-weight:700;color:var(--text3);padding:3px;letter-spacing:.5px}
+.mo-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex:1;overflow:hidden}
+.mo-cell{background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);padding:5px;cursor:pointer;display:flex;flex-direction:column;min-height:70px;transition:.15s;overflow:hidden}
+.mo-cell:hover{border-color:var(--border2);background:var(--bg3)}
+.mo-cell.today{border-color:rgba(245,166,35,.45);background:rgba(245,166,35,.04)}
+.mo-cell.other{opacity:.3}
+.mo-cell.sel{border-color:var(--gold)}
+.mo-dnum{font-size:11px;font-weight:700;margin-bottom:3px}
+.mo-cell.today .mo-dnum{color:var(--gold)}
+.mo-chip{border-radius:3px;padding:1px 4px;font-size:9px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-chip.krank{background:var(--red-bg);color:var(--red2);border-left:2px solid var(--red)}
+.mo-chip.rechn{background:var(--yellow-bg);color:var(--yellow2);border-left:2px solid var(--yellow)}
+.mo-chip.privat{background:var(--green-bg);color:var(--green2);border-left:2px solid var(--green)}
+.mo-chip.gcal{background:var(--blue-bg);color:var(--blue2);border-left:2px solid var(--blue)}
+.mo-more{font-size:9px;color:var(--text3)}
+
+/* CUSTOMER CARDS */
+.cust-list{flex:1;overflow-y:auto;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;align-content:start}
+.cust-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px;cursor:pointer;transition:.2s;position:relative}
+.cust-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px)}
+.cust-card.gc-card{border-left:3px solid var(--blue)}
+.cust-card.gc-card .cc-src{font-size:9px;color:var(--blue2);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.cc-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px}
+.cc-av{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font2);font-weight:700;font-size:14px;flex-shrink:0;overflow:hidden}
+.cc-av img{width:100%;height:100%;object-fit:cover}
+.cc-av.kts{background:var(--blue-bg);color:var(--blue2)}
+.cc-av.re{background:var(--yellow-bg);color:var(--yellow2)}
+.cc-av.privat{background:var(--green-bg);color:var(--green2)}
+.cc-av.firma{background:var(--purple-bg);color:var(--purple)}
+.cc-av.stamm{background:var(--orange-bg);color:var(--orange)}
+.cc-av.gc{background:var(--blue-bg);color:var(--blue2)}
+.cc-name{font-weight:700;font-size:14px;line-height:1.2}
+.cc-addr{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.cc-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;border:1px solid}
+.cc-tag.kts{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.cc-tag.re{background:var(--yellow-bg);color:var(--yellow2);border-color:var(--yellow-border)}
+.cc-tag.privat{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.cc-tag.firma{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
+.cc-tag.stamm{background:var(--orange-bg);color:var(--orange);border-color:var(--orange-border)}
+.cc-tag.befreit{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.cc-tag.zuzahl{background:var(--bg4);color:var(--text2);border-color:var(--border2)}
+.cc-btns{display:flex;gap:5px}
+.cc-btn{flex:1;padding:6px;border-radius:var(--r2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:4px;transition:.12s;border:1px solid var(--border2);background:var(--bg3)}
+.cc-btn:hover{background:var(--bg4)}
+.cc-btn.map{border-color:var(--blue-border);color:var(--blue2);background:var(--blue-bg)}
+.cc-btn.wa{border-color:var(--green-border);color:var(--green2);background:var(--green-bg)}
+.cc-btn.call{border-color:var(--purple-border);color:var(--purple);background:var(--purple-bg)}
+.cc-btn.ride{border-color:rgba(245,166,35,.3);color:var(--gold);background:var(--gold3)}
+.cc-ride-count{position:absolute;top:9px;right:9px;background:var(--bg4);border-radius:20px;padding:2px 7px;font-size:9px;color:var(--text2);font-weight:700}
+
+/* FILTER STRIP */
+.filter-strip{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-x:auto}
+.f-tab{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--border2);color:var(--text2);cursor:pointer;transition:.12s;white-space:nowrap;flex-shrink:0}
+.f-tab.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.f-tab.gc{border-color:var(--blue-border);color:var(--blue2)}
+.f-tab.gc.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(5px)}
+.overlay.hidden{display:none}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-lg{max-width:640px}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 0;margin-bottom:14px}
+.mh h3{font-size:16px;font-weight:700}
+.mclose{width:30px;height:30px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text2);transition:.12s}
+.mclose:hover{background:var(--bg4)}
+.mbody{padding:0 18px 18px}
+.mfooter{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--border)}
+.fr{margin-bottom:12px}
+.fr label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;letter-spacing:.2px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fdiv{border:none;border-top:1px solid var(--border);margin:14px 0}
+.fsec{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+/* radio */
+.rg{display:flex;gap:6px;flex-wrap:wrap}
+.ro{flex:1;min-width:70px}
+.ro input{display:none}
+.ro label{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);cursor:pointer;font-size:11px;font-weight:600;transition:.15s;text-align:center;white-space:nowrap}
+.ro input:checked+label{border-color:var(--gold);background:var(--gold3);color:var(--gold)}
+/* toggle */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0}
+.tog-label{font-size:12px;color:var(--text)}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-sl{position:absolute;inset:0;background:var(--bg4);border-radius:11px;transition:.22s;cursor:pointer}
+.tog-sl::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.22s}
+.tog input:checked~.tog-sl{background:var(--gold)}
+.tog input:checked~.tog-sl::before{transform:translateX(18px)}
+/* buttons */
+.btn{padding:8px 16px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;transition:.15s;border:1px solid transparent}
+.btn-primary{background:var(--gold);color:#000;border-color:var(--gold)}
+.btn-primary:hover{background:var(--gold2)}
+.btn-secondary{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.btn-secondary:hover{background:var(--bg4)}
+.btn-danger{background:var(--red-bg);color:var(--red2);border-color:var(--red-border)}
+.btn-danger:hover{background:rgba(232,68,68,.2)}
+.btn-wa{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.btn-wa:hover{background:rgba(46,213,115,.18)}
+.btn-blue{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.btn-blue:hover{background:rgba(74,158,255,.18)}
+.btn-sm{padding:5px 10px;font-size:11px}
+/* autocomplete */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);z-index:600;max-height:200px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
+.ac-list.show{display:block}
+.ac-item{padding:8px 13px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s}
+.ac-item:hover{background:var(--bg4)}
+.ac-item:last-child{border-bottom:none}
+.ac-main{font-size:12px;font-weight:600}
+.ac-sub{font-size:10px;color:var(--text2);margin-top:1px}
+/* ride detail */
+.rd-head{background:var(--bg3);border-radius:var(--r);padding:13px;margin-bottom:12px}
+.rd-badges{display:flex;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+.rd-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.rd-badge.krank{background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
+.rd-badge.rechn{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.rd-badge.privat{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+.rd-time{font-size:24px;font-weight:700;font-family:var(--font2);line-height:1}
+.rd-date{font-size:11px;color:var(--text2);margin-top:3px}
+.drow{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.drow:last-child{border-bottom:none}
+.drow-icon{width:18px;color:var(--text3);flex-shrink:0;text-align:center;margin-top:1px;font-size:13px}
+.drow-lbl{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.drow-val{font-size:12px;margin-top:2px;font-weight:500}
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700}
+.badge.serie{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
+.badge.remind{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.badge.befreit{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+/* dist */
+.dist-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--r2);background:var(--bg4);border:1px solid var(--border2);font-size:11px;font-weight:600;margin-top:5px}
+/* FAB */
+.fab{position:fixed;bottom:22px;right:22px;width:50px;height:50px;border-radius:50%;background:var(--gold);color:#000;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(245,166,35,.45);cursor:pointer;transition:.18s;z-index:100;font-weight:700}
+.fab:hover{transform:scale(1.1)}
+/* TOAST */
+.toast-wrap{position:fixed;top:62px;right:14px;z-index:3000;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:9px;box-shadow:var(--shadow);animation:tIn .25s ease;min-width:220px;max-width:300px}
+.toast.ok{border-color:var(--green-border)}
+.toast.warn{border-color:var(--yellow-border)}
+.toast.err{border-color:var(--red-border)}
+.ti{font-size:16px}
+.tt{flex:1;font-size:12px;font-weight:500}
+@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* GOOGLE CONTACTS PANEL */
+.gc-panel{background:var(--bg2);border:1px solid var(--blue-border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.gc-panel h4{font-size:13px;font-weight:700;color:var(--blue2);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.gc-status{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.gc-contact-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r2);border:1px solid var(--border);background:var(--bg3);margin-bottom:6px;cursor:pointer;transition:.12s}
+.gc-contact-item:hover{background:var(--bg4)}
+.gc-contact-item .gci-av{width:32px;height:32px;border-radius:8px;background:var(--blue-bg);color:var(--blue2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;overflow:hidden}
+.gc-contact-item .gci-av img{width:100%;height:100%;object-fit:cover}
+.gc-contact-item .gci-info{flex:1;min-width:0}
+.gc-contact-item .gci-name{font-weight:600;font-size:12px}
+.gc-contact-item .gci-meta{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gc-contact-item .gci-action{font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0}
+/* empty */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--text3);text-align:center;padding:20px}
+.empty .ei{font-size:44px;margin-bottom:4px}
+.empty p{font-size:13px;max-width:220px;line-height:1.5}
+/* today rides */
+.tr-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:9px;cursor:pointer;transition:.15s}
+.tr-card:hover{border-color:var(--border2);background:var(--bg3)}
+.tr-card.krank{border-left:3px solid var(--red)}
+.tr-card.rechn{border-left:3px solid var(--yellow)}
+.tr-card.privat{border-left:3px solid var(--green)}
+/* DRIVER DISPATCH */
+.driver-picker{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(6px)}
+.driver-picker.hidden{display:none}
+.dp-sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:20px 18px 32px;border:1px solid var(--border2);box-shadow:var(--shadow)}
+.dp-handle{width:40px;height:4px;border-radius:2px;background:var(--bg5);margin:0 auto 16px}
+.dp-title{font-family:var(--font2);font-size:15px;font-weight:700;margin-bottom:4px}
+.dp-ride-info{font-size:12px;color:var(--text2);margin-bottom:16px;padding:10px 12px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);line-height:1.6}
+.dp-drivers{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:14px}
+.dp-driver-card{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);cursor:pointer;transition:.15s}
+.dp-driver-card:hover{background:var(--bg4);border-color:var(--gold)}
+.dp-driver-card:active{transform:scale(.98)}
+.dp-av{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:var(--font2);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dp-info{flex:1;min-width:0}
+.dp-name{font-weight:700;font-size:14px}
+.dp-phone{font-size:11px;color:var(--text2);margin-top:2px}
+.dp-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.dp-status.frei{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+.dp-status.besetzt{background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
+.dp-send-icon{font-size:20px;flex-shrink:0}
+.dp-empty{text-align:center;padding:20px;color:var(--text3);font-size:13px}
+.dp-add-btn{width:100%;padding:11px;border-radius:var(--r2);border:1px dashed var(--border2);background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.dp-add-btn:hover{background:var(--bg3);border-color:var(--gold);color:var(--gold)}
+/* dispatch sent badge */
+.dispatched-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:9px;font-weight:700;background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+/* driver btn on ride card */
+.cc-btn.dispatch{border-color:rgba(245,166,35,.4);color:var(--gold);background:var(--gold3);font-size:11px}
+.cc-btn.dispatch:hover{background:rgba(245,166,35,.2)}
+/* drivers view */
+.driver-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;transition:.2s;position:relative}
+.driver-card:hover{border-color:var(--border2);background:var(--bg3)}
+.driver-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.driver-av-lg{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:var(--font2);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.driver-name{font-weight:700;font-size:15px}
+.driver-phone{font-size:12px;color:var(--text2);margin-top:2px}
+.driver-btns{display:flex;gap:6px}
+/* responsive */
+@media(max-width:700px){
+  #sidebar{display:none}
+  .cust-list{grid-template-columns:1fr}
+  .mo-cell{min-height:55px}
+  .fr2,.fr3{grid-template-columns:1fr}
+  #topbar-btns .tb-btn:not(.primary){display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo">TaxiPro <em>Dispatch</em></div>
+  <div id="search-wrap">
+    <span class="si">🔍</span>
+    <input type="text" id="global-search" placeholder="Kunden, Kontakte, Fahrten suchen…" autocomplete="off"/>
+    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+    <div id="search-results"></div>
+  </div>
+  <div id="topbar-btns">
+    <button class="tb-btn gc" id="gc-sync-btn" onclick="initiateGoogleSync()">🔵 Google Kontakte</button>
+    <button class="tb-btn gc" id="gcal-sync-btn" onclick="initiateGCalSync()">📅 Google Kalender</button>
+    <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel umschalten">🌙</button>
+    <button class="tb-btn primary" onclick="openRideModal()">＋ Fahrt</button>
+    <button class="tb-btn" onclick="openCustomerModal()">👤 Kunde</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="mini-cal" id="mini-cal"></div>
+  <div class="nav-sec">Navigation</div>
+  <div class="nav-item active" data-view="calendar" onclick="switchView('calendar')"><span class="nav-icon">📅</span> Kalender</div>
+  <div class="nav-item" data-view="today" onclick="switchView('today')"><span class="nav-icon">🚗</span> Heute <span class="nav-badge" id="nb-today">0</span></div>
+  <div class="nav-item" data-view="customers" onclick="switchView('customers')"><span class="nav-icon">👥</span> Kunden <span class="nav-badge" id="nb-cust">0</span></div>
+  <div class="nav-item gc-item" data-view="gcontacts" id="nav-gc" onclick="switchView('gcontacts')"><span class="nav-icon">🔵</span> Google Kontakte <span class="nav-badge" id="nb-gc">0</span></div>
+  <div class="nav-item gc-item" id="nav-gcal" onclick="initiateGCalSync()"><span class="nav-icon">📅</span> Google Kalender <span class="nav-badge" id="nb-gcal">–</span></div>
+  <div class="nav-item" data-view="drivers" onclick="switchView('drivers')"><span class="nav-icon">👨‍✈️</span> Fahrer <span class="nav-badge" id="nb-drivers">0</span></div>
+  <div class="nav-sec">Fahrttyp</div>
+  <div class="nav-item" onclick="calFilterType('krank')"><span class="nav-icon">🔴</span> Krankenfahrten</div>
+  <div class="nav-item" onclick="calFilterType('rechn')"><span class="nav-icon">🟡</span> Rechnungsfahrten</div>
+  <div class="nav-item" onclick="calFilterType('privat')"><span class="nav-icon">🟢</span> Privatfahrten</div>
+  <div class="nav-item" onclick="calFilterType('all')"><span class="nav-icon">📋</span> Alle</div>
+  <div class="nav-sec">Serien</div>
+  <div class="nav-item" onclick="calFilterSerie('dialyse')"><span class="nav-icon">💧</span> Dialyse</div>
+  <div class="nav-item" onclick="calFilterSerie('chemo')"><span class="nav-icon">🏥</span> Chemotherapie</div>
+  <div class="nav-item" onclick="calFilterSerie('strahlen')"><span class="nav-icon">☢️</span> Strahlentherapie</div>
+  <div class="nav-item" onclick="calFilterSerie(null)"><span class="nav-icon">🔄</span> Alle Serien</div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+  <!-- CALENDAR VIEW -->
+  <div class="view active" id="view-calendar">
+    <div class="toolbar">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+        <button class="today-btn" onclick="goToday()">Heute</button>
+        <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+      </div>
+      <div class="cal-title" id="cal-title"></div>
+      <div class="view-tabs">
+        <div class="view-tab active" data-cv="day" onclick="setCalView('day')">Plan</div>
+        <div class="view-tab" data-cv="week" onclick="setCalView('week')">Woche</div>
+        <div class="view-tab" data-cv="month" onclick="setCalView('month')">Monat</div>
+      </div>
+    </div>
+    <div class="stats-bar" id="stats-bar"></div>
+    <div id="cal-body" style="flex:1;overflow:hidden;display:flex;flex-direction:column"></div>
+  </div>
+
+  <!-- TODAY VIEW -->
+  <div class="view" id="view-today">
+    <div class="toolbar"><h2>🚗 Fahrten Heute</h2></div>
+    <div style="flex:1;overflow-y:auto;padding:14px" id="today-list"></div>
+  </div>
+
+  <!-- CUSTOMERS VIEW -->
+  <div class="view" id="view-customers">
+    <div class="toolbar"><h2>Kundenkatalog</h2>
+      <button class="tb-btn btn-sm" onclick="openCustomerModal()">＋ Neu</button>
+    </div>
+    <div class="filter-strip" id="cust-filter-strip">
+      <div class="f-tab active" data-cf="all" onclick="setCustFilter('all')">Alle</div>
+      <div class="f-tab" data-cf="kts" onclick="setCustFilter('kts')">🏥 KTS</div>
+      <div class="f-tab" data-cf="re" onclick="setCustFilter('re')">🟡 Rechnung</div>
+      <div class="f-tab" data-cf="privat" onclick="setCustFilter('privat')">🟢 Privat</div>
+      <div class="f-tab" data-cf="firma" onclick="setCustFilter('firma')">🏢 Firma</div>
+      <div class="f-tab" data-cf="stamm" onclick="setCustFilter('stamm')">⭐ Stammkunde</div>
+    </div>
+    <div class="cust-list" id="cust-list"></div>
+  </div>
+
+  <!-- DRIVERS VIEW -->
+  <div class="view" id="view-drivers">
+    <div class="toolbar"><h2>👨‍✈️ Fahrer &amp; Disponenten</h2>
+      <button class="tb-btn primary" onclick="openDriverModal()">＋ Fahrer</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;align-content:start" id="drivers-list"></div>
+    </div>
+  </div>
+
+  <!-- GOOGLE CONTACTS VIEW -->
+  <div class="view" id="view-gcontacts">
+    <div class="toolbar"><h2>🔵 Google Kontakte</h2>
+      <button class="tb-btn gc" onclick="initiateGoogleSync()">🔄 Synchronisieren</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px" id="gc-list"></div>
+  </div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- FAB -->
+<button class="fab" onclick="openRideModal()">＋</button>
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ═══ MODAL: FAHRT ═══ -->
+<div class="overlay hidden" id="modal-ride">
+<div class="modal">
+  <div class="mh"><h3 id="modal-ride-title">Neue Fahrt</h3><button class="mclose" onclick="closeM('modal-ride')">✕</button></div>
+  <div class="mbody">
+    <div class="fr">
+      <label>Fahrttyp</label>
+      <div class="rg">
+        <div class="ro"><input type="radio" name="rt" id="rt-krank" value="krank" checked onchange="onRTChange()"/><label for="rt-krank">🔴 Krankenfahrt</label></div>
+        <div class="ro"><input type="radio" name="rt" id="rt-rechn" value="rechn" onchange="onRTChange()"/><label for="rt-rechn">🟡 Rechnung</label></div>
+        <div class="ro"><input type="radio" name="rt" id="rt-privat" value="privat" onchange="onRTChange()"/><label for="rt-privat">🟢 Privat</label></div>
+      </div>
+    </div>
+    <div class="fr">
+      <label>Kunde</label>
+      <div class="ac-wrap">
+        <input type="text" id="r-cust-search" placeholder="Name eingeben…" oninput="onRCustSearch(this.value)" autocomplete="off"/>
+        <div class="ac-list" id="r-cust-ac"></div>
+      </div>
+      <input type="hidden" id="r-cust-id"/>
+    </div>
+    <div class="fr2 fr">
+      <div><label>Datum</label><input type="date" id="r-date"/></div>
+      <div><label>Abfahrt</label><input type="time" id="r-time"/></div>
+    </div>
+    <div class="fr"><label>Abholadresse</label><input type="text" id="r-from" placeholder="Wird automatisch geladen…"/></div>
+    <div class="fr">
+      <label>Zieladresse / Krankenhaus</label>
+      <div class="ac-wrap">
+        <input type="text" id="r-to" placeholder="Ziel oder Krankenhaus suchen…" oninput="onHospSearch(this.value)" autocomplete="off"/>
+        <div class="ac-list" id="hosp-ac"></div>
+      </div>
+      <div id="r-dist"></div>
+    </div>
+    <!-- KTS fields -->
+    <div id="kts-fields">
+      <hr class="fdiv"/>
+      <div class="fsec">Krankenkasse</div>
+      <div class="fr2 fr">
+        <div><label>Verordnung</label>
+          <select id="r-verord">
+            <option value="">– wählen –</option>
+            <option value="taxi">Taxi (§60 SGB V)</option>
+            <option value="kt">Krankentransport</option>
+            <option value="rollstuhl">Rollstuhlfahrzeug</option>
+            <option value="liegend">Liegendtransport</option>
+          </select>
+        </div>
+        <div><label>Zuzahlung</label>
+          <select id="r-zuzahl">
+            <option value="ja">Ja (10% / mind. 5€)</option>
+            <option value="nein">Befreit</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <hr class="fdiv"/>
+    <div class="tog-row"><span class="tog-label">🔁 Serienfahrt</span><label class="tog"><input type="checkbox" id="r-serie" onchange="onSerieToggle()"/><span class="tog-sl"></span></label></div>
+    <div id="serie-fields" style="display:none">
+      <div class="fr2 fr" style="margin-top:8px">
+        <div><label>Serie Typ</label>
+          <select id="r-serie-typ">
+            <option value="dialyse">💧 Dialyse</option>
+            <option value="chemo">🏥 Chemotherapie</option>
+            <option value="strahlen">☢️ Strahlentherapie</option>
+            <option value="aufbau">💪 Aufbautraining</option>
+            <option value="kontrolle">🩺 Kontrolltermin</option>
+            <option value="sonstige">Sonstige</option>
+          </select>
+        </div>
+        <div><label>Frequenz</label>
+          <select id="r-freq">
+            <option value="taeglich">Täglich</option>
+            <option value="mo-mi-fr">Mo · Mi · Fr</option>
+            <option value="mo-do">Mo · Do</option>
+            <option value="di-do">Di · Do</option>
+            <option value="woechentlich">Wöchentlich</option>
+            <option value="2wochen">Alle 2 Wochen</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr2 fr">
+        <div><label>Enddatum</label><input type="date" id="r-serie-end"/></div>
+        <div><label>Max. Fahrten</label><input type="number" id="r-serie-count" placeholder="z.B. 24" min="1" max="365"/></div>
+      </div>
+    </div>
+    <hr class="fdiv"/>
+    <div class="tog-row"><span class="tog-label">🔔 Erinnerung</span><label class="tog"><input type="checkbox" id="r-reminder" onchange="onRemToggle()"/><span class="tog-sl"></span></label></div>
+    <div id="rem-fields" style="display:none;margin-top:8px">
+      <div class="fr"><label>Vorabwarnung</label>
+        <select id="r-rem-min">
+          <option value="15">15 Minuten vorher</option>
+          <option value="30" selected>30 Minuten vorher</option>
+          <option value="60">1 Stunde vorher</option>
+          <option value="120">2 Stunden vorher</option>
+          <option value="1440">1 Tag vorher</option>
+        </select>
+      </div>
+    </div>
+    <hr class="fdiv"/>
+    <div class="fr"><label>Notiz / Besonderheiten</label><textarea id="r-note" rows="2" placeholder="Rollator, Hilfsmittel, Begleitung…"></textarea></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-danger btn-sm" id="r-delete-btn" style="display:none;margin-right:auto" onclick="deleteCurrentRide()">🗑️ Löschen</button>
+    <button class="btn btn-secondary" onclick="closeM('modal-ride')">Abbrechen</button>
+    <button class="btn btn-wa" onclick="shareRideWA()">📱 WhatsApp</button>
+    <button class="btn btn-primary" onclick="saveRide()">💾 Speichern</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: KUNDE ═══ -->
+<div class="overlay hidden" id="modal-customer">
+<div class="modal modal-lg">
+  <div class="mh"><h3 id="modal-cust-title">Neuer Kunde</h3><button class="mclose" onclick="closeM('modal-customer')">✕</button></div>
+  <div class="mbody">
+    <div class="fsec">Persönliche Daten</div>
+    <div class="fr2 fr">
+      <div><label>Vorname *</label><input type="text" id="c-fname" placeholder="Max"/></div>
+      <div><label>Nachname *</label><input type="text" id="c-lname" placeholder="Mustermann"/></div>
+    </div>
+    <div class="fr2 fr">
+      <div><label>Telefon</label><input type="tel" id="c-phone" placeholder="+49 171 1234567"/></div>
+      <div><label>Geburtsdatum</label><input type="date" id="c-birth"/></div>
+    </div>
+    <div class="fr2 fr">
+      <div><label>E-Mail</label><input type="email" id="c-email" placeholder="max@mail.de"/></div>
+      <div><label>Firma / Organisation</label><input type="text" id="c-org" placeholder="Optional"/></div>
+    </div>
+    <hr class="fdiv"/>
+    <div class="fsec">Adresse</div>
+    <div class="fr"><label>Straße & Nr.</label><input type="text" id="c-street" placeholder="Musterstraße 12"/></div>
+    <div class="fr2 fr">
+      <div><label>PLZ</label><input type="text" id="c-plz" placeholder="12345" maxlength="6"/></div>
+      <div><label>Stadt</label><input type="text" id="c-city" placeholder="Berlin"/></div>
+    </div>
+    <hr class="fdiv"/>
+    <div class="fsec">Kundentyp</div>
+    <div class="fr">
+      <div class="rg">
+        <div class="ro"><input type="radio" name="ct" id="ct-kts" value="kts" checked onchange="onCTChange()"/><label for="ct-kts">🏥 KTS</label></div>
+        <div class="ro"><input type="radio" name="ct" id="ct-re" value="re" onchange="onCTChange()"/><label for="ct-re">🟡 Rechnung</label></div>
+        <div class="ro"><input type="radio" name="ct" id="ct-privat" value="privat" onchange="onCTChange()"/><label for="ct-privat">🟢 Privat</label></div>
+        <div class="ro"><input type="radio" name="ct" id="ct-firma" value="firma" onchange="onCTChange()"/><label for="ct-firma">🏢 Firma</label></div>
+        <div class="ro"><input type="radio" name="ct" id="ct-stamm" value="stamm" onchange="onCTChange()"/><label for="ct-stamm">⭐ Stamm</label></div>
+      </div>
+    </div>
+    <div id="kts-cust-fields">
+      <div class="fr2 fr">
+        <div><label>Krankenkasse</label><input type="text" id="c-kk" placeholder="AOK, TK, Barmer…"/></div>
+        <div><label>Versichertennr.</label><input type="text" id="c-vnr" placeholder="A123456789"/></div>
+      </div>
+      <div class="fr">
+        <label>Zuzahlungsstatus</label>
+        <div class="rg">
+          <div class="ro"><input type="radio" name="cz" id="cz-ja" value="ja" checked/><label for="cz-ja">€ Zuzahlung</label></div>
+          <div class="ro"><input type="radio" name="cz" id="cz-nein" value="nein"/><label for="cz-nein">✓ Befreit</label></div>
+        </div>
+      </div>
+    </div>
+    <hr class="fdiv"/>
+    <div class="fsec">Stammkrankenhaus (optional)</div>
+    <div class="fr">
+      <div class="ac-wrap">
+        <input type="text" id="c-hosp" placeholder="Krankenhaus suchen…" oninput="onCHospSearch(this.value)" autocomplete="off"/>
+        <div class="ac-list" id="c-hosp-ac"></div>
+      </div>
+    </div>
+    <div class="fr"><label>Notiz</label><textarea id="c-note" rows="2" placeholder="Rollstuhl, Sauerstoff, Besonderheiten…"></textarea></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-danger btn-sm" id="c-delete-btn" style="display:none;margin-right:auto" onclick="deleteCurrentCustomer()">🗑️</button>
+    <button class="btn btn-secondary" onclick="closeM('modal-customer')">Abbrechen</button>
+    <button class="btn btn-wa" id="c-wa-btn" onclick="shareCustomerWA()">📱 Teilen</button>
+    <button class="btn btn-primary" onclick="saveCustomer()">💾 Speichern</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: FAHRT DETAIL ═══ -->
+<div class="overlay hidden" id="modal-ride-detail">
+<div class="modal">
+  <div class="mh"><h3>Fahrt Details</h3><button class="mclose" onclick="closeM('modal-ride-detail')">✕</button></div>
+  <div class="mbody" id="mrd-body"></div>
+  <div class="mfooter" id="mrd-footer"></div>
+</div>
+</div>
+
+<!-- ═══ MODAL: GOOGLE SYNC ═══ -->
+<div class="overlay hidden" id="modal-gc">
+<div class="modal">
+  <div class="mh"><h3>🔵 Google Kontakte Sync</h3><button class="mclose" onclick="closeM('modal-gc')">✕</button></div>
+  <div class="mbody" id="gc-modal-body">
+    <div class="gc-panel">
+      <h4>🔵 Google People API</h4>
+      <div class="gc-status" id="gc-status-text">
+        Verbinde dein Google-Konto, um Telefonkontakte in TaxiPro zu synchronisieren. Kontakte erscheinen dann in der Suche und können direkt als Kunden übernommen werden.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-blue" onclick="startGoogleOAuth()">🔵 Mit Google verbinden</button>
+        <button class="btn btn-secondary" id="gc-demo-btn" onclick="loadDemoGoogleContacts()">📋 Demo-Kontakte laden</button>
+      </div>
+    </div>
+    <div id="gc-preview-list"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-gc')">Schließen</button>
+    <button class="btn btn-primary" id="gc-import-btn" onclick="importSelectedGCContacts()" style="display:none">✅ Ausgewählte importieren</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: GOOGLE KALENDER ═══ -->
+<div class="overlay hidden" id="modal-gcal">
+<div class="modal">
+  <div class="mh"><h3>📅 Google Kalender Sync</h3><button class="mclose" onclick="closeM('modal-gcal')">✕</button></div>
+  <div class="mbody" id="gcal-modal-body">
+    <div class="gc-panel">
+      <h4>📅 Google Calendar API</h4>
+      <div class="gc-status" id="gcal-status-text">
+        Verbinde deinen Google Kalender – Termine erscheinen dann blau im Kalender neben deinen TaxiPro-Fahrten.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-blue" id="gcal-connect-btn" onclick="startGCalOAuth()">📅 Mit Google verbinden</button>
+        <button class="btn btn-secondary" id="gcal-refresh-btn" onclick="fullGCalSync()" style="display:none">🔄 Jetzt synchronisieren</button>
+        <button class="btn btn-secondary" id="gcal-disconnect-btn" onclick="disconnectGCal()" style="display:none">Trennen</button>
+        <button class="btn btn-secondary" id="gcal-reset-btn" onclick="resetGoogleAuth()" style="display:none">↺ Zurücksetzen</button>
+      </div>
+      <div id="gcal-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
+    </div>
+    <div class="tog-row" id="gcal-sync-toggle" style="display:none">
+      <span class="tog-label">🔄 Zwei-Wege-Sync (App ↔ Google)</span>
+      <label class="tog"><input type="checkbox" id="gcal-sync" checked onchange="toggleGCalSync()"/><span class="tog-sl"></span></label>
+    </div>
+    <div class="fr" id="gcal-cal-select-wrap" style="display:none;margin-top:10px">
+      <label>Sync-Kalender</label>
+      <select id="gcal-calendar-select" onchange="onGCalCalendarChange()"></select>
+    </div>
+    <div class="tog-row" id="gcal-import-toggle" style="display:none">
+      <span class="tog-label">Alle Google-Termine als Fahrten importieren</span>
+      <label class="tog"><input type="checkbox" id="gcal-import-all" checked onchange="toggleGCalImportAll()"/><span class="tog-sl"></span></label>
+    </div>
+    <div class="tog-row" id="gcal-show-toggle" style="display:none">
+      <span class="tog-label">Nicht-importierte Termine blau anzeigen</span>
+      <label class="tog"><input type="checkbox" id="gcal-show" checked onchange="toggleGCalShow()"/><span class="tog-sl"></span></label>
+    </div>
+    <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
+    <div id="gcal-preview-list"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-gcal')">Schließen</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: GOOGLE TERMINE DETAIL ═══ -->
+<div class="overlay hidden" id="modal-gcal-detail">
+<div class="modal">
+  <div class="mh"><h3>📅 Google Termin</h3><button class="mclose" onclick="closeM('modal-gcal-detail')">✕</button></div>
+  <div class="mbody" id="gcal-detail-body"></div>
+  <div class="mfooter" id="gcal-detail-footer"></div>
+</div>
+</div>
+
+<!-- ═══ DRIVER PICKER SHEET ═══ -->
+<div class="driver-picker hidden" id="driver-picker" onclick="closeDriverPicker(event)">
+<div class="dp-sheet">
+  <div class="dp-handle"></div>
+  <div class="dp-title">🚀 Fahrt zuweisen an Fahrer</div>
+  <div class="dp-ride-info" id="dp-ride-info">–</div>
+  <div class="dp-drivers" id="dp-drivers-list"></div>
+  <button class="dp-add-btn" onclick="closeDriverPicker();openDriverModal()">＋ Neuen Fahrer anlegen</button>
+</div>
+</div>
+
+<!-- ═══ MODAL: FAHRER ═══ -->
+<div class="overlay hidden" id="modal-driver">
+<div class="modal">
+  <div class="mh"><h3 id="modal-driver-title">Neuer Fahrer</h3><button class="mclose" onclick="closeM('modal-driver')">✕</button></div>
+  <div class="mbody">
+    <div class="fsec">Fahrerdaten</div>
+    <div class="fr2 fr">
+      <div><label>Vorname *</label><input type="text" id="d-fname" placeholder="Ali"/></div>
+      <div><label>Nachname *</label><input type="text" id="d-lname" placeholder="Yilmaz"/></div>
+    </div>
+    <div class="fr2 fr">
+      <div><label>WhatsApp / Telefon *</label><input type="tel" id="d-phone" placeholder="+49 171 …"/></div>
+      <div><label>Fahrzeug</label><input type="text" id="d-car" placeholder="VW Caddy · B-TX 123"/></div>
+    </div>
+    <div class="fr">
+      <label>Status</label>
+      <div class="rg">
+        <div class="ro"><input type="radio" name="ds" id="ds-frei" value="frei" checked/><label for="ds-frei">🟢 Verfügbar</label></div>
+        <div class="ro"><input type="radio" name="ds" id="ds-besetzt" value="besetzt"/><label for="ds-besetzt">🔴 Besetzt</label></div>
+        <div class="ro"><input type="radio" name="ds" id="ds-pause" value="pause"/><label for="ds-pause">⏸️ Pause</label></div>
+      </div>
+    </div>
+    <div class="fr"><label>Notiz</label><input type="text" id="d-note" placeholder="Führerschein Klasse, Sprachen…"/></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-danger btn-sm" id="d-delete-btn" style="display:none;margin-right:auto" onclick="deleteDriver()">🗑️</button>
+    <button class="btn btn-secondary" onclick="closeM('modal-driver')">Abbrechen</button>
+    <button class="btn btn-primary" onclick="saveDriver()">💾 Speichern</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// HOSPITALS DATABASE
+// ═══════════════════════════════════════════════════════════════
+const HOSPITALS=[
+  {n:"Charité – Campus Mitte",a:"Charitéplatz 1, 10117 Berlin"},
+  {n:"Charité – Campus Virchow-Klinikum",a:"Augustenburger Platz 1, 13353 Berlin"},
+  {n:"Charité – Campus Benjamin Franklin",a:"Hindenburgdamm 30, 12203 Berlin"},
+  {n:"Charité – Campus Buch",a:"Lindenberger Weg 80, 13125 Berlin"},
+  {n:"DRK Kliniken Berlin",a:"Drontheimer Str. 39, 13359 Berlin"},
+  {n:"Vivantes Klinikum Neukölln",a:"Rudower Str. 48, 12351 Berlin"},
+  {n:"Vivantes Auguste-Viktoria-Klinikum",a:"Rubensstraße 125, 12157 Berlin"},
+  {n:"St. Hedwig-Krankenhaus Berlin",a:"Große Hamburger Str. 5, 10115 Berlin"},
+  {n:"Universitätsklinikum Hamburg-Eppendorf",a:"Martinistraße 52, 20246 Hamburg"},
+  {n:"Asklepios Klinik Altona",a:"Paul-Ehrlich-Str. 1, 22763 Hamburg"},
+  {n:"Klinikum München-Großhadern (LMU)",a:"Marchioninistraße 15, 81377 München"},
+  {n:"Klinikum rechts der Isar TUM",a:"Ismaninger Str. 22, 81675 München"},
+  {n:"Universitätsklinikum Frankfurt",a:"Theodor-Stern-Kai 7, 60590 Frankfurt"},
+  {n:"Bürgerhospital Frankfurt",a:"Nibelungenallee 37, 60318 Frankfurt"},
+  {n:"Universitätsklinikum Köln",a:"Kerpener Str. 62, 50937 Köln"},
+  {n:"Kliniken der Stadt Köln – Merheim",a:"Ostmerheimerstr. 200, 51109 Köln"},
+  {n:"Universitätsklinikum Düsseldorf",a:"Moorenstraße 5, 40225 Düsseldorf"},
+  {n:"Evangelisches Krankenhaus Düsseldorf",a:"Kirchfeldstraße 40, 40217 Düsseldorf"},
+  {n:"Klinikum Dortmund",a:"Beurhausstraße 40, 44137 Dortmund"},
+  {n:"Universitätsklinikum Münster",a:"Albert-Schweitzer-Campus 1, 48149 Münster"},
+  {n:"Katharinenhospital Stuttgart",a:"Kriegsbergstraße 60, 70174 Stuttgart"},
+  {n:"Robert-Bosch-Krankenhaus Stuttgart",a:"Auerbachstraße 110, 70376 Stuttgart"},
+  {n:"Städtisches Klinikum Karlsruhe",a:"Moltkestraße 90, 76133 Karlsruhe"},
+  {n:"Uniklinikum Freiburg",a:"Hugstetter Str. 55, 79106 Freiburg"},
+  {n:"Klinikum Nürnberg Nord",a:"Prof.-Ernst-Nathan-Str. 1, 90419 Nürnberg"},
+  {n:"Klinikum Augsburg",a:"Stenglinstraße 2, 86156 Augsburg"},
+  {n:"Universitätsklinikum Leipzig",a:"Liebigstraße 20, 04103 Leipzig"},
+  {n:"Universitätsklinikum Dresden",a:"Fetscherstraße 74, 01307 Dresden"},
+  {n:"Klinikum der Uni Regensburg",a:"Franz-Josef-Strauß-Allee 11, 93053 Regensburg"},
+  {n:"Klinikum Braunschweig",a:"Salzdahlumer Str. 90, 38126 Braunschweig"},
+  {n:"Klinikum Bielefeld",a:"Teutoburger Str. 50, 33604 Bielefeld"},
+  {n:"Marien Hospital Düsseldorf",a:"Rochusstraße 2, 40479 Düsseldorf"},
+  {n:"St. Antonius Hospital Eschweiler",a:"Dechant-Deckers-Str. 8, 52249 Eschweiler"},
+  {n:"HELIOS Klinikum Wuppertal",a:"Heusnerstraße 40, 42283 Wuppertal"},
+  {n:"Klinikum Leverkusen",a:"Am Gesundheitspark 11, 51375 Leverkusen"},
+  {n:"Rotes Kreuz Krankenhaus Kassel",a:"Hansteinstraße 29, 34121 Kassel"},
+  {n:"Klinikum Fulda",a:"Pacelliallee 4, 36043 Fulda"},
+  {n:"Klinikum Darmstadt",a:"Grafenstraße 9, 64283 Darmstadt"},
+  {n:"Universitätsmedizin Mainz",a:"Langenbeckstraße 1, 55131 Mainz"},
+  {n:"Klinikum Mannheim",a:"Theodor-Kutzer-Ufer 1-3, 68167 Mannheim"},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// GOOGLE API – Client ID hier eintragen (Cloud Console)
+// ═══════════════════════════════════════════════════════════════
+const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
+const SCOPE_CALENDAR='https://www.googleapis.com/auth/calendar';
+const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
+const SCOPE_ALL=SCOPE_CALENDAR+' '+SCOPE_CONTACTS;
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let customers=JSON.parse(localStorage.getItem('tp_c')||'[]');
+let rides=JSON.parse(localStorage.getItem('tp_r')||'[]');
+let gcContacts=JSON.parse(localStorage.getItem('tp_gc')||'[]');
+let drivers=JSON.parse(localStorage.getItem('tp_d')||'[]');
+let gcalEvents=[];
+let gcalCalendars=[];
+let gcalToken=localStorage.getItem('tp_gcal_token')||null;
+let gcalConnected=!!gcalToken;
+let gcalShow=localStorage.getItem('tp_gcal_show')!=='false';
+let gcalSyncEnabled=localStorage.getItem('tp_gcal_sync')!=='false';
+let gcalImportAll=localStorage.getItem('tp_gcal_import_all')!=='false';
+let gcalCalendarId=localStorage.getItem('tp_gcal_cal')||'primary';
+const TAXI_KEYWORDS=['fahrt','fahrten','taxi','kranken','krankenfahrt','dialyse','chemo','chemotherapie','strahlen','strahlentherapie','transport','abholung','klinik','krankenhaus','charité','charite','patient','termin','kt ','kts','rollstuhl'];
+let editRideId=null, editCustId=null, editDriverId=null;
+let view='calendar', calV='day';
+let curDate=new Date();
+let miniDate=new Date();
+let custFilter='all', calTypeF='all', calSerieF=null;
+let gcSelected=new Set();
+let dispatchRideId=null;
+
+function save(){
+  localStorage.setItem('tp_c',JSON.stringify(customers));
+  localStorage.setItem('tp_r',JSON.stringify(rides));
+  localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
+  localStorage.setItem('tp_d',JSON.stringify(drivers));
+}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmtD=d=>new Date(d).toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const DE_MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const DE_DAYS=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const DE_DAYS_SHORT=['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+// ═══════════════════════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════════════════════
+function switchView(v){
+  view=v;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
+  if(v==='calendar') renderCalendar();
+  if(v==='customers') renderCustomers();
+  if(v==='today') renderToday();
+  if(v==='gcontacts') renderGCView();
+  if(v==='drivers') renderDrivers();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MINI CALENDAR
+// ═══════════════════════════════════════════════════════════════
+function renderMiniCal(){
+  const y=miniDate.getFullYear(),m=miniDate.getMonth();
+  const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  const todayStr=fmtD(new Date()),selStr=fmtD(curDate);
+  let h=`<div class="mini-cal-header">
+    <button class="mini-cal-nav" onclick="miniNav(-1)">‹</button>
+    <span>${DE_MONTHS[m].slice(0,3)} ${y}</span>
+    <button class="mini-cal-nav" onclick="miniNav(1)">›</button>
+  </div><div class="mini-cal-grid">
+  ${'Mo Di Mi Do Fr Sa So'.split(' ').map(w=>`<div class="mini-dow">${w}</div>`).join('')}`;
+  const start=(first+6)%7;
+  for(let i=0;i<start;i++) h+=`<div class="mini-day emp">0</div>`;
+  for(let d=1;d<=days;d++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasDot=rides.some(r=>r.date===iso)||(gcalConnected&&gcalShow&&gcalEvents.some(e=>e.date===iso));
+    h+=`<div class="mini-day${iso===todayStr?' today':''}${iso===selStr?' sel':''}${hasDot?' dot':''}" onclick="miniSel(${y},${m},${d})">${d}</div>`;
+  }
+  h+=`</div>`;
+  document.getElementById('mini-cal').innerHTML=h;
+}
+function miniNav(d){miniDate=new Date(miniDate.getFullYear(),miniDate.getMonth()+d,1);renderMiniCal();}
+function miniSel(y,m,d){curDate=new Date(y,m,d);if(view!=='calendar')switchView('calendar');else{renderCalendar();if(gcalConnected)fetchGCalEvents();}renderMiniCal();}
+
+// ═══════════════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════════════
+function setCalView(v){calV=v;document.querySelectorAll('.view-tab').forEach(t=>t.classList.toggle('active',t.dataset.cv===v));renderCalendar();if(gcalConnected)fetchGCalEvents();}
+function calNav(d){if(calV==='day')curDate=addDays(curDate,d);else if(calV==='week')curDate=addDays(curDate,d*7);else curDate=new Date(curDate.getFullYear(),curDate.getMonth()+d,1);renderCalendar();renderMiniCal();if(gcalConnected)fetchGCalEvents();}
+function goToday(){curDate=new Date();renderCalendar();renderMiniCal();if(gcalConnected)fetchGCalEvents();}
+function calFilterType(t){calTypeF=t;calSerieF=null;switchView('calendar');}
+function calFilterSerie(s){calSerieF=s;calTypeF='all';switchView('calendar');}
+
+function filteredRides(dateStr){
+  return rides.filter(r=>{
+    if(r.date!==dateStr) return false;
+    if(calTypeF!=='all'&&r.type!==calTypeF) return false;
+    if(calSerieF&&r.serieType!==calSerieF) return false;
+    return true;
+  }).sort((a,b)=>a.time.localeCompare(b.time));
+}
+
+function filteredGCalEvents(dateStr){
+  if(!gcalConnected||!gcalShow) return [];
+  return gcalEvents.filter(e=>{
+    if(e.date!==dateStr) return false;
+    if(gcalSyncEnabled&&rides.some(r=>r.googleEventId===e.id)) return false;
+    return true;
+  }).sort((a,b)=>a.time.localeCompare(b.time));
+}
+
+function getGCalRange(){
+  let timeMin,timeMax;
+  if(calV==='day'){
+    timeMin=new Date(curDate);timeMin.setHours(0,0,0,0);
+    timeMax=new Date(curDate);timeMax.setHours(23,59,59,999);
+  } else if(calV==='week'){
+    const mo=weekMon(curDate);
+    timeMin=new Date(mo);timeMin.setHours(0,0,0,0);
+    timeMax=addDays(mo,6);timeMax.setHours(23,59,59,999);
+  } else {
+    const y=curDate.getFullYear(),m=curDate.getMonth();
+    timeMin=new Date(y,m,1);
+    timeMax=new Date(y,m+1,0,23,59,59,999);
+  }
+  return{timeMin:timeMin.toISOString(),timeMax:timeMax.toISOString()};
+}
+
+function normGCalEvent(ev){
+  const isAllDay=!!ev.start?.date;
+  const dateStr=isAllDay?ev.start.date:(ev.start?.dateTime||'').slice(0,10);
+  const timeStr=isAllDay?'00:00':(ev.start?.dateTime||'').slice(11,16);
+  const endTime=isAllDay?'23:59':(ev.end?.dateTime||'').slice(11,16)||timeStr;
+  return{
+    id:ev.id,title:ev.summary||'(Ohne Titel)',date:dateStr,time:timeStr,endTime,isAllDay,
+    location:ev.location||'',description:ev.description||'',htmlLink:ev.htmlLink||'',
+    calendar:ev.organizer?.displayName||'Google Kalender',
+    taxiproRideId:ev.extendedProperties?.private?.taxiproRideId||null,
+    updated:ev.updated||null
+  };
+}
+
+function gcalBlockHeight(ev){
+  if(ev.isAllDay) return 50;
+  const[sh,sm]=ev.time.split(':').map(Number);
+  const[eh,em]=(ev.endTime||ev.time).split(':').map(Number);
+  return Math.min(Math.max(30,(eh*60+em)-(sh*60+sm)),180);
+}
+
+function renderCalendar(){
+  // title
+  let t='';
+  if(calV==='day') t=`${DE_DAYS[curDate.getDay()]}, ${curDate.getDate()}. ${DE_MONTHS[curDate.getMonth()]} ${curDate.getFullYear()}`;
+  else if(calV==='week'){const mo=weekMon(curDate);const su=addDays(mo,6);t=`KW ${kwNum(mo)} · ${mo.getDate()}. ${DE_MONTHS[mo.getMonth()]} – ${su.getDate()}. ${DE_MONTHS[su.getMonth()]} ${su.getFullYear()}`;}
+  else t=`${DE_MONTHS[curDate.getMonth()]} ${curDate.getFullYear()}`;
+  document.getElementById('cal-title').textContent=t;
+  // stats
+  let pool=[],gpool=[];
+  if(calV==='day'){pool=filteredRides(fmtD(curDate));gpool=filteredGCalEvents(fmtD(curDate));}
+  else if(calV==='week'){const mo=weekMon(curDate);for(let i=0;i<7;i++){const ds=fmtD(addDays(mo,i));pool.push(...filteredRides(ds));gpool.push(...filteredGCalEvents(ds));}}
+  else{const y=curDate.getFullYear(),m=curDate.getMonth(),days=new Date(y,m+1,0).getDate();for(let d=1;d<=days;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;pool.push(...filteredRides(ds));gpool.push(...filteredGCalEvents(ds));}}
+  const kr=pool.filter(r=>r.type==='krank').length,re=pool.filter(r=>r.type==='rechn').length,pr=pool.filter(r=>r.type==='privat').length;
+  let stats=`
+    <div class="s-chip gold"><strong>${pool.length}</strong> Fahrten</div>
+    <div class="s-chip red"><strong>${kr}</strong> Kranken</div>
+    <div class="s-chip yellow"><strong>${re}</strong> Rechnung</div>
+    <div class="s-chip green"><strong>${pr}</strong> Privat</div>`;
+  if(gcalConnected&&gcalShow) stats+=`<div class="s-chip blue"><strong>${gpool.length}</strong> Google</div>`;
+  document.getElementById('stats-bar').innerHTML=stats;
+  const body=document.getElementById('cal-body');
+  body.innerHTML='';
+  if(calV==='day') renderDayV(body);
+  else if(calV==='week') renderWeekV(body);
+  else renderMonthV(body);
+}
+
+function rideTypeCode(type){return type==='krank'?'KTS':type==='rechn'?'RE':type==='privat'?'PRIV':'';}
+function rideScheduleName(r){
+  const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  if(c) return `${c.fname} ${(c.lname||'').charAt(0)}.`.trim();
+  if(r.from) return 'Zur Fahrt';
+  return 'Fahrt';
+}
+function rideScheduleAddr(r){
+  const dest=(r.to||'').split(',')[0].trim();
+  const from=(r.from||'').split(',')[0].trim();
+  return dest||from||'–';
+}
+function buildScheduleItems(ds){
+  const items=[];
+  filteredRides(ds).forEach(r=>{
+    items.push({kind:'ride',time:r.time||'00:00',sortKey:r.time||'00:00',data:r,
+      allday:false,type:r.type||'krank'});
+  });
+  filteredGCalEvents(ds).forEach(ev=>{
+    items.push({kind:'gcal',time:ev.isAllDay?'00:00':ev.time,sortKey:ev.isAllDay?'00:00':ev.time,data:ev,
+      allday:ev.isAllDay,type:'gcal'});
+  });
+  return items.sort((a,b)=>a.sortKey.localeCompare(b.sortKey)||(a.kind==='ride'?0:1));
+}
+
+function renderDayV(container){
+  const ds=fmtD(curDate);
+  const items=buildScheduleItems(ds);
+  const wrap=document.createElement('div');wrap.className='day-sched-wrap';
+  const allday=items.filter(i=>i.allday);
+  const timed=items.filter(i=>!i.allday);
+  const now=new Date();
+  const isToday=fmtD(now)===ds;
+  const nowMins=now.getHours()*60+now.getMinutes();
+
+  if(allday.length){
+    const ad=document.createElement('div');ad.className='sch-allday';
+    ad.innerHTML='<div class="sch-allday-lbl">Ganztägig</div>';
+    allday.forEach(item=>{
+      const row=document.createElement('div');row.className='sch-allday-item';
+      if(item.kind==='ride'){
+        const r=item.data;const name=rideScheduleName(r);
+        row.innerHTML=`<span class="sch-dot ${item.type}"></span><span>${name}</span>`;
+        row.onclick=()=>showRideDetail(r.id);
+      } else {
+        row.innerHTML=`<span class="sch-dot gcal"></span><span>${item.data.title}</span>`;
+        row.onclick=()=>showGCalDetail(item.data.id);
+      }
+      ad.appendChild(row);
+    });
+    wrap.appendChild(ad);
+  }
+
+  const list=document.createElement('div');list.className='sch-list';
+  if(!timed.length&&!allday.length){
+    list.innerHTML='<div class="sch-empty"><div class="ei">📋</div>Keine Fahrten an diesem Tag</div>';
+  } else {
+    let nowInserted=false;
+    timed.forEach(item=>{
+      const[hh,mm]=item.time.split(':').map(Number);
+      const itemMins=hh*60+mm;
+      if(isToday&&!nowInserted&&itemMins>nowMins){
+        const nl=document.createElement('div');nl.className='sch-now';list.appendChild(nl);nowInserted=true;
+      }
+      const row=document.createElement('div');
+      row.className=`sch-row ${item.type}`;
+      if(item.kind==='ride'){
+        const r=item.data;
+        const name=rideScheduleName(r);
+        const code=rideTypeCode(r.type)+(r.serieType?` · ${r.serieType.toUpperCase()}`:'');
+        const addr=rideScheduleAddr(r);
+        const sync=r.googleEventId?' 📅':'';
+        row.innerHTML=`<div class="sch-dot"></div><div class="sch-time">${r.time}</div>
+          <div class="sch-body"><span class="sch-title">${name}</span>${code?`<span class="sch-code">${code}</span>`:''}
+          <span class="sch-addr">${addr}${sync}</span></div>
+          <button class="sch-del" title="Fahrt löschen" onclick="event.stopPropagation();deleteRide('${r.id}')">🗑️</button>`;
+        row.onclick=()=>showRideDetail(r.id);
+      } else {
+        const ev=item.data;
+        row.innerHTML=`<div class="sch-dot"></div><div class="sch-time">${ev.time}</div>
+          <div class="sch-body"><span class="sch-title">${ev.title}</span><span class="sch-code">GOOGLE</span>
+          <span class="sch-addr">${ev.location||'–'}</span></div>`;
+        row.onclick=()=>showGCalDetail(ev.id);
+      }
+      list.appendChild(row);
+    });
+    if(isToday&&!nowInserted){const nl=document.createElement('div');nl.className='sch-now';list.appendChild(nl);}
+  }
+  wrap.appendChild(list);container.appendChild(wrap);
+
+  if(isToday){
+    setTimeout(()=>{
+      const marker=wrap.querySelector('.sch-now');
+      if(marker) marker.scrollIntoView({block:'center',behavior:'smooth'});
+    },80);
+  }
+}
+
+function buildRideBlock(r){
+  const [hh,mm]=(r.time||'00:00').split(':').map(Number);
+  const top=hh*60+mm;
+  const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  const name=c?c.fname+' '+c.lname:'–';
+  const el=document.createElement('div');
+  el.className=`ride-block ${r.type||'krank'}${r.googleEventId?' synced':''}`;
+  el.style.cssText=`top:${top}px;height:50px`;
+  el.innerHTML=`<div class="rb-time">${r.time}${r.serieType?` · ${r.serieType}`:''}${r.source==='google'?' · G':''}</div><div class="rb-name">${name}</div><div class="rb-dest">→ ${r.to||'–'}</div>`;
+  el.onclick=()=>showRideDetail(r.id);
+  return el;
+}
+
+function buildGCalBlock(ev){
+  const[hh,mm]=ev.time.split(':').map(Number);
+  const top=hh*60+mm;
+  const h=gcalBlockHeight(ev);
+  const el=document.createElement('div');
+  el.className='ride-block gcal';
+  el.style.cssText=`top:${top}px;height:${h}px`;
+  el.innerHTML=`<div class="rb-time">📅 ${ev.isAllDay?'Ganztägig':ev.time}</div><div class="rb-name">${ev.title}</div><div class="rb-dest">${ev.location?`📍 ${ev.location}`:'Google Kalender'}</div>`;
+  el.onclick=()=>showGCalDetail(ev.id);
+  return el;
+}
+
+function weekMon(d){const x=new Date(d);const dow=x.getDay();x.setDate(x.getDate()-(dow+6)%7);return x;}
+function kwNum(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()+3-(x.getDay()+6)%7);const w1=new Date(x.getFullYear(),0,4);return 1+Math.round(((x-w1)/86400000-3+(w1.getDay()+6)%7)/7);}
+
+function renderWeekV(container){
+  const mo=weekMon(curDate);
+  const days=Array.from({length:7},(_,i)=>addDays(mo,i));
+  const todayStr=fmtD(new Date());
+  const wrap=document.createElement('div');wrap.style.cssText='flex:1;overflow:hidden;display:flex;flex-direction:column';
+  const head=document.createElement('div');head.className='wk-head';
+  const sp=document.createElement('div');sp.className='wk-spacer';head.appendChild(sp);
+  days.forEach((day,i)=>{
+    const h=document.createElement('div');h.className='wk-dcol-h'+(fmtD(day)===todayStr?' today':'');
+    h.innerHTML=`<div class="wk-dn">${day.getDate()}</div><div class="wk-dname">${DE_DAYS_SHORT[(day.getDay()+6)%7]}</div>`;
+    h.onclick=()=>{curDate=day;setCalView('day');};
+    head.appendChild(h);
+  });
+  wrap.appendChild(head);
+  const body=document.createElement('div');body.className='wk-body';
+  const tc=document.createElement('div');tc.className='wk-tc';
+  for(let h=0;h<24;h++){const s=document.createElement('div');s.style.cssText='height:60px;border-bottom:1px solid var(--border);padding:3px 5px;font-size:9px;color:var(--text3);font-weight:600';s.textContent=h===0?'':String(h).padStart(2,'0')+':00';tc.appendChild(s);}
+  body.appendChild(tc);
+  const area=document.createElement('div');area.className='wk-area';area.style.gridTemplateColumns=`repeat(7,1fr)`;
+  days.forEach(day=>{
+    const ds=fmtD(day);const dr=filteredRides(ds);
+    const col=document.createElement('div');col.className='wk-col';
+    for(let h=0;h<24;h++){const l=document.createElement('div');l.style.cssText=`position:absolute;left:0;right:0;top:${h*60}px;border-top:1px solid var(--border);pointer-events:none`;col.appendChild(l);}
+    dr.forEach(r=>{
+      const [hh,mm]=(r.time||'00:00').split(':').map(Number);
+      const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+      const name=c?c.fname+' '+c.lname.charAt(0)+'.':'–';
+      const el=document.createElement('div');
+      el.className=`ride-block ${r.type||'krank'}`;
+      el.style.cssText=`top:${hh*60+mm}px;height:46px;left:2px;right:2px`;
+      el.innerHTML=`<div class="rb-time" style="font-size:8px">${r.time}</div><div class="rb-name" style="font-size:10px">${name}</div>`;
+      el.onclick=()=>showRideDetail(r.id);
+      col.appendChild(el);
+    });
+    filteredGCalEvents(ds).forEach(ev=>{
+      const[hh,mm]=ev.time.split(':').map(Number);
+      const el=document.createElement('div');
+      el.className='ride-block gcal';
+      el.style.cssText=`top:${hh*60+mm}px;height:${Math.min(gcalBlockHeight(ev),46)}px;left:2px;right:2px`;
+      el.innerHTML=`<div class="rb-time" style="font-size:8px">📅 ${ev.isAllDay?'GT':ev.time}</div><div class="rb-name" style="font-size:10px">${ev.title.slice(0,18)}</div>`;
+      el.onclick=()=>showGCalDetail(ev.id);
+      col.appendChild(el);
+    });
+    if(ds===fmtD(new Date())){const now=new Date();const nl=document.createElement('div');nl.style.cssText=`position:absolute;left:0;right:0;top:${now.getHours()*60+now.getMinutes()}px;height:2px;background:var(--gold);z-index:8`;col.appendChild(nl);}
+    area.appendChild(col);
+  });
+  body.appendChild(area);wrap.appendChild(body);container.appendChild(wrap);
+  setTimeout(()=>body.scrollTop=7*60,30);
+}
+
+function renderMonthV(container){
+  const y=curDate.getFullYear(),m=curDate.getMonth();
+  const first=new Date(y,m,1).getDay(),daysInM=new Date(y,m+1,0).getDate();
+  const todayStr=fmtD(new Date()),selStr=fmtD(curDate);
+  const wrap=document.createElement('div');wrap.className='mo-wrap';
+  const dowRow=document.createElement('div');dowRow.className='mo-dow-row';
+  'Mo Di Mi Do Fr Sa So'.split(' ').forEach(d=>{const el=document.createElement('div');el.className='mo-dow';el.textContent=d;dowRow.appendChild(el);});
+  wrap.appendChild(dowRow);
+  const grid=document.createElement('div');grid.className='mo-grid';
+  const start=(first+6)%7;
+  const prev=new Date(y,m,0).getDate();
+  for(let i=start-1;i>=0;i--){const c=document.createElement('div');c.className='mo-cell other';c.innerHTML=`<div class="mo-dnum">${prev-i}</div>`;grid.appendChild(c);}
+  for(let d=1;d<=daysInM;d++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dr=filteredRides(iso);
+    const ge=filteredGCalEvents(iso);
+    const cell=document.createElement('div');
+    cell.className=`mo-cell${iso===todayStr?' today':''}${iso===selStr?' sel':''}`;
+    const allItems=[
+      ...dr.map(r=>{const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);return{type:r.type||'krank',html:`<div class="mo-chip ${r.type||'krank'}">${r.time} ${c?c.fname:'?'}</div>`};}),
+      ...ge.map(ev=>({type:'gcal',html:`<div class="mo-chip gcal">📅 ${ev.isAllDay?'GT':ev.time} ${ev.title.slice(0,12)}</div>`}))
+    ];
+    let chips=allItems.slice(0,3).map(x=>x.html).join('');
+    if(allItems.length>3) chips+=`<div class="mo-more">+${allItems.length-3}</div>`;
+    cell.innerHTML=`<div class="mo-dnum">${d}</div>${chips}`;
+    cell.onclick=()=>{curDate=new Date(y,m,d);setCalView('day');renderMiniCal();};
+    grid.appendChild(cell);
+  }
+  const rem=(7-(start+daysInM)%7)%7;
+  for(let i=1;i<=rem;i++){const c=document.createElement('div');c.className='mo-cell other';c.innerHTML=`<div class="mo-dnum">${i}</div>`;grid.appendChild(c);}
+  wrap.appendChild(grid);container.appendChild(wrap);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMERS
+// ═══════════════════════════════════════════════════════════════
+function setCustFilter(f){
+  custFilter=f;
+  document.querySelectorAll('#cust-filter-strip .f-tab').forEach(t=>t.classList.toggle('active',t.dataset.cf===f));
+  renderCustomers();
+}
+
+function renderCustomers(){
+  let list=[...customers];
+  if(custFilter!=='all') list=list.filter(c=>c.type===custFilter);
+  const el=document.getElementById('cust-list');
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="ei">👥</div><p>Keine Kunden gefunden</p></div>`;return;}
+  el.innerHTML=list.map(c=>buildCustCard(c,false)).join('');
+}
+
+const TYPE_COLORS={kts:'kts',re:'re',privat:'privat',firma:'firma',stamm:'stamm',gc:'gc'};
+const TYPE_LABELS={kts:'🏥 KTS',re:'🟡 Rechnung',privat:'🟢 Privat',firma:'🏢 Firma',stamm:'⭐ Stammkunde',gc:'🔵 Google'};
+
+function buildCustCard(c,isGC=false){
+  const rcount=rides.filter(r=>r.customerId===c.id).length;
+  const addr=`${c.street||''}, ${c.plz||''} ${c.city||''}`.replace(/^,\s*|,\s*$/g,'').trim();
+  const initials=(c.fname||'?').charAt(0)+(c.lname||'').charAt(0);
+  const typeClass=TYPE_COLORS[c.type]||'kts';
+  const typeLabel=TYPE_LABELS[c.type]||c.type;
+  const tags=[`<span class="cc-tag ${typeClass}">${typeLabel}</span>`];
+  if(c.zuzahlungStatus==='nein') tags.push(`<span class="cc-tag befreit">✓ Befreit</span>`);
+  else if(c.type==='kts') tags.push(`<span class="cc-tag zuzahl">€ Zuzahlung</span>`);
+  const gcBanner=isGC?`<div class="cc-src">🔵 Google Kontakt</div>`:'';
+  const avContent=c.photo?`<img src="${c.photo}" alt=""/>`:(initials||'?');
+  return`<div class="cust-card${isGC?' gc-card':''}" onclick="${isGC?`openGCDetail('${c.id}')`:`openCustDetail('${c.id}')`}">
+    ${rcount>0?`<div class="cc-ride-count">${rcount} 🚗</div>`:''}
+    ${gcBanner}
+    <div class="cc-top">
+      <div class="cc-av ${typeClass}">${avContent}</div>
+      <div style="flex:1;min-width:0">
+        <div class="cc-name">${c.fname} ${c.lname}</div>
+        <div class="cc-addr">📍 ${addr||'Keine Adresse'}</div>
+        ${c.phone?`<div class="cc-addr">📞 ${c.phone}</div>`:''}
+      </div>
+    </div>
+    <div class="cc-tags">${tags.join('')}</div>
+    <div class="cc-btns">
+      ${c.phone?`<button class="cc-btn call" onclick="event.stopPropagation();window.open('tel:${c.phone}')">📞</button>`:''}
+      ${addr?`<button class="cc-btn map" onclick="event.stopPropagation();openMaps('${addr}')">🗺️</button>`:''}
+      <button class="cc-btn wa" onclick="event.stopPropagation();shareCustomerWAById('${c.id}')">📱</button>
+      <button class="cc-btn ride" onclick="event.stopPropagation();openRideForCust('${c.id}')">＋🚗</button>
+    </div>
+  </div>`;
+}
+
+function openCustDetail(id){
+  editCustId=id;
+  const c=customers.find(x=>x.id===id);if(!c) return;
+  document.getElementById('modal-cust-title').textContent='Kunde bearbeiten';
+  document.getElementById('c-fname').value=c.fname||'';
+  document.getElementById('c-lname').value=c.lname||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-birth').value=c.birth||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-org').value=c.org||'';
+  document.getElementById('c-street').value=c.street||'';
+  document.getElementById('c-plz').value=c.plz||'';
+  document.getElementById('c-city').value=c.city||'';
+  document.getElementById(`ct-${c.type||'kts'}`).checked=true;
+  document.getElementById('c-kk').value=c.kk||'';
+  document.getElementById('c-vnr').value=c.vnr||'';
+  document.getElementById(`cz-${c.zuzahlungStatus||'ja'}`).checked=true;
+  document.getElementById('c-hosp').value=c.stammHosp||'';
+  document.getElementById('c-note').value=c.note||'';
+  document.getElementById('c-delete-btn').style.display='inline-flex';
+  onCTChange();
+  openM('modal-customer');
+}
+
+function openGCDetail(id){
+  const c=gcContacts.find(x=>x.id===id);if(!c) return;
+  // Pre-fill customer modal from GC contact to import as customer
+  editCustId=null;
+  document.getElementById('modal-cust-title').textContent='Kontakt als Kunde importieren';
+  document.getElementById('c-fname').value=c.fname||'';
+  document.getElementById('c-lname').value=c.lname||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-street').value=c.street||'';
+  document.getElementById('c-plz').value=c.plz||'';
+  document.getElementById('c-city').value=c.city||'';
+  document.getElementById('c-birth').value='';
+  document.getElementById('c-org').value=c.org||'';
+  document.getElementById('ct-kts').checked=true;
+  document.getElementById('c-kk').value='';document.getElementById('c-vnr').value='';
+  document.getElementById('cz-ja').checked=true;
+  document.getElementById('c-hosp').value='';document.getElementById('c-note').value='';
+  document.getElementById('c-delete-btn').style.display='none';
+  onCTChange();
+  openM('modal-customer');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TODAY
+// ═══════════════════════════════════════════════════════════════
+function renderToday(){
+  const ds=fmtD(new Date());
+  const dr=rides.filter(r=>r.date===ds).sort((a,b)=>a.time.localeCompare(b.time));
+  const el=document.getElementById('today-list');
+  if(!dr.length){el.innerHTML=`<div class="empty"><div class="ei">🚗</div><p>Keine Fahrten heute</p></div>`;return;}
+  el.innerHTML=dr.map(r=>{
+    const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+    const name=c?c.fname+' '+c.lname:'Unbekannt';
+    const from=r.from||'–';
+    const dispatched=r.dispatchedTo?drivers.find(d=>d.id===r.dispatchedTo):null;
+    const badges=[
+      r.serieType?`<span class="badge serie">🔁 ${r.serieType}</span>`:'',
+      r.reminder?`<span class="badge remind">🔔 ${r.reminderMin}min</span>`:'',
+      r.zuzahlung==='nein'?`<span class="badge befreit">✓ Befreit</span>`:'',
+      dispatched?`<span class="dispatched-badge">✅ ${dispatched.fname} ${dispatched.lname}</span>`:''
+    ].filter(Boolean).join('');
+    const typeColor=r.type==='krank'?'var(--red2)':r.type==='privat'?'var(--green2)':'var(--yellow2)';
+    return`<div class="tr-card ${r.type||'krank'}" onclick="showRideDetail('${r.id}')">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+        <div style="font-size:21px;font-weight:700;font-family:var(--font2);color:${typeColor}">${r.time}</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:11px;color:var(--text2)">📍 ${from}</div></div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="cc-btn dispatch btn-sm" onclick="event.stopPropagation();openDriverPicker('${r.id}')" title="Fahrer zuweisen">🚀</button>
+          <button class="cc-btn map btn-sm" onclick="event.stopPropagation();openMapsRoute('${from}','${r.to||''}')">🗺️</button>
+          <button class="cc-btn wa btn-sm" onclick="event.stopPropagation();shareRideWAById('${r.id}')">📱</button>
+          <button class="cc-btn del btn-sm" onclick="event.stopPropagation();deleteRide('${r.id}')" title="Fahrt löschen">🗑️</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">→ <strong>${r.to||'–'}</strong>${r.km?` · ${r.km} km`:''}</div>
+      ${badges?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">${badges}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RIDE DETAIL
+// ═══════════════════════════════════════════════════════════════
+function showRideDetail(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  const name=c?c.fname+' '+c.lname:'Unbekannt';
+  const from=r.from||'–';
+  const fmtDateDE=s=>{const d=new Date(s+'T12:00:00');return`${DE_DAYS[d.getDay()]}, ${d.getDate()}. ${DE_MONTHS[d.getMonth()]} ${d.getFullYear()}`;};
+  document.getElementById('mrd-body').innerHTML=`
+    <div class="rd-head">
+      <div class="rd-badges">
+        <span class="rd-badge ${r.type||'krank'}">${r.type==='krank'?'🔴 Krankenfahrt':r.type==='privat'?'🟢 Privatfahrt':'🟡 Rechnungsfahrt'}</span>
+        ${r.serieType?`<span class="badge serie">🔁 ${r.serieType}</span>`:''}
+        ${r.reminder?`<span class="badge remind">🔔 ${r.reminderMin}min</span>`:''}
+      </div>
+      <div class="rd-time">${r.time} Uhr</div>
+      <div class="rd-date">${fmtDateDE(r.date)}</div>
+    </div>
+    <div class="drow"><div class="drow-icon">👤</div><div><div class="drow-lbl">Kunde</div><div class="drow-val">${name}</div></div></div>
+    <div class="drow"><div class="drow-icon">📍</div><div><div class="drow-lbl">Abholung</div><div class="drow-val">${from}</div></div></div>
+    <div class="drow"><div class="drow-icon">🎯</div><div><div class="drow-lbl">Ziel</div><div class="drow-val">${r.to||'–'}</div></div></div>
+    ${r.km?`<div class="drow"><div class="drow-icon">📏</div><div><div class="drow-lbl">Distanz</div><div class="drow-val">ca. ${r.km} km</div></div></div>`:''}
+    ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${r.zuzahlung==='nein'?'Befreit ✓':'Zuzahlung €'}</div></div></div>`:''}
+    ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
+    ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Synchronisiert</div></div></div>`:''}
+    ${r.source==='google'&&!r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Quelle</div><div class="drow-val">Importiert aus Google</div></div></div>`:''}
+  `;
+  document.getElementById('mrd-footer').innerHTML=`
+    <button class="btn btn-danger btn-sm" onclick="deleteRide('${id}')">🗑️ Löschen</button>
+    <button class="btn btn-secondary btn-sm" onclick="editRide('${id}')">✏️</button>
+    <button class="btn btn-sm" style="background:var(--gold3);color:var(--gold);border:1px solid rgba(245,166,35,.3)" onclick="closeM('modal-ride-detail');openDriverPicker('${id}')">🚀 Fahrer</button>
+    <button class="btn btn-wa btn-sm" onclick="shareRideWAById('${id}')">📱</button>
+    <button class="btn btn-primary btn-sm" onclick="openMapsRoute('${from}','${r.to||''}')">🗺️ Navigation</button>
+  `;
+  openM('modal-ride-detail');
+}
+async function deleteRide(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  const gcalNote=r.googleEventId&&gcalConnected&&gcalSyncEnabled?' Auch in Google Kalender.':'';
+  if(!confirm(`Fahrt wirklich löschen?${gcalNote}`)) return;
+  if(r.googleEventId&&gcalConnected&&gcalSyncEnabled) await deleteGoogleEvent(r);
+  rides=rides.filter(x=>x.id!==id);
+  save();closeM('modal-ride-detail');closeM('modal-ride');renderCalendar();renderToday();updateCounts();renderMiniCal();toast('Fahrt gelöscht','warn');
+}
+function editRide(id){closeM('modal-ride-detail');openRideModal(id);}
+
+// ═══════════════════════════════════════════════════════════════
+// RIDE MODAL
+// ═══════════════════════════════════════════════════════════════
+function openRideModal(id=null){
+  editRideId=id;
+  document.getElementById('modal-ride-title').textContent=id?'Fahrt bearbeiten':'Neue Fahrt';
+  document.getElementById('r-delete-btn').style.display=id?'inline-flex':'none';
+  const now=new Date();
+  const timeNow=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  if(id){
+    const r=rides.find(x=>x.id===id);if(!r) return;
+    document.getElementById(`rt-${r.type||'krank'}`).checked=true;
+    document.getElementById('r-date').value=r.date;
+    document.getElementById('r-time').value=r.time;
+    document.getElementById('r-from').value=r.from||'';
+    document.getElementById('r-to').value=r.to||'';
+    document.getElementById('r-verord').value=r.verordnung||'';
+    document.getElementById('r-zuzahl').value=r.zuzahlung||'ja';
+    document.getElementById('r-note').value=r.note||'';
+    document.getElementById('r-reminder').checked=!!r.reminder;
+    document.getElementById('r-rem-min').value=r.reminderMin||'30';
+    document.getElementById('r-serie').checked=!!r.serie;
+    document.getElementById('r-serie-typ').value=r.serieType||'dialyse';
+    const cust=customers.find(c=>c.id===r.customerId)||gcContacts.find(c=>c.id===r.customerId);
+    document.getElementById('r-cust-search').value=cust?cust.fname+' '+cust.lname:'';
+    document.getElementById('r-cust-id').value=r.customerId||'';
+  } else {
+    document.getElementById('rt-krank').checked=true;
+    document.getElementById('r-date').value=fmtD(curDate);
+    document.getElementById('r-time').value=timeNow;
+    ['r-from','r-to','r-note','r-cust-search'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('r-cust-id').value='';
+    document.getElementById('r-verord').value='';document.getElementById('r-zuzahl').value='ja';
+    document.getElementById('r-reminder').checked=false;document.getElementById('r-serie').checked=false;
+  }
+  onRTChange();onSerieToggle();onRemToggle();
+  document.getElementById('r-dist').innerHTML='';
+  openM('modal-ride');
+}
+
+function openRideForCust(id){
+  openRideModal();
+  const c=customers.find(x=>x.id===id)||gcContacts.find(x=>x.id===id);if(!c) return;
+  document.getElementById('r-cust-search').value=c.fname+' '+c.lname;
+  document.getElementById('r-cust-id').value=id;
+  document.getElementById('r-from').value=[c.street,c.plz,c.city].filter(Boolean).join(', ');
+  if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
+  document.getElementById(`rt-${c.type==='re'?'rechn':c.type==='privat'?'privat':'krank'}`).checked=true;
+  onRTChange();
+}
+
+function onRTChange(){
+  const t=document.querySelector('input[name="rt"]:checked').value;
+  document.getElementById('kts-fields').style.display=t==='krank'?'block':'none';
+}
+function onSerieToggle(){document.getElementById('serie-fields').style.display=document.getElementById('r-serie').checked?'block':'none';}
+function onRemToggle(){document.getElementById('rem-fields').style.display=document.getElementById('r-reminder').checked?'block':'none';}
+
+async function saveRide(){
+  const type=document.querySelector('input[name="rt"]:checked').value;
+  const date=document.getElementById('r-date').value;
+  const time=document.getElementById('r-time').value;
+  if(!date||!time){toast('Datum und Uhrzeit pflicht','warn');return;}
+  const custId=document.getElementById('r-cust-id').value;
+  const cust=customers.find(c=>c.id===custId)||gcContacts.find(c=>c.id===custId);
+  const from=document.getElementById('r-from').value.trim()||(cust?[cust.street,cust.plz,cust.city].filter(Boolean).join(', '):'');
+  const to=document.getElementById('r-to').value.trim();
+  const serie=document.getElementById('r-serie').checked;
+  const reminder=document.getElementById('r-reminder').checked;
+  const base={
+    type,customerId:custId||null,date,time,from,to,
+    verordnung:document.getElementById('r-verord').value,
+    zuzahlung:document.getElementById('r-zuzahl').value,
+    note:document.getElementById('r-note').value.trim(),
+    serie,reminder,reminderMin:document.getElementById('r-rem-min').value,
+    serieType:serie?document.getElementById('r-serie-typ').value:'',
+    km:estKm(from,to),localUpdated:Date.now(),
+  };
+  const savedIds=[];
+  if(editRideId){
+    const i=rides.findIndex(r=>r.id===editRideId);
+    if(i!==-1){rides[i]={...rides[i],...base};savedIds.push(editRideId);}
+    toast('Fahrt aktualisiert');
+  } else if(serie){
+    const arr=genSerie(base);
+    rides.push(...arr);
+    savedIds.push(...arr.map(r=>r.id));
+    toast(`${arr.length} Serienfahrten eingetragen`);
+  } else {
+    const newId=uid();
+    rides.push({...base,id:newId});
+    savedIds.push(newId);
+    toast('Fahrt eingetragen');
+  }
+  save();
+  if(gcalConnected&&gcalSyncEnabled){
+    let synced=0;
+    for(const id of savedIds){
+      const r=rides.find(x=>x.id===id);
+      if(r&&await pushRideToGoogle(r)) synced++;
+    }
+    if(synced) toast(`📅 ${synced} in Google Kalender gespeichert`);
+  }
+  closeM('modal-ride');renderCalendar();renderToday();updateCounts();renderMiniCal();
+}
+
+function genSerie(base){
+  const freq=document.getElementById('r-freq').value;
+  const endDate=document.getElementById('r-serie-end').value;
+  const maxCount=parseInt(document.getElementById('r-serie-count').value)||30;
+  const end=endDate?new Date(endDate+'T12:00:00'):null;
+  const result=[];let cur=new Date(base.date+'T12:00:00'),count=0;
+  while(count<maxCount){
+    if(end&&cur>end) break;
+    const dow=cur.getDay();
+    const inc=
+      freq==='taeglich'?true:
+      freq==='mo-mi-fr'?[1,3,5].includes(dow):
+      freq==='mo-do'?[1,4].includes(dow):
+      freq==='di-do'?[2,4].includes(dow):
+      freq==='woechentlich'?true:
+      freq==='2wochen'?true:false;
+    if(inc){result.push({...base,id:uid(),date:fmtD(cur)});count++;}
+    cur=addDays(cur,freq==='2wochen'&&inc?14:freq==='woechentlich'&&inc?7:1);
+  }
+  return result;
+}
+
+function estKm(from,to){if(!from||!to) return '';return Math.round(4+Math.random()*28);}
+
+function deleteCurrentRide(){deleteRide(editRideId);}
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMER MODAL
+// ═══════════════════════════════════════════════════════════════
+function openCustomerModal(){
+  editCustId=null;
+  document.getElementById('modal-cust-title').textContent='Neuer Kunde';
+  ['c-fname','c-lname','c-phone','c-email','c-org','c-street','c-plz','c-city','c-kk','c-vnr','c-hosp','c-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c-birth').value='';
+  document.getElementById('ct-kts').checked=true;document.getElementById('cz-ja').checked=true;
+  document.getElementById('c-delete-btn').style.display='none';
+  onCTChange();openM('modal-customer');
+}
+
+function onCTChange(){
+  const t=document.querySelector('input[name="ct"]:checked').value;
+  document.getElementById('kts-cust-fields').style.display=t==='kts'?'block':'none';
+}
+
+function saveCustomer(){
+  const fname=document.getElementById('c-fname').value.trim();
+  const lname=document.getElementById('c-lname').value.trim();
+  if(!fname){toast('Vorname fehlt','warn');return;}
+  const data={
+    fname,lname,
+    phone:document.getElementById('c-phone').value.trim(),
+    email:document.getElementById('c-email').value.trim(),
+    org:document.getElementById('c-org').value.trim(),
+    birth:document.getElementById('c-birth').value,
+    street:document.getElementById('c-street').value.trim(),
+    plz:document.getElementById('c-plz').value.trim(),
+    city:document.getElementById('c-city').value.trim(),
+    type:document.querySelector('input[name="ct"]:checked').value,
+    kk:document.getElementById('c-kk').value.trim(),
+    vnr:document.getElementById('c-vnr').value.trim(),
+    zuzahlungStatus:document.querySelector('input[name="cz"]:checked')?.value||'ja',
+    stammHosp:document.getElementById('c-hosp').value.trim(),
+    note:document.getElementById('c-note').value.trim(),
+    source:'app',
+  };
+  if(editCustId){
+    const i=customers.findIndex(c=>c.id===editCustId);
+    if(i!==-1) customers[i]={...customers[i],...data};
+    toast('Kunde aktualisiert');
+  } else {
+    customers.push({...data,id:uid()});
+    toast('Kunde angelegt');
+  }
+  save();closeM('modal-customer');renderCustomers();updateCounts();
+}
+
+function deleteCurrentCustomer(){if(!confirm('Kunde löschen?')) return;customers=customers.filter(c=>c.id!==editCustId);save();closeM('modal-customer');renderCustomers();updateCounts();toast('Kunde gelöscht','warn');}
+
+// ═══════════════════════════════════════════════════════════════
+// GOOGLE CONTACTS
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// GOOGLE CALENDAR – ZWEI-WEGE-SYNC
+// ═══════════════════════════════════════════════════════════════
+let gcalFetching=false,gcalDetailId=null,gcalLastSyncStats={imported:0,updated:0,deleted:0};
+let googleTokenClient=null;
+
+function getAppOrigin(){return location.protocol+'//'+location.host;}
+function isValidAppUrl(){
+  if(location.protocol==='file:') return false;
+  const ok=['localhost:8080','127.0.0.1:8080','localhost:5500','127.0.0.1:5500','sero91ak.github.io'];
+  return ok.includes(location.host);
+}
+function getAppUrlHint(){
+  if(location.host==='sero91ak.github.io') return 'https://sero91ak.github.io/taxipro-dispatch/';
+  return 'http://localhost:8080/taxipro-dispatch.html';
+}
+function getOAuthOriginHint(){
+  if(location.host==='sero91ak.github.io') return 'https://sero91ak.github.io';
+  return 'http://localhost:8080';
+}
+
+function showGCalError(msg){
+  const el=document.getElementById('gcal-error-hint');
+  if(!el) return;
+  el.style.display='block';
+  el.innerHTML=msg;
+}
+
+function hideGCalError(){
+  const el=document.getElementById('gcal-error-hint');
+  if(el){el.style.display='none';el.innerHTML='';}
+}
+
+function googleOAuthErrorMsg(err){
+  const t=(err?.type||err?.message||String(err||'')).toLowerCase();
+  if(t.includes('popup')||t.includes('closed')) return 'Google-Fenster wurde geschlossen. Popup-Blocker deaktivieren und erneut versuchen.';
+  if(t.includes('access_denied')||t.includes('denied')) return 'Zugriff verweigert. In Google Cloud Console unter <strong>OAuth → Testnutzer</strong> deine E-Mail hinzufügen.';
+  if(t.includes('origin')||t.includes('redirect')) return `Ungültige URL. In Google Cloud Console diese Origin eintragen:<br><code style="color:var(--gold)">${getAppOrigin()}</code>`;
+  return `Verbindungsfehler: ${err?.message||err?.type||'Unbekannt'}`;
+}
+
+function initGoogleTokenClient(scope,onSuccess){
+  if(!window.google?.accounts?.oauth2) return false;
+  googleTokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:GOOGLE_CLIENT_ID,scope,
+    callback:async(resp)=>{
+      if(resp.error){
+        showGCalError(googleOAuthErrorMsg({type:resp.error}));
+        toast('Verbindung fehlgeschlagen: '+resp.error,'err');
+        return;
+      }
+      hideGCalError();
+      gcalToken=resp.access_token;gcalConnected=true;
+      localStorage.setItem('tp_gcal_token',gcalToken);
+      await onSuccess(resp);
+    },
+    error_callback:(err)=>{
+      showGCalError(googleOAuthErrorMsg(err));
+      toast('Google OAuth Fehler','err');
+    },
+  });
+  return true;
+}
+
+function resetGoogleAuth(){
+  disconnectGCal();
+  hideGCalError();
+  toast('Google-Verbindung zurückgesetzt – bitte neu verbinden');
+  renderGCalModal();
+}
+
+function initiateGCalSync(){openM('modal-gcal');renderGCalModal();}
+
+function getGoogleSetupHTML(apiName){
+  if(GOOGLE_CLIENT_ID!=='YOUR_GOOGLE_CLIENT_ID') return '';
+  return `<strong>Einrichtung (${apiName}):</strong><br>
+    1. <a href="https://console.cloud.google.com" target="_blank" style="color:var(--blue2)">Google Cloud Console</a> öffnen<br>
+    2. Projekt erstellen → <em>${apiName}</em> aktivieren<br>
+    3. OAuth 2.0 Client ID (Web) erstellen<br>
+    4. Authorized JavaScript origins: <code style="color:var(--gold)">http://localhost:8080</code> und <code style="color:var(--gold)">https://sero91ak.github.io</code><br>
+    5. Client ID in Zeile <code>GOOGLE_CLIENT_ID</code> eintragen<br>
+    6. App über <code>python3 -m http.server 8080</code> starten (nicht als Datei öffnen!)<br><br>`;
+}
+
+function renderGCalModal(){
+  const connected=gcalConnected&&!!gcalToken;
+  const syncedRides=rides.filter(r=>r.googleEventId).length;
+  const urlOk=isValidAppUrl();
+  if(!connected){
+    let hint='';
+    if(location.protocol==='file:') hint=`<div style="color:var(--red2);margin-top:8px">⚠️ Du hast die Datei direkt geöffnet. Stattdessen nutzen:<br><code style="color:var(--gold)">https://sero91ak.github.io/taxipro-dispatch/</code></div>`;
+    else if(!urlOk) hint=`<div style="color:var(--yellow2);margin-top:8px">⚠️ Aktuelle URL: <code>${getAppOrigin()}</code><br>In Google Cloud Console unter OAuth-Client diese URL als <strong>JavaScript-Origin</strong> eintragen.</div>`;
+    document.getElementById('gcal-status-text').innerHTML=`Verbinde deinen Google Kalender (Zwei-Wege-Sync).<br><br>
+      <strong>Checkliste:</strong><br>
+      ✓ Calendar API aktiviert<br>
+      ✓ OAuth-Client mit Origin: <code style="color:var(--gold)">${getOAuthOriginHint()}</code><br>
+      ✓ Deine E-Mail als <strong>Testnutzer</strong> eingetragen<br>
+      ✓ App über localhost öffnen (nicht als Datei)${hint}`;
+    hideGCalError();
+  } else {
+    document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Zwei-Wege-Sync aktiv</strong><br>
+       App → Google: Fahrten werden als Termine gespeichert<br>
+       Google → App: Termine werden als Fahrten importiert<br>
+       <span style="color:var(--text3)">${syncedRides} Fahrten verknüpft · ${gcalEvents.length} Termine geladen</span>`;
+  }
+  document.getElementById('gcal-connect-btn').style.display=connected?'none':'inline-flex';
+  document.getElementById('gcal-refresh-btn').style.display=connected?'inline-flex':'none';
+  document.getElementById('gcal-disconnect-btn').style.display=connected?'inline-flex':'none';
+  document.getElementById('gcal-reset-btn').style.display='inline-flex';
+  document.getElementById('gcal-sync-toggle').style.display=connected?'flex':'none';
+  document.getElementById('gcal-cal-select-wrap').style.display=connected?'block':'none';
+  document.getElementById('gcal-import-toggle').style.display=connected?'flex':'none';
+  document.getElementById('gcal-show-toggle').style.display=connected?'flex':'none';
+  document.getElementById('gcal-sync-stats').style.display=connected?'block':'none';
+  document.getElementById('gcal-sync').checked=gcalSyncEnabled;
+  document.getElementById('gcal-import-all').checked=gcalImportAll;
+  document.getElementById('gcal-show').checked=gcalShow;
+  if(connected){
+    const stats=document.getElementById('gcal-sync-stats');
+    stats.innerHTML=`Letzter Sync: <strong>${gcalLastSyncStats.imported}</strong> neu · <strong>${gcalLastSyncStats.updated}</strong> aktualisiert · <strong>${gcalLastSyncStats.deleted}</strong> gelöscht<br>Kalender: <strong>${gcalCalendars.find(c=>c.id===gcalCalendarId)?.summary||gcalCalendarId}</strong>`;
+    renderGCalCalendarSelect();
+  }
+  renderGCalPreview();
+}
+
+function renderGCalCalendarSelect(){
+  const sel=document.getElementById('gcal-calendar-select');
+  if(!gcalCalendars.length){sel.innerHTML=`<option value="${gcalCalendarId}">${gcalCalendarId}</option>`;return;}
+  sel.innerHTML=gcalCalendars.map(c=>`<option value="${c.id}"${c.id===gcalCalendarId?' selected':''}>${c.summary}${c.primary?' (Haupt)':''}</option>`).join('');
+}
+
+async function gcalApi(path,method='GET',body=null){
+  const res=await fetch(`https://www.googleapis.com/calendar/v3/${path}`,{
+    method,headers:{Authorization:'Bearer '+gcalToken,'Content-Type':'application/json'},
+    body:body?JSON.stringify(body):undefined
+  });
+  if(res.status===401){disconnectGCal(true);toast('Session abgelaufen – bitte neu verbinden','warn');return null;}
+  return res;
+}
+
+function startGCalOAuth(){
+  if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID'){toast('Bitte zuerst GOOGLE_CLIENT_ID eintragen','warn');renderGCalModal();return;}
+  if(location.protocol==='file:'){
+    showGCalError('App nicht als Datei öffnen! Nutze:<br><code>'+getAppUrlHint()+'</code>');
+    toast('Bitte über localhost öffnen','warn');return;
+  }
+  if(!window.google?.accounts?.oauth2){toast('Google API lädt… bitte warten','warn');setTimeout(startGCalOAuth,800);return;}
+  hideGCalError();
+  if(!initGoogleTokenClient(SCOPE_CALENDAR,async()=>{
+    toast('Google Kalender verbunden – Sync startet…');
+    await loadGCalendars();
+    updateGCalBtn();
+    await fullGCalSync();
+    renderGCalModal();
+  })) return;
+  googleTokenClient.requestAccessToken({prompt:gcalToken?'':'consent'});
+}
+
+async function loadGCalendars(){
+  const res=await gcalApi('users/me/calendarList');
+  if(!res||!res.ok) return;
+  const data=await res.json();
+  gcalCalendars=(data.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer');
+  if(!gcalCalendars.find(c=>c.id===gcalCalendarId)&&gcalCalendars.length)
+    gcalCalendarId=gcalCalendars.find(c=>c.primary)?.id||gcalCalendars[0].id;
+  localStorage.setItem('tp_gcal_cal',gcalCalendarId);
+  renderGCalCalendarSelect();
+}
+
+function onGCalCalendarChange(){
+  gcalCalendarId=document.getElementById('gcal-calendar-select').value;
+  localStorage.setItem('tp_gcal_cal',gcalCalendarId);
+  fullGCalSync();
+}
+
+function detectRideType(title,desc=''){
+  const t=(title+' '+desc).toLowerCase();
+  if(/dialyse|chemo|strahlen|kranken|kts|charité|charite|klinik|krankenhaus|verordnung|zuzahlung|patient/.test(t)) return 'krank';
+  if(/privat|privatfahrt/.test(t)) return 'privat';
+  if(/rechnung|firma|flughafen|geschäft|business/.test(t)) return 'rechn';
+  return 'krank';
+}
+
+function shouldImportGCalEvent(raw){
+  if(raw.extendedProperties?.private?.taxiproRideId) return true;
+  if(gcalImportAll) return true;
+  const text=((raw.summary||'')+' '+(raw.description||'')+' '+(raw.location||'')).toLowerCase();
+  return TAXI_KEYWORDS.some(k=>text.includes(k))||text.includes('🚖');
+}
+
+function parseFromDescription(desc){
+  if(!desc) return '';
+  const m=desc.match(/Abholung:\s*(.+)/i);
+  return m?m[1].trim():'';
+}
+
+function matchCustomerFromEvent(ev){
+  let name=ev.title.replace(/^🚖\s*/,'').split('→')[0].trim();
+  if(name.startsWith('──')||name==='(Ohne Titel)') name='';
+  const all=[...customers,...gcContacts];
+  let c=all.find(x=>(x.fname+' '+x.lname).toLowerCase()===name.toLowerCase());
+  if(!c&&name){
+    const parts=name.split(' ');
+    c=all.find(x=>x.fname.toLowerCase()===parts[0]?.toLowerCase()&&x.lname.toLowerCase()===(parts.slice(1).join(' ')||'').toLowerCase());
+  }
+  return{customerId:c?.id||null,customerName:name};
+}
+
+function parseGCalToRide(raw,ev){
+  const type=detectRideType(ev.title,ev.description);
+  const{customerId}=matchCustomerFromEvent(ev);
+  const from=parseFromDescription(ev.description)||'';
+  const to=ev.location||ev.title.replace(/^🚖\s*/,'').split('→').slice(1).join('→').trim()||ev.title;
+  return{
+    type,customerId,date:ev.date,time:ev.isAllDay?'09:00':ev.time,from,to,
+    note:(ev.description||'').replace(/── TaxiPro Fahrt ──[\s\S]*/,'').trim()||'',
+    verordnung:type==='krank'?'taxi':'',zuzahlung:'ja',serie:false,reminder:false,
+    reminderMin:'30',serieType:'',km:estKm(from,to),
+    googleEventId:ev.id,googleUpdated:raw.updated,source:'google',
+  };
+}
+
+function rideToGCalEvent(ride){
+  const c=customers.find(x=>x.id===ride.customerId)||gcContacts.find(x=>x.id===ride.customerId);
+  const name=c?`${c.fname} ${c.lname}`:'Fahrt';
+  const typeLabel=ride.type==='krank'?'🔴 Krankenfahrt':ride.type==='privat'?'🟢 Privat':'🟡 Rechnung';
+  const destShort=(ride.to||'').split(',')[0];
+  const summary=`🚖 ${name}${destShort?' → '+destShort:''}`;
+  const desc=['── TaxiPro Fahrt ──',`Typ: ${typeLabel}`,`Abholung: ${ride.from||'–'}`,`Ziel: ${ride.to||'–'}`,
+    ride.note?`Notiz: ${ride.note}`:'',ride.serieType?`Serie: ${ride.serieType}`:'',
+    ride.km?`Strecke: ca. ${ride.km} km`:''].filter(Boolean).join('\n');
+  const[hh,mm]=(ride.time||'09:00').split(':').map(Number);
+  const endH=Math.min(hh+1,23);
+  return{
+    summary,location:ride.to||ride.from||'',description:desc,
+    start:{dateTime:`${ride.date}T${ride.time}:00`,timeZone:'Europe/Berlin'},
+    end:{dateTime:`${ride.date}T${String(endH).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`,timeZone:'Europe/Berlin'},
+    extendedProperties:{private:{taxiproRideId:ride.id,taxiproVersion:String(ride.localUpdated||Date.now())}},
+    colorId:ride.type==='krank'?'11':ride.type==='privat'?'2':'5',
+  };
+}
+
+async function pushRideToGoogle(ride){
+  if(!gcalConnected||!gcalToken||!gcalSyncEnabled) return false;
+  const body=rideToGCalEvent(ride);
+  const cal=encodeURIComponent(gcalCalendarId);
+  try{
+    if(ride.googleEventId){
+      const res=await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ride.googleEventId)}`,'PUT',body);
+      if(res&&res.ok){const d=await res.json();ride.googleEventId=d.id;ride.googleUpdated=d.updated;save();return true;}
+      if(res&&res.status===404) ride.googleEventId=null;
+    }
+    const res=await gcalApi(`calendars/${cal}/events`,'POST',body);
+    if(res&&res.ok){const d=await res.json();ride.googleEventId=d.id;ride.googleUpdated=d.updated;save();return true;}
+    if(res&&(res.status===403||res.status===401)) toast('Kein Schreibzugriff – bitte neu verbinden','warn');
+  }catch(e){console.error(e);}
+  return false;
+}
+
+async function deleteGoogleEvent(ride){
+  if(!ride?.googleEventId||!gcalConnected) return;
+  const cal=encodeURIComponent(gcalCalendarId);
+  await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ride.googleEventId)}`,'DELETE');
+}
+
+function syncFromGoogle(rawEvents){
+  if(!gcalSyncEnabled) return;
+  let imported=0,updated=0,deleted=0;
+  for(const raw of rawEvents){
+    if(raw.status==='cancelled'){
+      const rideId=raw.extendedProperties?.private?.taxiproRideId;
+      const byGcal=rides.find(r=>r.googleEventId===raw.id);
+      if(rideId||byGcal){
+        rides=rides.filter(r=>r.id!==rideId&&r.googleEventId!==raw.id);
+        deleted++;
+      }
+      continue;
+    }
+    if(!shouldImportGCalEvent(raw)) continue;
+    const ev=normGCalEvent(raw);
+    const linkedId=raw.extendedProperties?.private?.taxiproRideId;
+    let ride=linkedId?rides.find(r=>r.id===linkedId):rides.find(r=>r.googleEventId===ev.id);
+    const rideData=parseGCalToRide(raw,ev);
+    if(ride){
+      const googleTs=raw.updated?new Date(raw.updated).getTime():0;
+      if(ride.localUpdated&&googleTs&&ride.localUpdated>googleTs+2000) continue;
+      Object.assign(ride,rideData,{id:ride.id,googleEventId:ev.id});
+      updated++;
+    } else {
+      rides.push({...rideData,id:uid()});
+      imported++;
+    }
+  }
+  gcalLastSyncStats={imported,updated,deleted};
+  if(imported||updated||deleted){save();updateCounts();}
+}
+
+async function fetchGCalEvents(){
+  if(!gcalConnected||!gcalToken||gcalFetching) return;
+  gcalFetching=true;
+  const{timeMin,timeMax}=getGCalRange();
+  try{
+    const cal=encodeURIComponent(gcalCalendarId);
+    const url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=250`;
+    const res=await gcalApi(url);
+    if(!res||!res.ok) throw new Error('API Fehler');
+    const data=await res.json();
+    const items=data.items||[];
+    if(gcalSyncEnabled) syncFromGoogle(items);
+    gcalEvents=items.map(normGCalEvent);
+    updateGCalBtn();renderCalendar();renderMiniCal();renderToday();
+    if(document.getElementById('modal-gcal')&&!document.getElementById('modal-gcal').classList.contains('hidden')) renderGCalModal();
+  }catch(e){toast('Kalender konnte nicht geladen werden','err');}
+  finally{gcalFetching=false;}
+}
+
+async function fullGCalSync(){
+  if(!gcalConnected) return;
+  await fetchGCalEvents();
+  if(gcalSyncEnabled){
+    let pushed=0;
+    for(const r of rides){
+      if(!r.googleEventId&&await pushRideToGoogle(r)) pushed++;
+    }
+    if(pushed){save();toast(`📅 ${pushed} Fahrten nach Google übertragen`);}
+  }
+  renderGCalModal();
+}
+
+function disconnectGCal(silent=false){
+  gcalToken=null;gcalConnected=false;gcalEvents=[];gcalCalendars=[];googleTokenClient=null;
+  localStorage.removeItem('tp_gcal_token');
+  updateGCalBtn();renderCalendar();renderMiniCal();
+  if(!silent){toast('Google Kalender getrennt','warn');renderGCalModal();}
+}
+
+function toggleGCalSync(){
+  gcalSyncEnabled=document.getElementById('gcal-sync').checked;
+  localStorage.setItem('tp_gcal_sync',gcalSyncEnabled?'true':'false');
+  if(gcalSyncEnabled&&gcalConnected) fullGCalSync();
+  else renderCalendar();
+}
+
+function toggleGCalImportAll(){
+  gcalImportAll=document.getElementById('gcal-import-all').checked;
+  localStorage.setItem('tp_gcal_import_all',gcalImportAll?'true':'false');
+  if(gcalConnected) fetchGCalEvents();
+}
+
+function toggleGCalShow(){
+  gcalShow=document.getElementById('gcal-show').checked;
+  localStorage.setItem('tp_gcal_show',gcalShow?'true':'false');
+  renderCalendar();renderMiniCal();
+}
+
+function updateGCalBtn(){
+  const btn=document.getElementById('gcal-sync-btn');
+  const nav=document.getElementById('nav-gcal');
+  const nb=document.getElementById('nb-gcal');
+  const synced=rides.filter(r=>r.googleEventId).length;
+  if(gcalConnected){
+    btn.classList.add('synced');
+    btn.textContent=gcalSyncEnabled?`✅ Sync (${synced})`:'✅ Kalender';
+    nav.classList.add('connected');
+    nb.textContent=synced||'✓';
+  } else {
+    btn.classList.remove('synced');
+    btn.textContent='📅 Google Kalender';
+    nav.classList.remove('connected');
+    nb.textContent='–';
+  }
+}
+
+function renderGCalPreview(){
+  const el=document.getElementById('gcal-preview-list');
+  const orphans=gcalEvents.filter(e=>!rides.some(r=>r.googleEventId===e.id));
+  if(!gcalConnected||!orphans.length){el.innerHTML=gcalConnected?'<div style="font-size:11px;color:var(--text3);padding:8px 0">Alle Termine sind als Fahrten synchronisiert ✓</div>':'';return;}
+  el.innerHTML=`<div class="fsec" style="margin-bottom:8px">Noch nicht importiert (${orphans.length})</div>`+
+  orphans.slice(0,8).map((ev,i)=>`<div class="gc-contact-item" onclick="showGCalDetailByIndex(${gcalEvents.indexOf(ev)})">
+    <div class="gci-av">📅</div><div class="gci-info"><div class="gci-name">${ev.title}</div>
+    <div class="gci-meta">${ev.date} ${ev.isAllDay?'GT':ev.time}${ev.location?' · '+ev.location:''}</div></div>
+    <div class="gci-action" style="color:var(--blue2)">Import</div></div>`).join('');
+}
+
+function showGCalDetailByIndex(i){const ev=gcalEvents[i];if(ev) showGCalDetail(ev.id);}
+function showGCalDetail(id){
+  gcalDetailId=id;
+  const ev=gcalEvents.find(e=>e.id===id);if(!ev) return;
+  const linked=rides.find(r=>r.googleEventId===id);
+  document.getElementById('gcal-detail-body').innerHTML=`
+    <div style="padding:4px 0;line-height:1.7">
+      <div style="font-size:16px;font-weight:700;color:var(--blue2);margin-bottom:10px">${ev.title}</div>
+      <div>📅 <strong>${ev.date}</strong>${ev.isAllDay?' · Ganztägig':` · ${ev.time} Uhr`}</div>
+      ${ev.location?`<div style="margin-top:6px">📍 ${ev.location}</div>`:''}
+      ${ev.description?`<div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--r2);font-size:12px;color:var(--text2);white-space:pre-wrap">${ev.description.replace(/</g,'&lt;')}</div>`:''}
+      ${linked?`<div style="margin-top:8px;color:var(--green2);font-size:12px">✅ Bereits als Fahrt verknüpft</div>`:''}
+    </div>`;
+  document.getElementById('gcal-detail-footer').innerHTML=`
+    <button class="btn btn-secondary" onclick="closeM('modal-gcal-detail')">Schließen</button>
+    ${ev.htmlLink?`<button class="btn btn-blue" onclick="window.open('${ev.htmlLink.replace(/'/g,"%27")}','_blank')">🔗 In Google öffnen</button>`:''}
+    ${linked?`<button class="btn btn-primary" onclick="closeM('modal-gcal-detail');showRideDetail('${linked.id}')">🚖 Fahrt anzeigen</button>`
+      :`<button class="btn btn-primary" onclick="forceImportGCalEvent()">🚖 Als Fahrt importieren</button>`}`;
+  openM('modal-gcal-detail');
+}
+
+function forceImportGCalEvent(){
+  const ev=gcalEvents.find(e=>e.id===gcalDetailId);
+  if(!ev||rides.some(r=>r.googleEventId===ev.id)) return;
+  const fakeRaw={id:ev.id,summary:ev.title,description:ev.description,location:ev.location,updated:ev.updated,status:'confirmed',
+    start:ev.isAllDay?{date:ev.date}:{dateTime:`${ev.date}T${ev.time}:00+01:00`},
+    end:{dateTime:`${ev.date}T${ev.endTime||ev.time}:00+01:00`}};
+  const rideData=parseGCalToRide(fakeRaw,ev);
+  rides.push({...rideData,id:uid()});
+  save();closeM('modal-gcal-detail');renderCalendar();renderToday();updateCounts();renderMiniCal();toast('Termin importiert');
+}
+
+function importGCalAsRide(){forceImportGCalEvent();}
+
+function initiateGoogleSync(){openM('modal-gc');renderGCModal();}
+
+function renderGCModal(){
+  const hasContacts=gcContacts.length>0;
+  document.getElementById('gc-status-text').innerHTML=hasContacts
+    ?`<strong>✅ ${gcContacts.length} Kontakte</strong> synchronisiert.<br>Wähle Kontakte aus und importiere sie als Kunden.`
+    :`Verbinde Google Kontakte mit <strong>Mit Google verbinden</strong>.<br><span style="color:var(--text3);font-size:11px">In Cloud Console auch <em>People API</em> aktivieren.</span>`;
+  document.getElementById('gc-demo-btn').style.display=hasContacts?'none':'inline-flex';
+  renderGCPreview();
+}
+
+function startGoogleOAuth(){
+  if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID'){
+    toast('Bitte zuerst GOOGLE_CLIENT_ID eintragen','warn');
+    document.getElementById('gc-status-text').innerHTML=getGoogleSetupHTML('People API');
+    return;
+  }
+  if(location.protocol==='file:'){toast('App muss über localhost laufen','warn');return;}
+  if(gcalToken){fetchGoogleContacts();return;}
+  if(!window.google?.accounts?.oauth2){toast('Google API lädt…','warn');setTimeout(startGoogleOAuth,800);return;}
+  if(!initGoogleTokenClient(SCOPE_ALL,async()=>{
+    toast('Google verbunden – Kontakte werden geladen…');
+    await fetchGoogleContacts();
+    renderGCModal();updateCounts();
+  })) return;
+  googleTokenClient.requestAccessToken({prompt:'consent'});
+}
+
+async function fetchGoogleContacts(){
+  if(!gcalToken){toast('Bitte zuerst mit Google verbinden','warn');return;}
+  try{
+    const url='https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers,emailAddresses,addresses,organizations,photos&pageSize=1000&sortOrder=LAST_MODIFIED_DESCENDING';
+    const res=await fetch(url,{headers:{Authorization:'Bearer '+gcalToken}});
+    if(res.status===401){toast('Session abgelaufen – neu verbinden','warn');return;}
+    if(res.status===403){toast('People API aktivieren in Google Cloud Console','warn');return;}
+    if(!res.ok) throw new Error('API Fehler');
+    const data=await res.json();
+    const parsed=(data.connections||[]).map(parseGooglePerson).filter(Boolean);
+    const existingPhones=new Set([...customers,...gcContacts].map(c=>c.phone).filter(Boolean));
+    const toAdd=parsed.filter(c=>!existingPhones.has(c.phone));
+    gcContacts.push(...toAdd);
+    save();updateCounts();
+    toast(`${toAdd.length} neue Kontakte geladen (${gcContacts.length} gesamt)`);
+    document.getElementById('gc-demo-btn').style.display='none';
+    document.getElementById('gc-import-btn').style.display='inline-flex';
+    renderGCPreview();
+    if(view==='gcontacts') renderGCView();
+    const gcBtn=document.getElementById('gc-sync-btn');
+    if(gcContacts.length){gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length} Kontakte`;}
+  }catch(e){toast('Kontakte konnten nicht geladen werden','err');}
+}
+
+function parseGooglePerson(p){
+  const name=p.names?.[0];if(!name) return null;
+  const phone=p.phoneNumbers?.[0]?.value||'';
+  const addr=p.addresses?.[0];
+  return{
+    id:'gc-'+uid(),fname:name.givenName||name.displayName?.split(' ')[0]||'',
+    lname:name.familyName||'',phone,email:p.emailAddresses?.[0]?.value||'',
+    street:addr?.streetAddress||'',plz:addr?.postalCode||'',city:addr?.city||'',
+    org:p.organizations?.[0]?.name||'',photo:p.photos?.[0]?.url||'',
+    source:'google',type:p.organizations?.[0]?.name?'firma':'privat'
+  };
+}
+
+function loadDemoGoogleContacts(){
+  const demo=[
+    {id:'gc-'+uid(),fname:'Ahmed',lname:'Al-Rashidi',phone:'+49 151 9988776',email:'ahmed.r@gmail.com',street:'Kurfürstendamm 45',plz:'10709',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
+    {id:'gc-'+uid(),fname:'Ingrid',lname:'Hoffmann',phone:'+49 172 4433221',email:'i.hoffmann@web.de',street:'Schloßstraße 12',plz:'12163',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
+    {id:'gc-'+uid(),fname:'Karim',lname:'Benali',phone:'+49 160 7766554',email:'k.benali@gmail.com',street:'Hermannstraße 88',plz:'12049',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
+    {id:'gc-'+uid(),fname:'Rosa',lname:'Müller',phone:'+49 176 3322110',email:'rosamueller@t-online.de',street:'Alexanderplatz 5',plz:'10178',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
+    {id:'gc-'+uid(),fname:'Mehmet',lname:'Yilmaz',phone:'+49 163 8877665',email:'m.yilmaz@yahoo.de',street:'Kantstraße 33',plz:'10627',city:'Berlin',org:'Yilmaz GmbH',photo:'',source:'google',type:'firma'},
+    {id:'gc-'+uid(),fname:'Christa',lname:'Weber',phone:'+49 174 1122334',email:'christa.weber@gmx.de',street:'Potsdamer Str. 7',plz:'10785',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
+    {id:'gc-'+uid(),fname:'Fatima',lname:'Özdemir',phone:'+49 152 5544332',email:'fatima.o@gmail.com',street:'Wilmersdorfer Str. 22',plz:'10627',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
+    {id:'gc-'+uid(),fname:'Klaus',lname:'Bauer',phone:'+49 171 0099887',email:'k.bauer@berliner.de',street:'Friedrichstraße 101',plz:'10117',city:'Berlin',org:'Bauer Logistik',photo:'',source:'google',type:'firma'},
+  ];
+  // Merge – avoid duplicates by phone
+  const existingPhones=new Set([...customers,...gcContacts].map(c=>c.phone).filter(Boolean));
+  const toAdd=demo.filter(c=>!existingPhones.has(c.phone));
+  gcContacts.push(...toAdd);
+  save();
+  toast(`${toAdd.length} Google-Kontakte geladen`);
+  document.getElementById('gc-demo-btn').style.display='none';
+  document.getElementById('gc-status-text').textContent=`${gcContacts.length} Kontakte synchronisiert. Klicke auf einen Kontakt um ihn als Kunden zu importieren.`;
+  document.getElementById('gc-import-btn').style.display='inline-flex';
+  renderGCPreview();
+  updateCounts();
+  if(view==='gcontacts') renderGCView();
+}
+
+function renderGCPreview(){
+  const el=document.getElementById('gc-preview-list');
+  if(!gcContacts.length){el.innerHTML='';return;}
+  gcSelected.clear();
+  el.innerHTML=`<div class="fsec" style="margin-bottom:8px">Synchronisierte Kontakte (${gcContacts.length})</div>`+
+  gcContacts.slice(0,20).map(c=>{
+    const initials=(c.fname||'?').charAt(0)+(c.lname||'').charAt(0);
+    const isAlreadyCust=customers.some(cu=>cu.phone===c.phone||(cu.fname===c.fname&&cu.lname===c.lname));
+    return`<div class="gc-contact-item" onclick="toggleGCSelect('${c.id}',this)">
+      <div class="gci-av">${c.photo?`<img src="${c.photo}"/>`:(initials||'?')}</div>
+      <div class="gci-info">
+        <div class="gci-name">${c.fname} ${c.lname}</div>
+        <div class="gci-meta">${c.phone||''} · ${c.city||''}</div>
+      </div>
+      <div class="gci-action">${isAlreadyCust?'✅ Vorhanden':'+ Import'}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleGCSelect(id,el){
+  if(gcSelected.has(id)){gcSelected.delete(id);el.style.background='';}
+  else{gcSelected.add(id);el.style.background='rgba(74,158,255,.15)';}
+  document.getElementById('gc-import-btn').style.display=gcSelected.size>0?'inline-flex':'none';
+}
+
+function importSelectedGCContacts(){
+  let imported=0;
+  gcSelected.forEach(id=>{
+    const gc=gcContacts.find(c=>c.id===id);
+    if(!gc) return;
+    const exists=customers.some(c=>c.phone===gc.phone||(c.fname===gc.fname&&c.lname===gc.lname));
+    if(!exists){customers.push({...gc,id:uid(),type:gc.type||'privat',source:'imported-gc'});imported++;}
+  });
+  save();updateCounts();
+  toast(`${imported} Kontakte als Kunden importiert`);
+  gcSelected.clear();
+  document.getElementById('gc-import-btn').style.display='none';
+  renderGCPreview();
+  if(view==='customers') renderCustomers();
+}
+
+function renderGCView(){
+  const el=document.getElementById('gc-list');
+  if(!gcContacts.length){
+    el.innerHTML=`<div class="empty"><div class="ei">🔵</div><p>Keine Google-Kontakte synchronisiert.<br>Klicke auf "Synchronisieren" um zu starten.</p></div>`;
+    return;
+  }
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;align-content:start">
+    ${gcContacts.map(c=>buildCustCard(c,true)).join('')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GLOBAL SEARCH — App Kunden + Google Kontakte
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('global-search').addEventListener('input',function(){
+  const val=this.value.trim();
+  const clr=document.getElementById('search-clear');
+  clr.classList.toggle('show',val.length>0);
+  const res=document.getElementById('search-results');
+  if(!val||val.length<1){res.classList.remove('show');return;}
+  const q=val.toLowerCase();
+  const appHits=customers.filter(c=>(c.fname+' '+c.lname).toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.city||'').toLowerCase().includes(q)||(c.org||'').toLowerCase().includes(q)).slice(0,5);
+  const gcHits=gcContacts.filter(c=>(c.fname+' '+c.lname).toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.city||'').toLowerCase().includes(q)).slice(0,5);
+  const rideHits=rides.filter(r=>{
+    if(!r.to) return false;
+    return r.to.toLowerCase().includes(q)||r.date.includes(q);
+  }).slice(0,3);
+  if(!appHits.length&&!gcHits.length&&!rideHits.length){res.classList.remove('show');return;}
+  let html='';
+  if(appHits.length){
+    html+=`<div class="sr-section">Kunden</div>`;
+    html+=appHits.map(c=>{
+      const addr=[c.street,c.plz,c.city].filter(Boolean).join(', ');
+      return`<div class="sr-item" onclick="selectSR('cust','${c.id}')">
+        <div class="sr-avatar cc-av ${c.type}">${(c.fname||'?').charAt(0)}${(c.lname||'').charAt(0)}</div>
+        <div class="sr-info"><div class="sr-name">${c.fname} ${c.lname}</div><div class="sr-meta">${addr||c.phone||'–'}</div></div>
+        <span class="sr-source app">APP</span>
+      </div>`;
+    }).join('');
+  }
+  if(gcHits.length){
+    html+=`<div class="sr-section">Google Kontakte</div>`;
+    html+=gcHits.map(c=>`<div class="sr-item" onclick="selectSR('gc','${c.id}')">
+      <div class="sr-avatar cc-av gc">${(c.fname||'?').charAt(0)}${(c.lname||'').charAt(0)}</div>
+      <div class="sr-info"><div class="sr-name">${c.fname} ${c.lname}</div><div class="sr-meta">${c.phone||''} · ${c.city||''}</div></div>
+      <span class="sr-source gc">GOOGLE</span>
+    </div>`).join('');
+  }
+  if(rideHits.length){
+    html+=`<div class="sr-section">Fahrten</div>`;
+    html+=rideHits.map(r=>{const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);return`<div class="sr-item" onclick="showRideDetail('${r.id}')">
+      <div class="sr-avatar" style="background:var(--red-bg);color:var(--red2)">🚗</div>
+      <div class="sr-info"><div class="sr-name">${c?c.fname+' '+c.lname:'?'} – ${r.date}</div><div class="sr-meta">→ ${r.to||'–'}</div></div>
+      <span class="sr-source app">FAHRT</span>
+    </div>`;}).join('');
+  }
+  res.innerHTML=html;res.classList.add('show');
+});
+
+function clearSearch(){document.getElementById('global-search').value='';document.getElementById('search-results').classList.remove('show');document.getElementById('search-clear').classList.remove('show');}
+
+function selectSR(type,id){
+  clearSearch();
+  if(type==='cust'){switchView('customers');setTimeout(()=>openCustDetail(id),80);}
+  else if(type==='gc'){switchView('gcontacts');setTimeout(()=>openGCDetail(id),80);}
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#search-wrap')) document.getElementById('search-results').classList.remove('show');
+  ['hosp-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('input')) el.classList.remove('show');});
+});
+
+// ═══════════════════════════════════════════════════════════════
+// AUTOCOMPLETES
+// ═══════════════════════════════════════════════════════════════
+function onHospSearch(val){
+  const ac=document.getElementById('hosp-ac');
+  if(!val||val.length<2){ac.classList.remove('show');return;}
+  const hits=HOSPITALS.filter(h=>h.n.toLowerCase().includes(val.toLowerCase())||h.a.toLowerCase().includes(val.toLowerCase())).slice(0,8);
+  if(!hits.length){ac.classList.remove('show');return;}
+  ac.innerHTML=hits.map(h=>`<div class="ac-item" onclick="selHosp('${h.n}','${h.a}')"><div class="ac-main">🏥 ${h.n}</div><div class="ac-sub">${h.a}</div></div>`).join('');
+  ac.classList.add('show');
+}
+function selHosp(n,a){document.getElementById('r-to').value=`${n}, ${a}`;document.getElementById('hosp-ac').classList.remove('show');calcDist();}
+
+function onCHospSearch(val){
+  const ac=document.getElementById('c-hosp-ac');
+  if(!val||val.length<2){ac.classList.remove('show');return;}
+  const hits=HOSPITALS.filter(h=>h.n.toLowerCase().includes(val.toLowerCase())).slice(0,6);
+  if(!hits.length){ac.classList.remove('show');return;}
+  ac.innerHTML=hits.map(h=>`<div class="ac-item" onclick="selCHosp('${h.n}')"><div class="ac-main">🏥 ${h.n}</div><div class="ac-sub">${h.a}</div></div>`).join('');
+  ac.classList.add('show');
+}
+function selCHosp(n){document.getElementById('c-hosp').value=n;document.getElementById('c-hosp-ac').classList.remove('show');}
+
+function onRCustSearch(val){
+  const ac=document.getElementById('r-cust-ac');
+  if(!val||val.length<1){ac.classList.remove('show');return;}
+  const q=val.toLowerCase();
+  const all=[...customers,...gcContacts];
+  const hits=all.filter(c=>(c.fname+' '+c.lname).toLowerCase().includes(q)||(c.phone||'').includes(q)).slice(0,8);
+  if(!hits.length){ac.classList.remove('show');return;}
+  ac.innerHTML=hits.map(c=>`<div class="ac-item" onclick="selRCust('${c.id}')">
+    <div class="ac-main">${c.fname} ${c.lname} ${c.source==='google'?'🔵':''}</div>
+    <div class="ac-sub">${c.phone||''} · ${c.city||''}</div>
+  </div>`).join('');
+  ac.classList.add('show');
+}
+function selRCust(id){
+  const c=customers.find(x=>x.id===id)||gcContacts.find(x=>x.id===id);if(!c) return;
+  document.getElementById('r-cust-search').value=c.fname+' '+c.lname;
+  document.getElementById('r-cust-id').value=id;
+  document.getElementById('r-cust-ac').classList.remove('show');
+  document.getElementById('r-from').value=[c.street,c.plz,c.city].filter(Boolean).join(', ');
+  if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
+  const rt=c.type==='re'?'rechn':c.type==='privat'?'privat':'krank';
+  const el=document.getElementById(`rt-${rt}`);if(el) el.checked=true;
+  onRTChange();calcDist();
+}
+
+function calcDist(){
+  const from=document.getElementById('r-from').value;
+  const to=document.getElementById('r-to').value;
+  if(from&&to) document.getElementById('r-dist').innerHTML=`<span class="dist-badge">📏 Ca. ${estKm(from,to)} km (Schätzung)</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAPS + WHATSAPP
+// ═══════════════════════════════════════════════════════════════
+function openMaps(addr){window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`,'_blank');}
+function openMapsRoute(from,to){
+  if(!to) return;
+  window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`,'_blank');
+}
+
+function shareRideWA(){
+  const custId=document.getElementById('r-cust-id').value;
+  const c=customers.find(x=>x.id===custId)||gcContacts.find(x=>x.id===custId);
+  const name=c?c.fname+' '+c.lname:'Kunde';
+  const date=document.getElementById('r-date').value;
+  const time=document.getElementById('r-time').value;
+  const from=document.getElementById('r-from').value;
+  const to=document.getElementById('r-to').value;
+  const txt=`🚖 *TaxiPro Fahrtauftrag*\n\n👤 *Kunde:* ${name}\n📅 *Datum:* ${date}\n⏰ *Abfahrt:* ${time} Uhr\n📍 *Von:* ${from||'–'}\n🎯 *Nach:* ${to||'–'}\n\n🗺️ Navigation:\nhttps://www.google.com/maps/dir/${encodeURIComponent(from||'')}/${encodeURIComponent(to||'')}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+function shareRideWAById(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  const name=c?c.fname+' '+c.lname:'Unbekannt';
+  const txt=`🚖 *TaxiPro Fahrtauftrag*\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${r.zuzahlung==='nein'?'Befreit':'Ja'}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(r.from||'')}/${encodeURIComponent(r.to||'')}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+function shareCustomerWA(){
+  const fname=document.getElementById('c-fname').value;
+  const lname=document.getElementById('c-lname').value;
+  const phone=document.getElementById('c-phone').value;
+  const addr=[document.getElementById('c-street').value,document.getElementById('c-plz').value,document.getElementById('c-city').value].filter(Boolean).join(', ');
+  const txt=`👤 *Kundendaten TaxiPro*\n*${fname} ${lname}*\n📞 ${phone||'–'}\n📍 ${addr||'–'}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+function shareCustomerWAById(id){
+  const c=customers.find(x=>x.id===id)||gcContacts.find(x=>x.id===id);if(!c) return;
+  const addr=[c.street,c.plz,c.city].filter(Boolean).join(', ');
+  const txt=`👤 *Kundendaten TaxiPro*\n*${c.fname} ${c.lname}*\n📞 ${c.phone||'–'}\n📍 ${addr||'–'}\n🏥 ${c.stammHosp||'–'}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRIVERS
+// ═══════════════════════════════════════════════════════════════
+function renderDrivers(){
+  const el=document.getElementById('drivers-list');
+  if(!drivers.length){
+    el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">👨‍✈️</div><p>Noch keine Fahrer angelegt.<br>Füge deine Fahrer hinzu um Fahrten direkt zuzuweisen.</p></div>`;
+    return;
+  }
+  el.innerHTML=drivers.map(d=>{
+    const statusColors={frei:'var(--green2)',besetzt:'var(--red2)',pause:'var(--yellow2)'};
+    const statusLabels={frei:'🟢 Verfügbar',besetzt:'🔴 Besetzt',pause:'⏸️ Pause'};
+    const todayDispatched=rides.filter(r=>r.date===fmtD(new Date())&&r.dispatchedTo===d.id).length;
+    return`<div class="driver-card">
+      <div class="driver-top">
+        <div class="driver-av-lg">${(d.fname||'?').charAt(0)}${(d.lname||'').charAt(0)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="driver-name">${d.fname} ${d.lname}</div>
+          <div class="driver-phone">📞 ${d.phone}</div>
+          ${d.car?`<div class="driver-phone">🚗 ${d.car}</div>`:''}
+        </div>
+        <div><span class="dp-status ${d.status||'frei'}">${statusLabels[d.status||'frei']}</span></div>
+      </div>
+      ${todayDispatched>0?`<div style="font-size:11px;color:var(--green2);margin-bottom:8px">✅ ${todayDispatched} Fahrt${todayDispatched>1?'en':''} heute zugewiesen</div>`:''}
+      <div class="driver-btns">
+        <button class="cc-btn call" style="flex:1" onclick="window.open('tel:${d.phone}')">📞 Anrufen</button>
+        <button class="cc-btn wa" style="flex:1" onclick="window.open('https://wa.me/${d.phone.replace(/\D/g,'')}')">📱 WhatsApp</button>
+        <button class="cc-btn ride" style="flex:1" onclick="openDriverModal('${d.id}')">✏️ Bearbeiten</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDriverModal(id=null){
+  editDriverId=id;
+  document.getElementById('modal-driver-title').textContent=id?'Fahrer bearbeiten':'Neuer Fahrer';
+  document.getElementById('d-delete-btn').style.display=id?'inline-flex':'none';
+  if(id){
+    const d=drivers.find(x=>x.id===id);if(!d) return;
+    document.getElementById('d-fname').value=d.fname||'';
+    document.getElementById('d-lname').value=d.lname||'';
+    document.getElementById('d-phone').value=d.phone||'';
+    document.getElementById('d-car').value=d.car||'';
+    document.getElementById('d-note').value=d.note||'';
+    document.getElementById(`ds-${d.status||'frei'}`).checked=true;
+  } else {
+    ['d-fname','d-lname','d-phone','d-car','d-note'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('ds-frei').checked=true;
+  }
+  openM('modal-driver');
+}
+
+function saveDriver(){
+  const fname=document.getElementById('d-fname').value.trim();
+  const phone=document.getElementById('d-phone').value.trim();
+  if(!fname||!phone){toast('Name und Telefon pflicht','warn');return;}
+  const data={
+    fname,lname:document.getElementById('d-lname').value.trim(),
+    phone,car:document.getElementById('d-car').value.trim(),
+    status:document.querySelector('input[name="ds"]:checked').value,
+    note:document.getElementById('d-note').value.trim(),
+  };
+  if(editDriverId){
+    const i=drivers.findIndex(d=>d.id===editDriverId);
+    if(i!==-1) drivers[i]={...drivers[i],...data};
+    toast('Fahrer aktualisiert');
+  } else {
+    drivers.push({...data,id:uid()});
+    toast(`Fahrer ${fname} angelegt`);
+  }
+  save();closeM('modal-driver');renderDrivers();updateCounts();
+}
+
+function deleteDriver(){
+  if(!confirm('Fahrer löschen?')) return;
+  drivers=drivers.filter(d=>d.id!==editDriverId);
+  save();closeM('modal-driver');renderDrivers();updateCounts();toast('Fahrer gelöscht','warn');
+}
+
+// DRIVER PICKER SHEET
+function openDriverPicker(rideId){
+  dispatchRideId=rideId;
+  const r=rides.find(x=>x.id===rideId);
+  if(!r) return;
+  const cust=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  const name=cust?cust.fname+' '+cust.lname:'Unbekannt';
+  // Ride info
+  document.getElementById('dp-ride-info').innerHTML=
+    `<strong>${r.time} Uhr · ${r.date}</strong><br>👤 ${name}<br>📍 ${r.from||'–'}<br>🎯 ${r.to||'–'}${r.km?`<br>📏 ca. ${r.km} km`:''}`;
+  // Drivers list
+  const el=document.getElementById('dp-drivers-list');
+  if(!drivers.length){
+    el.innerHTML=`<div class="dp-empty">Noch keine Fahrer angelegt.<br>Lege zuerst Fahrer an.</div>`;
+  } else {
+    const statusLabels={frei:'Verfügbar',besetzt:'Besetzt',pause:'Pause'};
+    el.innerHTML=drivers.map(d=>`
+      <div class="dp-driver-card" onclick="dispatchToDriver('${d.id}')">
+        <div class="dp-av">${(d.fname||'?').charAt(0)}${(d.lname||'').charAt(0)}</div>
+        <div class="dp-info">
+          <div class="dp-name">${d.fname} ${d.lname}</div>
+          <div class="dp-phone">${d.phone}${d.car?` · ${d.car}`:''}</div>
+        </div>
+        <span class="dp-status ${d.status||'frei'}">${statusLabels[d.status||'frei']}</span>
+        <div class="dp-send-icon">📲</div>
+      </div>`).join('');
+  }
+  document.getElementById('driver-picker').classList.remove('hidden');
+}
+
+function closeDriverPicker(e){
+  if(!e||e.target===document.getElementById('driver-picker')||e===undefined){
+    document.getElementById('driver-picker').classList.add('hidden');
+    dispatchRideId=null;
+  }
+}
+
+function dispatchToDriver(driverId){
+  if(!dispatchRideId) return;
+  const r=rides.find(x=>x.id===dispatchRideId);
+  const d=drivers.find(x=>x.id===driverId);
+  if(!r||!d) return;
+  // Mark ride as dispatched
+  r.dispatchedTo=driverId;
+  save();
+  // Build WhatsApp message
+  const cust=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  const custName=cust?cust.fname+' '+cust.lname:'Kunde';
+  const from=r.from||'';
+  const to=r.to||'';
+  const mapsLink=from?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(from||to)}`;
+  const navLink=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(from)}&travelmode=driving`;
+  const msg=
+`🚖 *FAHRTAUFTRAG – TaxiPro*
+━━━━━━━━━━━━━━━━━━
+📅 *Datum:* ${r.date}
+⏰ *Abfahrt:* ${r.time} Uhr
+👤 *Kunde:* ${custName}
+${cust&&cust.phone?`📞 *Kundentel.:* ${cust.phone}`:''}
+━━━━━━━━━━━━━━━━━━
+📍 *Abholung:*
+${from||'–'}
+
+🎯 *Ziel:*
+${to||'–'}
+${r.km?`📏 *Strecke:* ca. ${r.km} km`:''}
+${r.type==='krank'&&r.zuzahlung?`💊 *Zuzahlung:* ${r.zuzahlung==='nein'?'Befreit ✓':'Ja €'}`:''}
+${r.note?`📝 *Hinweis:* ${r.note}`:''}
+━━━━━━━━━━━━━━━━━━
+🗺️ *Zum Kunden fahren:*
+${navLink}
+
+🗺️ *Komplette Route:*
+${mapsLink}`;
+
+  // Open WhatsApp to driver
+  const driverPhone=d.phone.replace(/\D/g,'');
+  const waUrl=`https://wa.me/${driverPhone}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl,'_blank');
+  closeDriverPicker();
+  toast(`✅ Fahrt an ${d.fname} gesendet`);
+  // Re-render
+  renderToday();
+  if(view==='calendar') renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODALS + TOAST + COUNTS
+// ═══════════════════════════════════════════════════════════════
+function openM(id){document.getElementById(id).classList.remove('hidden');}
+function closeM(id){document.getElementById(id).classList.add('hidden');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));});
+
+function toast(msg,type='ok'){
+  const w=document.getElementById('toast-wrap');
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=`<span class="ti">${type==='ok'?'✅':type==='warn'?'⚠️':'❌'}</span><span class="tt">${msg}</span>`;
+  w.appendChild(el);setTimeout(()=>el.remove(),3500);
+}
+
+function updateCounts(){
+  document.getElementById('nb-cust').textContent=customers.length;
+  document.getElementById('nb-today').textContent=rides.filter(r=>r.date===fmtD(new Date())).length;
+  document.getElementById('nb-gc').textContent=gcContacts.length;
+  document.getElementById('nb-drivers').textContent=drivers.length;
+  const gcBtn=document.getElementById('gc-sync-btn');
+  if(gcContacts.length>0){gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length} Kontakte`;}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════
+function initTheme(){
+  const t=localStorage.getItem('tp_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  const btn=document.getElementById('theme-btn');
+  if(btn) btn.textContent=t==='light'?'🌙':'☀️';
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'dark';
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('tp_theme',next);
+  document.getElementById('theme-btn').textContent=next==='light'?'🌙':'☀️';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DEMO DATA ENTFERNEN
+// ═══════════════════════════════════════════════════════════════
+function purgeDemoData(){
+  const demoPhones=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665'];
+  const demoDriverPhones=['+49 171 1112233','+49 172 4445566','+49 173 7778899'];
+  const demoNotes=['Kardiologie','Dialyse','Chemo Zyklus 3','Folge-Untersuchung'];
+  const demoCustIds=customers.filter(c=>demoPhones.includes(c.phone)).map(c=>c.id);
+  const n=customers.length+rides.length+drivers.length;
+  customers=customers.filter(c=>!demoPhones.includes(c.phone));
+  rides=rides.filter(r=>!demoCustIds.includes(r.customerId)&&!demoNotes.includes(r.note));
+  drivers=drivers.filter(d=>!demoDriverPhones.includes(d.phone));
+  if(customers.length+rides.length+drivers.length<n) save();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+purgeDemoData();
+initTheme();
+updateCounts();
+updateGCalBtn();
+renderMiniCal();
+renderCalendar();
+renderCustomers();
+if(gcalConnected){loadGCalendars().then(()=>fullGCalSync());}
+setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
+</script>
+</body>
+</html>
