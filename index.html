@@ -402,6 +402,9 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .ac-item:last-child{border-bottom:none}
 .ac-main{font-size:12px;font-weight:600}
 .ac-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.ac-tag{display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
+.ac-tag.hosp{background:var(--red-bg);color:var(--red2);border-color:var(--red-border)}
+.ac-loading{padding:10px 13px;font-size:11px;color:var(--text3)}
 /* ride detail */
 .rd-head{background:var(--bg3);border-radius:var(--r);padding:13px;margin-bottom:12px}
 .rd-badges{display:flex;gap:6px;margin-bottom:7px;flex-wrap:wrap}
@@ -700,11 +703,16 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <div><label>Datum</label><input type="date" id="r-date"/></div>
       <div><label>Abfahrt</label><input type="time" id="r-time"/></div>
     </div>
-    <div class="fr"><label>Abholadresse</label><input type="text" id="r-from" placeholder="Wird automatisch geladen…"/></div>
+    <div class="fr"><label>Abholadresse</label>
+      <div class="ac-wrap">
+        <input type="text" id="r-from" placeholder="Adresse suchen (Deutschland)…" oninput="onAddrSearch(this.value,'from-ac','r-from',true)" autocomplete="off"/>
+        <div class="ac-list" id="from-ac"></div>
+      </div>
+    </div>
     <div class="fr">
       <label>Zieladresse / Krankenhaus</label>
       <div class="ac-wrap">
-        <input type="text" id="r-to" placeholder="Ziel oder Krankenhaus suchen…" oninput="onHospSearch(this.value)" autocomplete="off"/>
+        <input type="text" id="r-to" placeholder="Krankenhaus, Schule oder Adresse…" oninput="onAddrSearch(this.value,'hosp-ac','r-to',true)" autocomplete="off"/>
         <div class="ac-list" id="hosp-ac"></div>
       </div>
       <div id="r-dist"></div>
@@ -1004,6 +1012,15 @@ h1,h2,h3,h4{font-family:var(--font2)}
       🔒 <strong>Testmodus aktiv:</strong> Google Kalender wird nur gelesen. Termine fließen automatisch in die App. Google wird <strong>nicht</strong> verändert.
     </div>
     <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
+    <div class="gc-panel" style="margin-top:12px">
+      <h4>🗺️ Google Maps Adresssuche</h4>
+      <div class="gc-status">Adress-Vorschläge bei Abholung &amp; Ziel (deutschlandweit, inkl. Krankenhäuser).</div>
+      <div class="fr" style="margin-top:8px;margin-bottom:0">
+        <label>Maps API-Schlüssel</label>
+        <input type="password" id="maps-api-key" placeholder="AIza… (Cloud Console)" onchange="saveMapsApiKey(this.value)"/>
+      </div>
+      <div id="maps-key-status" style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5"></div>
+    </div>
     <div id="gcal-preview-list"></div>
   </div>
   <div class="mfooter">
@@ -1109,12 +1126,33 @@ const HOSPITALS=[
   {n:"Klinikum Darmstadt",a:"Grafenstraße 9, 64283 Darmstadt"},
   {n:"Universitätsmedizin Mainz",a:"Langenbeckstraße 1, 55131 Mainz"},
   {n:"Klinikum Mannheim",a:"Theodor-Kutzer-Ufer 1-3, 68167 Mannheim"},
+  {n:"Universitätsklinikum Bonn (UKB)",a:"Venusberg-Campus 1, 53127 Bonn"},
+  {n:"St. Marien Hospital Bonn",a:"Uracher Str. 19, 53127 Bonn"},
+  {n:"Malteser Krankenhaus Bonn",a:"Kardinal-Frings-Str. 1, 53117 Bonn"},
+  {n:"Augusta Kliniken Bonn",a:"Am Alten Posthof 15, 53113 Bonn"},
+  {n:"Johanniter-Krankenhaus Bonn",a:"Waldkrankenhaus 1, 53127 Bonn"},
+  {n:"Klinikum Meckenheim",a:"Kaiser-Friedrich-Str. 487, 53340 Meckenheim"},
+  {n:"Sankt Josef Hospital Troisdorf",a:"Bonner Str. 84, 53840 Troisdorf"},
+  {n:"GFO Kliniken Bonn – St. Josef",a:"Rochusstraße 2, 53123 Bonn"},
+  {n:"Klinikum Siegen",a:"Weidenauer Str. 76, 57076 Siegen"},
+  {n:"Klinikum Aachen",a:"Pauwelsstraße 30, 52074 Aachen"},
+  {n:"Klinikum Worms",a:"Gutenbergstraße 3-5, 67550 Worms"},
+  {n:"Klinikum Koblenz",a:"Kastorstraße 1, 56073 Koblenz"},
+  {n:"Klinikum Trier",a:"Weberstraße 10, 54292 Trier"},
+  {n:"Klinikum Neuwied",a:"Wilhelm-Leuschner-Str. 7, 56564 Neuwied"},
+  {n:"Klinikum Remscheid",a:"Bergstraße 26, 42859 Remscheid"},
+  {n:"Klinikum Solingen",a:"Gotenstraße 1, 42653 Solingen"},
+  {n:"Klinikum Bergisch Gladbach",a:"Sandstraße 41, 51465 Bergisch Gladbach"},
+  {n:"Klinikum Rheinbach",a:"Wilhelm-Külz-Str. 41, 53359 Rheinbach"},
+  {n:"Klinikum Bad Neuenahr",a:"Wilhelmstraße 21-23, 53474 Bad Neuenahr-Ahrweiler"},
 ];
 
 // ═══════════════════════════════════════════════════════════════
 // GOOGLE API – Client ID hier eintragen (Cloud Console)
 // ═══════════════════════════════════════════════════════════════
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
+// Google Maps / Places API-Schlüssel (Cloud Console → APIs: Maps JavaScript + Places)
+const GOOGLE_MAPS_API_KEY=localStorage.getItem('tp_maps_key')||'';
 // Microsoft Azure App – einmal in Azure Portal anlegen (siehe Cloud-Modal)
 const MS_CLIENT_ID=localStorage.getItem('tp_ms_client_id')||'56ac200a-a8cd-45ee-a482-8d6dc477b3ed';
 const MS_TENANT_ID='92713e54-4080-477b-9e22-8a1b4f3eeb14';
@@ -2231,6 +2269,7 @@ function renderGCalModal(){
     renderGCalCalendarSelect();
   }
   renderGCalPreview();
+  updateMapsKeyStatus();
 }
 
 function renderGCalCalendarSelect(){
@@ -2953,21 +2992,172 @@ function selectSR(type,id){
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('#search-wrap')) document.getElementById('search-results').classList.remove('show');
-  ['hosp-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('input')) el.classList.remove('show');});
+  ['hosp-ac','from-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('.ac-wrap')) el.classList.remove('show');});
 });
 
 // ═══════════════════════════════════════════════════════════════
-// AUTOCOMPLETES
+// ADRESS-AUTOCOMPLETE (Google Maps + Krankenhäuser)
 // ═══════════════════════════════════════════════════════════════
-function onHospSearch(val){
-  const ac=document.getElementById('hosp-ac');
-  if(!val||val.length<2){ac.classList.remove('show');return;}
-  const hits=HOSPITALS.filter(h=>h.n.toLowerCase().includes(val.toLowerCase())||h.a.toLowerCase().includes(val.toLowerCase())).slice(0,8);
-  if(!hits.length){ac.classList.remove('show');return;}
-  ac.innerHTML=hits.map(h=>`<div class="ac-item" onclick="selHosp('${h.n}','${h.a}')"><div class="ac-main">🏥 ${h.n}</div><div class="ac-sub">${h.a}</div></div>`).join('');
+const addrAcCache={};
+let addrSearchTimer=null;
+let mapsPlacesReady=null;
+let placesAutocompleteService=null;
+let placesSessionToken=null;
+let mapsKeyWarned=false;
+
+function getGoogleMapsKey(){return GOOGLE_MAPS_API_KEY||localStorage.getItem('tp_maps_key')||'';}
+
+function escAc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+
+function resetPlacesSession(){placesSessionToken=null;}
+
+function loadGoogleMapsScript(){
+  if(window.google?.maps?.places) return Promise.resolve(true);
+  if(mapsPlacesReady) return mapsPlacesReady;
+  const key=getGoogleMapsKey();
+  if(!key) return Promise.resolve(false);
+  mapsPlacesReady=new Promise(resolve=>{
+    window.__tpGmapsCb=()=>{resolve(!!window.google?.maps?.places);delete window.__tpGmapsCb;};
+    const s=document.createElement('script');
+    s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&language=de&region=DE&callback=__tpGmapsCb`;
+    s.onerror=()=>resolve(false);
+    document.head.appendChild(s);
+  });
+  return mapsPlacesReady;
+}
+
+async function ensureGoogleMapsPlaces(){
+  if(placesAutocompleteService) return true;
+  if(!(await loadGoogleMapsScript())||!window.google?.maps?.places) return false;
+  placesAutocompleteService=new google.maps.places.AutocompleteService();
+  resetPlacesSession();
+  updateMapsKeyStatus();
+  return true;
+}
+
+function searchLocalPlaces(q,includeHospitals,limit=6){
+  const ql=q.toLowerCase();
+  const hits=[];
+  const add=(icon,main,sub,value,tag)=>{
+    hits.push({icon,main,sub,value,tag,source:'local'});
+  };
+  if(includeHospitals||/krank|klinik|hosp|ukb|medizin|kgs|schule|tages/i.test(q)){
+    HOSPITALS.filter(h=>h.n.toLowerCase().includes(ql)||h.a.toLowerCase().includes(ql))
+      .slice(0,limit).forEach(h=>add('🏥',h.n,h.a,`${h.n}, ${h.a}`,'Krankenhaus'));
+  }
+  const custHits=[...customers,...gcContacts].filter(c=>{
+    const addr=[c.street,c.plz,c.city].filter(Boolean).join(' ').toLowerCase();
+    const name=(c.fname+' '+c.lname).toLowerCase();
+    return addr.includes(ql)||name.includes(ql)||(c.street||'').toLowerCase().includes(ql);
+  }).slice(0,4);
+  custHits.forEach(c=>{
+    const addr=[c.street,c.plz,c.city].filter(Boolean).join(', ');
+    if(addr) add('👤',`${c.fname} ${c.lname}`,addr,addr,'Kunde');
+  });
+  return hits;
+}
+
+function searchGooglePlaces(input){
+  return new Promise(async resolve=>{
+    if(!(await ensureGoogleMapsPlaces())) return resolve([]);
+    if(!placesSessionToken) placesSessionToken=new google.maps.places.AutocompleteSessionToken();
+    placesAutocompleteService.getPlacePredictions({
+      input,
+      sessionToken:placesSessionToken,
+      componentRestrictions:{country:'de'},
+    },(predictions,status)=>{
+      if(status!==google.maps.places.PlacesServiceStatus.OK||!predictions) return resolve([]);
+      resolve(predictions.slice(0,8).map(p=>{
+        const types=p.types||[];
+        const isHosp=types.some(t=>/hospital|health|doctor|physician/.test(t));
+        return{
+          icon:isHosp?'🏥':'📍',
+          main:p.structured_formatting?.main_text||p.description,
+          sub:(p.structured_formatting?.secondary_text||'Deutschland')+' · Google Maps',
+          value:p.description,
+          tag:'Google Maps',
+          source:'google',
+          placeId:p.place_id,
+        };
+      }));
+    });
+  });
+}
+
+function renderAddrAc(acId,fieldId,items){
+  const ac=document.getElementById(acId);
+  if(!ac) return;
+  if(!items.length){ac.classList.remove('show');return;}
+  addrAcCache[acId]=items.map(it=>({...it,fieldId}));
+  ac.innerHTML=items.map((it,i)=>{
+    const tag=it.tag?`<span class="ac-tag${it.tag==='Krankenhaus'?' hosp':''}">${escAc(it.tag)}</span>`:'';
+    return `<div class="ac-item" onclick="selectAddrSuggestion('${acId}',${i})">
+      <div class="ac-main">${it.icon||'📍'} ${escAc(it.main)}${tag}</div>
+      <div class="ac-sub">${escAc(it.sub||'')}</div>
+    </div>`;
+  }).join('');
   ac.classList.add('show');
 }
+
+function selectAddrSuggestion(acId,idx){
+  const it=addrAcCache[acId]?.[idx];
+  if(!it) return;
+  document.getElementById(it.fieldId).value=it.value;
+  document.getElementById(acId).classList.remove('show');
+  resetPlacesSession();
+  calcDist();
+}
+
+function onAddrSearch(val,acId,fieldId,includeHospitals=false){
+  clearTimeout(addrSearchTimer);
+  const ac=document.getElementById(acId);
+  if(!val||val.trim().length<2){if(ac) ac.classList.remove('show');return;}
+  const q=val.trim();
+  const localHits=searchLocalPlaces(q,includeHospitals,6);
+  renderAddrAc(acId,fieldId,localHits);
+  if(ac&&localHits.length) ac.innerHTML+=`<div class="ac-loading" id="${acId}-load">🔍 Google Maps wird durchsucht…</div>`;
+  addrSearchTimer=setTimeout(async()=>{
+    const mapsHits=await searchGooglePlaces(q);
+    const loadEl=document.getElementById(`${acId}-load`);
+    if(loadEl) loadEl.remove();
+    const seen=new Set(localHits.map(h=>h.value.toLowerCase()));
+    const merged=[...localHits,...mapsHits.filter(h=>!seen.has(h.value.toLowerCase()))].slice(0,10);
+    if(!merged.length){
+      if(!getGoogleMapsKey()&&!mapsKeyWarned){
+        mapsKeyWarned=true;
+        toast('Google Maps API-Schlüssel fehlt – nur lokale Krankenhäuser/Kunden','warn');
+      }
+      if(ac) ac.classList.remove('show');
+      return;
+    }
+    renderAddrAc(acId,fieldId,merged);
+  },320);
+}
+
+function onHospSearch(val){onAddrSearch(val,'hosp-ac','r-to',true);}
 function selHosp(n,a){document.getElementById('r-to').value=`${n}, ${a}`;document.getElementById('hosp-ac').classList.remove('show');calcDist();}
+
+function saveMapsApiKey(key){
+  const k=(key||'').trim();
+  if(k) localStorage.setItem('tp_maps_key',k);
+  else localStorage.removeItem('tp_maps_key');
+  mapsPlacesReady=null;
+  placesAutocompleteService=null;
+  resetPlacesSession();
+  updateMapsKeyStatus();
+  if(k) ensureGoogleMapsPlaces().then(ok=>toast(ok?'Google Maps Adresssuche aktiv':'Maps-Schlüssel ungültig oder API nicht aktiviert',ok?'ok':'warn'));
+}
+
+function updateMapsKeyStatus(){
+  const el=document.getElementById('maps-key-status');
+  const inp=document.getElementById('maps-api-key');
+  if(inp&&!inp.value) inp.value=getGoogleMapsKey();
+  if(!el) return;
+  const k=getGoogleMapsKey();
+  el.innerHTML=k
+    ? (placesAutocompleteService?'✅ Adresssuche aktiv · deutschlandweit via Google Maps':'⏳ Maps wird geladen… (JavaScript API + Places aktivieren)')
+    : 'API-Schlüssel in <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" style="color:var(--blue2)">Google Cloud Console</a> erstellen · APIs: <strong>Maps JavaScript API</strong> + <strong>Places API</strong> · HTTP-Referrer: <code style="color:var(--gold)">https://sero91ak.github.io/*</code>';
+}
 
 function onCHospSearch(val){
   const ac=document.getElementById('c-hosp-ac');
@@ -4290,6 +4480,8 @@ renderMiniCal();
 renderCalendar();
 renderCustomers();
 if(gcalConnected) trySilentGoogleRefresh();
+updateMapsKeyStatus();
+if(getGoogleMapsKey()) ensureGoogleMapsPlaces();
 setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
 </script>
 </body>
