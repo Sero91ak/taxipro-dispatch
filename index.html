@@ -252,19 +252,32 @@ h1,h2,h3,h4{font-family:var(--font2)}
 /* CUSTOMER CARDS + LIST */
 .cust-list{flex:1;overflow-y:auto;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;align-content:start}
 .cust-list.list-view{display:flex;flex-direction:column;gap:0;padding:0}
-.cust-row{display:grid;grid-template-columns:40px 1.2fr 1fr .8fr auto;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;background:var(--bg2)}
+.cust-row{display:grid;grid-template-columns:40px minmax(130px,1.35fr) minmax(95px,.85fr) minmax(70px,.55fr) minmax(110px,1fr) minmax(72px,.6fr) 42px auto;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;background:var(--bg2)}
 .cust-row:nth-child(even){background:var(--bg3)}
 .cust-row:hover{background:var(--bg4)!important}
 .cust-row .cr-av{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
-.cust-row .cr-name{font-weight:700;font-size:14px;color:var(--text)}
-.cust-row .cr-sub{font-size:11px;color:var(--text2);margin-top:2px}
-.cust-row .cr-phone{font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums}
-.cust-row .cr-city{font-size:12px;color:var(--text3)}
-.cust-row .cr-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap}
-.cust-row .cr-btns{display:flex;gap:4px}
+.cust-row .cr-main{min-width:0}
+.cust-row .cr-name{font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-row .cr-sub{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-row .cr-mobile-meta{display:none;font-size:11px;color:var(--text2);margin-top:3px;line-height:1.35}
+.cust-row .cr-phone{font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-row .cr-city{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-row .cr-addr{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-row .cr-rides{font-size:12px;font-weight:700;color:var(--text2);text-align:center;font-variant-numeric:tabular-nums}
+.cust-row .cr-rides.has{font-size:12px;font-weight:700;color:var(--gold)}
+.cust-row .cr-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap;border:1px solid}
+.cust-row .cr-tag.kts{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.cust-row .cr-tag.re{background:var(--yellow-bg);color:var(--yellow2);border-color:var(--yellow-border)}
+.cust-row .cr-tag.privat{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.cust-row .cr-tag.firma{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
+.cust-row .cr-tag.stamm{background:var(--orange-bg);color:var(--orange);border-color:var(--orange-border)}
+.cust-row .cr-tag.gc{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.cust-row .cr-btns{display:flex;gap:4px;flex-shrink:0}
 .cust-row .cr-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .cust-row .cr-btn:hover{background:var(--bg5)}
-.cust-list-header{display:grid;grid-template-columns:40px 1.2fr 1fr .8fr auto;gap:12px;padding:8px 16px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg3);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:2}
+.cust-list-header{display:grid;grid-template-columns:40px minmax(130px,1.35fr) minmax(95px,.85fr) minmax(70px,.55fr) minmax(110px,1fr) minmax(72px,.6fr) 42px auto;gap:10px;padding:8px 14px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg3);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:2}
+.cust-list.list-view{overflow-x:auto}
+.cust-list.list-view>.cust-list-header,.cust-list.list-view>.cust-row{min-width:720px}
 /* VIEW TOGGLE */
 .view-toggle{display:flex;gap:2px;background:var(--bg3);border-radius:var(--r2);padding:3px;border:1px solid var(--border2)}
 .vt-btn{width:34px;height:30px;border-radius:5px;border:none;background:transparent;color:var(--text2);font-size:15px;cursor:pointer;transition:.12s}
@@ -458,15 +471,38 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .driver-phone{font-size:12px;color:var(--text2);margin-top:2px}
 .driver-btns{display:flex;gap:6px}
 /* responsive */
+@media(max-width:900px){
+  .cust-list.list-view>.cust-list-header,.cust-list.list-view>.cust-row{min-width:640px}
+}
 @media(max-width:700px){
   #sidebar{display:none}
-  .cust-list{grid-template-columns:1fr}
-  .cust-row{grid-template-columns:36px 1fr auto;gap:8px}
-  .cust-row .cr-phone,.cust-row .cr-city,.cust-list-header span:nth-child(3),.cust-list-header span:nth-child(4){display:none}
-  .cust-local-search{max-width:120px;min-width:100px}
+  .cust-list{grid-template-columns:1fr;padding:8px 10px}
+  .cust-list.list-view{padding:0;overflow-x:hidden}
+  .cust-list.list-view>.cust-list-header,.cust-list.list-view>.cust-row{min-width:0}
+  .cust-list-header{display:none}
+  .cust-row{grid-template-columns:38px 1fr auto;grid-template-rows:auto auto;gap:4px 10px;padding:10px 12px;align-items:start}
+  .cust-row .cr-av{width:38px;height:38px;font-size:13px;grid-row:1/span 2;align-self:center}
+  .cust-row .cr-main{grid-column:2;grid-row:1}
+  .cust-row .cr-mobile-meta{display:block;grid-column:2;grid-row:2}
+  .cust-row .cr-phone,.cust-row .cr-city,.cust-row .cr-addr,.cust-row .cr-rides,.cust-row .cr-type-col{display:none}
+  .cust-row .cr-btns{grid-column:3;grid-row:1/span 2;align-self:center;flex-direction:column;gap:3px}
+  .cust-row .cr-btn{width:30px;height:30px;font-size:12px}
+  .cust-toolbar-row{padding:8px 10px;gap:6px}
+  .cust-toolbar-row h2{font-size:14px;flex:1 1 100%}
+  .cust-local-search{flex:1;max-width:none;min-width:0}
+  .cust-sort-sel{min-width:110px;flex:1}
+  .view-toggle .vt-btn{width:32px;height:28px;font-size:14px}
+  .filter-strip{padding:8px 10px;gap:5px}
+  .f-tab{padding:4px 10px;font-size:10px}
   .mo-cell{min-height:55px}
   .fr2,.fr3{grid-template-columns:1fr}
   #topbar-btns .tb-btn:not(.primary){display:none}
+  #global-search{font-size:13px;height:36px;padding:8px 36px}
+}
+@media(max-width:420px){
+  .cust-row .cr-btns{flex-direction:row}
+  .cust-row .cr-btn{width:28px;height:28px}
+  .cust-toolbar-row .tb-btn.btn-sm{padding:5px 8px;font-size:10px}
 }
 </style>
 </head>
@@ -1449,19 +1485,30 @@ function filterContacts(list,q){
   );
 }
 
+const TYPE_SHORT={kts:'KTS',re:'Rechnung',privat:'Privat',firma:'Firma',stamm:'Stamm',gc:'Google'};
+
 function buildCustRow(c,isGC=false){
   const typeClass=TYPE_COLORS[c.type]||'kts';
-  const typeLabel=TYPE_LABELS[c.type]||c.type;
+  const typeLabel=TYPE_SHORT[c.type]||c.type||'–';
   const initials=(c.fname||'?').charAt(0)+(c.lname||'').charAt(0);
   const addr=[c.street,c.plz,c.city].filter(Boolean).join(', ');
+  const addrShort=c.street||(c.plz&&c.city?`${c.plz} ${c.city}`:c.city)||'–';
+  const rcount=isGC?0:rides.filter(r=>r.customerId===c.id).length;
+  const mobileMeta=[c.phone,c.city,addrShort].filter(v=>v&&v!=='–').join(' · ');
   const click=isGC?`openGCDetail('${c.id}')`:`openCustDetail('${c.id}')`;
   return`<div class="cust-row" onclick="${click}">
     <div class="cr-av cc-av ${typeClass}">${initials}</div>
-    <div><div class="cr-name">${c.fname} ${c.lname}</div><div class="cr-sub">${c.org||addr||'–'}</div></div>
+    <div class="cr-main">
+      <div class="cr-name">${c.fname} ${c.lname}</div>
+      <div class="cr-sub">${c.org||'–'}</div>
+    </div>
+    <div class="cr-mobile-meta">${mobileMeta||'–'}</div>
     <div class="cr-phone">${c.phone||'–'}</div>
     <div class="cr-city">${c.city||'–'}</div>
+    <div class="cr-addr">${addrShort}</div>
+    <div class="cr-type-col"><span class="cr-tag ${typeClass}">${typeLabel}</span></div>
+    <div class="cr-rides${rcount?' has':''}">${rcount||'–'}</div>
     <div class="cr-btns">
-      <span class="cr-tag cc-tag ${typeClass}">${typeLabel.replace(/[^\w\säöüÄÖÜß🏥🟡🟢🏢⭐🔵]/g,'').trim().slice(0,8)||c.type}</span>
       ${c.phone?`<button class="cr-btn" onclick="event.stopPropagation();window.open('tel:${c.phone}')" title="Anrufen">📞</button>`:''}
       <button class="cr-btn" onclick="event.stopPropagation();${isGC?`openGCDetail('${c.id}')`:`openRideForCust('${c.id}')`}" title="Fahrt">🚗</button>
     </div>
@@ -1472,7 +1519,7 @@ function renderContactList(el,list,isGC=false){
   el.className='cust-list'+(contactViewMode==='list'?' list-view':'');
   if(!list.length){el.innerHTML=`<div class="empty"><div class="ei">👥</div><p>Keine Kontakte gefunden</p></div>`;return;}
   if(contactViewMode==='list'){
-    el.innerHTML=`<div class="cust-list-header"><span></span><span>Name</span><span>Telefon</span><span>Stadt</span><span>Aktion</span></div>`+
+    el.innerHTML=`<div class="cust-list-header"><span></span><span>Name</span><span>Telefon</span><span>Stadt</span><span>Adresse</span><span>Typ</span><span>Fahrten</span><span>Aktion</span></div>`+
       list.map(c=>buildCustRow(c,isGC)).join('');
   } else {
     el.innerHTML=list.map(c=>buildCustCard(c,isGC)).join('');
