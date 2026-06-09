@@ -1014,6 +1014,42 @@ const SCOPE_CALENDAR='https://www.googleapis.com/auth/calendar.readonly';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
 const SCOPE_ALL=SCOPE_CALENDAR+' '+SCOPE_CONTACTS;
 const GCAL_PUSH_ENABLED=false; // Nur Google → App, nie App → Google
+const DEMO_PHONES=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
+  '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
+  '+49 174 1122334','+49 152 5544332','+49 171 0099887'];
+const DEMO_DRIVER_PHONES=['+49 171 1112233','+49 172 4445566','+49 173 7778899'];
+const DEMO_NOTES=['Kardiologie','Dialyse','Chemo Zyklus 3','Folge-Untersuchung'];
+const DEMO_NAMES=[['Ahmed','Al-Rashidi'],['Ingrid','Hoffmann'],['Karim','Benali'],['Rosa','Müller'],
+  ['Mehmet','Yilmaz'],['Christa','Weber'],['Fatima','Özdemir'],['Klaus','Bauer']];
+
+function isDemoContact(c){
+  return DEMO_PHONES.includes(c.phone)||DEMO_NAMES.some(([f,l])=>c.fname===f&&c.lname===l);
+}
+function demoTextBlob(...parts){
+  return parts.filter(Boolean).join(' ').toLowerCase();
+}
+function textHasDemoContent(text){
+  const t=demoTextBlob(text);
+  if(!t) return false;
+  if(t.includes('── taxipro fahrt ──')) return true;
+  if(DEMO_NOTES.some(n=>t.includes(n.toLowerCase()))) return true;
+  if(DEMO_NAMES.some(([f,l])=>t.includes((f+' '+l).toLowerCase()))) return true;
+  return DEMO_PHONES.some(p=>t.includes(p.replace(/\s/g,'')));
+}
+function isDemoRideContent(r){
+  if(DEMO_NOTES.includes(r.note)) return true;
+  if((r.note||'').includes('── TaxiPro Fahrt ──')) return true;
+  if(r.customerId){
+    const c=customers.find(x=>x.id===r.customerId);
+    if(c&&isDemoContact(c)) return true;
+  }
+  return textHasDemoContent(r.from,r.to,r.note);
+}
+function isExcludedGCalEvent(raw){
+  if(!raw) return true;
+  if(raw.extendedProperties?.private?.taxiproRideId) return true;
+  return textHasDemoContent(raw.summary,raw.description,raw.location);
+}
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
@@ -1159,6 +1195,7 @@ function filteredGCalEvents(dateStr){
   if(!gcalConnected||!gcalShow) return [];
   return gcalEvents.filter(e=>{
     if(e.date!==dateStr) return false;
+    if(e.taxiproRideId) return false;
     if(gcalSyncEnabled&&rides.some(r=>r.googleEventId===e.id)) return false;
     return true;
   }).sort((a,b)=>a.time.localeCompare(b.time));
@@ -1992,7 +2029,7 @@ function renderGCalModal(){
     hideGCalError();
   } else {
     document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Google Kalender verbunden</strong><br>
-       Nur Import: Termine aus Google → App (keine Übertragung aus der App)<br>
+       Nur Import: echte Google-Termine → App (Demo/TaxiPro-Termine werden ignoriert)<br>
        <span style="color:var(--text3)">${syncedRides} verknüpft · ${gcalEvents.length} Termine geladen</span>`;
   }
   document.getElementById('gcal-connect-btn').style.display=connected?'none':'inline-flex';
@@ -2075,10 +2112,21 @@ function detectRideType(title,desc=''){
 }
 
 function shouldImportGCalEvent(raw){
-  if(raw.extendedProperties?.private?.taxiproRideId) return true;
+  if(isExcludedGCalEvent(raw)) return false;
   if(gcalImportAll) return true;
-  const text=((raw.summary||'')+' '+(raw.description||'')+' '+(raw.location||'')).toLowerCase();
+  const text=demoTextBlob(raw.summary,raw.description,raw.location);
   return TAXI_KEYWORDS.some(k=>text.includes(k))||text.includes('🚖');
+}
+
+function removeExcludedGoogleRides(rawEvents){
+  const excludedIds=new Set((rawEvents||[]).filter(isExcludedGCalEvent).map(e=>e.id));
+  const before=rides.length;
+  rides=rides.filter(r=>{
+    if(r.googleEventId&&excludedIds.has(r.googleEventId)) return false;
+    if(isDemoRideContent(r)) return false;
+    return true;
+  });
+  if(rides.length<before){save();updateCounts();}
 }
 
 function parseFromDescription(desc){
@@ -2161,6 +2209,11 @@ function syncFromGoogle(rawEvents){
   let imported=0,updated=0,deleted=0;
   for(const raw of rawEvents){
     if(raw.status==='cancelled'){
+      if(isExcludedGCalEvent(raw)){
+        rides=rides.filter(r=>r.googleEventId!==raw.id);
+        deleted++;
+        continue;
+      }
       const rideId=raw.extendedProperties?.private?.taxiproRideId;
       const byGcal=rides.find(r=>r.googleEventId===raw.id);
       if(rideId||byGcal){
@@ -2198,9 +2251,10 @@ async function fetchGCalEvents(){
     const res=await gcalApi(url);
     if(!res||!res.ok) throw new Error('API Fehler');
     const data=await res.json();
-    const items=data.items||[];
+    const items=(data.items||[]).filter(e=>e.status!=='cancelled'||!isExcludedGCalEvent(e));
+    removeExcludedGoogleRides(data.items||[]);
     if(gcalSyncEnabled) syncFromGoogle(items);
-    gcalEvents=items.map(normGCalEvent);
+    gcalEvents=items.filter(e=>!isExcludedGCalEvent(e)).map(normGCalEvent);
     updateGCalBtn();renderCalendar();renderMiniCal();renderToday();
     if(document.getElementById('modal-gcal')&&!document.getElementById('modal-gcal').classList.contains('hidden')) renderGCalModal();
   }catch(e){toast('Kalender konnte nicht geladen werden','err');}
@@ -2259,7 +2313,7 @@ function updateGCalBtn(){
 
 function renderGCalPreview(){
   const el=document.getElementById('gcal-preview-list');
-  const orphans=gcalEvents.filter(e=>!rides.some(r=>r.googleEventId===e.id));
+  const orphans=gcalEvents.filter(e=>!e.taxiproRideId&&!rides.some(r=>r.googleEventId===e.id));
   if(!gcalConnected||!orphans.length){el.innerHTML=gcalConnected?'<div style="font-size:11px;color:var(--text3);padding:8px 0">Alle Termine sind als Fahrten synchronisiert ✓</div>':'';return;}
   el.innerHTML=`<div class="fsec" style="margin-bottom:8px">Noch nicht importiert (${orphans.length})</div>`+
   orphans.slice(0,8).map((ev,i)=>`<div class="gc-contact-item" onclick="showGCalDetailByIndex(${gcalEvents.indexOf(ev)})">
@@ -2291,7 +2345,7 @@ function showGCalDetail(id){
 
 function forceImportGCalEvent(){
   const ev=gcalEvents.find(e=>e.id===gcalDetailId);
-  if(!ev||rides.some(r=>r.googleEventId===ev.id)) return;
+  if(!ev||ev.taxiproRideId||rides.some(r=>r.googleEventId===ev.id)) return;
   const fakeRaw={id:ev.id,summary:ev.title,description:ev.description,location:ev.location,updated:ev.updated,status:'confirmed',
     start:ev.isAllDay?{date:ev.date}:{dateTime:`${ev.date}T${ev.time}:00+01:00`},
     end:{dateTime:`${ev.date}T${ev.endTime||ev.time}:00+01:00`}};
@@ -2839,24 +2893,14 @@ function toggleTheme(){
 // DEMO DATA ENTFERNEN
 // ═══════════════════════════════════════════════════════════════
 function purgeDemoData(){
-  const demoPhones=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
-    '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
-    '+49 174 1122334','+49 152 5544332','+49 171 0099887'];
-  const demoDriverPhones=['+49 171 1112233','+49 172 4445566','+49 173 7778899'];
-  const demoNotes=['Kardiologie','Dialyse','Chemo Zyklus 3','Folge-Untersuchung'];
-  const demoNames=[['Ahmed','Al-Rashidi'],['Ingrid','Hoffmann'],['Karim','Benali'],['Rosa','Müller'],
-    ['Mehmet','Yilmaz'],['Christa','Weber'],['Fatima','Özdemir'],['Klaus','Bauer']];
-  const isDemoContact=c=>demoPhones.includes(c.phone)||demoNames.some(([f,l])=>c.fname===f&&c.lname===l);
   const demoCustIds=customers.filter(isDemoContact).map(c=>c.id);
   const before=customers.length+rides.length+drivers.length+gcContacts.length;
   gcContacts=gcContacts.filter(c=>!isDemoContact(c));
   customers=customers.filter(c=>!isDemoContact(c));
-  drivers=drivers.filter(d=>!demoDriverPhones.includes(d.phone));
+  drivers=drivers.filter(d=>!DEMO_DRIVER_PHONES.includes(d.phone));
   rides=rides.filter(r=>{
-    if(r.source==='google') return true;
     if(demoCustIds.includes(r.customerId)) return false;
-    if(demoNotes.includes(r.note)) return false;
-    if((r.note||'').includes('── TaxiPro Fahrt ──')) return false;
+    if(isDemoRideContent(r)) return false;
     return true;
   });
   if(customers.length+rides.length+drivers.length+gcContacts.length<before) save();
