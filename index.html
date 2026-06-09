@@ -879,7 +879,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
         <button class="btn btn-secondary" id="gcal-refresh-btn" onclick="fullGCalSync()" style="display:none">🔄 Jetzt synchronisieren</button>
         <button class="btn btn-secondary" id="gcal-disconnect-btn" onclick="disconnectGCal()" style="display:none">Trennen</button>
         <button class="btn btn-secondary" id="gcal-reset-btn" onclick="resetGoogleAuth()" style="display:none">↺ Zurücksetzen</button>
-        <button class="btn btn-danger" id="gcal-purge-btn" onclick="purgeDemoFromGoogleCalendar(false)" style="display:none">🗑️ Demo-Termine aus Google löschen</button>
+        <button class="btn btn-danger" id="gcal-purge-btn" onclick="purgeDemoFromGoogleCalendar(false)" style="display:none">🗑️ ALLE Test-Fahrten aus Google löschen</button>
       </div>
       <div id="gcal-purge-status" style="display:none;margin-top:10px;padding:10px 12px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r2);font-size:11px;color:var(--yellow2);line-height:1.6"></div>
       <div id="gcal-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
@@ -1016,7 +1016,6 @@ const SCOPE_CALENDAR_READ='https://www.googleapis.com/auth/calendar.readonly';
 const SCOPE_CALENDAR_WRITE='https://www.googleapis.com/auth/calendar.events';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
 const SCOPE_ALL=SCOPE_CALENDAR_READ+' '+SCOPE_CALENDAR_WRITE+' '+SCOPE_CONTACTS;
-const GCAL_PURGE_KEY='tp_gcal_demo_purged_v3';
 const GCAL_PUSH_ENABLED=false; // Nur Google → App, nie App → Google
 const DEMO_PHONES=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
   '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
@@ -1024,7 +1023,10 @@ const DEMO_PHONES=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 15
 const DEMO_DRIVER_PHONES=['+49 171 1112233','+49 172 4445566','+49 173 7778899'];
 const DEMO_NOTES=['Kardiologie','Dialyse','Chemo Zyklus 3','Folge-Untersuchung'];
 const DEMO_NAMES=[['Ahmed','Al-Rashidi'],['Ingrid','Hoffmann'],['Karim','Benali'],['Rosa','Müller'],
-  ['Mehmet','Yilmaz'],['Christa','Weber'],['Fatima','Özdemir'],['Klaus','Bauer']];
+  ['Mehmet','Yilmaz'],['Christa','Weber'],['Fatima','Özdemir'],['Klaus','Bauer'],['Maria','Schmidt']];
+const DEMO_TITLE_HINTS=['maria schmidt','klaus bauer','müller wacholder','offermanns','plenker','schaaf',
+  'kohlhass','bitjakov','kuchen runfeld','marlene schulz','hüseyin ab','roswitah','szczessy','kinggerske',
+  'ritter klister','braun südstr','tykhon balea','fr bitjakov','waldschule','neuer markt','dorfplatz'];
 
 function isDemoContact(c){
   return DEMO_PHONES.includes(c.phone)||DEMO_NAMES.some(([f,l])=>c.fname===f&&c.lname===l);
@@ -1038,7 +1040,31 @@ function textHasDemoContent(text){
   if(t.includes('── taxipro fahrt ──')) return true;
   if(DEMO_NOTES.some(n=>t.includes(n.toLowerCase()))) return true;
   if(DEMO_NAMES.some(([f,l])=>t.includes((f+' '+l).toLowerCase()))) return true;
+  if(DEMO_TITLE_HINTS.some(h=>t.includes(h))) return true;
   return DEMO_PHONES.some(p=>t.includes(p.replace(/\s/g,'')));
+}
+function isPrivateRealAppointment(raw){
+  const all=demoTextBlob(raw?.summary,raw?.description,raw?.location);
+  return /geburtstag|birthday|urlaub|feiertag|weihnacht|silvester|jubiläum|hochzeit|beerdigung|team meeting|zoom meeting/i.test(all);
+}
+function isKrankenfahrtDispatchEvent(raw){
+  if(!raw||raw.status==='cancelled') return false;
+  if(isPrivateRealAppointment(raw)) return false;
+  const sum=(raw.summary||'').trim();
+  const blob=demoTextBlob(sum,raw.location,raw.description);
+  if(raw.extendedProperties?.private?.taxiproRideId) return true;
+  if(/[🚖🚕]/.test(sum)) return true;
+  if((raw.description||'').includes('TaxiPro')) return true;
+  if(textHasDemoContent(sum,raw.description,raw.location)) return true;
+  if(rides.some(r=>r.googleEventId===raw.id)) return true;
+  if(/\s[-–→]{1,3}\s/.test(sum)&&sum.length>10) return true;
+  if(/\b(str\.?|straße|strasse|weg|platz|allee|ring|damm|gasse|steige|ufer|hammer)\b/i.test(sum)&&/[-–→]/.test(sum)) return true;
+  if(/uniklinik|charité|charite|ukb|marien|kts|\bkt\b|dhz|hämo|hospital|klinikum|krankenhaus|hosp\b|merl|waldkranken|neuer markt|dorfplatz|wacholder/i.test(blob)) return true;
+  if(TAXI_KEYWORDS.some(k=>blob.includes(k))&&/[a-zäöüß]{4,}/i.test(sum)) return true;
+  const st=raw.start?.dateTime||'';
+  const en=raw.end?.dateTime||'';
+  if(st&&en&&st.slice(0,16)===en.slice(0,16)&&sum.length>8) return true;
+  return false;
 }
 function isDemoRideContent(r){
   if(DEMO_NOTES.includes(r.note)) return true;
@@ -1051,30 +1077,10 @@ function isDemoRideContent(r){
 }
 function isExcludedGCalEvent(raw){
   if(!raw) return true;
-  if(raw.extendedProperties?.private?.taxiproRideId) return true;
-  return textHasDemoContent(raw.summary,raw.description,raw.location);
-}
-function isTaxiProAppEvent(raw){
-  if(!raw||raw.status==='cancelled') return false;
-  if(raw.extendedProperties?.private?.taxiproRideId) return true;
-  const sum=raw.summary||'';
-  const desc=raw.description||'';
-  if(/^[🚖🚕]/.test(sum)) return true;
-  if(desc.includes('── TaxiPro')||desc.includes('TaxiPro Fahrt')) return true;
-  if(desc.includes('Abholung:')&&desc.includes('Ziel:')) return true;
-  if(textHasDemoContent(sum,desc,raw.location)) return true;
-  if(rides.some(r=>r.googleEventId===raw.id)) return true;
-  return false;
-}
-function isDispatchTestEvent(raw){
-  if(!raw||raw.status==='cancelled') return false;
-  const sum=raw.summary||'';
-  const blob=demoTextBlob(sum,raw.location,raw.description);
-  if(!/(kts|\bkt\b|ukb|charité|charite|marien|uniklin|dhz|klinik|hospital|hämo|hosp)/i.test(blob)) return false;
-  return /[-–→]/.test(sum)||sum.includes(' Ab ');
+  return isKrankenfahrtDispatchEvent(raw);
 }
 function shouldDeleteFromGoogleCalendar(raw){
-  return isTaxiProAppEvent(raw)||isDispatchTestEvent(raw);
+  return isKrankenfahrtDispatchEvent(raw);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2232,20 +2238,25 @@ async function deleteGoogleEvent(ride){
 }
 
 async function fetchAllGCalEventsWide(){
-  const cal=encodeURIComponent(gcalCalendarId);
   const now=new Date();
-  const timeMin=new Date(now);timeMin.setMonth(timeMin.getMonth()-6);
-  const timeMax=new Date(now);timeMax.setMonth(timeMax.getMonth()+12);
-  let pageToken='',all=[];
-  do{
-    let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin.toISOString())}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=250`;
-    if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
-    const res=await gcalApi(url);
-    if(!res||!res.ok) throw new Error(res?.status===403?'Kein Löschzugriff – bitte neu verbinden':'API Fehler');
-    const data=await res.json();
-    all=all.concat(data.items||[]);
-    pageToken=data.nextPageToken||'';
-  }while(pageToken);
+  const timeMin=new Date(now);timeMin.setMonth(timeMin.getMonth()-12);
+  const timeMax=new Date(now);timeMax.setMonth(timeMax.getMonth()+18);
+  const cals=gcalCalendars.length?gcalCalendars:[{id:gcalCalendarId,summary:'primary'}];
+  let all=[];
+  for(const calInfo of cals){
+    const cal=encodeURIComponent(calInfo.id);
+    let pageToken='';
+    do{
+      let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin.toISOString())}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=250`;
+      if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
+      const res=await gcalApi(url);
+      if(!res||!res.ok) continue;
+      const data=await res.json();
+      all=all.concat((data.items||[]).map(e=>({...e,_calId:calInfo.id})));
+      pageToken=data.nextPageToken||'';
+    }while(pageToken);
+  }
+  if(!all.length) throw new Error('Keine Termine geladen – bitte neu verbinden');
   return all;
 }
 
@@ -2257,25 +2268,29 @@ async function purgeDemoFromGoogleCalendar(auto=false){
     const all=await fetchAllGCalEventsWide();
     const targets=all.filter(shouldDeleteFromGoogleCalendar);
     if(!targets.length){
-      if(statusEl) statusEl.textContent='Keine Demo-/TaxiPro-Termine gefunden.';
-      localStorage.setItem(GCAL_PURGE_KEY,'done');
+      if(statusEl) statusEl.textContent='Keine Demo-/Test-Fahrten mehr gefunden.';
       if(!auto) toast('Keine Demo-Termine in Google gefunden');
       return;
     }
-    if(!auto&&!confirm(`${targets.length} Demo-/Test-Termine in Google Kalender löschen?\n\nDeine echten privaten Termine bleiben erhalten.\nGelöschte Termine liegen 30 Tage im Google-Papierkorb.`)) return;
-    if(statusEl) statusEl.textContent=`Lösche ${targets.length} Termine aus Google Kalender…`;
-    const cal=encodeURIComponent(gcalCalendarId);
+    if(!auto&&!confirm(`${targets.length} Demo-/Test-Fahrten aus ALLEN Google Kalendern löschen?\n\nEchte Geburtstage/Urlaub bleiben erhalten.`)) return;
+    if(statusEl) statusEl.textContent=`Lösche ${targets.length} Test-Fahrten aus Google Kalender…`;
     let deleted=0,failed=0;
     for(const ev of targets){
+      const cal=encodeURIComponent(ev._calId||gcalCalendarId);
       const res=await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ev.id)}`,'DELETE');
       if(res&&(res.ok||res.status===404||res.status===410)) deleted++;
       else failed++;
     }
     const deletedIds=new Set(targets.map(e=>e.id));
-    rides=rides.filter(r=>!r.googleEventId||!deletedIds.has(r.googleEventId));
+    rides=rides.filter(r=>{
+      if(r.googleEventId&&deletedIds.has(r.googleEventId)) return false;
+      if(isDemoRideContent(r)) return false;
+      if(r.source!=='google'&&isKrankenfahrtDispatchEvent({summary:(r.from||'')+' → '+(r.to||''),description:r.note,location:r.to,status:'confirmed'})) return false;
+      return true;
+    });
+    customers=customers.filter(c=>!isDemoContact(c));
     save();updateCounts();
     await fetchGCalEvents();
-    localStorage.setItem(GCAL_PURGE_KEY,'done');
     if(statusEl) statusEl.innerHTML=`<strong>✅ ${deleted} Demo-Termine aus Google Kalender entfernt</strong>${failed?` · ${failed} fehlgeschlagen`:''}<br><span style="color:var(--text3)">Prüfe die Google Kalender App – sollte jetzt leer von Testfahrten sein.</span>`;
     toast(`🗑️ ${deleted} Demo-Termine aus Google gelöscht`,deleted?'ok':'warn');
     renderGCalModal();
@@ -2982,6 +2997,9 @@ function purgeDemoData(){
   rides=rides.filter(r=>{
     if(demoCustIds.includes(r.customerId)) return false;
     if(isDemoRideContent(r)) return false;
+    const blob=demoTextBlob(r.from,r.to,r.note);
+    if(DEMO_TITLE_HINTS.some(h=>blob.includes(h))) return false;
+    if(r.source!=='google'&&/\s[-–→]\s/.test((r.from||'')+' → '+(r.to||''))) return false;
     return true;
   });
   if(customers.length+rides.length+drivers.length+gcContacts.length<before) save();
@@ -3002,8 +3020,8 @@ renderCalendar();
 renderCustomers();
 if(gcalConnected){
   loadGCalendars().then(async()=>{
+    await purgeDemoFromGoogleCalendar(true);
     await fullGCalSync();
-    if(localStorage.getItem(GCAL_PURGE_KEY)!=='done') await purgeDemoFromGoogleCalendar(true);
   });
 }
 setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
