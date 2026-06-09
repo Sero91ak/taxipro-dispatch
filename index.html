@@ -2322,21 +2322,11 @@ function detectRideType(title,desc=''){
 }
 
 function shouldImportGCalEvent(raw){
-  if(isExcludedGCalEvent(raw)) return false;
+  if(isPrivateRealAppointment(raw)) return false;
   if(gcalImportAll) return true;
+  if(isKrankenfahrtDispatchEvent(raw)) return true;
   const text=demoTextBlob(raw.summary,raw.description,raw.location);
   return TAXI_KEYWORDS.some(k=>text.includes(k))||text.includes('🚖');
-}
-
-function removeExcludedGoogleRides(rawEvents){
-  const excludedIds=new Set((rawEvents||[]).filter(isExcludedGCalEvent).map(e=>e.id));
-  const before=rides.length;
-  rides=rides.filter(r=>{
-    if(r.googleEventId&&excludedIds.has(r.googleEventId)) return false;
-    if(isDemoRideContent(r)) return false;
-    return true;
-  });
-  if(rides.length<before){save();updateCounts();}
 }
 
 function parseFromDescription(desc){
@@ -2623,17 +2613,28 @@ async function fetchGCalEvents(){
   const{timeMin,timeMax}=getGCalRange();
   try{
     const cal=encodeURIComponent(gcalCalendarId);
-    const url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=250`;
-    const res=await gcalApi(url);
-    if(!res||!res.ok) throw new Error('API Fehler');
-    const data=await res.json();
-    const items=(data.items||[]).filter(e=>e.status!=='cancelled'||!isExcludedGCalEvent(e));
-    removeExcludedGoogleRides(data.items||[]);
+    let pageToken=null,allItems=[];
+    do{
+      let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=250`;
+      if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
+      const res=await gcalApi(url);
+      if(!res||!res.ok){
+        const errBody=res?await res.text().catch(()=>''):'';
+        throw new Error(`API ${res?.status||'?'} ${errBody.slice(0,120)}`);
+      }
+      const data=await res.json();
+      allItems.push(...(data.items||[]));
+      pageToken=data.nextPageToken||null;
+    }while(pageToken);
+    const items=allItems.filter(e=>e.status!=='cancelled'||!isExcludedGCalEvent(e));
     if(gcalSyncEnabled) syncFromGoogle(items);
     gcalEvents=items.filter(e=>!isExcludedGCalEvent(e)).map(normGCalEvent);
     updateGCalBtn();renderCalendar();renderMiniCal();renderToday();
     if(document.getElementById('modal-gcal')&&!document.getElementById('modal-gcal').classList.contains('hidden')) renderGCalModal();
-  }catch(e){toast('Kalender konnte nicht geladen werden','err');}
+  }catch(e){
+    console.error('fetchGCalEvents',e);
+    toast('Kalender konnte nicht geladen werden','err');
+  }
   finally{gcalFetching=false;}
 }
 
@@ -3781,10 +3782,18 @@ async function initMicrosoftCloud(){
   }
 }
 
+function whenGoogleReady(fn,attempt=0){
+  if(window.google?.accounts?.oauth2) return fn();
+  if(attempt>=24) return;
+  setTimeout(()=>whenGoogleReady(fn,attempt+1),250);
+}
+
 function trySilentGoogleRefresh(){
-  if(!gcalToken||!window.google?.accounts?.oauth2) return;
-  initGoogleTokenClient(getGoogleScopes(),async()=>{await loadGCalendars();await fullGCalSync();});
-  googleTokenClient.requestAccessToken({prompt:''});
+  if(!gcalToken) return;
+  whenGoogleReady(()=>{
+    if(!initGoogleTokenClient(getGoogleScopes(),async()=>{await loadGCalendars();await fullGCalSync();})) return;
+    googleTokenClient.requestAccessToken({prompt:''});
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4280,10 +4289,7 @@ updateGCalBtn();
 renderMiniCal();
 renderCalendar();
 renderCustomers();
-if(gcalConnected){
-  setTimeout(trySilentGoogleRefresh,1500);
-  loadGCalendars().then(()=>fullGCalSync());
-}
+if(gcalConnected) trySilentGoogleRefresh();
 setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
 </script>
 </body>
