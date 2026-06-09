@@ -974,7 +974,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
         <button class="btn btn-secondary" id="gcal-refresh-btn" onclick="fullGCalSync()" style="display:none">🔄 Jetzt synchronisieren</button>
         <button class="btn btn-secondary" id="gcal-disconnect-btn" onclick="disconnectGCal()" style="display:none">Trennen</button>
         <button class="btn btn-secondary" id="gcal-reset-btn" onclick="resetGoogleAuth()" style="display:none">↺ Zurücksetzen</button>
-        <button class="btn btn-danger" id="gcal-purge-btn" onclick="purgeDemoFromGoogleCalendar(false)" style="display:none">🗑️ ALLE Test-Fahrten aus Google löschen</button>
+        <button class="btn btn-primary" id="gcal-restore-btn" onclick="restoreGoogleCalendarEvents()" style="display:none">🔄 Gelöschte Termine wiederherstellen</button>
+        <button class="btn btn-danger" id="gcal-purge-btn" onclick="purgeDemoFromGoogleCalendar(false)" style="display:none">🗑️ Demo-Testfahrten löschen</button>
       </div>
       <div id="gcal-purge-status" style="display:none;margin-top:10px;padding:10px 12px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r2);font-size:11px;color:var(--yellow2);line-height:1.6"></div>
       <div id="gcal-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
@@ -994,6 +995,13 @@ h1,h2,h3,h4{font-family:var(--font2)}
     <div class="tog-row" id="gcal-show-toggle" style="display:none">
       <span class="tog-label">Nicht-importierte Termine blau anzeigen</span>
       <label class="tog"><input type="checkbox" id="gcal-show" checked onchange="toggleGCalShow()"/><span class="tog-sl"></span></label>
+    </div>
+    <div class="tog-row" id="gcal-write-toggle" style="display:none">
+      <span class="tog-label">🔓 App → Google Schreiben freigeben <span style="color:var(--text3);font-size:10px">(erst zum Testen aktivieren)</span></span>
+      <label class="tog"><input type="checkbox" id="gcal-write" onchange="toggleGCalWrite()"/><span class="tog-sl"></span></label>
+    </div>
+    <div id="gcal-safe-mode" style="display:none;margin-top:10px;padding:10px 12px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r2);font-size:11px;color:var(--green2);line-height:1.6">
+      🔒 <strong>Testmodus aktiv:</strong> Google Kalender wird nur gelesen. Termine fließen automatisch in die App. Google wird <strong>nicht</strong> verändert.
     </div>
     <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
     <div id="gcal-preview-list"></div>
@@ -1116,8 +1124,9 @@ const DEFAULT_MS_FOLDER_URL='https://rheinsani-my.sharepoint.com/:f:/g/personal/
 const SCOPE_CALENDAR_READ='https://www.googleapis.com/auth/calendar.readonly';
 const SCOPE_CALENDAR_WRITE='https://www.googleapis.com/auth/calendar.events';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
-const SCOPE_ALL=SCOPE_CALENDAR_READ+' '+SCOPE_CALENDAR_WRITE+' '+SCOPE_CONTACTS;
-const GCAL_PUSH_ENABLED=false; // Nur Google → App, nie App → Google
+const SCOPE_GCAL_IMPORT=SCOPE_CALENDAR_READ+' '+SCOPE_CONTACTS;
+const SCOPE_GCAL_FULL=SCOPE_GCAL_IMPORT+' '+SCOPE_CALENDAR_WRITE;
+const GCAL_PUSH_ENABLED=false;
 const DEMO_PHONES=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
   '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
   '+49 174 1122334','+49 152 5544332','+49 171 0099887'];
@@ -1204,6 +1213,7 @@ let gcalToken=localStorage.getItem('tp_gcal_token')||null;
 let gcalConnected=!!gcalToken;
 let gcalShow=localStorage.getItem('tp_gcal_show')!=='false';
 let gcalSyncEnabled=localStorage.getItem('tp_gcal_sync')!=='false';
+let gcalWriteEnabled=localStorage.getItem('tp_gcal_write')==='true';
 let gcalImportAll=localStorage.getItem('tp_gcal_import_all')!=='false';
 let gcalCalendarId=localStorage.getItem('tp_gcal_cal')||'primary';
 const TAXI_KEYWORDS=['fahrt','fahrten','taxi','kranken','krankenfahrt','dialyse','chemo','chemotherapie','strahlen','strahlentherapie','transport','abholung','klinik','krankenhaus','charité','charite','patient','termin','kt ','kts','rollstuhl'];
@@ -2194,22 +2204,27 @@ function renderGCalModal(){
     hideGCalError();
   } else {
     document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Google Kalender verbunden</strong><br>
-       Nur Import: echte Google-Termine → App (Demo/TaxiPro-Termine werden ignoriert)<br>
-       <span style="color:var(--text3)">${syncedRides} verknüpft · ${gcalEvents.length} Termine geladen</span>`;
+       ${gcalWriteEnabled?'🔓 Import + Schreiben aktiv':'🔒 Nur Import (Testmodus): Google → App, Google bleibt unverändert'}<br>
+       <span style="color:var(--text3)">${syncedRides} verknüpft · ${gcalEvents.length} Termine geladen · Auto-Sync alle 2 Min.</span>`;
   }
   document.getElementById('gcal-connect-btn').style.display=connected?'none':'inline-flex';
   document.getElementById('gcal-refresh-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-disconnect-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-reset-btn').style.display='inline-flex';
-  document.getElementById('gcal-purge-btn').style.display=connected?'inline-flex':'none';
+  document.getElementById('gcal-purge-btn').style.display='none';
   document.getElementById('gcal-sync-toggle').style.display=connected?'flex':'none';
   document.getElementById('gcal-cal-select-wrap').style.display=connected?'block':'none';
   document.getElementById('gcal-import-toggle').style.display=connected?'flex':'none';
   document.getElementById('gcal-show-toggle').style.display=connected?'flex':'none';
+  document.getElementById('gcal-write-toggle').style.display=connected?'flex':'none';
+  document.getElementById('gcal-safe-mode').style.display=connected&&!gcalWriteEnabled?'block':'none';
   document.getElementById('gcal-sync-stats').style.display=connected?'block':'none';
   document.getElementById('gcal-sync').checked=gcalSyncEnabled;
   document.getElementById('gcal-import-all').checked=gcalImportAll;
   document.getElementById('gcal-show').checked=gcalShow;
+  const writeEl=document.getElementById('gcal-write');
+  if(writeEl) writeEl.checked=gcalWriteEnabled;
+  document.getElementById('gcal-restore-btn').style.display=(connected&&gcalWriteEnabled)?'inline-flex':'none';
   if(connected){
     const stats=document.getElementById('gcal-sync-stats');
     stats.innerHTML=`Letzter Sync: <strong>${gcalLastSyncStats.imported}</strong> neu · <strong>${gcalLastSyncStats.updated}</strong> aktualisiert · <strong>${gcalLastSyncStats.deleted}</strong> gelöscht<br>Kalender: <strong>${gcalCalendars.find(c=>c.id===gcalCalendarId)?.summary||gcalCalendarId}</strong>`;
@@ -2224,7 +2239,14 @@ function renderGCalCalendarSelect(){
   sel.innerHTML=gcalCalendars.map(c=>`<option value="${c.id}"${c.id===gcalCalendarId?' selected':''}>${c.summary}${c.primary?' (Haupt)':''}</option>`).join('');
 }
 
+function getGoogleScopes(){return gcalWriteEnabled?SCOPE_GCAL_FULL:SCOPE_GCAL_IMPORT;}
+function canWriteToGoogle(){return gcalWriteEnabled&&gcalConnected&&!!gcalToken;}
+
 async function gcalApi(path,method='GET',body=null){
+  if(method!=='GET'&&!canWriteToGoogle()){
+    toast('Google Schreiben nicht freigegeben (Testmodus)','warn');
+    return null;
+  }
   const res=await fetch(`https://www.googleapis.com/calendar/v3/${path}`,{
     method,headers:{Authorization:'Bearer '+gcalToken,'Content-Type':'application/json'},
     body:body?JSON.stringify(body):undefined
@@ -2241,7 +2263,7 @@ function startGCalOAuth(){
   }
   if(!window.google?.accounts?.oauth2){toast('Google API lädt… bitte warten','warn');setTimeout(startGCalOAuth,800);return;}
   hideGCalError();
-  if(!initGoogleTokenClient(SCOPE_ALL,async()=>{
+  if(!initGoogleTokenClient(getGoogleScopes(),async()=>{
     toast('Google verbunden – Kalender-Sync startet…');
     await loadGCalendars();
     updateGCalBtn();
@@ -2250,6 +2272,28 @@ function startGCalOAuth(){
     renderGCalModal();
   })) return;
   googleTokenClient.requestAccessToken({prompt:gcalToken?'':'consent'});
+}
+
+function toggleGCalWrite(){
+  const wantWrite=document.getElementById('gcal-write').checked;
+  if(wantWrite){
+    if(!confirm('App → Google Schreiben freigeben?\n\nDie App darf dann Termine in Google anlegen/ändern/löschen.\n\nNur aktivieren wenn du das wirklich willst.')){
+      document.getElementById('gcal-write').checked=false;
+      return;
+    }
+    gcalWriteEnabled=true;
+    localStorage.setItem('tp_gcal_write','true');
+    toast('Schreib-Freigabe aktiv – bitte Google neu autorisieren…');
+    googleTokenClient=null;
+    startGCalOAuth();
+  }else{
+    gcalWriteEnabled=false;
+    localStorage.setItem('tp_gcal_write','false');
+    toast('Testmodus: nur Google → App','ok');
+    googleTokenClient=null;
+    startGCalOAuth();
+  }
+  renderGCalModal();
 }
 
 async function loadGCalendars(){
@@ -2348,7 +2392,7 @@ function rideToGCalEvent(ride){
 }
 
 async function pushRideToGoogle(ride){
-  if(!GCAL_PUSH_ENABLED||!gcalConnected||!gcalToken||!gcalSyncEnabled) return false;
+  if(!canWriteToGoogle()||!GCAL_PUSH_ENABLED||!gcalSyncEnabled) return false;
   const body=rideToGCalEvent(ride);
   const cal=encodeURIComponent(gcalCalendarId);
   try{
@@ -2365,7 +2409,7 @@ async function pushRideToGoogle(ride){
 }
 
 async function deleteGoogleEvent(ride){
-  if(!GCAL_PUSH_ENABLED||!ride?.googleEventId||!gcalConnected) return;
+  if(!canWriteToGoogle()||!GCAL_PUSH_ENABLED||!ride?.googleEventId) return;
   const cal=encodeURIComponent(gcalCalendarId);
   await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ride.googleEventId)}`,'DELETE');
 }
@@ -2391,6 +2435,110 @@ async function fetchAllGCalEventsWide(){
   }
   if(!all.length) throw new Error('Keine Termine geladen – bitte neu verbinden');
   return all;
+}
+
+async function fetchAllGCalEventsIncludingDeleted(){
+  const now=new Date();
+  const timeMin=new Date(now);timeMin.setMonth(timeMin.getMonth()-12);
+  const timeMax=new Date(now);timeMax.setMonth(timeMax.getMonth()+18);
+  const cals=gcalCalendars.length?gcalCalendars:[{id:gcalCalendarId,summary:'primary'}];
+  let all=[];
+  for(const calInfo of cals){
+    const cal=encodeURIComponent(calInfo.id);
+    let pageToken='';
+    do{
+      let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin.toISOString())}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&showDeleted=true&maxResults=250`;
+      if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
+      const res=await gcalApi(url);
+      if(!res||!res.ok) continue;
+      const data=await res.json();
+      all=all.concat((data.items||[]).map(e=>({...e,_calId:calInfo.id})));
+      pageToken=data.nextPageToken||'';
+    }while(pageToken);
+  }
+  return all;
+}
+
+let gcalRestoreAbort=false;
+
+async function restoreOneGoogleEvent(ev){
+  const cal=encodeURIComponent(ev._calId||gcalCalendarId);
+  const id=encodeURIComponent(ev.id);
+  let res=await gcalApi(`calendars/${cal}/events/${id}`,'PATCH',{status:'confirmed'});
+  if(res&&(res.ok||res.status===200)) return true;
+  const body={summary:ev.summary||'Termin',start:ev.start,end:ev.end||ev.start,status:'confirmed'};
+  if(ev.location) body.location=ev.location;
+  if(ev.description) body.description=ev.description;
+  res=await gcalApi(`calendars/${cal}/events/${id}`,'PUT',body);
+  return !!(res&&res.ok);
+}
+
+async function recreateRideInGoogle(ride){
+  const body=rideToGCalEvent(ride);
+  const cal=encodeURIComponent(gcalCalendarId);
+  const res=await gcalApi(`calendars/${cal}/events`,'POST',body);
+  if(res&&res.ok){
+    const d=await res.json();
+    ride.googleEventId=d.id;
+    ride.googleUpdated=d.updated;
+    return true;
+  }
+  return false;
+}
+
+async function restoreGoogleCalendarEvents(){
+  if(!gcalConnected||!gcalToken){toast('Bitte zuerst Google Kalender verbinden','warn');openM('modal-gcal');return;}
+  if(!canWriteToGoogle()){toast('Erst „App → Google Schreiben freigeben“ aktivieren','warn');return;}
+  gcalRestoreAbort=false;
+  const statusEl=document.getElementById('gcal-purge-status');
+  if(statusEl){statusEl.style.display='block';statusEl.style.background='var(--blue-bg)';statusEl.style.borderColor='var(--blue-border)';statusEl.style.color='var(--blue2)';statusEl.textContent='Suche gelöschte Termine in Google Kalender…';}
+  openM('modal-gcal');
+  try{
+    const all=await fetchAllGCalEventsIncludingDeleted();
+    const cancelled=all.filter(e=>e.status==='cancelled'&&!isPrivateRealAppointment(e));
+    if(!cancelled.length){
+      if(statusEl) statusEl.textContent='Keine gelöschten Termine im Papierkorb gefunden. Versuche Fahrten aus App neu anzulegen…';
+    }else if(!confirm(`${cancelled.length} gelöschte Termine gefunden.\n\nAlle wiederherstellen? (Kann einige Minuten dauern)`)){
+      if(statusEl) statusEl.style.display='none';
+      return;
+    }
+    let restored=0,failed=0;
+    for(let i=0;i<cancelled.length;i++){
+      if(gcalRestoreAbort) break;
+      if(i%25===0&&statusEl) statusEl.textContent=`Stelle wieder her: ${i} / ${cancelled.length}… (${restored} OK)`;
+      if(await restoreOneGoogleEvent(cancelled[i])) restored++;
+      else failed++;
+      if(i%8===0) await new Promise(r=>setTimeout(r,120));
+    }
+    let recreated=0;
+    const ridesWithoutGoogle=rides.filter(r=>r.date&&!r.googleEventId&&r.type);
+    if(ridesWithoutGoogle.length){
+      if(statusEl) statusEl.textContent=`Erstelle ${ridesWithoutGoogle.length} Fahrten aus App neu in Google…`;
+      for(const ride of ridesWithoutGoogle){
+        if(gcalRestoreAbort) break;
+        if(await recreateRideInGoogle(ride)) recreated++;
+        await new Promise(r=>setTimeout(r,80));
+      }
+      if(recreated) save();
+    }
+    save();
+    await fetchGCalEvents();
+    renderCalendar();renderToday();updateCounts();renderMiniCal();
+    if(statusEl){
+      statusEl.innerHTML=`<strong>✅ Wiederherstellung abgeschlossen</strong><br>
+        ${restored} Termine aus Papierkorb wiederhergestellt${failed?` · ${failed} fehlgeschlagen`:''}${recreated?`<br>${recreated} Fahrten aus App neu in Google erstellt`:''}`;
+    }
+    toast(`✅ ${restored} Termine wiederhergestellt${recreated?`, ${recreated} neu erstellt`:''}`,'ok');
+    renderGCalModal();
+  }catch(e){
+    if(statusEl) statusEl.innerHTML=`<strong>Fehler:</strong> ${e.message||e}<br>Google neu verbinden und erneut versuchen.`;
+    toast('Wiederherstellung fehlgeschlagen','err');
+  }
+}
+
+function abortGCalRestore(){
+  gcalRestoreAbort=true;
+  toast('Wiederherstellung abgebrochen','warn');
 }
 
 async function purgeDemoFromGoogleCalendar(auto=false){
@@ -2620,7 +2768,7 @@ async function startGoogleOAuth(refreshOnly=false){
     refreshOnly=false;
   }
   if(!window.google?.accounts?.oauth2){toast('Google API lädt…','warn');setTimeout(()=>startGoogleOAuth(refreshOnly),800);return;}
-  if(!initGoogleTokenClient(SCOPE_ALL,async()=>{
+  if(!initGoogleTokenClient(getGoogleScopes(),async()=>{
     gcalConnected=true;
     localStorage.setItem('tp_gcal_token',gcalToken);
     toast('Google verbunden – Kontakte werden geladen…');
@@ -3635,7 +3783,7 @@ async function initMicrosoftCloud(){
 
 function trySilentGoogleRefresh(){
   if(!gcalToken||!window.google?.accounts?.oauth2) return;
-  initGoogleTokenClient(SCOPE_ALL,async()=>{await loadGCalendars();await fullGCalSync();});
+  initGoogleTokenClient(getGoogleScopes(),async()=>{await loadGCalendars();await fullGCalSync();});
   googleTokenClient.requestAccessToken({prompt:''});
 }
 
@@ -4134,9 +4282,7 @@ renderCalendar();
 renderCustomers();
 if(gcalConnected){
   setTimeout(trySilentGoogleRefresh,1500);
-  loadGCalendars().then(async()=>{
-    await fullGCalSync();
-  });
+  loadGCalendars().then(()=>fullGCalSync());
 }
 setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
 </script>
