@@ -175,6 +175,23 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .excel-panel-h{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
 .excel-file-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
 .excel-file-name{font-size:12px;color:var(--green2);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cust-docs-panel{margin-top:10px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
+.cust-docs-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.cust-docs-toolbar select{flex:1;min-width:120px}
+.cust-docs-toolbar input[type=text]{flex:2;min-width:140px}
+.cust-doc-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2)}
+.cust-doc-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--border);transition:.12s}
+.cust-doc-item:last-child{border-bottom:none}
+.cust-doc-item:hover{background:var(--bg4)}
+.cust-doc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--bg4)}
+.cust-doc-item.verordnung .cust-doc-icon{background:var(--blue-bg)}
+.cust-doc-item.genehmigung .cust-doc-icon{background:var(--green-bg)}
+.cust-doc-info{flex:1;min-width:0}
+.cust-doc-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-doc-meta{font-size:10px;color:var(--text3);margin-top:2px}
+.cust-doc-btns{display:flex;gap:4px;flex-shrink:0}
+.cust-doc-empty{padding:16px;text-align:center;font-size:11px;color:var(--text3);line-height:1.5}
+.cust-doc-hint{font-size:10px;color:var(--text3);margin-top:8px;line-height:1.55}
 .excel-detail-box{margin-top:12px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
 .excel-detail-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .cloud-step{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r2);font-size:12px;color:var(--text2);margin-bottom:4px;background:var(--bg3);border:1px solid var(--border)}
@@ -852,6 +869,31 @@ h1,h2,h3,h4{font-family:var(--font2)}
       </div>
     </div>
     <div class="fr"><label>Notiz</label><textarea id="c-note" rows="2" placeholder="Rollstuhl, Sauerstoff, Besonderheiten…"></textarea></div>
+    <hr class="fdiv"/>
+    <div class="fsec">📄 Verordnungen &amp; Genehmigungen</div>
+    <div class="cust-docs-panel">
+      <div style="font-size:11px;color:var(--text2);line-height:1.55;margin-bottom:10px">
+        Verordnungen und Genehmigungen scannen oder hochladen – pro Kunde ein eigener Ordner.
+        Mit Microsoft Cloud → automatisch in SharePoint unter <strong>Kunden-Unterlagen</strong>.
+      </div>
+      <div class="cust-docs-toolbar">
+        <select id="c-doc-type">
+          <option value="verordnung">📋 Verordnung</option>
+          <option value="genehmigung">✅ Genehmigung</option>
+          <option value="sonstiges">📎 Sonstiges</option>
+        </select>
+        <input type="text" id="c-doc-title" placeholder="Bezeichnung (z.B. Dialyse-Verordnung)"/>
+        <label class="btn btn-blue btn-sm" style="cursor:pointer;margin:0">
+          📷 Scannen / Hochladen
+          <input type="file" id="c-doc-file" accept="image/*,application/pdf" capture="environment" style="display:none" onchange="handleCustDocUpload(this)"/>
+        </label>
+      </div>
+      <div class="fr" style="margin-bottom:8px">
+        <input type="text" id="c-doc-search" placeholder="🔍 Dokumente durchsuchen…" oninput="renderCustDocs()" autocomplete="off"/>
+      </div>
+      <div class="cust-doc-list" id="c-doc-list"></div>
+      <div class="cust-doc-hint" id="c-doc-cloud-hint"></div>
+    </div>
     <hr class="fdiv"/>
     <div class="fsec">📊 Excel-Abrechnung (KTS / Rechnung)</div>
     <div class="excel-panel">
@@ -1716,7 +1758,9 @@ function filterContacts(list,q){
   return list.filter(c=>
     (c.fname+' '+c.lname).toLowerCase().includes(s)||
     (c.phone||'').includes(s)||(c.city||'').toLowerCase().includes(s)||
-    (c.org||'').toLowerCase().includes(s)||(c.street||'').toLowerCase().includes(s)
+    (c.org||'').toLowerCase().includes(s)||(c.street||'').toLowerCase().includes(s)||
+    (c.kk||'').toLowerCase().includes(s)||(c.vnr||'').toLowerCase().includes(s)||
+    (c.documents||[]).some(d=>(d.title||'').toLowerCase().includes(s)||(d.fileName||'').toLowerCase().includes(s)||docTypeLabel(d.type).toLowerCase().includes(s))
   );
 }
 
@@ -1785,6 +1829,7 @@ function buildCustCard(c,isGC=false){
   const tags=[`<span class="cc-tag ${typeClass}">${typeLabel}</span>`];
   if(c.zuzahlungStatus==='nein') tags.push(`<span class="cc-tag befreit">✓ Befreit</span>`);
   else if(c.type==='kts') tags.push(`<span class="cc-tag zuzahl">€ Zuzahlung</span>`);
+  if((c.documents||[]).length) tags.push(`<span class="cc-tag" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)">📄 ${c.documents.length}</span>`);
   const gcBanner=isGC?`<div class="cc-src">🔵 Google Kontakt</div>`:'';
   const avContent=c.photo?`<img src="${c.photo}" alt=""/>`:(initials||'?');
   return`<div class="cust-card${isGC?' gc-card':''}" onclick="${isGC?`openGCDetail('${c.id}')`:`openCustDetail('${c.id}')`}">
@@ -1828,8 +1873,11 @@ function openCustDetail(id){
   document.getElementById('c-hosp').value=c.stammHosp||'';
   document.getElementById('c-note').value=c.note||'';
   document.getElementById('c-delete-btn').style.display='inline-flex';
+  document.getElementById('c-doc-search').value='';
+  document.getElementById('c-doc-title').value='';
   onCTChange();
   updateCustomerExcelUI(c);
+  renderCustDocs();
   openM('modal-customer');
 }
 
@@ -2069,6 +2117,190 @@ function estKm(from,to){if(!from||!to) return '';return Math.round(4+Math.random
 function deleteCurrentRide(){deleteRide(editRideId);}
 
 // ═══════════════════════════════════════════════════════════════
+// KUNDEN-DOKUMENTE (Verordnungen / Genehmigungen)
+// ═══════════════════════════════════════════════════════════════
+const CUST_DOCS_ROOT='Kunden-Unterlagen';
+const CUST_DOC_IDB='taxipro_cust_docs_v1';
+
+function docTypeLabel(t){return t==='genehmigung'?'Genehmigung':t==='verordnung'?'Verordnung':'Sonstiges';}
+function docTypeIcon(t){return t==='genehmigung'?'✅':t==='verordnung'?'📋':'📎';}
+function docTypeFolder(t){return t==='genehmigung'?'Genehmigungen':t==='verordnung'?'Verordnungen':'Sonstiges';}
+function escDoc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function sanitizePathName(s){return (s||'').replace(/[<>:"/\\|?*]/g,'').replace(/\s+/g,' ').trim();}
+function custFolderName(c){return sanitizePathName(`${c.lname||''} ${c.fname||''}`.trim())||c.id;}
+function fmtFileSize(n){if(!n) return '';if(n<1024) return n+' B';if(n<1048576) return Math.round(n/1024)+' KB';return (n/1048576).toFixed(1)+' MB';}
+
+function openCustDocsDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(CUST_DOC_IDB,1);
+    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('docs')) req.result.createObjectStore('docs',{keyPath:'id'});};
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+async function storeCustDocBlob(id,blob){
+  const db=await openCustDocsDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('docs','readwrite');
+    tx.objectStore('docs').put({id,blob,updated:Date.now()});
+    tx.oncomplete=()=>res();
+    tx.onerror=()=>rej(tx.error);
+  });
+}
+async function getCustDocBlob(id){
+  const db=await openCustDocsDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('docs','readonly');
+    const req=tx.objectStore('docs').get(id);
+    req.onsuccess=()=>res(req.result?.blob||null);
+    req.onerror=()=>rej(req.error);
+  });
+}
+async function deleteCustDocBlob(id){
+  const db=await openCustDocsDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('docs','readwrite');
+    tx.objectStore('docs').delete(id);
+    tx.oncomplete=()=>res();
+    tx.onerror=()=>rej(tx.error);
+  });
+}
+
+function getCustomerById(id){return customers.find(c=>c.id===id);}
+
+function renderCustDocs(){
+  const listEl=document.getElementById('c-doc-list');
+  const hintEl=document.getElementById('c-doc-cloud-hint');
+  if(!listEl) return;
+  if(!editCustId){
+    listEl.innerHTML='<div class="cust-doc-empty">Kunde zuerst speichern – danach Verordnungen &amp; Genehmigungen scannen.</div>';
+    if(hintEl) hintEl.textContent='';
+    return;
+  }
+  const c=getCustomerById(editCustId);
+  const q=document.getElementById('c-doc-search')?.value?.trim().toLowerCase()||'';
+  let docs=[...(c?.documents||[])];
+  if(q) docs=docs.filter(d=>(d.title||'').toLowerCase().includes(q)||(d.fileName||'').toLowerCase().includes(q)||docTypeLabel(d.type).toLowerCase().includes(q));
+  docs.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.uploaded||'').localeCompare(a.uploaded||''));
+  if(!docs.length){
+    listEl.innerHTML='<div class="cust-doc-empty">Noch keine Dokumente.<br>📷 Verordnung oder Genehmigung scannen / hochladen.</div>';
+  }else{
+    listEl.innerHTML=docs.map(d=>`<div class="cust-doc-item ${d.type||'sonstiges'}">
+      <div class="cust-doc-icon">${docTypeIcon(d.type)}</div>
+      <div class="cust-doc-info">
+        <div class="cust-doc-title">${escDoc(d.title||d.fileName||docTypeLabel(d.type))}</div>
+        <div class="cust-doc-meta">${docTypeLabel(d.type)} · ${d.date||'–'} · ${fmtFileSize(d.size)}${d.msItemId?' · ☁️ SharePoint':''}</div>
+      </div>
+      <div class="cust-doc-btns">
+        <button class="btn btn-sm btn-blue" onclick="openCustDoc('${d.id}')" title="Öffnen">👁️</button>
+        ${d.webUrl?`<button class="btn btn-sm btn-secondary" onclick="window.open('${d.webUrl.replace(/'/g,'%27')}','_blank')" title="SharePoint">☁️</button>`:''}
+        <button class="btn btn-sm btn-danger" onclick="deleteCustDoc('${d.id}')" title="Löschen">🗑️</button>
+      </div>
+    </div>`).join('');
+  }
+  if(hintEl){
+    const name=c?custFolderName(c):'';
+    hintEl.innerHTML=msCloudReady()
+      ?`☁️ SharePoint-Ordner: <code>${CUST_DOCS_ROOT}/${name}/Verordnungen</code> &amp; <code>Genehmigungen</code>`
+      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openCloudModal()">Microsoft Cloud verbinden</span> für SharePoint-Backup';
+  }
+}
+
+async function handleCustDocUpload(input){
+  const file=input.files?.[0];
+  input.value='';
+  if(!file) return;
+  if(!editCustId){toast('Kunde zuerst speichern, dann Dokument hochladen','warn');return;}
+  const c=getCustomerById(editCustId);
+  if(!c) return;
+  const type=document.getElementById('c-doc-type')?.value||'verordnung';
+  const title=(document.getElementById('c-doc-title')?.value||'').trim();
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const now=new Date();
+  const stamp=fmtD(now)+'-'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0')+String(now.getSeconds()).padStart(2,'0');
+  const fileName=`${type}-${stamp}.${ext||'jpg'}`;
+  const doc={
+    id:uid(),type,title:title||docTypeLabel(type)+' '+fmtD(now),
+    fileName,date:fmtD(now),mime:file.type||'application/octet-stream',
+    size:file.size,uploaded:now.toISOString(),msDriveId:'',msItemId:'',webUrl:''
+  };
+  toast('Speichere Dokument…');
+  try{
+    await storeCustDocBlob(doc.id,file);
+    if(!c.documents) c.documents=[];
+    c.documents.push(doc);
+    save();
+    if(msCloudReady()){
+      try{
+        const item=await uploadCustDocToSharePoint(c,doc,file);
+        if(item){
+          doc.msDriveId=item.parentReference?.driveId||msFolderDriveId;
+          doc.msItemId=item.id;
+          doc.webUrl=item.webUrl||'';
+          save();
+        }
+      }catch(e){console.warn('SharePoint upload',e);toast('Lokal gespeichert – SharePoint-Upload fehlgeschlagen','warn');}
+    }
+    document.getElementById('c-doc-title').value='';
+    renderCustDocs();
+    renderCustomers();
+    toast('📄 Dokument gespeichert','ok');
+  }catch(e){
+    toast('Speichern fehlgeschlagen','err');
+  }
+}
+
+async function uploadCustDocToSharePoint(cust,doc,file){
+  const relPath=[CUST_DOCS_ROOT,custFolderName(cust),docTypeFolder(doc.type),doc.fileName].join('/');
+  const buf=await file.arrayBuffer();
+  return uploadMsFileAtPath(msFolderDriveId,msFolderItemId,relPath,buf,doc.mime);
+}
+
+async function uploadMsFileAtPath(driveId,parentItemId,relativePath,buf,contentType){
+  const token=await getMsToken();
+  const encoded=relativePath.split('/').map(encodeURIComponent).join('/');
+  const res=await fetch('https://graph.microsoft.com/v1.0/drives/'+driveId+'/items/'+parentItemId+':/'+encoded+':/content',{
+    method:'PUT',
+    headers:{Authorization:'Bearer '+token,'Content-Type':contentType||'application/octet-stream'},
+    body:buf
+  });
+  if(!res.ok) throw new Error('UPLOAD_FAIL');
+  return res.json();
+}
+
+async function openCustDoc(docId){
+  const c=getCustomerById(editCustId);
+  const doc=c?.documents?.find(d=>d.id===docId);
+  if(!doc){toast('Dokument nicht gefunden','warn');return;}
+  let blob=await getCustDocBlob(doc.id);
+  if(!blob&&doc.msDriveId&&doc.msItemId){
+    try{
+      toast('Lade aus SharePoint…');
+      const buf=await downloadMsFile(doc.msDriveId,doc.msItemId);
+      blob=new Blob([buf],{type:doc.mime||'application/octet-stream'});
+      await storeCustDocBlob(doc.id,blob);
+    }catch(e){toast('Download fehlgeschlagen','err');return;}
+  }
+  if(!blob){toast('Datei nicht verfügbar','err');return;}
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
+
+async function deleteCustDoc(docId){
+  if(!confirm('Dokument löschen?')) return;
+  const c=getCustomerById(editCustId);
+  if(!c?.documents) return;
+  const doc=c.documents.find(d=>d.id===docId);
+  c.documents=c.documents.filter(d=>d.id!==docId);
+  await deleteCustDocBlob(docId);
+  save();
+  renderCustDocs();
+  renderCustomers();
+  toast('Dokument gelöscht','warn');
+}
+
+// ═══════════════════════════════════════════════════════════════
 // CUSTOMER MODAL
 // ═══════════════════════════════════════════════════════════════
 function openCustomerModal(){
@@ -2080,6 +2312,9 @@ function openCustomerModal(){
   document.getElementById('c-delete-btn').style.display='none';
   onCTChange();
   updateCustomerExcelUI(null);
+  document.getElementById('c-doc-search').value='';
+  document.getElementById('c-doc-title').value='';
+  renderCustDocs();
   openM('modal-customer');
 }
 
@@ -2117,17 +2352,28 @@ function saveCustomer(){
     if(i!==-1){
       const prev=customers[i];
       data.excelFileName=prev.excelFileName;
+      data.documents=prev.documents||[];
+      data.msExcelDriveId=prev.msExcelDriveId;
+      data.msExcelItemId=prev.msExcelItemId;
       customers[i]={...prev,...data};
     }
     toast('Kunde aktualisiert');
   } else {
-    customers.push({...data,id:uid()});
+    customers.push({...data,id:uid(),documents:[]});
     toast('Kunde angelegt');
   }
   save();closeM('modal-customer');renderCustomers();updateCounts();
 }
 
-function deleteCurrentCustomer(){if(!confirm('Kunde löschen?')) return;customers=customers.filter(c=>c.id!==editCustId);save();closeM('modal-customer');renderCustomers();updateCounts();toast('Kunde gelöscht','warn');}
+async function deleteCurrentCustomer(){
+  if(!confirm('Kunde löschen?')) return;
+  const c=customers.find(x=>x.id===editCustId);
+  if(c?.documents?.length){
+    for(const d of c.documents) await deleteCustDocBlob(d.id);
+  }
+  customers=customers.filter(c=>c.id!==editCustId);
+  save();closeM('modal-customer');renderCustomers();updateCounts();toast('Kunde gelöscht','warn');
+}
 
 // ═══════════════════════════════════════════════════════════════
 // GOOGLE CONTACTS
@@ -2947,7 +3193,7 @@ document.getElementById('global-search').addEventListener('input',function(){
   const res=document.getElementById('search-results');
   if(!val||val.length<1){res.classList.remove('show');return;}
   const q=val.toLowerCase();
-  const matchC=c=>(c.fname+' '+c.lname).toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.city||'').toLowerCase().includes(q)||(c.org||'').toLowerCase().includes(q)||(c.street||'').toLowerCase().includes(q);
+  const matchC=c=>(c.fname+' '+c.lname).toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.city||'').toLowerCase().includes(q)||(c.org||'').toLowerCase().includes(q)||(c.street||'').toLowerCase().includes(q)||(c.documents||[]).some(d=>(d.title||'').toLowerCase().includes(q)||(d.fileName||'').toLowerCase().includes(q));
   const allContacts=sortContacts([
     ...customers.map(c=>({...c,_src:'cust'})),
     ...gcContacts.filter(gc=>!customers.some(c=>c.phone&&gc.phone&&c.phone===gc.phone)).map(c=>({...c,_src:'gc'}))
