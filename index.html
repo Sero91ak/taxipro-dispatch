@@ -852,7 +852,6 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-blue" id="gc-connect-btn" onclick="startGoogleOAuth()">🔵 Mit Google verbinden</button>
         <button class="btn btn-secondary" id="gc-refresh-btn" onclick="startGoogleOAuth(true)" style="display:none">🔄 Kontakte laden</button>
-        <button class="btn btn-secondary" id="gc-demo-btn" onclick="loadDemoGoogleContacts()">📋 Demo-Kontakte</button>
       </div>
       <div id="gc-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
     </div>
@@ -884,7 +883,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <div id="gcal-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
     </div>
     <div class="tog-row" id="gcal-sync-toggle" style="display:none">
-      <span class="tog-label">🔄 Zwei-Wege-Sync (App ↔ Google)</span>
+      <span class="tog-label">📥 Google-Termine in App importieren</span>
       <label class="tog"><input type="checkbox" id="gcal-sync" checked onchange="toggleGCalSync()"/><span class="tog-sl"></span></label>
     </div>
     <div class="fr" id="gcal-cal-select-wrap" style="display:none;margin-top:10px">
@@ -1011,9 +1010,10 @@ const HOSPITALS=[
 // GOOGLE API – Client ID hier eintragen (Cloud Console)
 // ═══════════════════════════════════════════════════════════════
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
-const SCOPE_CALENDAR='https://www.googleapis.com/auth/calendar';
+const SCOPE_CALENDAR='https://www.googleapis.com/auth/calendar.readonly';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
 const SCOPE_ALL=SCOPE_CALENDAR+' '+SCOPE_CONTACTS;
+const GCAL_PUSH_ENABLED=false; // Nur Google → App, nie App → Google
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
@@ -1510,6 +1510,7 @@ function buildCustRow(c,isGC=false){
     <div class="cr-rides${rcount?' has':''}">${rcount||'–'}</div>
     <div class="cr-btns">
       ${c.phone?`<button class="cr-btn" onclick="event.stopPropagation();window.open('tel:${c.phone}')" title="Anrufen">📞</button>`:''}
+      ${c.phone?`<button class="cr-btn" onclick="event.stopPropagation();openWhatsAppContact('${c.phone.replace(/'/g,"\\'")}')" title="WhatsApp">📱</button>`:''}
       <button class="cr-btn" onclick="event.stopPropagation();${isGC?`openGCDetail('${c.id}')`:`openRideForCust('${c.id}')`}" title="Fahrt">🚗</button>
     </div>
   </div>`;
@@ -1681,7 +1682,7 @@ function showRideDetail(id){
     ${r.km?`<div class="drow"><div class="drow-icon">📏</div><div><div class="drow-lbl">Distanz</div><div class="drow-val">ca. ${r.km} km</div></div></div>`:''}
     ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${r.zuzahlung==='nein'?'Befreit ✓':'Zuzahlung €'}</div></div></div>`:''}
     ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
-    ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Synchronisiert</div></div></div>`:''}
+    ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Aus Google importiert</div></div></div>`:''}
     ${r.source==='google'&&!r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Quelle</div><div class="drow-val">Importiert aus Google</div></div></div>`:''}
   `;
   document.getElementById('mrd-footer').innerHTML=`
@@ -1695,9 +1696,8 @@ function showRideDetail(id){
 }
 async function deleteRide(id){
   const r=rides.find(x=>x.id===id);if(!r) return;
-  const gcalNote=r.googleEventId&&gcalConnected&&gcalSyncEnabled?' Auch in Google Kalender.':'';
+  const gcalNote=r.source==='google'?' (Nur in der App – Google Kalender bleibt unverändert.)':'';
   if(!confirm(`Fahrt wirklich löschen?${gcalNote}`)) return;
-  if(r.googleEventId&&gcalConnected&&gcalSyncEnabled) await deleteGoogleEvent(r);
   rides=rides.filter(x=>x.id!==id);
   save();closeM('modal-ride-detail');closeM('modal-ride');renderCalendar();renderToday();updateCounts();renderMiniCal();toast('Fahrt gelöscht','warn');
 }
@@ -1798,14 +1798,6 @@ async function saveRide(){
     toast('Fahrt eingetragen');
   }
   save();
-  if(gcalConnected&&gcalSyncEnabled){
-    let synced=0;
-    for(const id of savedIds){
-      const r=rides.find(x=>x.id===id);
-      if(r&&await pushRideToGoogle(r)) synced++;
-    }
-    if(synced) toast(`📅 ${synced} in Google Kalender gespeichert`);
-  }
   closeM('modal-ride');renderCalendar();renderToday();updateCounts();renderMiniCal();
 }
 
@@ -1991,7 +1983,7 @@ function renderGCalModal(){
     let hint='';
     if(location.protocol==='file:') hint=`<div style="color:var(--red2);margin-top:8px">⚠️ Du hast die Datei direkt geöffnet. Stattdessen nutzen:<br><code style="color:var(--gold)">https://sero91ak.github.io/taxipro-dispatch/</code></div>`;
     else if(!urlOk) hint=`<div style="color:var(--yellow2);margin-top:8px">⚠️ Aktuelle URL: <code>${getAppOrigin()}</code><br>In Google Cloud Console unter OAuth-Client diese URL als <strong>JavaScript-Origin</strong> eintragen.</div>`;
-    document.getElementById('gcal-status-text').innerHTML=`Verbinde deinen Google Kalender (Zwei-Wege-Sync).<br><br>
+    document.getElementById('gcal-status-text').innerHTML=`Verbinde deinen Google Kalender (nur Import, keine Übertragung aus der App).<br><br>
       <strong>Checkliste:</strong><br>
       ✓ Calendar API aktiviert<br>
       ✓ OAuth-Client → JavaScript-Quelle: <code style="color:var(--gold)">${getOAuthOriginHint()}</code><br>
@@ -1999,10 +1991,9 @@ function renderGCalModal(){
       ✓ Popup-Blocker für diese Seite erlauben${hint}`;
     hideGCalError();
   } else {
-    document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Zwei-Wege-Sync aktiv</strong><br>
-       App → Google: Fahrten werden als Termine gespeichert<br>
-       Google → App: Termine werden als Fahrten importiert<br>
-       <span style="color:var(--text3)">${syncedRides} Fahrten verknüpft · ${gcalEvents.length} Termine geladen</span>`;
+    document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Google Kalender verbunden</strong><br>
+       Nur Import: Termine aus Google → App (keine Übertragung aus der App)<br>
+       <span style="color:var(--text3)">${syncedRides} verknüpft · ${gcalEvents.length} Termine geladen</span>`;
   }
   document.getElementById('gcal-connect-btn').style.display=connected?'none':'inline-flex';
   document.getElementById('gcal-refresh-btn').style.display=connected?'inline-flex':'none';
@@ -2143,7 +2134,7 @@ function rideToGCalEvent(ride){
 }
 
 async function pushRideToGoogle(ride){
-  if(!gcalConnected||!gcalToken||!gcalSyncEnabled) return false;
+  if(!GCAL_PUSH_ENABLED||!gcalConnected||!gcalToken||!gcalSyncEnabled) return false;
   const body=rideToGCalEvent(ride);
   const cal=encodeURIComponent(gcalCalendarId);
   try{
@@ -2160,7 +2151,7 @@ async function pushRideToGoogle(ride){
 }
 
 async function deleteGoogleEvent(ride){
-  if(!ride?.googleEventId||!gcalConnected) return;
+  if(!GCAL_PUSH_ENABLED||!ride?.googleEventId||!gcalConnected) return;
   const cal=encodeURIComponent(gcalCalendarId);
   await gcalApi(`calendars/${cal}/events/${encodeURIComponent(ride.googleEventId)}`,'DELETE');
 }
@@ -2219,13 +2210,6 @@ async function fetchGCalEvents(){
 async function fullGCalSync(){
   if(!gcalConnected) return;
   await fetchGCalEvents();
-  if(gcalSyncEnabled){
-    let pushed=0;
-    for(const r of rides){
-      if(!r.googleEventId&&await pushRideToGoogle(r)) pushed++;
-    }
-    if(pushed){save();toast(`📅 ${pushed} Fahrten nach Google übertragen`);}
-  }
   renderGCalModal();
 }
 
@@ -2333,7 +2317,6 @@ function renderGCModal(){
       ✓ Mit Google verbinden → Zugriff auf Kontakte erlauben`;
   document.getElementById('gc-connect-btn').style.display=connected&&hasContacts?'none':'inline-flex';
   document.getElementById('gc-refresh-btn').style.display=connected?'inline-flex':'none';
-  document.getElementById('gc-demo-btn').style.display=hasContacts?'none':'inline-flex';
   if(!hasContacts) hideGCError();
   renderGCPreview();
 }
@@ -2388,7 +2371,6 @@ async function fetchGoogleContacts(){
     save();updateCounts();hideGCError();
     const imported=importAllGCContacts(true);
     toast(`✅ ${gcContacts.length} Kontakte · ${imported} neue Kunden importiert`);
-    document.getElementById('gc-demo-btn').style.display='none';
     document.getElementById('gc-import-btn').style.display=gcContacts.length?'inline-flex':'none';
     document.getElementById('gc-connect-btn').style.display='none';
     document.getElementById('gc-refresh-btn').style.display='inline-flex';
@@ -2422,30 +2404,6 @@ function parseGooglePerson(p){
     org:(p.organizations||[])[0]?.name||'',photo:(p.photos||[])[0]?.url||'',
     source:'google',type:(p.organizations||[])[0]?.name?'firma':'privat'
   };
-}
-
-function loadDemoGoogleContacts(){
-  const demo=[
-    {id:'gc-'+uid(),fname:'Ahmed',lname:'Al-Rashidi',phone:'+49 151 9988776',email:'ahmed.r@gmail.com',street:'Kurfürstendamm 45',plz:'10709',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
-    {id:'gc-'+uid(),fname:'Ingrid',lname:'Hoffmann',phone:'+49 172 4433221',email:'i.hoffmann@web.de',street:'Schloßstraße 12',plz:'12163',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
-    {id:'gc-'+uid(),fname:'Karim',lname:'Benali',phone:'+49 160 7766554',email:'k.benali@gmail.com',street:'Hermannstraße 88',plz:'12049',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
-    {id:'gc-'+uid(),fname:'Rosa',lname:'Müller',phone:'+49 176 3322110',email:'rosamueller@t-online.de',street:'Alexanderplatz 5',plz:'10178',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
-    {id:'gc-'+uid(),fname:'Mehmet',lname:'Yilmaz',phone:'+49 163 8877665',email:'m.yilmaz@yahoo.de',street:'Kantstraße 33',plz:'10627',city:'Berlin',org:'Yilmaz GmbH',photo:'',source:'google',type:'firma'},
-    {id:'gc-'+uid(),fname:'Christa',lname:'Weber',phone:'+49 174 1122334',email:'christa.weber@gmx.de',street:'Potsdamer Str. 7',plz:'10785',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
-    {id:'gc-'+uid(),fname:'Fatima',lname:'Özdemir',phone:'+49 152 5544332',email:'fatima.o@gmail.com',street:'Wilmersdorfer Str. 22',plz:'10627',city:'Berlin',org:'',photo:'',source:'google',type:'privat'},
-    {id:'gc-'+uid(),fname:'Klaus',lname:'Bauer',phone:'+49 171 0099887',email:'k.bauer@berliner.de',street:'Friedrichstraße 101',plz:'10117',city:'Berlin',org:'Bauer Logistik',photo:'',source:'google',type:'firma'},
-  ];
-  // Merge – avoid duplicates by phone
-  const existingPhones=new Set([...customers,...gcContacts].map(c=>c.phone).filter(Boolean));
-  const toAdd=demo.filter(c=>!existingPhones.has(c.phone));
-  gcContacts.push(...toAdd);
-  save();
-  const imported=importAllGCContacts(true);
-  toast(`${toAdd.length} Kontakte geladen · ${imported} importiert`);
-  document.getElementById('gc-demo-btn').style.display='none';
-  document.getElementById('gc-import-btn').style.display='inline-flex';
-  updateCounts();
-  if(view==='gcontacts') renderGCView();
 }
 
 function isGCCustomerExists(gc){
@@ -2624,6 +2582,11 @@ function calcDist(){
 // ═══════════════════════════════════════════════════════════════
 // MAPS + WHATSAPP
 // ═══════════════════════════════════════════════════════════════
+function openWhatsAppContact(phone){
+  const n=(phone||'').replace(/\D/g,'');
+  if(!n){toast('Keine Telefonnummer','warn');return;}
+  window.open(`https://wa.me/${n}`,'_blank');
+}
 function openMaps(addr){window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`,'_blank');}
 function openMapsRoute(from,to){
   if(!to) return;
@@ -2876,15 +2839,27 @@ function toggleTheme(){
 // DEMO DATA ENTFERNEN
 // ═══════════════════════════════════════════════════════════════
 function purgeDemoData(){
-  const demoPhones=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665'];
+  const demoPhones=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
+    '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
+    '+49 174 1122334','+49 152 5544332','+49 171 0099887'];
   const demoDriverPhones=['+49 171 1112233','+49 172 4445566','+49 173 7778899'];
   const demoNotes=['Kardiologie','Dialyse','Chemo Zyklus 3','Folge-Untersuchung'];
-  const demoCustIds=customers.filter(c=>demoPhones.includes(c.phone)).map(c=>c.id);
-  const n=customers.length+rides.length+drivers.length;
-  customers=customers.filter(c=>!demoPhones.includes(c.phone));
-  rides=rides.filter(r=>!demoCustIds.includes(r.customerId)&&!demoNotes.includes(r.note));
+  const demoNames=[['Ahmed','Al-Rashidi'],['Ingrid','Hoffmann'],['Karim','Benali'],['Rosa','Müller'],
+    ['Mehmet','Yilmaz'],['Christa','Weber'],['Fatima','Özdemir'],['Klaus','Bauer']];
+  const isDemoContact=c=>demoPhones.includes(c.phone)||demoNames.some(([f,l])=>c.fname===f&&c.lname===l);
+  const demoCustIds=customers.filter(isDemoContact).map(c=>c.id);
+  const before=customers.length+rides.length+drivers.length+gcContacts.length;
+  gcContacts=gcContacts.filter(c=>!isDemoContact(c));
+  customers=customers.filter(c=>!isDemoContact(c));
   drivers=drivers.filter(d=>!demoDriverPhones.includes(d.phone));
-  if(customers.length+rides.length+drivers.length<n) save();
+  rides=rides.filter(r=>{
+    if(r.source==='google') return true;
+    if(demoCustIds.includes(r.customerId)) return false;
+    if(demoNotes.includes(r.note)) return false;
+    if((r.note||'').includes('── TaxiPro Fahrt ──')) return false;
+    return true;
+  });
+  if(customers.length+rides.length+drivers.length+gcContacts.length<before) save();
 }
 
 // ═══════════════════════════════════════════════════════════════
