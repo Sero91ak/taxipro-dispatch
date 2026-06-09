@@ -762,9 +762,11 @@ h1,h2,h3,h4{font-family:var(--font2)}
         Verbinde dein Google-Konto, um Telefonkontakte in TaxiPro zu synchronisieren. Kontakte erscheinen dann in der Suche und können direkt als Kunden übernommen werden.
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-blue" onclick="startGoogleOAuth()">🔵 Mit Google verbinden</button>
-        <button class="btn btn-secondary" id="gc-demo-btn" onclick="loadDemoGoogleContacts()">📋 Demo-Kontakte laden</button>
+        <button class="btn btn-blue" id="gc-connect-btn" onclick="startGoogleOAuth()">🔵 Mit Google verbinden</button>
+        <button class="btn btn-secondary" id="gc-refresh-btn" onclick="startGoogleOAuth(true)" style="display:none">🔄 Kontakte laden</button>
+        <button class="btn btn-secondary" id="gc-demo-btn" onclick="loadDemoGoogleContacts()">📋 Demo-Kontakte</button>
       </div>
+      <div id="gc-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
     </div>
     <div id="gc-preview-list"></div>
   </div>
@@ -1748,6 +1750,15 @@ function hideGCalError(){
   const el=document.getElementById('gcal-error-hint');
   if(el){el.style.display='none';el.innerHTML='';}
 }
+function showGCError(msg){
+  const el=document.getElementById('gc-error-hint');
+  if(!el) return;
+  el.style.display='block';el.innerHTML=msg;
+}
+function hideGCError(){
+  const el=document.getElementById('gc-error-hint');
+  if(el){el.style.display='none';el.innerHTML='';}
+}
 
 function googleOAuthErrorMsg(err){
   const t=(err?.type||err?.message||String(err||'')).toLowerCase();
@@ -1864,11 +1875,12 @@ function startGCalOAuth(){
   }
   if(!window.google?.accounts?.oauth2){toast('Google API lädt… bitte warten','warn');setTimeout(startGCalOAuth,800);return;}
   hideGCalError();
-  if(!initGoogleTokenClient(SCOPE_CALENDAR,async()=>{
-    toast('Google Kalender verbunden – Sync startet…');
+  if(!initGoogleTokenClient(SCOPE_ALL,async()=>{
+    toast('Google verbunden – Kalender-Sync startet…');
     await loadGCalendars();
     updateGCalBtn();
     await fullGCalSync();
+    await fetchGoogleContacts();
     renderGCalModal();
   })) return;
   googleTokenClient.requestAccessToken({prompt:gcalToken?'':'consent'});
@@ -2138,64 +2150,104 @@ function initiateGoogleSync(){openM('modal-gc');renderGCModal();}
 
 function renderGCModal(){
   const hasContacts=gcContacts.length>0;
+  const connected=!!gcalToken;
   document.getElementById('gc-status-text').innerHTML=hasContacts
-    ?`<strong>✅ ${gcContacts.length} Kontakte</strong> synchronisiert.<br>Wähle Kontakte aus und importiere sie als Kunden.`
-    :`Verbinde Google Kontakte mit <strong>Mit Google verbinden</strong>.<br><span style="color:var(--text3);font-size:11px">In Cloud Console auch <em>People API</em> aktivieren.</span>`;
+    ?`<strong>✅ ${gcContacts.length} Kontakte</strong> geladen.<br>Klicke Kontakte an → als Kunden importieren. In der Suche erscheinen sie automatisch.`
+    :`<strong>Google Kontakte verbinden</strong><br><br>
+      <strong>Checkliste:</strong><br>
+      ✓ <em>People API</em> in Cloud Console aktiviert<br>
+      ✓ OAuth-Origin: <code style="color:var(--gold)">${getOAuthOriginHint()}</code><br>
+      ✓ Testnutzer: <code>sero91ak@gmail.com</code><br>
+      ✓ Mit Google verbinden → Zugriff auf Kontakte erlauben`;
+  document.getElementById('gc-connect-btn').style.display=connected&&hasContacts?'none':'inline-flex';
+  document.getElementById('gc-refresh-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gc-demo-btn').style.display=hasContacts?'none':'inline-flex';
+  if(!hasContacts) hideGCError();
   renderGCPreview();
 }
 
-function startGoogleOAuth(){
+async function startGoogleOAuth(refreshOnly=false){
   if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID'){
     toast('Bitte zuerst GOOGLE_CLIENT_ID eintragen','warn');
     document.getElementById('gc-status-text').innerHTML=getGoogleSetupHTML('People API');
     return;
   }
-  if(location.protocol==='file:'){toast('App muss über localhost laufen','warn');return;}
-  if(gcalToken){fetchGoogleContacts();return;}
-  if(!window.google?.accounts?.oauth2){toast('Google API lädt…','warn');setTimeout(startGoogleOAuth,800);return;}
+  if(location.protocol==='file:'){
+    showGCError('Nutze: <code>'+getAppUrlHint()+'</code>');
+    toast('Bitte über HTTPS/localhost öffnen','warn');return;
+  }
+  hideGCError();
+  if(gcalToken){
+    const ok=await fetchGoogleContacts();
+    if(ok) return;
+    refreshOnly=false;
+  }
+  if(!window.google?.accounts?.oauth2){toast('Google API lädt…','warn');setTimeout(()=>startGoogleOAuth(refreshOnly),800);return;}
   if(!initGoogleTokenClient(SCOPE_ALL,async()=>{
+    gcalConnected=true;
+    localStorage.setItem('tp_gcal_token',gcalToken);
     toast('Google verbunden – Kontakte werden geladen…');
     await fetchGoogleContacts();
-    renderGCModal();updateCounts();
+    renderGCModal();updateCounts();updateGCalBtn();
   })) return;
-  googleTokenClient.requestAccessToken({prompt:'consent'});
+  googleTokenClient.requestAccessToken({prompt:refreshOnly?'':'consent'});
 }
 
 async function fetchGoogleContacts(){
-  if(!gcalToken){toast('Bitte zuerst mit Google verbinden','warn');return;}
+  if(!gcalToken){
+    showGCError('Zuerst <strong>Mit Google verbinden</strong> klicken.');
+    toast('Bitte zuerst mit Google verbinden','warn');return false;
+  }
   try{
     const url='https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers,emailAddresses,addresses,organizations,photos&pageSize=1000&sortOrder=LAST_MODIFIED_DESCENDING';
     const res=await fetch(url,{headers:{Authorization:'Bearer '+gcalToken}});
-    if(res.status===401){toast('Session abgelaufen – neu verbinden','warn');return;}
-    if(res.status===403){toast('People API aktivieren in Google Cloud Console','warn');return;}
+    if(res.status===401){
+      showGCError('Session abgelaufen – bitte neu verbinden.');
+      toast('Session abgelaufen','warn');return false;
+    }
+    if(res.status===403){
+      showGCError('<strong>People API nicht aktiv</strong><br>Cloud Console → Bibliothek → <em>People API</em> → Aktivieren.<br>Dann neu verbinden mit Kontakte-Zugriff.');
+      toast('People API aktivieren','warn');return false;
+    }
     if(!res.ok) throw new Error('API Fehler');
     const data=await res.json();
     const parsed=(data.connections||[]).map(parseGooglePerson).filter(Boolean);
-    const existingPhones=new Set([...customers,...gcContacts].map(c=>c.phone).filter(Boolean));
-    const toAdd=parsed.filter(c=>!existingPhones.has(c.phone));
-    gcContacts.push(...toAdd);
-    save();updateCounts();
-    toast(`${toAdd.length} neue Kontakte geladen (${gcContacts.length} gesamt)`);
+    gcContacts=parsed;
+    save();updateCounts();hideGCError();
+    toast(`✅ ${gcContacts.length} Kontakte geladen`);
     document.getElementById('gc-demo-btn').style.display='none';
-    document.getElementById('gc-import-btn').style.display='inline-flex';
-    renderGCPreview();
+    document.getElementById('gc-import-btn').style.display=gcContacts.length?'inline-flex':'none';
+    document.getElementById('gc-connect-btn').style.display='none';
+    document.getElementById('gc-refresh-btn').style.display='inline-flex';
+    renderGCPreview();renderGCModal();
     if(view==='gcontacts') renderGCView();
     const gcBtn=document.getElementById('gc-sync-btn');
-    if(gcContacts.length){gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length} Kontakte`;}
-  }catch(e){toast('Kontakte konnten nicht geladen werden','err');}
+    const nav=document.getElementById('nav-gc');
+    if(gcContacts.length){
+      gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length} Kontakte`;
+      nav.classList.add('connected');
+      document.getElementById('nb-gc').textContent=gcContacts.length;
+    }
+    return true;
+  }catch(e){
+    showGCError('Kontakte konnten nicht geladen werden. Neu verbinden.');
+    toast('Kontakte konnten nicht geladen werden','err');return false;
+  }
 }
 
 function parseGooglePerson(p){
   const name=p.names?.[0];if(!name) return null;
-  const phone=p.phoneNumbers?.[0]?.value||'';
-  const addr=p.addresses?.[0];
+  const phone=(p.phoneNumbers||[]).map(x=>x.value).find(Boolean)||'';
+  const addr=(p.addresses||[])[0];
+  const fname=name.givenName||name.displayName?.split(' ')[0]||'';
+  const lname=name.familyName||name.displayName?.split(' ').slice(1).join(' ')||'';
+  if(!fname&&!lname) return null;
   return{
-    id:'gc-'+uid(),fname:name.givenName||name.displayName?.split(' ')[0]||'',
-    lname:name.familyName||'',phone,email:p.emailAddresses?.[0]?.value||'',
+    id:'gc-'+(p.resourceName||uid()).replace(/[^a-z0-9]/gi,''),
+    fname,lname,phone,email:(p.emailAddresses||[])[0]?.value||'',
     street:addr?.streetAddress||'',plz:addr?.postalCode||'',city:addr?.city||'',
-    org:p.organizations?.[0]?.name||'',photo:p.photos?.[0]?.url||'',
-    source:'google',type:p.organizations?.[0]?.name?'firma':'privat'
+    org:(p.organizations||[])[0]?.name||'',photo:(p.photos||[])[0]?.url||'',
+    source:'google',type:(p.organizations||[])[0]?.name?'firma':'privat'
   };
 }
 
