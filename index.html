@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.min.js"></script>
 <style>
 :root,[data-theme="dark"]{
   --bg:#1a2433;--bg2:#222e3f;--bg3:#2a384c;--bg4:#33465c;--bg5:#3d5269;
@@ -114,6 +116,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .nav-badge{margin-left:auto;background:var(--bg4);border-radius:20px;padding:1px 7px;font-size:10px;color:var(--text2)}
 .nav-item.active .nav-badge{background:rgba(245,166,35,.2);color:var(--gold)}
 .nav-item.gc-item.connected{color:var(--green2)}
+#nav-cloud.connected{color:var(--green2)}
+#nav-cloud.connected .nav-badge{background:var(--green-bg);color:var(--green2)}
 .nav-item.gc-item.connected .nav-icon-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;margin-left:auto;margin-right:4px}
 
 /* VIEWS */
@@ -158,7 +162,23 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .sch-allday-item .sch-dot.privat{background:var(--green)}
 .sch-allday-item .sch-dot.gcal{background:var(--blue)}
 .sch-list{padding:4px 0;background:var(--bg)}
-.sch-row{display:grid;grid-template-columns:14px 54px 1fr auto;gap:0 12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;min-height:46px;background:var(--bg2)}
+.sch-row{display:grid;grid-template-columns:14px 54px 1fr auto auto;gap:0 8px;align-items:center;padding:11px 12px 11px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;min-height:46px;background:var(--bg2)}
+.sch-excel{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.excel-dir-row{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:2px}
+.excel-dir{width:26px;height:26px;border-radius:4px;font-size:11px;font-weight:700;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:.12s;border:1px solid transparent}
+.excel-dir:hover{background:var(--bg4);color:var(--text)}
+.excel-dir.on{background:var(--gold3);color:var(--gold);border-color:rgba(245,166,35,.35)}
+.excel-sync{width:32px;height:32px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);font-size:14px;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0}
+.excel-sync:hover{background:var(--bg4);border-color:var(--gold)}
+.excel-sync.done{background:var(--green-bg);border-color:var(--green-border);color:var(--green2)}
+.excel-sync.off{opacity:.45}
+.excel-panel{margin-top:10px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
+.excel-panel-h{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.excel-file-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+.excel-file-name{font-size:12px;color:var(--green2);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.excel-detail-box{margin-top:12px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
+.excel-detail-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.badge.excel-synced{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
 .sch-row:nth-child(even){background:var(--bg3)}
 .sch-row:hover{background:var(--bg4)!important}
 .sch-del{width:30px;height:30px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0;opacity:.45}
@@ -545,6 +565,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div class="nav-item" onclick="calFilterType('rechn')"><span class="nav-icon">🟡</span> Rechnungsfahrten</div>
   <div class="nav-item" onclick="calFilterType('privat')"><span class="nav-icon">🟢</span> Privatfahrten</div>
   <div class="nav-item" onclick="calFilterType('all')"><span class="nav-icon">📋</span> Alle</div>
+  <div class="nav-sec">Cloud</div>
+  <div class="nav-item" id="nav-cloud" onclick="openCloudModal()"><span class="nav-icon">☁️</span> Microsoft Cloud <span class="nav-badge" id="nb-cloud">–</span></div>
   <div class="nav-sec">Daten</div>
   <div class="nav-item" onclick="exportBackup()"><span class="nav-icon">💾</span> Backup speichern</div>
   <div class="nav-item" onclick="document.getElementById('import-file').click()"><span class="nav-icon">📂</span> Backup laden</div>
@@ -820,12 +842,78 @@ h1,h2,h3,h4{font-family:var(--font2)}
       </div>
     </div>
     <div class="fr"><label>Notiz</label><textarea id="c-note" rows="2" placeholder="Rollstuhl, Sauerstoff, Besonderheiten…"></textarea></div>
+    <hr class="fdiv"/>
+    <div class="fsec">📊 Excel-Abrechnung (KTS / Rechnung)</div>
+    <div class="excel-panel">
+      <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:8px">
+        Excel läuft über <strong>Microsoft Cloud</strong> (Sidebar → ☁️ Microsoft Cloud).
+        Datei wird automatisch nach Name + Jahr in SharePoint gesucht.
+      </div>
+      <div class="excel-file-row">
+        <button type="button" class="btn btn-blue btn-sm" onclick="openCloudModal()">☁️ Cloud einrichten</button>
+        <span class="excel-file-name" id="c-excel-name">–</span>
+      </div>
+      <div class="fr2 fr" style="margin-top:10px">
+        <div><label>Standard km</label><input type="number" id="c-excel-km" placeholder="z.B. 13" min="1" max="999"/></div>
+        <div><label>Standard Ziel (Fahrstrecke)</label><input type="text" id="c-excel-dest" placeholder="z.B. Marienhospital"/></div>
+      </div>
+      <div class="fr" style="margin-top:8px">
+        <label>Vorlagen-Typ</label>
+        <select id="c-excel-type">
+          <option value="kts">KTS-Bestätigung (monatliche Blätter)</option>
+          <option value="rechn">Rechnungsfahrt (gleiche Struktur)</option>
+        </select>
+      </div>
+    </div>
   </div>
   <div class="mfooter">
     <button class="btn btn-danger btn-sm" id="c-delete-btn" style="display:none;margin-right:auto" onclick="deleteCurrentCustomer()">🗑️</button>
     <button class="btn btn-secondary" onclick="closeM('modal-customer')">Abbrechen</button>
     <button class="btn btn-wa" id="c-wa-btn" onclick="shareCustomerWA()">📱 Teilen</button>
     <button class="btn btn-primary" onclick="saveCustomer()">💾 Speichern</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: MICROSOFT CLOUD (SharePoint live) ═══ -->
+<div class="overlay hidden" id="modal-cloud">
+<div class="modal">
+  <div class="mh"><h3>☁️ Microsoft Cloud – live online</h3><button class="mclose" onclick="closeM('modal-cloud')">✕</button></div>
+  <div class="mbody">
+    <div class="gc-panel">
+      <h4>Einmal einrichten – überall nutzen</h4>
+      <div class="gc-status" id="cloud-status-text">
+        Mit Microsoft anmelden → SharePoint-Ordner verknüpfen → Fahrten, Kunden und Excel laufen live in der Cloud.
+        Kein PC-Ordner, kein VPN, kein erneutes Anmelden (Token bleibt gespeichert).
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn btn-blue" id="ms-connect-btn" onclick="connectMicrosoft()">☁️ Mit Microsoft verbinden</button>
+        <button class="btn btn-secondary" id="ms-disconnect-btn" onclick="disconnectMicrosoft()" style="display:none">Trennen</button>
+      </div>
+      <div id="cloud-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
+    </div>
+    <div id="cloud-folder-section" style="display:none;margin-top:14px">
+      <div class="fsec">SharePoint-Ordner (Excel-Dateien)</div>
+      <div class="fr">
+        <label>Ordner-Link aus SharePoint einfügen</label>
+        <input type="url" id="ms-folder-url" placeholder="https://…sharepoint.com/…"/>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveMsFolderUrl()">📂 Ordner verknüpfen</button>
+      <div class="excel-file-name" id="ms-folder-status" style="margin-top:8px">–</div>
+    </div>
+    <div id="cloud-sync-section" style="display:none;margin-top:14px;padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);font-size:11px;color:var(--text2);line-height:1.6">
+      <strong>Cloud-Sync aktiv</strong><br>
+      <span id="cloud-sync-info">Fahrten &amp; Kunden werden automatisch in SharePoint gespeichert.</span>
+    </div>
+    <div id="cloud-setup-hint" style="margin-top:14px;padding:10px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r2);font-size:11px;color:var(--yellow2);line-height:1.65"></div>
+    <div id="cloud-client-section" style="margin-top:12px;display:none">
+      <div class="fr"><label>Azure Client-ID (einmalig)</label><input type="text" id="ms-client-id-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/></div>
+      <button class="btn btn-secondary btn-sm" onclick="saveMsClientId()">💾 Client-ID speichern</button>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-cloud')">Schließen</button>
+    <button class="btn btn-secondary" id="cloud-sync-now-btn" style="display:none" onclick="uploadCloudData(true)">🔄 Jetzt synchronisieren</button>
   </div>
 </div>
 </div>
@@ -1012,6 +1100,11 @@ const HOSPITALS=[
 // GOOGLE API – Client ID hier eintragen (Cloud Console)
 // ═══════════════════════════════════════════════════════════════
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
+// Microsoft Azure App – einmal in Azure Portal anlegen (siehe Cloud-Modal)
+const MS_CLIENT_ID=localStorage.getItem('tp_ms_client_id')||'YOUR_MS_CLIENT_ID';
+const MS_SCOPES=['User.Read','Files.ReadWrite.All','openid','profile','offline_access'];
+const MS_CLOUD_DATA_FILE='taxipro-dispatch-cloud.json';
+const DEFAULT_MS_FOLDER_URL='https://rheinsani-my.sharepoint.com/:f:/g/personal/info_meckenheim-taxi_de/IgAEMRi9xNRRR4XQxyREnb7WARV1NGCDWqr1gt0luDlVD28?e=nUu9zB';
 const SCOPE_CALENDAR_READ='https://www.googleapis.com/auth/calendar.readonly';
 const SCOPE_CALENDAR_WRITE='https://www.googleapis.com/auth/calendar.events';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
@@ -1114,6 +1207,7 @@ function save(){
   localStorage.setItem('tp_r',JSON.stringify(rides));
   localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
   localStorage.setItem('tp_d',JSON.stringify(drivers));
+  scheduleCloudSave();
 }
 
 function exportBackup(){
@@ -1372,7 +1466,8 @@ function renderDayV(container){
         const sync=r.googleEventId?' 📅':'';
         row.innerHTML=`<div class="sch-dot"></div><div class="sch-time">${r.time}</div>
           <div class="sch-body"><span class="sch-title">${name}</span>${code?`<span class="sch-code">${code}</span>`:''}
-          <span class="sch-addr">${addr}${sync}</span></div>
+          <span class="sch-addr">${addr}${sync}${r.excelSynced?' · ✅ Excel':''}</span></div>
+          ${buildExcelControlsHtml(r)}
           <button class="sch-del" title="Fahrt löschen" onclick="event.stopPropagation();deleteRide('${r.id}')">🗑️</button>`;
         row.onclick=()=>showRideDetail(r.id);
       } else {
@@ -1663,6 +1758,7 @@ function openCustDetail(id){
   document.getElementById('c-note').value=c.note||'';
   document.getElementById('c-delete-btn').style.display='inline-flex';
   onCTChange();
+  updateCustomerExcelUI(c);
   openM('modal-customer');
 }
 
@@ -1706,6 +1802,7 @@ function renderToday(){
       r.serieType?`<span class="badge serie">🔁 ${r.serieType}</span>`:'',
       r.reminder?`<span class="badge remind">🔔 ${r.reminderMin}min</span>`:'',
       r.zuzahlung==='nein'?`<span class="badge befreit">✓ Befreit</span>`:'',
+      r.excelSynced?`<span class="badge excel-synced">📊 Excel</span>`:'',
       dispatched?`<span class="dispatched-badge">✅ ${dispatched.fname} ${dispatched.lname}</span>`:''
     ].filter(Boolean).join('');
     const typeColor=r.type==='krank'?'var(--red2)':r.type==='privat'?'var(--green2)':'var(--yellow2)';
@@ -1713,7 +1810,8 @@ function renderToday(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
         <div style="font-size:21px;font-weight:700;font-family:var(--font2);color:${typeColor}">${r.time}</div>
         <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:11px;color:var(--text2)">📍 ${from}</div></div>
-        <div style="display:flex;gap:5px;flex-shrink:0">
+        <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
+          ${buildExcelControlsHtml(r)}
           <button class="cc-btn dispatch btn-sm" onclick="event.stopPropagation();openDriverPicker('${r.id}')" title="Fahrer zuweisen">🚀</button>
           <button class="cc-btn map btn-sm" onclick="event.stopPropagation();openMapsRoute('${from}','${r.to||''}')">🗺️</button>
           <button class="cc-btn wa btn-sm" onclick="event.stopPropagation();shareRideWAById('${r.id}')">📱</button>
@@ -1753,10 +1851,12 @@ function showRideDetail(id){
     ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
     ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Aus Google importiert</div></div></div>`:''}
     ${r.source==='google'&&!r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Quelle</div><div class="drow-val">Importiert aus Google</div></div></div>`:''}
+    ${buildExcelDetailHtml(r)}
   `;
   document.getElementById('mrd-footer').innerHTML=`
     <button class="btn btn-danger btn-sm" onclick="deleteRide('${id}')">🗑️ Löschen</button>
     <button class="btn btn-secondary btn-sm" onclick="editRide('${id}')">✏️</button>
+    ${isExcelRide(r)?`<button class="btn btn-sm btn-blue" onclick="syncRideToExcel('${id}')">${r.excelSynced?'🔄 Excel':'📊 Excel'}</button>`:''}
     <button class="btn btn-sm" style="background:var(--gold3);color:var(--gold);border:1px solid rgba(245,166,35,.3)" onclick="closeM('modal-ride-detail');openDriverPicker('${id}')">🚀 Fahrer</button>
     <button class="btn btn-wa btn-sm" onclick="shareRideWAById('${id}')">📱</button>
     <button class="btn btn-primary btn-sm" onclick="openMapsRoute('${from}','${r.to||''}')">🗺️ Navigation</button>
@@ -1849,6 +1949,7 @@ async function saveRide(){
     serie,reminder,reminderMin:document.getElementById('r-rem-min').value,
     serieType:serie?document.getElementById('r-serie-typ').value:'',
     km:estKm(from,to),localUpdated:Date.now(),
+    excelDir:(type==='krank'||type==='rechn')?'hin-rueck':undefined,
   };
   const savedIds=[];
   if(editRideId){
@@ -1906,7 +2007,9 @@ function openCustomerModal(){
   document.getElementById('c-birth').value='';
   document.getElementById('ct-kts').checked=true;document.getElementById('cz-ja').checked=true;
   document.getElementById('c-delete-btn').style.display='none';
-  onCTChange();openM('modal-customer');
+  onCTChange();
+  updateCustomerExcelUI(null);
+  openM('modal-customer');
 }
 
 function onCTChange(){
@@ -1933,11 +2036,18 @@ function saveCustomer(){
     zuzahlungStatus:document.querySelector('input[name="cz"]:checked')?.value||'ja',
     stammHosp:document.getElementById('c-hosp').value.trim(),
     note:document.getElementById('c-note').value.trim(),
+    excelKm:document.getElementById('c-excel-km').value.trim(),
+    excelDest:document.getElementById('c-excel-dest').value.trim(),
+    excelType:document.getElementById('c-excel-type').value||'kts',
     source:'app',
   };
   if(editCustId){
     const i=customers.findIndex(c=>c.id===editCustId);
-    if(i!==-1) customers[i]={...customers[i],...data};
+    if(i!==-1){
+      const prev=customers[i];
+      data.excelFileName=prev.excelFileName;
+      customers[i]={...prev,...data};
+    }
     toast('Kunde aktualisiert');
   } else {
     customers.push({...data,id:uid()});
@@ -2986,6 +3096,836 @@ function toggleTheme(){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// MICROSOFT CLOUD (SharePoint live – Excel + App-Daten)
+// ═══════════════════════════════════════════════════════════════
+let msalInstance=null;
+let msConnected=false;
+let msFolderShareUrl=localStorage.getItem('tp_ms_folder_url')||DEFAULT_MS_FOLDER_URL;
+let msFolderDriveId=localStorage.getItem('tp_ms_folder_drive')||'';
+let msFolderItemId=localStorage.getItem('tp_ms_folder_item')||'';
+let msCloudDataDriveId=localStorage.getItem('tp_ms_data_drive')||'';
+let msCloudDataItemId=localStorage.getItem('tp_ms_data_item')||'';
+let msCloudSaveTimer=null;
+let msCloudLastSync=localStorage.getItem('tp_ms_last_sync')||'';
+
+function getMsRedirectUri(){
+  if(location.host==='sero91ak.github.io') return 'https://sero91ak.github.io/taxipro-dispatch/';
+  if(location.protocol==='file:') return 'http://localhost:8080/taxipro-dispatch/';
+  return location.origin+location.pathname;
+}
+
+function msCloudReady(){return msConnected&&!!msFolderDriveId&&!!msFolderItemId;}
+
+function getMsSetupHTML(){
+  if(MS_CLIENT_ID&&MS_CLIENT_ID!=='YOUR_MS_CLIENT_ID') return '';
+  return `<strong>Einmalige Azure-Einrichtung (5 Min.):</strong><br>
+    1. <a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" style="color:var(--blue2)">Azure Portal → App-Registrierungen</a> → Neue Registrierung<br>
+    2. Plattform: <strong>Single-Page Application</strong> → URI: <code style="color:var(--gold)">${getMsRedirectUri()}</code><br>
+    3. API: <em>Microsoft Graph → Files.ReadWrite.All, User.Read</em> → Admin-Zustimmung erteilen<br>
+    4. Client-ID unten eintragen und speichern`;
+}
+
+function saveMsClientId(){
+  const id=document.getElementById('ms-client-id-input')?.value?.trim();
+  if(!id){toast('Client-ID eingeben','warn');return;}
+  localStorage.setItem('tp_ms_client_id',id);
+  toast('Client-ID gespeichert – Seite wird neu geladen…');
+  setTimeout(()=>location.reload(),800);
+}
+
+function showCloudError(msg){
+  const el=document.getElementById('cloud-error-hint');
+  if(el){el.style.display='block';el.innerHTML=msg;}
+}
+function hideCloudError(){
+  const el=document.getElementById('cloud-error-hint');
+  if(el){el.style.display='none';el.innerHTML='';}
+}
+
+function initMsal(){
+  if(!window.msal||MS_CLIENT_ID==='YOUR_MS_CLIENT_ID') return false;
+  if(msalInstance) return true;
+  msalInstance=new msal.PublicClientApplication({
+    auth:{clientId:MS_CLIENT_ID,authority:'https://login.microsoftonline.com/common',redirectUri:getMsRedirectUri()},
+    cache:{cacheLocation:'localStorage',storeAuthStateInCookie:false}
+  });
+  return true;
+}
+
+async function getMsAccount(){
+  if(!msalInstance) return null;
+  const accounts=msalInstance.getAllAccounts();
+  return accounts[0]||null;
+}
+
+async function getMsToken(){
+  if(!initMsal()) throw new Error('MS_NOT_CONFIGURED');
+  const account=await getMsAccount();
+  if(!account) throw new Error('MS_NOT_CONNECTED');
+  try{
+    const r=await msalInstance.acquireTokenSilent({scopes:MS_SCOPES,account});
+    return r.accessToken;
+  }catch(e){
+    const r=await msalInstance.acquireTokenPopup({scopes:MS_SCOPES,account});
+    return r.accessToken;
+  }
+}
+
+async function msGraph(path,opts={}){
+  const token=await getMsToken();
+  const url=path.startsWith('http')?path:'https://graph.microsoft.com/v1.0'+path;
+  const res=await fetch(url,{...opts,headers:{Authorization:'Bearer '+token,...(opts.headers||{})}});
+  if(res.status===401){msConnected=false;updateCloudUI();throw new Error('MS_AUTH');}
+  return res;
+}
+
+function encodeShareUrl(url){
+  const b64=btoa(unescape(encodeURIComponent(url.split('?')[0]))).replace(/=+$/,'').replace(/\//g,'_').replace(/\+/g,'-');
+  return 'u!'+b64;
+}
+
+async function connectMicrosoft(){
+  if(MS_CLIENT_ID==='YOUR_MS_CLIENT_ID'){
+    showCloudError(getMsSetupHTML());
+    toast('Bitte zuerst Microsoft Client-ID eintragen','warn');
+    openCloudModal();return;
+  }
+  if(!initMsal()){toast('Microsoft API lädt…','warn');return;}
+  hideCloudError();
+  try{
+    await msalInstance.handleRedirectPromise();
+    let account=await getMsAccount();
+    if(!account){
+      const r=await msalInstance.loginPopup({scopes:MS_SCOPES,prompt:'select_account'});
+      account=r.account;
+    }
+    msConnected=!!account;
+    updateCloudUI();
+    toast('Microsoft verbunden ☁️');
+    if(msFolderShareUrl) await saveMsFolderUrl(true);
+    await loadCloudData();
+    await uploadCloudData(true);
+  }catch(e){
+    if(e?.errorCode!=='user_cancelled'&&e?.name!=='BrowserAuthError'){
+      showCloudError('Anmeldung fehlgeschlagen. Pop-ups erlauben und erneut versuchen.');
+      toast('Microsoft-Anmeldung fehlgeschlagen','err');
+    }
+  }
+}
+
+function disconnectMicrosoft(){
+  if(msalInstance){
+    const acc=msalInstance.getAllAccounts()[0];
+    if(acc) msalInstance.logoutPopup({account:acc});
+  }
+  msConnected=false;
+  updateCloudUI();
+  toast('Microsoft getrennt','warn');
+}
+
+async function saveMsFolderUrl(silent=false){
+  const url=(document.getElementById('ms-folder-url')?.value||msFolderShareUrl||'').trim();
+  if(!url){if(!silent) toast('SharePoint-Link einfügen','warn');return;}
+  if(!msConnected){if(!silent) toast('Zuerst mit Microsoft verbinden','warn');return;}
+  try{
+    msFolderShareUrl=url;
+    localStorage.setItem('tp_ms_folder_url',url);
+    const shareId=encodeShareUrl(url);
+    const res=await msGraph('/shares/'+shareId+'/driveItem');
+    if(!res.ok) throw new Error('Ordner nicht gefunden');
+    const item=await res.json();
+    msFolderDriveId=item.parentReference?.driveId||item.driveId||'';
+    msFolderItemId=item.id;
+    localStorage.setItem('tp_ms_folder_drive',msFolderDriveId);
+    localStorage.setItem('tp_ms_folder_item',msFolderItemId);
+    await ensureCloudDataFile();
+    updateCloudUI();
+    if(!silent) toast('SharePoint-Ordner verknüpft ✓');
+  }catch(e){
+    if(!silent) toast('SharePoint-Ordner konnte nicht geöffnet werden','err');
+  }
+}
+
+async function listMsFolderChildren(driveId,itemId){
+  let items=[],path='/drives/'+driveId+'/items/'+itemId+'/children?$top=200&select=id,name,folder,file';
+  while(path){
+    const res=await msGraph(path);
+    if(!res.ok) break;
+    const data=await res.json();
+    items.push(...(data.value||[]));
+    path=data['@odata.nextLink']?data['@odata.nextLink'].replace('https://graph.microsoft.com/v1.0',''):null;
+  }
+  return items;
+}
+
+async function findCustomerExcelInCloud(cust,year){
+  if(!msCloudReady()||!cust?.fname||!cust?.lname) return null;
+  if(cust.msExcelItemId&&cust.msExcelDriveId){
+    return{name:cust.excelFileName||'',driveId:cust.msExcelDriveId,itemId:cust.msExcelItemId};
+  }
+  const queue=[{driveId:msFolderDriveId,itemId:msFolderItemId,depth:0}];
+  let best=null,bestScore=0;
+  while(queue.length){
+    const cur=queue.shift();
+    if(cur.depth>6) continue;
+    const children=await listMsFolderChildren(cur.driveId,cur.itemId);
+    for(const ch of children){
+      if(ch.folder) queue.push({driveId:cur.driveId,itemId:ch.id,depth:cur.depth+1});
+      else if(ch.name?.toLowerCase().endsWith('.xlsx')&&!ch.name.startsWith('~$')){
+        const sc=scoreExcelFileName(ch.name,cust,year);
+        if(sc>bestScore){bestScore=sc;best={name:ch.name,driveId:cur.driveId,itemId:ch.id};}
+      }
+    }
+    if(bestScore>=100) break;
+  }
+  if(bestScore<60) return null;
+  const i=customers.findIndex(c=>c.id===cust.id);
+  if(i!==-1){
+    customers[i].excelFileName=best.name;
+    customers[i].msExcelDriveId=best.driveId;
+    customers[i].msExcelItemId=best.itemId;
+    customers[i].excelAutoLinked=true;
+    save();
+  }
+  return best;
+}
+
+async function downloadMsFile(driveId,itemId){
+  const res=await msGraph('/drives/'+driveId+'/items/'+itemId+'/content');
+  if(!res.ok) throw new Error('DOWNLOAD_FAIL');
+  return res.arrayBuffer();
+}
+
+async function uploadMsFile(driveId,itemId,buf){
+  const token=await getMsToken();
+  const res=await fetch('https://graph.microsoft.com/v1.0/drives/'+driveId+'/items/'+itemId+'/content',{
+    method:'PUT',
+    headers:{Authorization:'Bearer '+token,'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
+    body:buf
+  });
+  if(!res.ok) throw new Error('UPLOAD_FAIL');
+}
+
+async function writeRideToExcelCloud(ride,cust){
+  const fileInfo=await findCustomerExcelInCloud(cust,ride.date.slice(0,4));
+  if(!fileInfo) throw new Error('NO_HANDLE');
+  const buf=await downloadMsFile(fileInfo.driveId,fileInfo.itemId);
+  const wb=XLSX.read(buf,{type:'array',cellDates:true});
+  const sheetName=findKtsSheet(wb,ride.date);
+  if(!sheetName) throw new Error('NO_SHEET');
+  const ws=wb.Sheets[sheetName];
+  let row=findTripRow(ws,ride.date);
+  if(!row){row=nextTripRow(ws);if(!row) throw new Error('NO_ROW');setCell(ws,'A'+row,nextTripNr(ws));}
+  applyTripToSheet(ws,row,ride,cust);
+  const out=XLSX.write(wb,{bookType:'xlsx',type:'array',cellDates:true});
+  await uploadMsFile(fileInfo.driveId,fileInfo.itemId,out);
+  return{sheetName,row,fileName:fileInfo.name};
+}
+
+function buildCloudPayload(){
+  return{version:2,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,
+    settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}};
+}
+
+async function ensureCloudDataFile(){
+  if(!msCloudReady()) return;
+  if(msCloudDataItemId&&msCloudDataDriveId) return;
+  const children=await listMsFolderChildren(msFolderDriveId,msFolderItemId);
+  const existing=children.find(c=>c.name===MS_CLOUD_DATA_FILE);
+  if(existing){
+    msCloudDataDriveId=msFolderDriveId;
+    msCloudDataItemId=existing.id;
+  }else{
+    const token=await getMsToken();
+    const body=JSON.stringify(buildCloudPayload(),null,2);
+    const res=await fetch('https://graph.microsoft.com/v1.0/drives/'+msFolderDriveId+'/items/'+msFolderItemId+':/'+MS_CLOUD_DATA_FILE+':/content',{
+      method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body
+    });
+    if(!res.ok) throw new Error('CLOUD_CREATE');
+    const item=await res.json();
+    msCloudDataDriveId=msFolderDriveId;
+    msCloudDataItemId=item.id;
+  }
+  localStorage.setItem('tp_ms_data_drive',msCloudDataDriveId);
+  localStorage.setItem('tp_ms_data_item',msCloudDataItemId);
+}
+
+async function uploadCloudData(showToast=false){
+  if(!msCloudReady()) return;
+  try{
+    await ensureCloudDataFile();
+    const token=await getMsToken();
+    const body=JSON.stringify(buildCloudPayload(),null,2);
+    const res=await fetch('https://graph.microsoft.com/v1.0/drives/'+msCloudDataDriveId+'/items/'+msCloudDataItemId+'/content',{
+      method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body
+    });
+    if(!res.ok) throw new Error('upload');
+    msCloudLastSync=new Date().toISOString();
+    localStorage.setItem('tp_ms_last_sync',msCloudLastSync);
+    updateCloudUI();
+    if(showToast) toast('☁️ Cloud synchronisiert');
+  }catch(e){if(showToast) toast('Cloud-Sync fehlgeschlagen','err');}
+}
+
+async function loadCloudData(){
+  if(!msCloudReady()) return;
+  try{
+    await ensureCloudDataFile();
+    const res=await msGraph('/drives/'+msCloudDataDriveId+'/items/'+msCloudDataItemId+'/content');
+    if(!res.ok) return;
+    const data=await res.json();
+    if(!data?.rides&&!data?.customers) return;
+    const localTs=localStorage.getItem('tp_local_saved')||'';
+    if(data.exported&&localTs&&data.exported<=localTs) return;
+    customers=data.customers||customers;
+    rides=data.rides||rides;
+    gcContacts=data.gcContacts||gcContacts;
+    drivers=data.drivers||drivers;
+    saveLocalOnly();
+    localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
+    renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();
+    toast('☁️ Daten aus Cloud geladen');
+  }catch(e){}
+}
+
+function saveLocalOnly(){
+  localStorage.setItem('tp_c',JSON.stringify(customers));
+  localStorage.setItem('tp_r',JSON.stringify(rides));
+  localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
+  localStorage.setItem('tp_d',JSON.stringify(drivers));
+  localStorage.setItem('tp_local_saved',new Date().toISOString());
+}
+
+function scheduleCloudSave(){
+  localStorage.setItem('tp_local_saved',new Date().toISOString());
+  if(!msCloudReady()) return;
+  clearTimeout(msCloudSaveTimer);
+  msCloudSaveTimer=setTimeout(()=>uploadCloudData(false),2500);
+}
+
+function updateCloudUI(){
+  const connected=msConnected&&!!(msalInstance?.getAllAccounts()?.length);
+  msConnected=connected;
+  const badge=document.getElementById('nb-cloud');
+  const nav=document.getElementById('nav-cloud');
+  if(badge) badge.textContent=msCloudReady()?'✓':connected?'◐':'–';
+  if(nav) nav.classList.toggle('connected',msCloudReady());
+  const connBtn=document.getElementById('ms-connect-btn');
+  const discBtn=document.getElementById('ms-disconnect-btn');
+  const folderSec=document.getElementById('cloud-folder-section');
+  const syncSec=document.getElementById('cloud-sync-section');
+  const syncBtn=document.getElementById('cloud-sync-now-btn');
+  const statusEl=document.getElementById('cloud-status-text');
+  const folderStatus=document.getElementById('ms-folder-status');
+  const syncInfo=document.getElementById('cloud-sync-info');
+  const setupHint=document.getElementById('cloud-setup-hint');
+  const clientSec=document.getElementById('cloud-client-section');
+  if(setupHint) setupHint.innerHTML=getMsSetupHTML();
+  if(clientSec) clientSec.style.display=(MS_CLIENT_ID==='YOUR_MS_CLIENT_ID')?'block':'none';
+  if(connBtn) connBtn.style.display=connected?'none':'inline-flex';
+  if(discBtn) discBtn.style.display=connected?'inline-flex':'none';
+  if(folderSec) folderSec.style.display=connected?'block':'none';
+  if(syncSec) syncSec.style.display=msCloudReady()?'block':'none';
+  if(syncBtn) syncBtn.style.display=msCloudReady()?'inline-flex':'none';
+  const urlInput=document.getElementById('ms-folder-url');
+  if(urlInput&&!urlInput.value) urlInput.value=msFolderShareUrl;
+  if(statusEl){
+    statusEl.textContent=msCloudReady()
+      ?'✅ Live online – Excel & Fahrten laufen über SharePoint. Von überall mit Browser nutzen.'
+      :connected?'Microsoft verbunden – jetzt SharePoint-Ordner-Link einfügen und verknüpfen.':
+      'Einmal Microsoft verbinden → SharePoint-Ordner verknüpfen → fertig.';
+  }
+  if(folderStatus){
+    folderStatus.textContent=msCloudReady()?('✅ Ordner aktiv · '+msFolderShareUrl.slice(0,60)+'…'):'Ordner noch nicht verknüpft';
+    folderStatus.style.color=msCloudReady()?'var(--green2)':'var(--text3)';
+  }
+  if(syncInfo&&msCloudLastSync) syncInfo.textContent='Letzter Sync: '+msCloudLastSync.slice(0,19).replace('T',' ')+' · '+rides.length+' Fahrten · '+customers.length+' Kunden';
+}
+
+function openCloudModal(){
+  updateCloudUI();
+  openM('modal-cloud');
+}
+
+async function initMicrosoftCloud(){
+  if(!initMsal()){updateCloudUI();return;}
+  try{
+    await msalInstance.initialize();
+    await msalInstance.handleRedirectPromise();
+    msConnected=!!(await getMsAccount());
+    if(msConnected){
+      if(msFolderShareUrl&&!msFolderDriveId) await saveMsFolderUrl(true);
+      if(msCloudReady()) await loadCloudData();
+    }
+    updateCloudUI();
+  }catch(e){updateCloudUI();}
+}
+
+function trySilentGoogleRefresh(){
+  if(!gcalToken||!window.google?.accounts?.oauth2) return;
+  initGoogleTokenClient(SCOPE_ALL,async()=>{await loadGCalendars();await fullGCalSync();});
+  googleTokenClient.requestAccessToken({prompt:''});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXCEL-INTEGRATION (KTS / Rechnungsfahrten)
+// ═══════════════════════════════════════════════════════════════
+const EXCEL_DIR_LABELS={hin:'Hinfahrt',rueck:'Rückfahrt','hin-rueck':'Hin- und Rückfahrt'};
+const EXCEL_IDB='taxipro_excel_v2';
+let excelHandles=new Map();
+let excelFolderHandle=null;
+let excelFolderName=localStorage.getItem('tp_excel_folder_name')||'';
+
+function excelSupported(){return 'showOpenFilePicker' in window && typeof XLSX!=='undefined';}
+function excelFolderSupported(){return 'showDirectoryPicker' in window;}
+
+function openExcelDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(EXCEL_IDB,2);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains('handles')) db.createObjectStore('handles',{keyPath:'customerId'});
+      if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'key'});
+    };
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+async function storeExcelMeta(key,val){
+  const db=await openExcelDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('meta','readwrite');
+    tx.objectStore('meta').put({key,...val});
+    tx.oncomplete=()=>res();
+    tx.onerror=()=>rej(tx.error);
+  });
+}
+async function getExcelMeta(key){
+  const db=await openExcelDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('meta','readonly');
+    const req=tx.objectStore('meta').get(key);
+    req.onsuccess=()=>res(req.result||null);
+    req.onerror=()=>rej(req.error);
+  });
+}
+async function storeExcelHandle(customerId,handle){
+  const db=await openExcelDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('handles','readwrite');
+    tx.objectStore('handles').put({customerId,handle});
+    tx.oncomplete=()=>{excelHandles.set(customerId,handle);res();};
+    tx.onerror=()=>rej(tx.error);
+  });
+}
+async function removeExcelHandle(customerId){
+  const db=await openExcelDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('handles','readwrite');
+    tx.objectStore('handles').delete(customerId);
+    tx.oncomplete=()=>{excelHandles.delete(customerId);res();};
+    tx.onerror=()=>rej(tx.error);
+  });
+}
+async function restoreExcelHandles(){
+  if(!excelSupported()) return;
+  try{
+    const db=await openExcelDB();
+    const all=await new Promise((res,rej)=>{
+      const tx=db.transaction('handles','readonly');
+      const req=tx.objectStore('handles').getAll();
+      req.onsuccess=()=>res(req.result||[]);
+      req.onerror=()=>rej(req.error);
+    });
+    for(const row of all){
+      if(row?.handle) excelHandles.set(row.customerId,row.handle);
+    }
+    const meta=await getExcelMeta('excelRootFolder');
+    if(meta?.handle){
+      excelFolderHandle=meta.handle;
+      excelFolderName=meta.name||excelFolderName;
+    }
+    updateExcelFolderBadge();
+  }catch(e){console.warn('Excel handles restore',e);}
+}
+
+function updateExcelFolderBadge(){
+  const el=document.getElementById('nb-excel-folder');
+  if(el) el.textContent=excelFolderHandle?'✓':'–';
+  const nav=document.getElementById('nav-excel-folder');
+  if(nav) nav.classList.toggle('connected',!!excelFolderHandle);
+}
+
+function updateExcelFolderUI(){
+  const nameEl=document.getElementById('excel-folder-name');
+  const unlinkBtn=document.getElementById('excel-folder-unlink-btn');
+  const statusEl=document.getElementById('excel-folder-status');
+  if(!nameEl) return;
+  if(excelFolderHandle){
+    nameEl.textContent='✅ '+excelFolderName;
+    nameEl.style.color='var(--green2)';
+    if(unlinkBtn) unlinkBtn.style.display='inline-flex';
+    if(statusEl) statusEl.textContent='Ordner aktiv – Excel-Dateien werden automatisch anhand von Kundenname und Jahr gesucht.';
+  }else{
+    nameEl.textContent='Kein Ordner verknüpft';
+    nameEl.style.color='var(--text3)';
+    if(unlinkBtn) unlinkBtn.style.display='none';
+  }
+  updateExcelFolderBadge();
+}
+
+function openExcelFolderModal(){
+  updateExcelFolderUI();
+  openM('modal-excel-folder');
+}
+
+async function ensureHandlePermission(handle){
+  if(!handle) return false;
+  try{
+    const perm=await handle.queryPermission({mode:'readwrite'});
+    if(perm==='granted') return true;
+    const req=await handle.requestPermission({mode:'readwrite'});
+    return req==='granted';
+  }catch(e){return false;}
+}
+
+async function linkExcelFolder(){
+  if(!excelFolderSupported()){toast('Ordner-Auswahl braucht Chrome/Edge','warn');return;}
+  try{
+    const handle=await window.showDirectoryPicker({mode:'readwrite'});
+    const ok=await ensureHandlePermission(handle);
+    if(!ok){toast('Schreibzugriff auf Ordner verweigert','err');return;}
+    excelFolderHandle=handle;
+    excelFolderName=handle.name;
+    localStorage.setItem('tp_excel_folder_name',excelFolderName);
+    await storeExcelMeta('excelRootFolder',{handle,name:handle.name});
+    updateExcelFolderUI();
+    toast(`Excel-Ordner verknüpft: ${handle.name}`);
+  }catch(e){if(e?.name!=='AbortError') toast('Ordner-Verknüpfung fehlgeschlagen','err');}
+}
+
+async function unlinkExcelFolder(){
+  excelFolderHandle=null;
+  excelFolderName='';
+  localStorage.removeItem('tp_excel_folder_name');
+  const db=await openExcelDB();
+  await new Promise((res,rej)=>{
+    const tx=db.transaction('meta','readwrite');
+    tx.objectStore('meta').delete('excelRootFolder');
+    tx.oncomplete=()=>res();
+    tx.onerror=()=>rej(tx.error);
+  });
+  updateExcelFolderUI();
+  toast('Excel-Ordner getrennt','warn');
+}
+
+function normalizeExcelToken(s){
+  return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+}
+
+function scoreExcelFileName(fileName,cust,year){
+  const base=normalizeExcelToken(fileName.replace(/\.xlsx$/i,''));
+  const fn=normalizeExcelToken(cust.fname);
+  const ln=normalizeExcelToken(cust.lname);
+  const y=String(year);
+  if(!fn||!ln||!base.includes(fn)||!base.includes(ln)||!base.includes(y)) return 0;
+  if(base===`${fn} ${ln} ${y}`||base===`${ln} ${fn} ${y}`) return 100;
+  if(base.includes(`${fn} ${ln}`)||base.includes(`${ln} ${fn}`)) return 85;
+  return 60;
+}
+
+async function* walkExcelDir(dirHandle,depth=0){
+  if(depth>5||!dirHandle) return;
+  for await (const entry of dirHandle.values()){
+    if(entry.kind==='file'){
+      const n=entry.name.toLowerCase();
+      if(n.endsWith('.xlsx')&&!n.startsWith('~$')) yield entry;
+    }else if(entry.kind==='directory'&&!entry.name.startsWith('.')){
+      yield* walkExcelDir(entry,depth+1);
+    }
+  }
+}
+
+async function findCustomerExcelInFolder(cust,year){
+  if(!excelFolderHandle||!cust?.fname||!cust?.lname) return null;
+  const ok=await ensureHandlePermission(excelFolderHandle);
+  if(!ok) return null;
+  let best=null,bestScore=0;
+  for await (const entry of walkExcelDir(excelFolderHandle)){
+    const sc=scoreExcelFileName(entry.name,cust,year);
+    if(sc>bestScore){bestScore=sc;best={name:entry.name,handle:entry};}
+    if(bestScore>=100) break;
+  }
+  return bestScore>=60?best:null;
+}
+
+function customerHasExcelAccess(cust){
+  return msCloudReady()||!!(cust?.excelFileName||excelFolderHandle);
+}
+
+function updateCustomerExcelUI(c){
+  const nameEl=document.getElementById('c-excel-name');
+  if(!nameEl) return;
+  const linked=!!(c?.excelFileName);
+  if(msCloudReady()){
+    nameEl.textContent=linked?`☁️ ${c.excelFileName}`:'☁️ Auto-Suche in SharePoint';
+    nameEl.style.color='var(--green2)';
+  }else{
+    nameEl.textContent='Cloud nicht eingerichtet';
+    nameEl.style.color='var(--text3)';
+  }
+  document.getElementById('c-excel-km').value=c?.excelKm||'';
+  document.getElementById('c-excel-dest').value=c?.excelDest||'';
+  document.getElementById('c-excel-type').value=c?.excelType||'kts';
+}
+
+async function linkCustomerExcel(){
+  if(!editCustId){toast('Bitte Kunde zuerst speichern','warn');return;}
+  if(!excelSupported()){toast('Excel-Sync braucht Chrome/Edge (nicht Safari/Firefox)','warn');return;}
+  try{
+    const[handle]=await window.showOpenFilePicker({
+      types:[{description:'Excel',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]
+    });
+    const perm=await handle.requestPermission({mode:'readwrite'});
+    if(perm!=='granted'){toast('Schreibzugriff verweigert','err');return;}
+    const i=customers.findIndex(c=>c.id===editCustId);
+    if(i===-1) return;
+    customers[i].excelFileName=handle.name;
+    if(!customers[i].excelDest){
+      const dest=customers[i].stammHosp||document.getElementById('c-hosp').value.trim();
+      if(dest) customers[i].excelDest=dest.split(/[,–-]/)[0].trim();
+    }
+    await storeExcelHandle(editCustId,handle);
+    save();
+    updateCustomerExcelUI(customers[i]);
+    toast(`Excel verknüpft: ${handle.name}`);
+  }catch(e){if(e?.name!=='AbortError') toast('Excel-Verknüpfung fehlgeschlagen','err');}
+}
+
+async function unlinkCustomerExcel(){
+  if(!editCustId) return;
+  const i=customers.findIndex(c=>c.id===editCustId);
+  if(i===-1) return;
+  delete customers[i].excelFileName;
+  await removeExcelHandle(editCustId);
+  save();
+  updateCustomerExcelUI(customers[i]);
+  toast('Excel-Verknüpfung entfernt','warn');
+}
+
+function isExcelRide(r){return r&&(r.type==='krank'||r.type==='rechn')&&r.customerId;}
+
+function cellToDateStr(val){
+  if(val==null||val==='') return null;
+  if(val instanceof Date) return fmtD(val);
+  if(typeof val==='number'&&XLSX?.SSF){
+    const d=XLSX.SSF.parse_date_code(val);
+    if(d) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  }
+  const s=String(val);
+  const iso=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(iso) return iso[1]+'-'+iso[2]+'-'+iso[3];
+  const de=s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if(de) return `${de[3]}-${de[2].padStart(2,'0')}-${de[1].padStart(2,'0')}`;
+  return null;
+}
+
+function excelDirLabel(dir){return EXCEL_DIR_LABELS[dir||'hin-rueck']||EXCEL_DIR_LABELS['hin-rueck'];}
+
+function findKtsSheet(wb,dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  const monthName=DE_MONTHS[d.getMonth()];
+  if(wb.SheetNames.includes(monthName)) return monthName;
+  const alt=monthName.slice(0,3);
+  return wb.SheetNames.find(n=>n.toLowerCase()===monthName.toLowerCase()||n.toLowerCase().startsWith(alt.toLowerCase()))||null;
+}
+
+function findTripRow(ws,dateStr){
+  for(let row=14;row<=43;row++){
+    const ds=cellToDateStr(ws['B'+row]?.v);
+    if(ds===dateStr) return row;
+  }
+  return null;
+}
+
+function nextTripRow(ws){
+  let lastUsed=13;
+  for(let row=14;row<=43;row++){
+    const a=ws['A'+row]?.v, b=ws['B'+row]?.v;
+    if(a!=null||b!=null) lastUsed=row;
+  }
+  for(let row=14;row<=43;row++){
+    if(!ws['B'+row]?.v&&!ws['A'+row]?.v) return row;
+  }
+  return lastUsed<43?lastUsed+1:null;
+}
+
+function nextTripNr(ws){
+  let max=0;
+  for(let row=14;row<=43;row++){
+    const v=parseInt(ws['A'+row]?.v,10);
+    if(!isNaN(v)&&v>max) max=v;
+  }
+  return max+1;
+}
+
+function setCell(ws,addr,val){
+  if(val==null||val===''){delete ws[addr];return;}
+  ws[addr]={t:typeof val==='number'?'n':'s',v:val};
+}
+
+function applyTripToSheet(ws,row,ride,cust){
+  const dir=ride.excelDir||'hin-rueck';
+  const dest=cust.excelDest||ride.to||'';
+  const km=parseInt(cust.excelKm||ride.km,10)||'';
+  const hasRoute=ws['C'+row]?.v&&ws['C'+row].v!=='"';
+  if(!hasRoute&&dest) setCell(ws,'C'+row,dest);
+  else if(!ws['C'+row]?.v) setCell(ws,'C'+row,'"');
+  if(!ws['D'+row]?.v&&km!=='') setCell(ws,'D'+row,hasRoute?'"':km);
+  else if(!ws['D'+row]?.v) setCell(ws,'D'+row,'"');
+  setCell(ws,'E'+row,excelDirLabel(dir));
+  const excelDate=new Date(ride.date+'T12:00:00');
+  setCell(ws,'B'+row,excelDate);
+}
+
+function updateRideExcelFields(id,fields){
+  const i=rides.findIndex(r=>r.id===id);
+  if(i===-1) return null;
+  rides[i]={...rides[i],...fields};
+  save();
+  return rides[i];
+}
+
+async function resolveCustomerExcelHandle(cust,rideDate){
+  let handle=excelHandles.get(cust.id);
+  if(handle&&await ensureHandlePermission(handle)) return handle;
+  if(excelFolderHandle){
+    const year=(rideDate||'').slice(0,4)||String(new Date().getFullYear());
+    const found=await findCustomerExcelInFolder(cust,year);
+    if(found){
+      await storeExcelHandle(cust.id,found.handle);
+      const i=customers.findIndex(c=>c.id===cust.id);
+      if(i!==-1){
+        customers[i].excelFileName=found.name;
+        customers[i].excelAutoLinked=true;
+        if(!customers[i].excelDest){
+          const dest=customers[i].stammHosp||'';
+          if(dest) customers[i].excelDest=dest.split(/[,–-]/)[0].trim();
+        }
+        save();
+      }
+      return found.handle;
+    }
+  }
+  return null;
+}
+
+async function writeRideToExcelWorkbook(ride,cust){
+  if(msCloudReady()) return writeRideToExcelCloud(ride,cust);
+  const handle=await resolveCustomerExcelHandle(cust,ride.date);
+  if(!handle) throw new Error('NO_HANDLE');
+  const buf=await (await handle.getFile()).arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array',cellDates:true});
+  const sheetName=findKtsSheet(wb,ride.date);
+  if(!sheetName) throw new Error('NO_SHEET');
+  const ws=wb.Sheets[sheetName];
+  let row=findTripRow(ws,ride.date);
+  if(!row){
+    row=nextTripRow(ws);
+    if(!row) throw new Error('NO_ROW');
+    setCell(ws,'A'+row,nextTripNr(ws));
+  }
+  applyTripToSheet(ws,row,ride,cust);
+  const out=XLSX.write(wb,{bookType:'xlsx',type:'array',cellDates:true});
+  const writable=await handle.createWritable();
+  await writable.write(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  await writable.close();
+  return{sheetName,row};
+}
+
+async function syncRideToExcel(rideId){
+  const r=rides.find(x=>x.id===rideId);
+  if(!r||!isExcelRide(r)){toast('Nur KTS/Rechnungsfahrten mit Kunde','warn');return;}
+  const cust=customers.find(c=>c.id===r.customerId);
+  if(!cust){toast('Kunde nicht gefunden','warn');return;}
+  if(!customerHasExcelAccess(cust)){
+    if(confirm('Microsoft Cloud noch nicht eingerichtet. Jetzt einrichten?')) openCloudModal();
+    return;
+  }
+  if(!excelSupported()){toast('Excel-Sync: Chrome oder Edge verwenden','warn');return;}
+  try{
+    toast('Excel wird gesucht und aktualisiert…');
+    const info=await writeRideToExcelWorkbook(r,cust);
+    const updatedCust=customers.find(c=>c.id===r.customerId);
+    updateRideExcelFields(rideId,{excelSynced:true,excelSyncedAt:Date.now(),excelDir:r.excelDir||'hin-rueck',excelFileUsed:updatedCust?.excelFileName||''});
+    toast(`✅ ${updatedCust?.excelFileName||'Excel'} · ${info.sheetName} Zeile ${info.row}`);
+    renderCalendar();renderToday();if(document.getElementById('modal-ride-detail')&&!document.getElementById('modal-ride-detail').classList.contains('hidden')) showRideDetail(rideId);
+  }catch(e){
+    const msg=e?.message==='NO_SHEET'?'Monats-Blatt nicht gefunden (z.B. „April“)':
+      e?.message==='NO_ROW'?'Keine freie Zeile in Excel':
+      e?.message==='NO_HANDLE'?'Excel-Datei nicht gefunden – Ordner oder Kunde prüfen':
+      'Excel-Fehler: '+((e&&e.message)||e);
+    toast(msg,'err');
+  }
+}
+
+async function setRideExcelDir(rideId,dir){
+  const r=updateRideExcelFields(rideId,{excelDir:dir});
+  if(!r) return;
+  renderCalendar();renderToday();
+  if(r.excelSynced&&r.customerId){
+    const cust=customers.find(c=>c.id===r.customerId);
+    if(customerHasExcelAccess(cust)){
+      try{await writeRideToExcelWorkbook(r,cust);toast('Excel aktualisiert');}
+      catch(e){toast('Excel-Update fehlgeschlagen','err');}
+    }
+  }
+  if(document.getElementById('modal-ride-detail')&&!document.getElementById('modal-ride-detail').classList.contains('hidden')) showRideDetail(rideId);
+}
+
+function buildExcelControlsHtml(r){
+  if(!isExcelRide(r)) return '';
+  const cust=customers.find(c=>c.id===r.customerId);
+  const linked=customerHasExcelAccess(cust);
+  const dir=r.excelDir||'hin-rueck';
+  const synced=!!r.excelSynced;
+  const dirs=['hin-rueck','hin','rueck'];
+  const dirBtns=dirs.map(d=>`<button type="button" class="excel-dir${dir===d?' on':''}" title="${excelDirLabel(d)}" onclick="event.stopPropagation();setRideExcelDir('${r.id}','${d}')">${d==='hin-rueck'?'↔':d==='hin'?'→':'←'}</button>`).join('');
+  const syncBtn=linked
+    ?`<button type="button" class="excel-sync${synced?' done':''}" title="${synced?'In Excel – erneut schreiben':'Automatisch in Excel eintragen'}" onclick="event.stopPropagation();syncRideToExcel('${r.id}')">${synced?'✅':'📊'}</button>`
+    :`<button type="button" class="excel-sync off" title="Cloud einrichten" onclick="event.stopPropagation();openCloudModal()">📊</button>`;
+  return `<div class="sch-excel" onclick="event.stopPropagation()"><div class="excel-dir-row">${dirBtns}</div>${syncBtn}</div>`;
+}
+
+function buildExcelDetailHtml(r){
+  if(!isExcelRide(r)) return '';
+  const cust=customers.find(c=>c.id===r.customerId);
+  const linked=customerHasExcelAccess(cust);
+  const dir=r.excelDir||'hin-rueck';
+  const dirs=['hin-rueck','hin','rueck'];
+  const fileInfo=cust?.excelFileName?`Datei: <strong style="color:var(--green2)">${cust.excelFileName}</strong>`:
+    msCloudReady()?`SharePoint-Ordner aktiv – Auto-Suche`:
+    '⚠️ Microsoft Cloud einrichten (Sidebar → ☁️)';
+  return `<div class="excel-detail-box">
+    <div class="excel-panel-h">📊 Excel-Abrechnung</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+      ${fileInfo}
+      ${r.excelSynced?` · <span style="color:var(--green2)">Eingetragen</span>${r.excelFileUsed?` (${r.excelFileUsed})`:''}`:''}
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Hin/Rückfahrt: <strong>${excelDirLabel(dir)}</strong></div>
+    <div class="excel-detail-btns">
+      ${dirs.map(d=>`<button type="button" class="btn btn-sm${dir===d?' btn-primary':' btn-secondary'}" onclick="setRideExcelDir('${r.id}','${d}')">${d==='hin-rueck'?'↔ Hin+Rück':d==='hin'?'→ Hinfahrt':'← Rückfahrt'}</button>`).join('')}
+      ${linked?`<button type="button" class="btn btn-sm btn-blue" onclick="syncRideToExcel('${r.id}')">${r.excelSynced?'🔄 Excel aktualisieren':'📊 In Excel eintragen'}</button>`:`<button type="button" class="btn btn-sm btn-secondary" onclick="openCloudModal()">☁️ Cloud einrichten</button>`}
+    </div>
+  </div>`;
+}
+
+function promptExcelLink(customerId){
+  if(!msCloudReady()){openCloudModal();return;}
+  toast('📊 im Kalender klicken – Excel wird automatisch gefunden');
+}
+
+// ═══════════════════════════════════════════════════════════════
 // DEMO DATA ENTFERNEN
 // ═══════════════════════════════════════════════════════════════
 function purgeDemoData(){
@@ -3010,6 +3950,7 @@ function purgeDemoData(){
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
 initTheme();
+initMicrosoftCloud();
 setContactViewMode(contactViewMode);
 setContactSort(contactSort);
 checkDataMigration();
@@ -3019,6 +3960,7 @@ renderMiniCal();
 renderCalendar();
 renderCustomers();
 if(gcalConnected){
+  setTimeout(trySilentGoogleRefresh,1500);
   loadGCalendars().then(async()=>{
     await purgeDemoFromGoogleCalendar(true);
     await fullGCalSync();
