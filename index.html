@@ -482,6 +482,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div class="nav-item" onclick="calFilterType('rechn')"><span class="nav-icon">🟡</span> Rechnungsfahrten</div>
   <div class="nav-item" onclick="calFilterType('privat')"><span class="nav-icon">🟢</span> Privatfahrten</div>
   <div class="nav-item" onclick="calFilterType('all')"><span class="nav-icon">📋</span> Alle</div>
+  <div class="nav-sec">Daten</div>
+  <div class="nav-item" onclick="exportBackup()"><span class="nav-icon">💾</span> Backup speichern</div>
+  <div class="nav-item" onclick="document.getElementById('import-file').click()"><span class="nav-icon">📂</span> Backup laden</div>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this)"/>
   <div class="nav-sec">Serien</div>
   <div class="nav-item" onclick="calFilterSerie('dialyse')"><span class="nav-icon">💧</span> Dialyse</div>
   <div class="nav-item" onclick="calFilterSerie('chemo')"><span class="nav-icon">🏥</span> Chemotherapie</div>
@@ -950,6 +954,48 @@ function save(){
   localStorage.setItem('tp_r',JSON.stringify(rides));
   localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
   localStorage.setItem('tp_d',JSON.stringify(drivers));
+}
+
+function exportBackup(){
+  const data={
+    version:1,exported:new Date().toISOString(),
+    customers,rides,gcContacts,drivers,
+    settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`taxipro-backup-${fmtD(new Date())}.json`;
+  a.click();
+  toast('Backup gespeichert');
+}
+
+function importBackup(input){
+  const file=input.files?.[0];if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!confirm(`Backup vom ${data.exported?.slice(0,10)||'?'} laden?\n${data.rides?.length||0} Fahrten · ${data.customers?.length||0} Kunden\nAktuelle Daten werden ersetzt.`)) return;
+      customers=data.customers||[];
+      rides=data.rides||[];
+      gcContacts=data.gcContacts||[];
+      drivers=data.drivers||[];
+      if(data.settings?.gcalCalendarId) gcalCalendarId=data.settings.gcalCalendarId;
+      save();
+      renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
+      toast(`✅ ${rides.length} Fahrten wiederhergestellt`);
+    }catch(err){toast('Backup-Datei ungültig','err');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function checkDataMigration(){
+  if(rides.length||customers.length) return;
+  setTimeout(()=>{
+    toast('Keine Daten? Backup laden oder Google Kalender verbinden','warn');
+  },1500);
 }
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmtD=d=>new Date(d).toISOString().slice(0,10);
@@ -2616,6 +2662,7 @@ function purgeDemoData(){
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
 initTheme();
+checkDataMigration();
 updateCounts();
 updateGCalBtn();
 renderMiniCal();
