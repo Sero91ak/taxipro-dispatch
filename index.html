@@ -1181,7 +1181,14 @@ function isExcludedGCalEvent(raw){
   return isKrankenfahrtDispatchEvent(raw);
 }
 function shouldDeleteFromGoogleCalendar(raw){
-  return isKrankenfahrtDispatchEvent(raw);
+  if(!raw||raw.status==='cancelled') return false;
+  if(isPrivateRealAppointment(raw)) return false;
+  const sum=(raw.summary||'').trim();
+  const desc=raw.description||'';
+  if(desc.includes('── TaxiPro Fahrt ──')) return true;
+  if(textHasDemoContent(sum,desc,raw.location)) return true;
+  if(/\[demo\]|testfahrt|demo-fahrt/i.test(demoTextBlob(sum,desc))) return true;
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2398,7 +2405,7 @@ async function purgeDemoFromGoogleCalendar(auto=false){
       if(!auto) toast('Keine Demo-Termine in Google gefunden');
       return;
     }
-    if(!auto&&!confirm(`${targets.length} Demo-/Test-Fahrten aus ALLEN Google Kalendern löschen?\n\nEchte Geburtstage/Urlaub bleiben erhalten.`)) return;
+    if(!confirm(`${targets.length} Demo-/Test-Fahrten aus Google Kalender löschen?\n\nNUR explizite TaxiPro-Testeinträge. Echte Fahrten bleiben erhalten.`)) return;
     if(statusEl) statusEl.textContent=`Lösche ${targets.length} Test-Fahrten aus Google Kalender…`;
     let deleted=0,failed=0;
     for(const ev of targets){
@@ -2411,18 +2418,17 @@ async function purgeDemoFromGoogleCalendar(auto=false){
     rides=rides.filter(r=>{
       if(r.googleEventId&&deletedIds.has(r.googleEventId)) return false;
       if(isDemoRideContent(r)) return false;
-      if(r.source!=='google'&&isKrankenfahrtDispatchEvent({summary:(r.from||'')+' → '+(r.to||''),description:r.note,location:r.to,status:'confirmed'})) return false;
       return true;
     });
     customers=customers.filter(c=>!isDemoContact(c));
     save();updateCounts();
     await fetchGCalEvents();
-    if(statusEl) statusEl.innerHTML=`<strong>✅ ${deleted} Demo-Termine aus Google Kalender entfernt</strong>${failed?` · ${failed} fehlgeschlagen`:''}<br><span style="color:var(--text3)">Prüfe die Google Kalender App – sollte jetzt leer von Testfahrten sein.</span>`;
+    if(statusEl) statusEl.innerHTML=`<strong>✅ ${deleted} Demo-Termine aus Google Kalender entfernt</strong>${failed?` · ${failed} fehlgeschlagen`:''}`;
     toast(`🗑️ ${deleted} Demo-Termine aus Google gelöscht`,deleted?'ok':'warn');
     renderGCalModal();
   }catch(e){
-    if(statusEl) statusEl.innerHTML=`<strong>Fehler:</strong> ${e.message}<br>Bitte ↺ Zurücksetzen und neu verbinden (Lösch-Berechtigung erforderlich).`;
-    toast('Google-Löschung fehlgeschlagen – neu verbinden','err');
+    if(statusEl) statusEl.innerHTML=`<strong>Fehler:</strong> ${e.message}`;
+    toast('Google-Löschung fehlgeschlagen','err');
   }
 }
 
@@ -4129,7 +4135,6 @@ renderCustomers();
 if(gcalConnected){
   setTimeout(trySilentGoogleRefresh,1500);
   loadGCalendars().then(async()=>{
-    await purgeDemoFromGoogleCalendar(true);
     await fullGCalSync();
   });
 }
