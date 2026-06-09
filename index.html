@@ -1248,8 +1248,17 @@ function importBackup(input){
 function checkDataMigration(){
   if(rides.length||customers.length) return;
   setTimeout(()=>{
-    toast('Keine Daten? Backup laden oder Google Kalender verbinden','warn');
+    toast('Keine Daten? Cloud verbinden, Backup laden oder Google Kalender','warn');
   },1500);
+}
+function checkCloudSetup(){
+  setTimeout(()=>{
+    if(!msCloudReady()){
+      if(MS_CLIENT_ID==='YOUR_MS_CLIENT_ID') toast('☁️ Start: Sidebar → Microsoft Cloud → Client-ID eintragen','warn');
+      else if(!msConnected) toast('☁️ Microsoft Cloud verbinden für live Excel & Daten','warn');
+      else toast('☁️ SharePoint-Ordner verknüpfen (Microsoft Cloud)','warn');
+    }
+  },3000);
 }
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmtD=d=>new Date(d).toISOString().slice(0,10);
@@ -3954,6 +3963,7 @@ initMicrosoftCloud();
 setContactViewMode(contactViewMode);
 setContactSort(contactSort);
 checkDataMigration();
+checkCloudSetup();
 updateCounts();
 updateGCalBtn();
 renderMiniCal();
