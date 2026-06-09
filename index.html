@@ -1753,7 +1753,7 @@ function googleOAuthErrorMsg(err){
   const t=(err?.type||err?.message||String(err||'')).toLowerCase();
   if(t.includes('popup')||t.includes('closed')) return 'Google-Fenster wurde geschlossen. Popup-Blocker deaktivieren und erneut versuchen.';
   if(t.includes('access_denied')||t.includes('denied')) return 'Zugriff verweigert. In Google Cloud Console unter <strong>OAuth → Testnutzer</strong> deine E-Mail hinzufügen.';
-  if(t.includes('origin')||t.includes('redirect')) return `Ungültige URL. In Google Cloud Console diese Origin eintragen:<br><code style="color:var(--gold)">${getAppOrigin()}</code>`;
+  if(t.includes('origin')||t.includes('redirect')||t.includes('mismatch')) return `<strong>Fehler 400: origin_mismatch</strong><br>In Google Cloud Console → OAuth-Client → <strong>Autorisierte JavaScript-Quellen</strong> eintragen:<br><code style="color:var(--gold)">${getOAuthOriginHint()}</code><br><span style="color:var(--text3)">Speichern, 2 Min. warten, dann ↺ Zurücksetzen und neu verbinden.</span>`;
   return `Verbindungsfehler: ${err?.message||err?.type||'Unbekannt'}`;
 }
 
@@ -1811,9 +1811,9 @@ function renderGCalModal(){
     document.getElementById('gcal-status-text').innerHTML=`Verbinde deinen Google Kalender (Zwei-Wege-Sync).<br><br>
       <strong>Checkliste:</strong><br>
       ✓ Calendar API aktiviert<br>
-      ✓ OAuth-Client mit Origin: <code style="color:var(--gold)">${getOAuthOriginHint()}</code><br>
-      ✓ Deine E-Mail als <strong>Testnutzer</strong> eingetragen<br>
-      ✓ App über localhost öffnen (nicht als Datei)${hint}`;
+      ✓ OAuth-Client → JavaScript-Quelle: <code style="color:var(--gold)">${getOAuthOriginHint()}</code><br>
+      ✓ Deine E-Mail <code>sero91ak@gmail.com</code> als <strong>Testnutzer</strong><br>
+      ✓ Popup-Blocker für diese Seite erlauben${hint}`;
     hideGCalError();
   } else {
     document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Zwei-Wege-Sync aktiv</strong><br>
