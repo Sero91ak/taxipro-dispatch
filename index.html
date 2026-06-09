@@ -178,7 +178,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .excel-file-name{font-size:12px;color:var(--green2);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .excel-detail-box{margin-top:12px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2)}
 .excel-detail-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.badge.excel-synced{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+.cloud-step{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r2);font-size:12px;color:var(--text2);margin-bottom:4px;background:var(--bg3);border:1px solid var(--border)}
+.cloud-step.done{color:var(--green2);border-color:var(--green-border);background:var(--green-bg)}
+.cloud-step-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--bg4);color:var(--text3)}
+.cloud-step.done .cloud-step-icon{background:var(--green);color:#000}
 .sch-row:nth-child(even){background:var(--bg3)}
 .sch-row:hover{background:var(--bg4)!important}
 .sch-del{width:30px;height:30px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0;opacity:.45}
@@ -891,6 +894,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
         <button class="btn btn-secondary" id="ms-disconnect-btn" onclick="disconnectMicrosoft()" style="display:none">Trennen</button>
       </div>
       <div id="cloud-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
+      <div id="cloud-steps" style="margin-top:12px">
+        <div class="cloud-step" id="cloud-step-ms"><span class="cloud-step-icon">1</span><span>Microsoft angemeldet</span></div>
+        <div class="cloud-step" id="cloud-step-folder"><span class="cloud-step-icon">2</span><span>SharePoint-Ordner verknüpft</span></div>
+      </div>
     </div>
     <div id="cloud-folder-section" style="display:none;margin-top:14px">
       <div class="fsec">SharePoint-Ordner (Excel-Dateien)</div>
@@ -1102,7 +1109,8 @@ const HOSPITALS=[
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
 // Microsoft Azure App – einmal in Azure Portal anlegen (siehe Cloud-Modal)
 const MS_CLIENT_ID=localStorage.getItem('tp_ms_client_id')||'56ac200a-a8cd-45ee-a482-8d6dc477b3ed';
-const MS_SCOPES=['User.Read','Files.ReadWrite.All','openid','profile','offline_access'];
+const MS_TENANT_ID='92713e54-4080-477b-9e22-8a1b4f3eeb14';
+const MS_SCOPES=['User.Read','Files.ReadWrite.All','openid','profile'];
 const MS_CLOUD_DATA_FILE='taxipro-dispatch-cloud.json';
 const DEFAULT_MS_FOLDER_URL='https://rheinsani-my.sharepoint.com/:f:/g/personal/info_meckenheim-taxi_de/IgAEMRi9xNRRR4XQxyREnb7WARV1NGCDWqr1gt0luDlVD28?e=nUu9zB';
 const SCOPE_CALENDAR_READ='https://www.googleapis.com/auth/calendar.readonly';
@@ -1252,13 +1260,12 @@ function checkDataMigration(){
   },1500);
 }
 function checkCloudSetup(){
+  if(sessionStorage.getItem('tp_cloud_hint')||msCloudReady()) return;
   setTimeout(()=>{
-    if(!msCloudReady()){
-      if(MS_CLIENT_ID==='YOUR_MS_CLIENT_ID') toast('☁️ Start: Sidebar → Microsoft Cloud → Client-ID eintragen','warn');
-      else if(!msConnected) toast('☁️ Microsoft Cloud verbinden für live Excel & Daten','warn');
-      else toast('☁️ SharePoint-Ordner verknüpfen (Microsoft Cloud)','warn');
-    }
-  },3000);
+    if(msCloudReady()) return;
+    sessionStorage.setItem('tp_cloud_hint','1');
+    openCloudModal();
+  },4000);
 }
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmtD=d=>new Date(d).toISOString().slice(0,10);
@@ -3108,6 +3115,7 @@ function toggleTheme(){
 // MICROSOFT CLOUD (SharePoint live – Excel + App-Daten)
 // ═══════════════════════════════════════════════════════════════
 let msalInstance=null;
+let msalInitPromise=null;
 let msConnected=false;
 let msFolderShareUrl=localStorage.getItem('tp_ms_folder_url')||DEFAULT_MS_FOLDER_URL;
 let msFolderDriveId=localStorage.getItem('tp_ms_folder_drive')||'';
@@ -3151,15 +3159,38 @@ function hideCloudError(){
   if(el){el.style.display='none';el.innerHTML='';}
 }
 
-function initMsal(){
-  if(!window.msal||MS_CLIENT_ID==='YOUR_MS_CLIENT_ID') return false;
-  if(msalInstance) return true;
-  msalInstance=new msal.PublicClientApplication({
-    auth:{clientId:MS_CLIENT_ID,authority:'https://login.microsoftonline.com/common',redirectUri:getMsRedirectUri()},
-    cache:{cacheLocation:'localStorage',storeAuthStateInCookie:false}
-  });
+function formatMsError(e){
+  const code=e?.errorCode||e?.code||'';
+  const msg=e?.message||String(e||'');
+  if(code==='popup_window_error'||msg.includes('popup')) return '<strong>Pop-up blockiert!</strong><br>1. Adressleiste → Pop-ups für diese Seite erlauben<br>2. Erneut klicken – oder es öffnet sich automatisch eine Weiterleitung zu Microsoft.';
+  if(code==='user_cancelled') return 'Anmeldung abgebrochen.';
+  if(msg.includes('AADSTS')) return '<strong>Microsoft-Fehler:</strong><br>'+msg.slice(0,200);
+  if(code==='access_denied') return 'Zugriff verweigert. Admin muss Files.ReadWrite.All in Azure freigeben.';
+  return 'Fehler: '+(msg||code||'Unbekannt');
+}
+
+async function ensureMsalReady(){
+  if(!window.msal||!MS_CLIENT_ID||MS_CLIENT_ID==='YOUR_MS_CLIENT_ID'){
+    showCloudError('Microsoft-Bibliothek lädt noch… Seite neu laden (Strg+F5).');
+    return false;
+  }
+  if(!msalInstance){
+    msalInstance=new msal.PublicClientApplication({
+      auth:{
+        clientId:MS_CLIENT_ID,
+        authority:'https://login.microsoftonline.com/'+MS_TENANT_ID,
+        redirectUri:getMsRedirectUri(),
+        navigateToLoginRequestUrl:false
+      },
+      cache:{cacheLocation:'localStorage',storeAuthStateInCookie:true}
+    });
+    msalInitPromise=msalInstance.initialize();
+  }
+  await msalInitPromise;
   return true;
 }
+
+function initMsal(){return !!window.msal&&!!MS_CLIENT_ID&&MS_CLIENT_ID!=='YOUR_MS_CLIENT_ID';}
 
 async function getMsAccount(){
   if(!msalInstance) return null;
@@ -3168,15 +3199,20 @@ async function getMsAccount(){
 }
 
 async function getMsToken(){
-  if(!initMsal()) throw new Error('MS_NOT_CONFIGURED');
+  if(!await ensureMsalReady()) throw new Error('MS_NOT_CONFIGURED');
   const account=await getMsAccount();
   if(!account) throw new Error('MS_NOT_CONNECTED');
   try{
     const r=await msalInstance.acquireTokenSilent({scopes:MS_SCOPES,account});
     return r.accessToken;
   }catch(e){
-    const r=await msalInstance.acquireTokenPopup({scopes:MS_SCOPES,account});
-    return r.accessToken;
+    try{
+      const r=await msalInstance.acquireTokenPopup({scopes:MS_SCOPES,account});
+      return r.accessToken;
+    }catch(e2){
+      await msalInstance.acquireTokenRedirect({scopes:MS_SCOPES,account});
+      throw new Error('MS_REDIRECT');
+    }
   }
 }
 
@@ -3189,36 +3225,59 @@ async function msGraph(path,opts={}){
 }
 
 function encodeShareUrl(url){
-  const b64=btoa(unescape(encodeURIComponent(url.split('?')[0]))).replace(/=+$/,'').replace(/\//g,'_').replace(/\+/g,'-');
+  const raw=(url||'').trim();
+  const b64=btoa(unescape(encodeURIComponent(raw))).replace(/=+$/,'').replace(/\//g,'_').replace(/\+/g,'-');
   return 'u!'+b64;
 }
 
+async function finishMicrosoftConnect(account){
+  msConnected=!!account;
+  updateCloudUI();
+  if(!account) return;
+  toast('Microsoft verbunden ☁️');
+  if(msFolderShareUrl) await saveMsFolderUrl(true);
+  if(msCloudReady()){await loadCloudData();await uploadCloudData(false);}
+}
+
 async function connectMicrosoft(){
-  if(MS_CLIENT_ID==='YOUR_MS_CLIENT_ID'){
-    showCloudError(getMsSetupHTML());
-    toast('Bitte zuerst Microsoft Client-ID eintragen','warn');
-    openCloudModal();return;
-  }
-  if(!initMsal()){toast('Microsoft API lädt…','warn');return;}
+  const btn=document.getElementById('ms-connect-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Verbinde…';}
   hideCloudError();
+  openM('modal-cloud');
   try{
-    await msalInstance.handleRedirectPromise();
+    if(!await ensureMsalReady()){
+      toast('Microsoft API nicht bereit – Strg+F5','err');return;
+    }
+    const redirectResult=await msalInstance.handleRedirectPromise();
+    if(redirectResult?.account){
+      await finishMicrosoftConnect(redirectResult.account);
+      return;
+    }
     let account=await getMsAccount();
     if(!account){
-      const r=await msalInstance.loginPopup({scopes:MS_SCOPES,prompt:'select_account'});
-      account=r.account;
+      try{
+        const r=await msalInstance.loginPopup({scopes:MS_SCOPES,prompt:'select_account'});
+        account=r.account;
+      }catch(popErr){
+        if(popErr?.errorCode==='popup_window_error'||popErr?.message?.includes('popup')||popErr?.errorCode==='empty_window_error'){
+          showCloudError('Pop-up blockiert → Weiterleitung zu Microsoft…');
+          toast('Weiterleitung zu Microsoft…','warn');
+          await msalInstance.loginRedirect({scopes:MS_SCOPES,prompt:'select_account'});
+          return;
+        }
+        throw popErr;
+      }
     }
-    msConnected=!!account;
-    updateCloudUI();
-    toast('Microsoft verbunden ☁️');
-    if(msFolderShareUrl) await saveMsFolderUrl(true);
-    await loadCloudData();
-    await uploadCloudData(true);
+    await finishMicrosoftConnect(account);
   }catch(e){
-    if(e?.errorCode!=='user_cancelled'&&e?.name!=='BrowserAuthError'){
-      showCloudError('Anmeldung fehlgeschlagen. Pop-ups erlauben und erneut versuchen.');
-      toast('Microsoft-Anmeldung fehlgeschlagen','err');
+    if(e?.message!=='MS_REDIRECT'){
+      showCloudError(formatMsError(e));
+      toast('Microsoft-Verbindung fehlgeschlagen','err');
+      console.error('MS connect',e);
     }
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='☁️ Mit Microsoft verbinden';}
+    updateCloudUI();
   }
 }
 
@@ -3236,22 +3295,32 @@ async function saveMsFolderUrl(silent=false){
   const url=(document.getElementById('ms-folder-url')?.value||msFolderShareUrl||'').trim();
   if(!url){if(!silent) toast('SharePoint-Link einfügen','warn');return;}
   if(!msConnected){if(!silent) toast('Zuerst mit Microsoft verbinden','warn');return;}
+  const btn=document.querySelector('#cloud-folder-section .btn-primary');
+  if(btn&&!silent){btn.disabled=true;btn.textContent='⏳ Verknüpfe…';}
   try{
     msFolderShareUrl=url;
     localStorage.setItem('tp_ms_folder_url',url);
     const shareId=encodeShareUrl(url);
     const res=await msGraph('/shares/'+shareId+'/driveItem');
-    if(!res.ok) throw new Error('Ordner nicht gefunden');
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      throw new Error(err.error?.message||('HTTP '+res.status));
+    }
     const item=await res.json();
-    msFolderDriveId=item.parentReference?.driveId||item.driveId||'';
+    msFolderDriveId=item.parentReference?.driveId||item.remoteItem?.parentReference?.driveId||'';
     msFolderItemId=item.id;
+    if(!msFolderDriveId||!msFolderItemId) throw new Error('Ordner-IDs fehlen');
     localStorage.setItem('tp_ms_folder_drive',msFolderDriveId);
     localStorage.setItem('tp_ms_folder_item',msFolderItemId);
     await ensureCloudDataFile();
     updateCloudUI();
     if(!silent) toast('SharePoint-Ordner verknüpft ✓');
   }catch(e){
+    showCloudError('SharePoint-Ordner Fehler: '+(e.message||e));
     if(!silent) toast('SharePoint-Ordner konnte nicht geöffnet werden','err');
+  }finally{
+    if(btn&&!silent){btn.disabled=false;btn.textContent='📂 Ordner verknüpfen';}
+    updateCloudUI();
   }
 }
 
@@ -3449,6 +3518,14 @@ function updateCloudUI(){
     folderStatus.style.color=msCloudReady()?'var(--green2)':'var(--text3)';
   }
   if(syncInfo&&msCloudLastSync) syncInfo.textContent='Letzter Sync: '+msCloudLastSync.slice(0,19).replace('T',' ')+' · '+rides.length+' Fahrten · '+customers.length+' Kunden';
+  const stepMs=document.getElementById('cloud-step-ms');
+  const stepFolder=document.getElementById('cloud-step-folder');
+  if(stepMs) stepMs.classList.toggle('done',connected);
+  if(stepFolder) stepFolder.classList.toggle('done',msCloudReady());
+  if(stepMs&&connected) stepMs.querySelector('.cloud-step-icon').textContent='✓';
+  if(stepFolder&&msCloudReady()) stepFolder.querySelector('.cloud-step-icon').textContent='✓';
+  if(stepMs&&!connected) stepMs.querySelector('.cloud-step-icon').textContent='1';
+  if(stepFolder&&!msCloudReady()) stepFolder.querySelector('.cloud-step-icon').textContent='2';
 }
 
 function openCloudModal(){
@@ -3457,17 +3534,28 @@ function openCloudModal(){
 }
 
 async function initMicrosoftCloud(){
-  if(!initMsal()){updateCloudUI();return;}
   try{
-    await msalInstance.initialize();
-    await msalInstance.handleRedirectPromise();
-    msConnected=!!(await getMsAccount());
+    if(!await ensureMsalReady()){updateCloudUI();return;}
+    const redirectResult=await msalInstance.handleRedirectPromise();
+    if(redirectResult?.account){
+      msConnected=true;
+      toast('Microsoft verbunden ☁️');
+    }else{
+      msConnected=!!(await getMsAccount());
+    }
     if(msConnected){
       if(msFolderShareUrl&&!msFolderDriveId) await saveMsFolderUrl(true);
       if(msCloudReady()) await loadCloudData();
     }
     updateCloudUI();
-  }catch(e){updateCloudUI();}
+    if(!msCloudReady()&&!sessionStorage.getItem('tp_cloud_modal_shown')){
+      sessionStorage.setItem('tp_cloud_modal_shown','1');
+      setTimeout(()=>openCloudModal(),1200);
+    }
+  }catch(e){
+    console.error('MS init',e);
+    updateCloudUI();
+  }
 }
 
 function trySilentGoogleRefresh(){
