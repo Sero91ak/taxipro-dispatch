@@ -772,7 +772,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
   </div>
   <div class="mfooter">
     <button class="btn btn-secondary" onclick="closeM('modal-gc')">Schließen</button>
-    <button class="btn btn-primary" id="gc-import-btn" onclick="importSelectedGCContacts()" style="display:none">✅ Ausgewählte importieren</button>
+    <button class="btn btn-primary" id="gc-import-btn" onclick="importAllGCContacts()" style="display:none">✅ Alle als Kunden importieren</button>
   </div>
 </div>
 </div>
@@ -2152,7 +2152,7 @@ function renderGCModal(){
   const hasContacts=gcContacts.length>0;
   const connected=!!gcalToken;
   document.getElementById('gc-status-text').innerHTML=hasContacts
-    ?`<strong>✅ ${gcContacts.length} Kontakte</strong> geladen.<br>Klicke Kontakte an → als Kunden importieren. In der Suche erscheinen sie automatisch.`
+    ?`<strong>✅ ${gcContacts.length} Kontakte</strong> geladen · <strong>${customers.filter(c=>c.source==='imported-gc').length}</strong> als Kunden importiert.<br>Neue Kontakte werden beim Sync automatisch übernommen.`
     :`<strong>Google Kontakte verbinden</strong><br><br>
       <strong>Checkliste:</strong><br>
       ✓ <em>People API</em> in Cloud Console aktiviert<br>
@@ -2214,7 +2214,8 @@ async function fetchGoogleContacts(){
     const parsed=(data.connections||[]).map(parseGooglePerson).filter(Boolean);
     gcContacts=parsed;
     save();updateCounts();hideGCError();
-    toast(`✅ ${gcContacts.length} Kontakte geladen`);
+    const imported=importAllGCContacts(true);
+    toast(`✅ ${gcContacts.length} Kontakte · ${imported} neue Kunden importiert`);
     document.getElementById('gc-demo-btn').style.display='none';
     document.getElementById('gc-import-btn').style.display=gcContacts.length?'inline-flex':'none';
     document.getElementById('gc-connect-btn').style.display='none';
@@ -2267,54 +2268,58 @@ function loadDemoGoogleContacts(){
   const toAdd=demo.filter(c=>!existingPhones.has(c.phone));
   gcContacts.push(...toAdd);
   save();
-  toast(`${toAdd.length} Google-Kontakte geladen`);
+  const imported=importAllGCContacts(true);
+  toast(`${toAdd.length} Kontakte geladen · ${imported} importiert`);
   document.getElementById('gc-demo-btn').style.display='none';
-  document.getElementById('gc-status-text').textContent=`${gcContacts.length} Kontakte synchronisiert. Klicke auf einen Kontakt um ihn als Kunden zu importieren.`;
   document.getElementById('gc-import-btn').style.display='inline-flex';
-  renderGCPreview();
   updateCounts();
   if(view==='gcontacts') renderGCView();
+}
+
+function isGCCustomerExists(gc){
+  return customers.some(c=>
+    (gc.phone&&c.phone===gc.phone)||
+    (c.fname===gc.fname&&c.lname===gc.lname)
+  );
+}
+
+function importAllGCContacts(silent=false){
+  let imported=0;
+  gcContacts.forEach(gc=>{
+    if(isGCCustomerExists(gc)) return;
+    const type=gc.type==='firma'||gc.org?'firma':'privat';
+    customers.push({
+      fname:gc.fname,lname:gc.lname,phone:gc.phone||'',email:gc.email||'',
+      org:gc.org||'',birth:'',street:gc.street||'',plz:gc.plz||'',city:gc.city||'',
+      type,kk:'',vnr:'',zuzahlungStatus:'ja',stammHosp:'',note:'',
+      source:'imported-gc',id:uid()
+    });
+    imported++;
+  });
+  if(imported){save();updateCounts();}
+  if(!silent) toast(`✅ ${imported} Kontakte als Kunden importiert`);
+  renderGCPreview();renderGCModal();
+  if(view==='customers') renderCustomers();
+  return imported;
 }
 
 function renderGCPreview(){
   const el=document.getElementById('gc-preview-list');
   if(!gcContacts.length){el.innerHTML='';return;}
-  gcSelected.clear();
-  el.innerHTML=`<div class="fsec" style="margin-bottom:8px">Synchronisierte Kontakte (${gcContacts.length})</div>`+
-  gcContacts.slice(0,20).map(c=>{
+  const imported=gcContacts.filter(c=>isGCCustomerExists(c)).length;
+  el.innerHTML=`<div class="fsec" style="margin-bottom:8px">${imported}/${gcContacts.length} als Kunden importiert</div>`+
+  gcContacts.slice(0,25).map(c=>{
     const initials=(c.fname||'?').charAt(0)+(c.lname||'').charAt(0);
-    const isAlreadyCust=customers.some(cu=>cu.phone===c.phone||(cu.fname===c.fname&&cu.lname===c.lname));
-    return`<div class="gc-contact-item" onclick="toggleGCSelect('${c.id}',this)">
+    const done=isGCCustomerExists(c);
+    return`<div class="gc-contact-item" onclick="openGCDetail('${c.id}')">
       <div class="gci-av">${c.photo?`<img src="${c.photo}"/>`:(initials||'?')}</div>
       <div class="gci-info">
         <div class="gci-name">${c.fname} ${c.lname}</div>
-        <div class="gci-meta">${c.phone||''} · ${c.city||''}</div>
+        <div class="gci-meta">${c.phone||'–'} · ${c.city||'–'}</div>
       </div>
-      <div class="gci-action">${isAlreadyCust?'✅ Vorhanden':'+ Import'}</div>
+      <div class="gci-action" style="color:${done?'var(--green2)':'var(--gold)'}">${done?'✅ Kunde':'Neu'}</div>
     </div>`;
-  }).join('');
-}
-
-function toggleGCSelect(id,el){
-  if(gcSelected.has(id)){gcSelected.delete(id);el.style.background='';}
-  else{gcSelected.add(id);el.style.background='rgba(74,158,255,.15)';}
-  document.getElementById('gc-import-btn').style.display=gcSelected.size>0?'inline-flex':'none';
-}
-
-function importSelectedGCContacts(){
-  let imported=0;
-  gcSelected.forEach(id=>{
-    const gc=gcContacts.find(c=>c.id===id);
-    if(!gc) return;
-    const exists=customers.some(c=>c.phone===gc.phone||(c.fname===gc.fname&&c.lname===gc.lname));
-    if(!exists){customers.push({...gc,id:uid(),type:gc.type||'privat',source:'imported-gc'});imported++;}
-  });
-  save();updateCounts();
-  toast(`${imported} Kontakte als Kunden importiert`);
-  gcSelected.clear();
-  document.getElementById('gc-import-btn').style.display='none';
-  renderGCPreview();
-  if(view==='customers') renderCustomers();
+  }).join('')+(gcContacts.length>25?`<div style="font-size:11px;color:var(--text3);padding:8px 0">+${gcContacts.length-25} weitere Kontakte</div>`:'');
 }
 
 function renderGCView(){
