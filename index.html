@@ -8,9 +8,49 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="TaxiPro"/>
-<link rel="manifest" href="manifest.json"/>
+<link rel="manifest" href="manifest.json" id="app-manifest"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <title>TaxiPro Dispatch</title>
+<script>
+(function(){
+  var p=new URLSearchParams(location.search);
+  var mode=p.get('mode');
+  var driver=mode==='driver'||p.has('token')||p.has('boot');
+  try{
+    if(!driver&&localStorage.getItem('tp_app_role')==='driver') driver=true;
+    if(p.get('source')==='pwa'&&!mode&&localStorage.getItem('tp_app_role')==='driver') driver=true;
+  }catch(e){}
+  if(driver){
+    document.documentElement.className='driver-boot';
+    var m=document.getElementById('app-manifest');
+    if(m) m.setAttribute('href','manifest-driver.json');
+    var t=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if(t) t.setAttribute('content','Fahrer');
+    document.title='TaxiPro Fahrer';
+    if(mode!=='driver'||(!p.has('token')&&!p.has('boot'))){
+      try{
+        var boot=localStorage.getItem('tp_driver_boot');
+        var token=localStorage.getItem('tp_driver_token');
+        if(boot||token){
+          var qs=new URLSearchParams();
+          qs.set('mode','driver');
+          if(p.get('source')) qs.set('source',p.get('source'));
+          if(token) qs.set('token',token);
+          if(boot) qs.set('boot',boot);
+          var base=location.pathname.replace(/[^/]*$/,'')+'index.html';
+          if(location.search!=='?'+qs.toString()) location.replace(base+'?'+qs.toString());
+        }
+      }catch(e){}
+    }
+  }else if(p.get('source')==='pwa'&&!mode){
+    try{
+      if(localStorage.getItem('tp_app_role')==='driver'){
+        location.replace(location.pathname.replace(/[^/]*$/,'')+'index.html?source=pwa&mode=driver');
+      }
+    }catch(e){}
+  }
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -857,6 +897,7 @@ html.driver-mode .overlay{z-index:6100!important}
 .drv-install-card ol{margin:8px 0 0 18px;padding:0}
 .drv-install-card li{margin-bottom:6px}
 html.driver-standalone .drv-install-card{display:none}
+html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,html.driver-boot #pwa-install-banner{display:none!important}
 .mob-week-agenda{display:none}
 </style>
 </head>
@@ -6291,7 +6332,11 @@ function isDriverAppMode(){
   if(p.get('mode')==='dispatch') return false;
   if(p.get('mode')==='driver'||p.has('token')||p.has('boot')||location.hash==='#fahrer') return true;
   if(/driver\.html$/i.test(location.pathname)) return true;
-  if(isStandalone()&&localStorage.getItem('tp_app_role')==='driver') return true;
+  if(document.documentElement.classList.contains('driver-boot')) return true;
+  try{
+    if(p.get('source')==='pwa'&&localStorage.getItem('tp_app_role')==='driver') return true;
+    if(isStandalone()&&localStorage.getItem('tp_app_role')==='driver') return true;
+  }catch(e){}
   return false;
 }
 
@@ -6379,6 +6424,7 @@ function copyDriverAppLink(driverId){
 function initAppMode(){
   const params=new URLSearchParams(location.search);
   if(isDriverAppMode()){
+    document.documentElement.classList.add('driver-boot');
     document.getElementById('app').classList.add('hidden');
     document.querySelector('.fab')?.classList.add('hidden');
     document.getElementById('mobile-bottom-nav')?.classList.add('hidden');
@@ -6436,6 +6482,21 @@ function showDriverLogin(){
   if(!isStandalone()&&!localStorage.getItem('tp_driver_pwa_dismiss')) scheduleInstallBanner(true,400);
 }
 
+function updateDriverUrlForInstall(d){
+  if(!d) return;
+  ensureDriverAccess(d);
+  try{
+    const qs=new URLSearchParams();
+    qs.set('mode','driver');
+    qs.set('token',d.accessToken);
+    qs.set('boot',encodeDriverBoot(d));
+    if(new URLSearchParams(location.search).get('source')) qs.set('source',new URLSearchParams(location.search).get('source'));
+    const target=(location.pathname.replace(/[^/]*$/,'')||'/')+'index.html?'+qs.toString();
+    history.replaceState(null,'',target);
+    persistDriverLinkParams(qs);
+  }catch(e){}
+}
+
 function showDriverMain(driverId){
   currentDriverId=driverId;
   localStorage.setItem('tp_driver_session',driverId);
@@ -6443,6 +6504,8 @@ function showDriverMain(driverId){
   sessionStorage.setItem('tp_driver_session',driverId);
   const d=drivers.find(x=>x.id===driverId);
   if(!d){showDriverLogin();return;}
+  document.documentElement.classList.add('driver-boot');
+  updateDriverUrlForInstall(d);
   document.documentElement.classList.remove('driver-login-visible');
   document.getElementById('driver-login').classList.add('hidden');
   const main=document.getElementById('driver-main');

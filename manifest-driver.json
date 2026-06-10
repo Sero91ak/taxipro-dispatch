@@ -3,7 +3,7 @@
   "short_name": "Fahrer",
   "description": "Fahrer-App – Fahrten annehmen, Navigation, Team-Chat, QR-Scan",
   "prefer_related_applications": false,
-  "start_url": "./driver.html?source=pwa&mode=driver",
+  "start_url": "./index.html?source=pwa&mode=driver",
   "scope": "./",
   "id": "./driver.html",
   "display": "standalone",
