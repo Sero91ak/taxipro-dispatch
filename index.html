@@ -168,10 +168,11 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .sch-allday-item .sch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .sch-allday-item .sch-dot.krank{background:var(--red)}
 .sch-allday-item .sch-dot.rechn{background:var(--yellow)}
+.sch-allday-item .sch-dot.normal{background:var(--blue)}
 .sch-allday-item .sch-dot.privat{background:var(--green)}
 .sch-allday-item .sch-dot.gcal{background:var(--blue)}
 .sch-list{padding:4px 0;background:var(--bg)}
-.sch-row{display:grid;grid-template-columns:14px 54px 1fr auto auto;gap:0 8px;align-items:center;padding:11px 12px 11px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;min-height:46px;background:var(--bg2)}
+.sch-row{display:grid;grid-template-columns:14px 54px 1fr auto auto auto;gap:0 6px;align-items:center;padding:11px 10px 11px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:.12s;min-height:46px;background:var(--bg2)}
 .sch-excel{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .excel-dir-row{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:2px}
 .excel-dir{width:26px;height:26px;border-radius:4px;font-size:11px;font-weight:700;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:.12s;border:1px solid transparent}
@@ -225,6 +226,9 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .sch-row:nth-child(even){background:var(--bg3)}
 .sch-row:hover{background:var(--bg4)!important}
 .sch-del{width:30px;height:30px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0;opacity:.45}
+.sch-dispatch{width:30px;height:30px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--gold);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0;opacity:.7}
+.sch-row:hover .sch-dispatch{opacity:1;background:var(--gold3);border-color:rgba(245,166,35,.35)}
+.sch-dispatch:hover{background:rgba(245,166,35,.22)!important;border-color:var(--gold)!important}
 .sch-row:hover .sch-del{opacity:1}
 @media(max-width:700px){.sch-del{opacity:.85}}
 .sch-del:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red2)}
@@ -234,11 +238,13 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .sch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;justify-self:center}
 .sch-row.krank .sch-dot{background:var(--red);box-shadow:0 0 0 2px var(--red-bg)}
 .sch-row.rechn .sch-dot{background:var(--yellow);box-shadow:0 0 0 2px var(--yellow-bg)}
+.sch-row.normal .sch-dot{background:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
 .sch-row.privat .sch-dot{background:var(--green);box-shadow:0 0 0 2px var(--green-bg)}
 .sch-row.gcal .sch-dot{background:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
 .sch-time{font-size:13px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .sch-row.krank .sch-time{color:var(--red2)}
 .sch-row.rechn .sch-time{color:var(--yellow2)}
+.sch-row.normal .sch-time{color:var(--blue2)}
 .sch-row.privat .sch-time{color:var(--green2)}
 .sch-row.gcal .sch-time{color:var(--blue2)}
 .sch-body{min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow:hidden}
@@ -246,6 +252,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .sch-code{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;flex-shrink:0}
 .sch-row.krank .sch-code{background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
 .sch-row.rechn .sch-code{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.sch-row.normal .sch-code{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
 .sch-row.privat .sch-code{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
 .sch-row.gcal .sch-code{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
 .sch-addr{font-size:13px;color:var(--text2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
@@ -264,12 +271,14 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .ride-block:hover{filter:brightness(1.2);z-index:10;transform:scaleX(1.01)}
 .ride-block.krank{background:var(--red-bg);border-color:var(--red-border);border-left:3px solid var(--red)}
 .ride-block.rechn{background:var(--yellow-bg);border-color:var(--yellow-border);border-left:3px solid var(--yellow)}
+.ride-block.normal{background:var(--blue-bg);border-color:var(--blue-border);border-left:3px solid var(--blue)}
 .ride-block.privat{background:var(--green-bg);border-color:var(--green-border);border-left:3px solid var(--green)}
 .rb-time{font-size:9px;font-weight:700}
 .rb-name{font-size:11px;font-weight:600;margin-top:1px}
 .rb-dest{font-size:10px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ride-block.krank .rb-time{color:var(--red2)}
 .ride-block.rechn .rb-time{color:var(--yellow2)}
+.ride-block.normal .rb-time{color:var(--blue2)}
 .ride-block.privat .rb-time{color:var(--green2)}
 .ride-block.gcal{background:var(--blue-bg);border-color:var(--blue-border);border-left:3px solid var(--blue);z-index:1}
 .ride-block.gcal .rb-time{color:var(--blue2)}
@@ -308,6 +317,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .mo-chip{border-radius:3px;padding:1px 4px;font-size:9px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mo-chip.krank{background:var(--red-bg);color:var(--red2);border-left:2px solid var(--red)}
 .mo-chip.rechn{background:var(--yellow-bg);color:var(--yellow2);border-left:2px solid var(--yellow)}
+.mo-chip.normal{background:var(--blue-bg);color:var(--blue2);border-left:2px solid var(--blue)}
 .mo-chip.privat{background:var(--green-bg);color:var(--green2);border-left:2px solid var(--green)}
 .mo-chip.gcal{background:var(--blue-bg);color:var(--blue2);border-left:2px solid var(--blue)}
 .mo-more{font-size:9px;color:var(--text3)}
@@ -479,6 +489,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .rd-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .rd-badge.krank{background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
 .rd-badge.rechn{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.rd-badge.normal{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
 .rd-badge.privat{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
 .rd-time{font-size:24px;font-weight:700;font-family:var(--font2);line-height:1}
 .rd-date{font-size:11px;color:var(--text2);margin-top:3px}
@@ -527,6 +538,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
 
 .tr-card.krank{border-left:3px solid var(--red)}
 .tr-card.rechn{border-left:3px solid var(--yellow)}
+.tr-card.normal{border-left:3px solid var(--blue)}
 .tr-card.privat{border-left:3px solid var(--green)}
 /* DRIVER DISPATCH */
 .driver-picker{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(6px)}
@@ -550,6 +562,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .dp-empty{text-align:center;padding:20px;color:var(--text3);font-size:13px}
 .dp-add-btn{width:100%;padding:11px;border-radius:var(--r2);border:1px dashed var(--border2);background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
 .dp-add-btn:hover{background:var(--bg3);border-color:var(--gold);color:var(--gold)}
+.driver-hint{margin:0 0 14px;padding:12px 14px;background:var(--gold3);border:1px solid rgba(245,166,35,.25);border-radius:var(--r2);font-size:12px;color:var(--text2);line-height:1.65}
+.driver-hint strong{color:var(--gold)}
 /* dispatch sent badge */
 .dispatched-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:9px;font-weight:700;background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
 /* driver btn on ride card */
@@ -643,8 +657,9 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div class="nav-item gc-item" id="nav-gcal" onclick="initiateGCalSync()"><span class="nav-icon">📅</span> Google Kalender <span class="nav-badge" id="nb-gcal">–</span></div>
   <div class="nav-item" data-view="drivers" onclick="switchView('drivers')"><span class="nav-icon">👨‍✈️</span> Fahrer <span class="nav-badge" id="nb-drivers">0</span></div>
   <div class="nav-sec">Fahrttyp</div>
-  <div class="nav-item" onclick="calFilterType('krank')"><span class="nav-icon">🔴</span> Krankenfahrten</div>
-  <div class="nav-item" onclick="calFilterType('rechn')"><span class="nav-icon">🟡</span> Rechnungsfahrten</div>
+  <div class="nav-item" onclick="calFilterType('krank')"><span class="nav-icon">🔴</span> Krankenfahrten (KTS)</div>
+  <div class="nav-item" onclick="calFilterType('rechn')"><span class="nav-icon">🟡</span> Rechnungsfahrten (RE)</div>
+  <div class="nav-item" onclick="calFilterType('normal')"><span class="nav-icon">🔵</span> Normale Fahrten</div>
   <div class="nav-item" onclick="calFilterType('privat')"><span class="nav-icon">🟢</span> Privatfahrten</div>
   <div class="nav-item" onclick="calFilterType('all')"><span class="nav-icon">📋</span> Alle</div>
   <div class="nav-sec">Cloud</div>
@@ -723,6 +738,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <button class="tb-btn primary" onclick="openDriverModal()">＋ Fahrer</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:14px">
+      <div class="driver-hint"><strong>So funktioniert's:</strong> Fahrer hier anlegen (Name + WhatsApp-Nummer). Bei jeder Fahrt auf <strong>🚀</strong> tippen → Fahrer wählen → WhatsApp öffnet sich mit dem kompletten Fahrtauftrag.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;align-content:start" id="drivers-list"></div>
     </div>
   </div>
@@ -769,8 +785,9 @@ h1,h2,h3,h4{font-family:var(--font2)}
     <div class="fr">
       <label>Fahrttyp</label>
       <div class="rg">
-        <div class="ro"><input type="radio" name="rt" id="rt-krank" value="krank" checked onchange="onRTChange()"/><label for="rt-krank">🔴 Krankenfahrt</label></div>
-        <div class="ro"><input type="radio" name="rt" id="rt-rechn" value="rechn" onchange="onRTChange()"/><label for="rt-rechn">🟡 Rechnung</label></div>
+        <div class="ro"><input type="radio" name="rt" id="rt-krank" value="krank" checked onchange="onRTChange()"/><label for="rt-krank">🔴 KTS Krankenfahrt</label></div>
+        <div class="ro"><input type="radio" name="rt" id="rt-rechn" value="rechn" onchange="onRTChange()"/><label for="rt-rechn">🟡 RE Rechnung</label></div>
+        <div class="ro"><input type="radio" name="rt" id="rt-normal" value="normal" onchange="onRTChange()"/><label for="rt-normal">🔵 Normale Fahrt</label></div>
         <div class="ro"><input type="radio" name="rt" id="rt-privat" value="privat" onchange="onRTChange()"/><label for="rt-privat">🟢 Privat</label></div>
       </div>
     </div>
@@ -814,10 +831,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
             <option value="liegend">Liegendtransport</option>
           </select>
         </div>
-        <div><label>Zuzahlung</label>
+        <div><label>Zuzahlung (KTS)</label>
           <select id="r-zuzahl">
-            <option value="ja">Ja (10% / mind. 5€)</option>
-            <option value="nein">Befreit</option>
+            <option value="NB">NB – Zuzahlung pflichtig</option>
+            <option value="BF">BF – Befreit von Zuzahlung</option>
           </select>
         </div>
       </div>
@@ -872,6 +889,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
     <button class="btn btn-danger btn-sm" id="r-delete-btn" style="display:none;margin-right:auto" onclick="deleteCurrentRide()">🗑️ Löschen</button>
     <button class="btn btn-secondary" onclick="closeM('modal-ride')">Abbrechen</button>
     <button class="btn btn-wa" onclick="shareRideWA()">📱 WhatsApp</button>
+    <button class="btn btn-sm" style="background:var(--gold3);color:var(--gold);border:1px solid rgba(245,166,35,.35);padding:9px 14px;font-weight:700" onclick="saveRide(true)">🚀 An Fahrer</button>
     <button class="btn btn-primary" onclick="saveRide()">💾 Speichern</button>
   </div>
 </div>
@@ -909,7 +927,12 @@ h1,h2,h3,h4{font-family:var(--font2)}
         <div><label>Firma / Organisation</label><input type="text" id="c-org" placeholder="Optional"/></div>
       </div>
       <div class="fsec">Adresse</div>
-      <div class="fr"><label>Straße &amp; Nr.</label><input type="text" id="c-street" placeholder="Musterstraße 12"/></div>
+      <div class="fr"><label>Straße &amp; Nr.</label>
+        <div class="ac-wrap">
+          <input type="text" id="c-street" placeholder="Straße suchen (Deutschland)…" oninput="onAddrSearch(this.value,'c-street-ac','c-street',false)" autocomplete="off"/>
+          <div class="ac-list" id="c-street-ac"></div>
+        </div>
+      </div>
       <div class="fr2 fr">
         <div><label>PLZ</label><input type="text" id="c-plz" placeholder="53340" maxlength="6"/></div>
         <div><label>Stadt</label><input type="text" id="c-city" placeholder="Meckenheim"/></div>
@@ -940,10 +963,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
             <div><label>Versichertennr.</label><input type="text" id="c-vnr" placeholder="A123456789"/></div>
           </div>
           <div class="fr">
-            <label>Zuzahlungsstatus</label>
+            <label>Zuzahlungsstatus (KTS)</label>
             <div class="rg">
-              <div class="ro"><input type="radio" name="cz" id="cz-ja" value="ja" checked/><label for="cz-ja">€ Zuzahlung</label></div>
-              <div class="ro"><input type="radio" name="cz" id="cz-nein" value="nein"/><label for="cz-nein">✓ Befreit</label></div>
+              <div class="ro"><input type="radio" name="cz" id="cz-nb" value="NB" checked/><label for="cz-nb">NB – Zuzahlung pflichtig</label></div>
+              <div class="ro"><input type="radio" name="cz" id="cz-bf" value="BF"/><label for="cz-bf">BF – Befreit von Zuzahlung</label></div>
             </div>
           </div>
         </div>
@@ -997,10 +1020,11 @@ h1,h2,h3,h4{font-family:var(--font2)}
         <div class="pro-panel-head">
           <div class="pro-panel-icon">📊</div>
           <div>
-            <div class="pro-panel-title">Excel-Abrechnung (KTS / Rechnung)</div>
-            <div class="pro-panel-desc">Automatische Suche der Excel-Datei nach Name und Jahr in SharePoint.</div>
+            <div class="pro-panel-title">Excel-Abrechnung – <span id="c-excel-type-label">KTS</span></div>
+            <div class="pro-panel-desc" id="c-excel-type-desc">KTS-Datei (rot) und Rechnungs-Datei (gelb/RE) werden getrennt gesucht.</div>
           </div>
         </div>
+        <input type="hidden" id="c-excel-type" value="kts"/>
         <div class="excel-file-row">
           <button type="button" class="btn btn-blue btn-sm" onclick="openCloudModal()">☁️ Cloud einrichten</button>
           <span class="excel-file-name" id="c-excel-name">–</span>
@@ -1009,11 +1033,11 @@ h1,h2,h3,h4{font-family:var(--font2)}
           <div><label>Standard km</label><input type="number" id="c-excel-km" placeholder="z.B. 13" min="1" max="999"/></div>
           <div><label>Standard Ziel (Fahrstrecke)</label><input type="text" id="c-excel-dest" placeholder="z.B. UKB Bonn"/></div>
         </div>
-        <div class="fr" style="margin-top:8px">
+        <div class="fr" style="margin-top:8px;display:none" id="c-excel-type-wrap">
           <label>Vorlagen-Typ</label>
-          <select id="c-excel-type">
-            <option value="kts">KTS-Bestätigung (monatliche Blätter)</option>
-            <option value="rechn">Rechnungsfahrt (gleiche Struktur)</option>
+          <select id="c-excel-type-select" onchange="document.getElementById('c-excel-type').value=this.value">
+            <option value="kts">KTS (Krankenfahrten)</option>
+            <option value="rechn">RE (Rechnungsfahrten)</option>
           </select>
         </div>
       </div>
@@ -1156,13 +1180,13 @@ h1,h2,h3,h4{font-family:var(--font2)}
     </div>
     <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
     <div class="gc-panel" style="margin-top:12px">
-      <h4>🗺️ Google Maps Adresssuche</h4>
-      <div class="gc-status">Adress-Vorschläge bei Abholung &amp; Ziel (deutschlandweit, inkl. Krankenhäuser).</div>
+      <h4>🗺️ Adresssuche</h4>
+      <div class="gc-status">Straßen deutschlandweit – mit <strong>Google Maps</strong> (beste Treffer) oder kostenlos via <strong>OpenStreetMap</strong>.</div>
       <div class="fr" style="margin-top:8px;margin-bottom:0">
-        <label>Maps API-Schlüssel</label>
+        <label>Maps API-Schlüssel (optional)</label>
         <input type="password" id="maps-api-key" placeholder="AIza… (Cloud Console)" onchange="saveMapsApiKey(this.value)"/>
       </div>
-      <div id="maps-key-status" style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5"></div>
+      <div id="maps-key-status" style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5"></div>
     </div>
     <div id="gcal-preview-list"></div>
   </div>
@@ -1188,7 +1212,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div class="dp-title">🚀 Fahrt zuweisen an Fahrer</div>
   <div class="dp-ride-info" id="dp-ride-info">–</div>
   <div class="dp-drivers" id="dp-drivers-list"></div>
-  <button class="dp-add-btn" onclick="closeDriverPicker();openDriverModal()">＋ Neuen Fahrer anlegen</button>
+  <button class="dp-add-btn" onclick="openDriverModalFromDispatch()">＋ Neuen Fahrer anlegen</button>
 </div>
 </div>
 
@@ -1203,7 +1227,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <div><label>Nachname *</label><input type="text" id="d-lname" placeholder="Yilmaz"/></div>
     </div>
     <div class="fr2 fr">
-      <div><label>WhatsApp / Telefon *</label><input type="tel" id="d-phone" placeholder="+49 171 …"/></div>
+      <div><label>WhatsApp / Telefon *</label><input type="tel" id="d-phone" placeholder="0171 1234567 oder +49 171 …"/></div>
       <div><label>Fahrzeug</label><input type="text" id="d-car" placeholder="VW Caddy · B-TX 123"/></div>
     </div>
     <div class="fr">
@@ -1294,7 +1318,7 @@ const HOSPITALS=[
 // GOOGLE API – Client ID hier eintragen (Cloud Console)
 // ═══════════════════════════════════════════════════════════════
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
-// Google Maps / Places API-Schlüssel (Cloud Console → APIs: Maps JavaScript + Places)
+// Google Maps / Places API-Schlüssel (Cloud Console → Maps JavaScript API + Places API)
 const GOOGLE_MAPS_API_KEY=localStorage.getItem('tp_maps_key')||'';
 // Microsoft Azure App – einmal in Azure Portal anlegen (siehe Cloud-Modal)
 const MS_CLIENT_ID=localStorage.getItem('tp_ms_client_id')||'56ac200a-a8cd-45ee-a482-8d6dc477b3ed';
@@ -1407,6 +1431,7 @@ let contactViewMode=localStorage.getItem('tp_contact_view')||'list';
 let contactSort=localStorage.getItem('tp_contact_sort')||'name';
 let gcSelected=new Set();
 let dispatchRideId=null;
+let pendingDispatchAfterDriver=null;
 
 function save(){
   localStorage.setItem('tp_c',JSON.stringify(customers));
@@ -1452,6 +1477,7 @@ function importBackup(input){
 }
 
 function checkDataMigration(){
+  migrateKtsReData();
   if(rides.length||customers.length) return;
   setTimeout(()=>{
     toast('Keine Daten? Cloud verbinden, Backup laden oder Google Kalender','warn');
@@ -1472,9 +1498,114 @@ const DE_MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August'
 const DE_DAYS=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const DE_DAYS_SHORT=['So','Mo','Di','Mi','Do','Fr','Sa'];
 
-// ═══════════════════════════════════════════════════════════════
-// VIEWS
-// ═══════════════════════════════════════════════════════════════
+function normalizeZuzahlung(v){
+  const s=String(v||'').trim().toLowerCase();
+  if(s==='bf'||s==='nein'||s==='befreit'||s==='frei') return 'BF';
+  if(s==='nb'||s==='ja'||s==='yes'||s==='pflicht') return 'NB';
+  return 'NB';
+}
+function zuzahlLabel(v){return normalizeZuzahlung(v)==='BF'?'BF – Befreit von Zuzahlung':'NB – Zuzahlung pflichtig';}
+function zuzahlShort(v){return normalizeZuzahlung(v);}
+function customerExcelType(c){
+  if(!c) return 'kts';
+  if(c.excelType==='rechn'||c.type==='re') return 'rechn';
+  return 'kts';
+}
+function rideMatchesCustomerExcel(cust,ride){
+  if(!cust||!ride) return false;
+  const want=customerExcelType(cust);
+  return want==='rechn'?ride.type==='rechn':ride.type==='krank';
+}
+function defaultRideTypeForCustomer(c){
+  if(!c) return 'krank';
+  if(c.type==='re') return 'rechn';
+  if(c.type==='privat') return 'privat';
+  return 'krank';
+}
+
+// Google-Kalender-Farben → Fahrttyp (exakt wie im Google Kalender)
+// Rot = KTS (immer rot) | Gelb/Gold = RE Rechnung | Blau = Normale Fahrt | Grün = Privat
+const GCAL_COLOR_VISUAL={
+  '11':'krank','4':'krank',
+  '5':'rechn','6':'rechn',
+  '9':'normal','1':'normal','7':'normal',
+  '2':'privat','10':'privat',
+};
+function rideTypeFromGCalColor(colorId,backgroundColor){
+  if(colorId&&GCAL_COLOR_VISUAL[colorId]) return GCAL_COLOR_VISUAL[colorId];
+  if(backgroundColor){
+    const h=String(backgroundColor).toLowerCase().replace(/\s/g,'');
+    if(/#?(dc2127|ff887c|c62828|e53935)/.test(h)) return 'krank';
+    if(/#?(fbd75b|ffb878|f5a623|ffc107|ffeb3b)/.test(h)) return 'rechn';
+    if(/#?(5484ed|a4bdfc|46d6db|2196f3|4285f4)/.test(h)) return 'normal';
+    if(/#?(7ae7bf|51b749|4caf50)/.test(h)) return 'privat';
+  }
+  return null;
+}
+function rideBusinessTypeFromGCalVisual(visual){
+  if(visual==='krank') return 'krank';
+  if(visual==='rechn'||visual==='normal'||visual==='privat') return visual;
+  return null;
+}
+function rideVisualClass(r){
+  if(r?.gcalColorId){
+    const v=rideTypeFromGCalColor(r.gcalColorId);
+    if(v) return v;
+  }
+  if(isRechnungsfahrtText(r?.to,r?.from,r?.note,r?.customerName)) return 'rechn';
+  if(r?.type==='rechn') return 'rechn';
+  if(r?.type==='normal') return 'normal';
+  return r?.type||'krank';
+}
+function gcalColorFromRide(ride){
+  if(ride?.gcalColorId) return ride.gcalColorId;
+  const t=ride?.type||'krank';
+  if(t==='krank') return '11';
+  if(t==='rechn') return '5';
+  if(t==='normal') return '9';
+  if(t==='privat') return '2';
+  return '11';
+}
+function rideTypeLabel(r){
+  const vis=rideVisualClass(r);
+  if(vis==='krank') return '🔴 KTS Krankenfahrt';
+  if(vis==='rechn') return '🟡 RE Rechnungsfahrt';
+  if(vis==='normal') return '🔵 Normale Fahrt';
+  if(vis==='privat') return '🟢 Privatfahrt';
+  return vis;
+}
+
+function migrateKtsReData(){
+  let changed=false;
+  customers.forEach(c=>{
+    const zz=normalizeZuzahlung(c.zuzahlungStatus);
+    if(c.zuzahlungStatus!==zz){c.zuzahlungStatus=zz;changed=true;}
+    const et=customerExcelType(c);
+    if(c.excelType!==et){c.excelType=et;changed=true;}
+  });
+  rides.forEach(r=>{
+    if(r.zuzahlung){
+      const zz=normalizeZuzahlung(r.zuzahlung);
+      if(r.zuzahlung!==zz){r.zuzahlung=zz;changed=true;}
+    }
+    if(isRechnungsfahrtText(r.to,r.from,r.note,r.customerName)){
+      if(r.type!=='rechn'){r.type='rechn';changed=true;}
+      if(r.gcalColorId!=='5'&&r.gcalColorId!=='6'){r.gcalColorId='5';changed=true;}
+      return;
+    }
+    if(r.gcalColorId){
+      const vis=rideTypeFromGCalColor(r.gcalColorId);
+      const biz=rideBusinessTypeFromGCalVisual(vis);
+      if(biz&&r.type!==biz){r.type=biz;changed=true;}
+      return;
+    }
+    const cust=customers.find(c=>c.id===r.customerId);
+    if(cust){
+      if(cust.type==='re'&&r.type!=='rechn'){r.type='rechn';changed=true;}
+    }
+  });
+  if(changed) save();
+}
 function switchView(v){
   view=v;
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
@@ -1525,7 +1656,11 @@ function calFilterSerie(s){calSerieF=s;calTypeF='all';switchView('calendar');}
 function filteredRides(dateStr){
   return rides.filter(r=>{
     if(r.date!==dateStr) return false;
-    if(calTypeF!=='all'&&r.type!==calTypeF) return false;
+    if(calTypeF!=='all'){
+      const vis=rideVisualClass(r);
+      if(calTypeF==='krank'&&vis!=='krank') return false;
+      else if(calTypeF!=='krank'&&vis!==calTypeF) return false;
+    }
     if(calSerieF&&r.serieType!==calSerieF) return false;
     return true;
   }).sort((a,b)=>a.time.localeCompare(b.time));
@@ -1568,6 +1703,8 @@ function normGCalEvent(ev){
     location:ev.location||'',description:ev.description||'',htmlLink:ev.htmlLink||'',
     calendar:ev.organizer?.displayName||'Google Kalender',
     taxiproRideId:ev.extendedProperties?.private?.taxiproRideId||null,
+    colorId:ev.colorId||null,
+    backgroundColor:ev.backgroundColor||null,
     updated:ev.updated||null
   };
 }
@@ -1591,11 +1728,15 @@ function renderCalendar(){
   if(calV==='day'){pool=filteredRides(fmtD(curDate));gpool=filteredGCalEvents(fmtD(curDate));}
   else if(calV==='week'){const mo=weekMon(curDate);for(let i=0;i<7;i++){const ds=fmtD(addDays(mo,i));pool.push(...filteredRides(ds));gpool.push(...filteredGCalEvents(ds));}}
   else{const y=curDate.getFullYear(),m=curDate.getMonth(),days=new Date(y,m+1,0).getDate();for(let d=1;d<=days;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;pool.push(...filteredRides(ds));gpool.push(...filteredGCalEvents(ds));}}
-  const kr=pool.filter(r=>r.type==='krank').length,re=pool.filter(r=>r.type==='rechn').length,pr=pool.filter(r=>r.type==='privat').length;
+  const kr=pool.filter(r=>rideVisualClass(r)==='krank').length;
+  const re=pool.filter(r=>rideVisualClass(r)==='rechn').length;
+  const nr=pool.filter(r=>rideVisualClass(r)==='normal').length;
+  const pr=pool.filter(r=>rideVisualClass(r)==='privat').length;
   let stats=`
     <div class="s-chip gold"><strong>${pool.length}</strong> Fahrten</div>
-    <div class="s-chip red"><strong>${kr}</strong> Kranken</div>
-    <div class="s-chip yellow"><strong>${re}</strong> Rechnung</div>
+    <div class="s-chip red"><strong>${kr}</strong> KTS</div>
+    <div class="s-chip yellow"><strong>${re}</strong> RE</div>
+    <div class="s-chip blue"><strong>${nr}</strong> Normal</div>
     <div class="s-chip green"><strong>${pr}</strong> Privat</div>`;
   if(gcalConnected&&gcalShow) stats+=`<div class="s-chip blue"><strong>${gpool.length}</strong> Google</div>`;
   document.getElementById('stats-bar').innerHTML=stats;
@@ -1606,10 +1747,17 @@ function renderCalendar(){
   else renderMonthV(body);
 }
 
-function rideTypeCode(type){return type==='krank'?'KTS':type==='rechn'?'RE':type==='privat'?'PRIV':'';}
+function rideTypeCode(r){
+  const vis=typeof r==='string'?r:rideVisualClass(r);
+  return vis==='krank'?'KTS':vis==='rechn'?'RE':vis==='normal'?'NORMAL':vis==='privat'?'PRIV':'';
+}
 function rideScheduleName(r){
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   if(c) return `${c.fname} ${(c.lname||'').charAt(0)}.`.trim();
+  if(r.customerName){
+    const p=r.customerName.trim().split(/\s+/);
+    return p.length>=2?`${p[0]} ${p[1].charAt(0)}.`:r.customerName;
+  }
   if(r.from) return 'Zur Fahrt';
   return 'Fahrt';
 }
@@ -1622,7 +1770,7 @@ function buildScheduleItems(ds){
   const items=[];
   filteredRides(ds).forEach(r=>{
     items.push({kind:'ride',time:r.time||'00:00',sortKey:r.time||'00:00',data:r,
-      allday:false,type:r.type||'krank'});
+      allday:false,type:rideVisualClass(r)});
   });
   filteredGCalEvents(ds).forEach(ev=>{
     items.push({kind:'gcal',time:ev.isAllDay?'00:00':ev.time,sortKey:ev.isAllDay?'00:00':ev.time,data:ev,
@@ -1675,13 +1823,16 @@ function renderDayV(container){
       if(item.kind==='ride'){
         const r=item.data;
         const name=rideScheduleName(r);
-        const code=rideTypeCode(r.type)+(r.serieType?` · ${r.serieType.toUpperCase()}`:'');
+        const code=rideTypeCode(r)+(r.serieType?` · ${r.serieType.toUpperCase()}`:'');
         const addr=rideScheduleAddr(r);
         const sync=r.googleEventId?' 📅':'';
+        const dispatched=r.dispatchedTo?drivers.find(d=>d.id===r.dispatchedTo):null;
+        const dispatchBadge=dispatched?` · ✅ ${dispatched.fname}`:'';
         row.innerHTML=`<div class="sch-dot"></div><div class="sch-time">${r.time}</div>
           <div class="sch-body"><span class="sch-title">${name}</span>${code?`<span class="sch-code">${code}</span>`:''}
-          <span class="sch-addr">${addr}${sync}${r.excelSynced?' · ✅ Excel':''}</span></div>
+          <span class="sch-addr">${addr}${sync}${r.excelSynced?' · ✅ Excel':''}${dispatchBadge}</span></div>
           ${buildExcelControlsHtml(r)}
+          <button class="sch-dispatch" title="An Fahrer senden (WhatsApp)" onclick="event.stopPropagation();openDriverPicker('${r.id}')">🚀</button>
           <button class="sch-del" title="Fahrt löschen" onclick="event.stopPropagation();deleteRide('${r.id}')">🗑️</button>`;
         row.onclick=()=>showRideDetail(r.id);
       } else {
@@ -1711,7 +1862,7 @@ function buildRideBlock(r){
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   const name=c?c.fname+' '+c.lname:'–';
   const el=document.createElement('div');
-  el.className=`ride-block ${r.type||'krank'}${r.googleEventId?' synced':''}`;
+  el.className=`ride-block ${rideVisualClass(r)}${r.googleEventId?' synced':''}`;
   el.style.cssText=`top:${top}px;height:50px`;
   el.innerHTML=`<div class="rb-time">${r.time}${r.serieType?` · ${r.serieType}`:''}${r.source==='google'?' · G':''}</div><div class="rb-name">${name}</div><div class="rb-dest">→ ${r.to||'–'}</div>`;
   el.onclick=()=>showRideDetail(r.id);
@@ -1761,7 +1912,7 @@ function renderWeekV(container){
       const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
       const name=c?c.fname+' '+c.lname.charAt(0)+'.':'–';
       const el=document.createElement('div');
-      el.className=`ride-block ${r.type||'krank'}`;
+      el.className=`ride-block ${rideVisualClass(r)}`;
       el.style.cssText=`top:${hh*60+mm}px;height:46px;left:2px;right:2px`;
       el.innerHTML=`<div class="rb-time" style="font-size:8px">${r.time}</div><div class="rb-name" style="font-size:10px">${name}</div>`;
       el.onclick=()=>showRideDetail(r.id);
@@ -1802,7 +1953,7 @@ function renderMonthV(container){
     const cell=document.createElement('div');
     cell.className=`mo-cell${iso===todayStr?' today':''}${iso===selStr?' sel':''}`;
     const allItems=[
-      ...dr.map(r=>{const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);return{type:r.type||'krank',html:`<div class="mo-chip ${r.type||'krank'}">${r.time} ${c?c.fname:'?'}</div>`};}),
+      ...dr.map(r=>{const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);const vis=rideVisualClass(r);return{type:vis,html:`<div class="mo-chip ${vis}">${r.time} ${c?c.fname:'?'}</div>`};}),
       ...ge.map(ev=>({type:'gcal',html:`<div class="mo-chip gcal">📅 ${ev.isAllDay?'GT':ev.time} ${ev.title.slice(0,12)}</div>`}))
     ];
     let chips=allItems.slice(0,3).map(x=>x.html).join('');
@@ -1928,8 +2079,8 @@ function buildCustCard(c,isGC=false){
   const typeClass=TYPE_COLORS[c.type]||'kts';
   const typeLabel=TYPE_LABELS[c.type]||c.type;
   const tags=[`<span class="cc-tag ${typeClass}">${typeLabel}</span>`];
-  if(c.zuzahlungStatus==='nein') tags.push(`<span class="cc-tag befreit">✓ Befreit</span>`);
-  else if(c.type==='kts') tags.push(`<span class="cc-tag zuzahl">€ Zuzahlung</span>`);
+  if(c.zuzahlungStatus==='BF'||normalizeZuzahlung(c.zuzahlungStatus)==='BF') tags.push(`<span class="cc-tag befreit">BF Befreit</span>`);
+  else if(c.type==='kts') tags.push(`<span class="cc-tag zuzahl">NB Zuzahlung pflichtig</span>`);
   if((c.documents||[]).length) tags.push(`<span class="cc-tag" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)">📄 ${c.documents.length}</span>`);
   const gcBanner=isGC?`<div class="cc-src">🔵 Google Kontakt</div>`:'';
   const avContent=c.photo?`<img src="${c.photo}" alt=""/>`:(initials||'?');
@@ -1970,7 +2121,7 @@ function openCustDetail(id){
   document.getElementById(`ct-${c.type||'kts'}`).checked=true;
   document.getElementById('c-kk').value=c.kk||'';
   document.getElementById('c-vnr').value=c.vnr||'';
-  document.getElementById(`cz-${c.zuzahlungStatus||'ja'}`).checked=true;
+  document.getElementById(`cz-${normalizeZuzahlung(c.zuzahlungStatus||'NB')==='BF'?'bf':'nb'}`).checked=true;
   document.getElementById('c-hosp').value=c.stammHosp||'';
   document.getElementById('c-note').value=c.note||'';
   document.getElementById('c-delete-btn').style.display='inline-flex';
@@ -2000,7 +2151,7 @@ function openGCDetail(id){
   document.getElementById('c-org').value=c.org||'';
   document.getElementById('ct-kts').checked=true;
   document.getElementById('c-kk').value='';document.getElementById('c-vnr').value='';
-  document.getElementById('cz-ja').checked=true;
+  document.getElementById('cz-nb').checked=true;
   document.getElementById('c-hosp').value='';document.getElementById('c-note').value='';
   document.getElementById('c-delete-btn').style.display='none';
   onCTChange();
@@ -2026,12 +2177,14 @@ function renderToday(){
     const badges=[
       r.serieType?`<span class="badge serie">🔁 ${r.serieType}</span>`:'',
       r.reminder?`<span class="badge remind">🔔 ${r.reminderMin}min</span>`:'',
-      r.zuzahlung==='nein'?`<span class="badge befreit">✓ Befreit</span>`:'',
+      r.type==='krank'&&(r.zuzahlung==='BF'||normalizeZuzahlung(r.zuzahlung)==='BF')?`<span class="badge befreit">BF</span>`:
+      r.type==='krank'?`<span class="badge" style="background:var(--bg4);color:var(--text2);border:1px solid var(--border2)">NB</span>`:'',
       r.excelSynced?`<span class="badge excel-synced">📊 Excel</span>`:'',
       dispatched?`<span class="dispatched-badge">✅ ${dispatched.fname} ${dispatched.lname}</span>`:''
     ].filter(Boolean).join('');
-    const typeColor=r.type==='krank'?'var(--red2)':r.type==='privat'?'var(--green2)':'var(--yellow2)';
-    return`<div class="tr-card ${r.type||'krank'}" onclick="showRideDetail('${r.id}')">
+    const vis=rideVisualClass(r);
+    const typeColor=vis==='krank'?'var(--red2)':vis==='rechn'?'var(--yellow2)':vis==='normal'?'var(--blue2)':vis==='privat'?'var(--green2)':'var(--text2)';
+    return`<div class="tr-card ${vis}" onclick="showRideDetail('${r.id}')">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
         <div style="font-size:21px;font-weight:700;font-family:var(--font2);color:${typeColor}">${r.time}</div>
         <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:11px;color:var(--text2)">📍 ${from}</div></div>
@@ -2058,10 +2211,11 @@ function showRideDetail(id){
   const name=c?c.fname+' '+c.lname:'Unbekannt';
   const from=r.from||'–';
   const fmtDateDE=s=>{const d=new Date(s+'T12:00:00');return`${DE_DAYS[d.getDay()]}, ${d.getDate()}. ${DE_MONTHS[d.getMonth()]} ${d.getFullYear()}`;};
+  const vis=rideVisualClass(r);
   document.getElementById('mrd-body').innerHTML=`
     <div class="rd-head">
       <div class="rd-badges">
-        <span class="rd-badge ${r.type||'krank'}">${r.type==='krank'?'🔴 Krankenfahrt':r.type==='privat'?'🟢 Privatfahrt':'🟡 Rechnungsfahrt'}</span>
+        <span class="rd-badge ${vis}">${rideTypeLabel(r)}</span>
         ${r.serieType?`<span class="badge serie">🔁 ${r.serieType}</span>`:''}
         ${r.reminder?`<span class="badge remind">🔔 ${r.reminderMin}min</span>`:''}
       </div>
@@ -2072,8 +2226,9 @@ function showRideDetail(id){
     <div class="drow"><div class="drow-icon">📍</div><div><div class="drow-lbl">Abholung</div><div class="drow-val">${from}</div></div></div>
     <div class="drow"><div class="drow-icon">🎯</div><div><div class="drow-lbl">Ziel</div><div class="drow-val">${r.to||'–'}</div></div></div>
     ${r.km?`<div class="drow"><div class="drow-icon">📏</div><div><div class="drow-lbl">Distanz</div><div class="drow-val">ca. ${r.km} km</div></div></div>`:''}
-    ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${r.zuzahlung==='nein'?'Befreit ✓':'Zuzahlung €'}</div></div></div>`:''}
+    ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${zuzahlLabel(r.zuzahlung)}</div></div></div>`:''}
     ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
+    ${r.dispatchedTo?(()=>{const d=drivers.find(x=>x.id===r.dispatchedTo);return d?`<div class="drow"><div class="drow-icon">🚀</div><div><div class="drow-lbl">Fahrer</div><div class="drow-val" style="color:var(--green2)">✅ ${d.fname} ${d.lname} · ${d.phone||'–'}</div></div></div>`:'';})():''}
     ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Aus Google importiert</div></div></div>`:''}
     ${r.source==='google'&&!r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Quelle</div><div class="drow-val">Importiert aus Google</div></div></div>`:''}
     ${buildExcelDetailHtml(r)}
@@ -2114,7 +2269,7 @@ function openRideModal(id=null){
     document.getElementById('r-from').value=r.from||'';
     document.getElementById('r-to').value=r.to||'';
     document.getElementById('r-verord').value=r.verordnung||'';
-    document.getElementById('r-zuzahl').value=r.zuzahlung||'ja';
+    document.getElementById('r-zuzahl').value=normalizeZuzahlung(r.zuzahlung||'NB');
     document.getElementById('r-note').value=r.note||'';
     document.getElementById('r-reminder').checked=!!r.reminder;
     document.getElementById('r-rem-min').value=r.reminderMin||'30';
@@ -2129,7 +2284,7 @@ function openRideModal(id=null){
     document.getElementById('r-time').value=timeNow;
     ['r-from','r-to','r-note','r-cust-search'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('r-cust-id').value='';
-    document.getElementById('r-verord').value='';document.getElementById('r-zuzahl').value='ja';
+    document.getElementById('r-verord').value='';document.getElementById('r-zuzahl').value='NB';
     document.getElementById('r-reminder').checked=false;document.getElementById('r-serie').checked=false;
   }
   onRTChange();onSerieToggle();onRemToggle();
@@ -2144,56 +2299,75 @@ function openRideForCust(id){
   document.getElementById('r-cust-id').value=id;
   document.getElementById('r-from').value=[c.street,c.plz,c.city].filter(Boolean).join(', ');
   if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
-  document.getElementById(`rt-${c.type==='re'?'rechn':c.type==='privat'?'privat':'krank'}`).checked=true;
+  document.getElementById(`rt-${defaultRideTypeForCustomer(c)}`).checked=true;
+  if(c.zuzahlungStatus) document.getElementById('r-zuzahl').value=normalizeZuzahlung(c.zuzahlungStatus);
   onRTChange();
 }
 
 function onRTChange(){
   const t=document.querySelector('input[name="rt"]:checked').value;
   document.getElementById('kts-fields').style.display=t==='krank'?'block':'none';
+  if(t==='rechn'||t==='normal'||t==='privat'){
+    document.getElementById('r-verord').value='';
+    if(t!=='krank') document.getElementById('r-zuzahl').value='NB';
+  }
 }
 function onSerieToggle(){document.getElementById('serie-fields').style.display=document.getElementById('r-serie').checked?'block':'none';}
 function onRemToggle(){document.getElementById('rem-fields').style.display=document.getElementById('r-reminder').checked?'block':'none';}
 
-async function saveRide(){
+async function saveRide(andDispatch=false){
   const type=document.querySelector('input[name="rt"]:checked').value;
   const date=document.getElementById('r-date').value;
   const time=document.getElementById('r-time').value;
   if(!date||!time){toast('Datum und Uhrzeit pflicht','warn');return;}
   const custId=document.getElementById('r-cust-id').value;
   const cust=customers.find(c=>c.id===custId)||gcContacts.find(c=>c.id===custId);
+  if(cust&&customers.find(c=>c.id===custId)&&!rideMatchesCustomerExcel(cust,{type})){
+    toast(cust.type==='re'
+      ?'RE-Kunde: bitte Rechnungsfahrt (gelb) wählen'
+      :'KTS-Kunde: bitte Krankenfahrt (rot) wählen','warn');
+    return;
+  }
   const from=document.getElementById('r-from').value.trim()||(cust?[cust.street,cust.plz,cust.city].filter(Boolean).join(', '):'');
   const to=document.getElementById('r-to').value.trim();
   const serie=document.getElementById('r-serie').checked;
   const reminder=document.getElementById('r-reminder').checked;
   const base={
     type,customerId:custId||null,date,time,from,to,
-    verordnung:document.getElementById('r-verord').value,
-    zuzahlung:document.getElementById('r-zuzahl').value,
+    verordnung:type==='krank'?document.getElementById('r-verord').value:'',
+    zuzahlung:type==='krank'?normalizeZuzahlung(document.getElementById('r-zuzahl').value):'',
+    gcalColorId:gcalColorFromRide({type}),
     note:document.getElementById('r-note').value.trim(),
     serie,reminder,reminderMin:document.getElementById('r-rem-min').value,
     serieType:serie?document.getElementById('r-serie-typ').value:'',
     km:estKm(from,to),localUpdated:Date.now(),
     excelDir:(type==='krank'||type==='rechn')?'hin-rueck':undefined,
   };
-  const savedIds=[];
+  let dispatchId=null;
   if(editRideId){
     const i=rides.findIndex(r=>r.id===editRideId);
-    if(i!==-1){rides[i]={...rides[i],...base};savedIds.push(editRideId);}
+    if(i!==-1){rides[i]={...rides[i],...base};dispatchId=editRideId;}
     toast('Fahrt aktualisiert');
   } else if(serie){
+    if(andDispatch){toast('Serienfahrt: bitte einzelne Fahrt zuweisen','warn');return;}
     const arr=genSerie(base);
     rides.push(...arr);
-    savedIds.push(...arr.map(r=>r.id));
     toast(`${arr.length} Serienfahrten eingetragen`);
   } else {
-    const newId=uid();
-    rides.push({...base,id:newId});
-    savedIds.push(newId);
+    dispatchId=uid();
+    rides.push({...base,id:dispatchId});
     toast('Fahrt eingetragen');
   }
   save();
   closeM('modal-ride');renderCalendar();renderToday();updateCounts();renderMiniCal();
+  if(andDispatch&&dispatchId){
+    if(!drivers.length){
+      toast('Bitte zuerst Fahrer anlegen','warn');
+      openDriverModalFromDispatch(dispatchId);
+    }else{
+      openDriverPicker(dispatchId);
+    }
+  }
 }
 
 function genSerie(base){
@@ -2456,7 +2630,7 @@ function openCustomerModal(){
   document.getElementById('modal-cust-title').textContent='Neuer Kunde';
   ['c-fname','c-lname','c-phone','c-email','c-org','c-street','c-plz','c-city','c-kk','c-vnr','c-hosp','c-note'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('c-birth').value='';
-  document.getElementById('ct-kts').checked=true;document.getElementById('cz-ja').checked=true;
+  document.getElementById('ct-kts').checked=true;document.getElementById('cz-nb').checked=true;
   document.getElementById('c-delete-btn').style.display='none';
   onCTChange();
   updateCustomerExcelUI(null);
@@ -2470,7 +2644,18 @@ function openCustomerModal(){
 
 function onCTChange(){
   const t=document.querySelector('input[name="ct"]:checked').value;
-  document.getElementById('kts-cust-fields').style.display=t==='kts'?'block':'none';
+  const isKts=t==='kts';
+  document.getElementById('kts-cust-fields').style.display=isKts?'block':'none';
+  const excelType=t==='re'?'rechn':'kts';
+  document.getElementById('c-excel-type').value=excelType;
+  const sel=document.getElementById('c-excel-type-select');
+  if(sel) sel.value=excelType;
+  const lbl=document.getElementById('c-excel-type-label');
+  const desc=document.getElementById('c-excel-type-desc');
+  if(lbl) lbl.textContent=t==='re'?'RE Rechnung':'KTS Krankenfahrt';
+  if(desc) desc.textContent=t==='re'
+    ?'Rechnungs-Excel (gelb) – getrennt von KTS-Dateien.'
+    :'KTS-Excel (rot) – getrennt von Rechnungs-Dateien. Spalte F: NB/BF.';
 }
 
 function saveCustomer(){
@@ -2489,22 +2674,31 @@ function saveCustomer(){
     type:document.querySelector('input[name="ct"]:checked').value,
     kk:document.getElementById('c-kk').value.trim(),
     vnr:document.getElementById('c-vnr').value.trim(),
-    zuzahlungStatus:document.querySelector('input[name="cz"]:checked')?.value||'ja',
+    zuzahlungStatus:document.querySelector('input[name="cz"]:checked')?.value||'NB',
     stammHosp:document.getElementById('c-hosp').value.trim(),
     note:document.getElementById('c-note').value.trim(),
     excelKm:document.getElementById('c-excel-km').value.trim(),
     excelDest:document.getElementById('c-excel-dest').value.trim(),
-    excelType:document.getElementById('c-excel-type').value||'kts',
+    excelType:customerExcelType({type:document.querySelector('input[name="ct"]:checked').value}),
     source:'app',
   };
   if(editCustId){
     const i=customers.findIndex(c=>c.id===editCustId);
     if(i!==-1){
       const prev=customers[i];
-      data.excelFileName=prev.excelFileName;
+      if(customerExcelType(prev)!==data.excelType){
+        data.excelFileName='';
+        data.excelAutoLinked=false;
+        delete data.msExcelDriveId;
+        delete data.msExcelItemId;
+        removeExcelHandle(editCustId).catch(()=>{});
+      }else{
+        data.excelFileName=prev.excelFileName;
+        data.msExcelDriveId=prev.msExcelDriveId;
+        data.msExcelItemId=prev.msExcelItemId;
+        data.excelAutoLinked=prev.excelAutoLinked;
+      }
       data.documents=prev.documents||[];
-      data.msExcelDriveId=prev.msExcelDriveId;
-      data.msExcelItemId=prev.msExcelItemId;
       customers[i]={...prev,...data};
     }
     toast('Kunde aktualisiert');
@@ -2638,7 +2832,7 @@ function renderGCalModal(){
     hideGCalError();
   } else {
     document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Google Kalender verbunden</strong><br>
-       ${gcalWriteEnabled?'🔓 Import + Schreiben aktiv':'🔒 Nur Import (Testmodus): Google → App, Google bleibt unverändert'}<br>
+       ${gcalWriteEnabled?'🔓 Import + Schreiben aktiv':'🔒 Nur Import: Google → App (12 Monate zurück + 18 Monate voraus)'}<br>
        <span style="color:var(--text3)">${syncedRides} verknüpft · ${gcalEvents.length} Termine geladen · Auto-Sync alle 2 Min.</span>`;
   }
   document.getElementById('gcal-connect-btn').style.display=connected?'none':'inline-flex';
@@ -2735,7 +2929,8 @@ async function loadGCalendars(){
   const res=await gcalApi('users/me/calendarList');
   if(!res||!res.ok) return;
   const data=await res.json();
-  gcalCalendars=(data.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer');
+  gcalCalendars=(data.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer')
+    .map(c=>({id:c.id,summary:c.summary,primary:c.primary,colorId:c.colorId||null,backgroundColor:c.backgroundColor||null}));
   if(!gcalCalendars.find(c=>c.id===gcalCalendarId)&&gcalCalendars.length)
     gcalCalendarId=gcalCalendars.find(c=>c.primary)?.id||gcalCalendars[0].id;
   localStorage.setItem('tp_gcal_cal',gcalCalendarId);
@@ -2748,18 +2943,36 @@ function onGCalCalendarChange(){
   fullGCalSync();
 }
 
-function detectRideType(title,desc=''){
-  const t=(title+' '+desc).toLowerCase();
-  if(/dialyse|chemo|strahlen|kranken|kts|charité|charite|klinik|krankenhaus|verordnung|zuzahlung|patient/.test(t)) return 'krank';
-  if(/privat|privatfahrt/.test(t)) return 'privat';
-  if(/rechnung|firma|flughafen|geschäft|business/.test(t)) return 'rechn';
-  return 'krank';
+function isRechnungsfahrtText(...parts){
+  const t=parts.filter(Boolean).join(' ').trim();
+  if(!t) return false;
+  if(/\bRSVG[\s-]*RE\b/i.test(t)) return true;
+  if(/\bRE\s*$/i.test(t)) return true;
+  if(/(?:^|\s|[-–])RE(?:\s|$|[.,;])/i.test(t)) return true;
+  if(/\brechnung|\brechnungsfahrt|\brechnungs\b/i.test(t)) return true;
+  return false;
+}
+function isKtsFahrtText(...parts){
+  if(isRechnungsfahrtText(...parts)) return false;
+  const t=parts.filter(Boolean).join(' ').toLowerCase();
+  return /\bkts\b|krankenfahrt|kranken|verordnung|zuzahlung|dialyse|chemo|strahlen|charité|charite|klinik|krankenhaus|\bpatient\b|\bkt\b/.test(t);
+}
+
+function detectRideType(title,desc='',location=''){
+  const parts=[title,desc,location];
+  if(/\b(privat|privatfahrt)\b/i.test(parts.join(' '))) return 'privat';
+  if(isRechnungsfahrtText(...parts)) return 'rechn';
+  if(isKtsFahrtText(...parts)) return 'krank';
+  return 'normal';
 }
 
 function shouldImportGCalEvent(raw){
   if(isPrivateRealAppointment(raw)) return false;
-  if(gcalImportAll) return true;
+  if(gcalImportAll) return !!(raw.summary||raw.location);
   if(isKrankenfahrtDispatchEvent(raw)) return true;
+  const sum=(raw.summary||'').trim();
+  if(/\s[-–→]\s/.test(sum)&&sum.length>8) return true;
+  if(isRechnungsfahrtText(sum,raw.description,raw.location)) return true;
   const text=demoTextBlob(raw.summary,raw.description,raw.location);
   return TAXI_KEYWORDS.some(k=>text.includes(k))||text.includes('🚖');
 }
@@ -2770,27 +2983,79 @@ function parseFromDescription(desc){
   return m?m[1].trim():'';
 }
 
-function matchCustomerFromEvent(ev){
-  let name=ev.title.replace(/^🚖\s*/,'').split('→')[0].trim();
-  if(name.startsWith('──')||name==='(Ohne Titel)') name='';
+function extractCustomerFromHead(head){
   const all=[...customers,...gcContacts];
-  let c=all.find(x=>(x.fname+' '+x.lname).toLowerCase()===name.toLowerCase());
-  if(!c&&name){
-    const parts=name.split(' ');
-    c=all.find(x=>x.fname.toLowerCase()===parts[0]?.toLowerCase()&&x.lname.toLowerCase()===(parts.slice(1).join(' ')||'').toLowerCase());
+  let best=null;
+  for(const c of all){
+    const full=(c.fname+' '+c.lname).trim();
+    if(!full) continue;
+    if(head.toLowerCase().startsWith(full.toLowerCase())){
+      if(!best||full.length>best.full.length) best={c,full};
+    }
   }
-  return{customerId:c?.id||null,customerName:name};
+  if(best) return {customer:best.c,name:best.full,rest:head.slice(best.full.length).trim()};
+  const parts=head.split(/\s+/);
+  if(parts.length>=2){
+    const c=all.find(x=>x.fname.toLowerCase()===parts[0].toLowerCase()&&x.lname.toLowerCase()===parts[1].toLowerCase());
+    if(c) return {customer:c,name:parts[0]+' '+parts[1],rest:parts.slice(2).join(' ')};
+  }
+  return {customer:null,name:parts.slice(0,2).join(' ')||head,rest:''};
+}
+
+function parseDispatchEvent(ev,raw){
+  const title=(ev.title||'').replace(/^🚖\s*/,'').trim();
+  const loc=(ev.location||raw?.location||'').trim();
+  let customerId=null,customerName='',from='',to=loc;
+  const routeParts=title.split(/\s+[-–→]\s+/);
+  if(routeParts.length>=2){
+    const head=routeParts[0].trim();
+    if(!to) to=routeParts.slice(1).join(' - ').trim();
+    const ex=extractCustomerFromHead(head);
+    customerId=ex.customer?.id||null;
+    customerName=ex.name;
+    from=ex.rest||head;
+  }else{
+    const ex=extractCustomerFromHead(title);
+    customerId=ex.customer?.id||null;
+    customerName=ex.name;
+    from=ex.rest||'';
+    if(!to) to=title;
+  }
+  return{customerId,customerName,from,to:to||title};
+}
+
+function matchCustomerFromEvent(ev,raw){
+  const p=parseDispatchEvent(ev,raw||{});
+  return{customerId:p.customerId,customerName:p.customerName};
 }
 
 function parseGCalToRide(raw,ev){
-  const type=detectRideType(ev.title,ev.description);
-  const{customerId}=matchCustomerFromEvent(ev);
-  const from=parseFromDescription(ev.description)||'';
-  const to=ev.location||ev.title.replace(/^🚖\s*/,'').split('→').slice(1).join('→').trim()||ev.title;
+  const dispatch=parseDispatchEvent(ev,raw);
+  const cust=dispatch.customerId?customers.find(c=>c.id===dispatch.customerId):null;
+  const calMeta=gcalCalendars.find(c=>c.id===(raw._calId||gcalCalendarId));
+  const colorId=raw.colorId||calMeta?.colorId||null;
+  const backgroundColor=raw.backgroundColor||calMeta?.backgroundColor||null;
+  const colorVisual=rideTypeFromGCalColor(colorId,backgroundColor);
+  const colorBiz=rideBusinessTypeFromGCalVisual(colorVisual);
+  const loc=dispatch.to||ev.location||raw.location||'';
+  const textType=detectRideType(ev.title,ev.description,loc);
+  let type=colorBiz||textType;
+  if(isRechnungsfahrtText(ev.title,ev.description,loc)) type='rechn';
+  else if(colorBiz==='rechn') type='rechn';
+  else if(!colorBiz&&textType==='normal'&&cust) type=defaultRideTypeForCustomer(cust);
+  const from=parseFromDescription(ev.description)||dispatch.from||'';
+  const to=dispatch.to||loc||ev.title;
+  const resolvedColorId=colorId||(type==='rechn'?'5':type==='krank'?'11':type==='normal'?'9':null);
   return{
-    type,customerId,date:ev.date,time:ev.isAllDay?'09:00':ev.time,from,to,
+    type,
+    customerId:dispatch.customerId,
+    customerName:dispatch.customerName,
+    date:ev.date,time:ev.isAllDay?'09:00':ev.time,from,to,
     note:(ev.description||'').replace(/── TaxiPro Fahrt ──[\s\S]*/,'').trim()||'',
-    verordnung:type==='krank'?'taxi':'',zuzahlung:'ja',serie:false,reminder:false,
+    verordnung:type==='krank'?'taxi':'',
+    zuzahlung:type==='krank'?normalizeZuzahlung(cust?.zuzahlungStatus||'NB'):'',
+    gcalColorId:resolvedColorId,
+    serie:false,reminder:false,
     reminderMin:'30',serieType:'',km:estKm(from,to),
     googleEventId:ev.id,googleUpdated:raw.updated,source:'google',
   };
@@ -2799,10 +3064,11 @@ function parseGCalToRide(raw,ev){
 function rideToGCalEvent(ride){
   const c=customers.find(x=>x.id===ride.customerId)||gcContacts.find(x=>x.id===ride.customerId);
   const name=c?`${c.fname} ${c.lname}`:'Fahrt';
-  const typeLabel=ride.type==='krank'?'🔴 Krankenfahrt':ride.type==='privat'?'🟢 Privat':'🟡 Rechnung';
+  const typeLabel=rideTypeLabel(ride);
   const destShort=(ride.to||'').split(',')[0];
   const summary=`🚖 ${name}${destShort?' → '+destShort:''}`;
   const desc=['── TaxiPro Fahrt ──',`Typ: ${typeLabel}`,`Abholung: ${ride.from||'–'}`,`Ziel: ${ride.to||'–'}`,
+    ride.type==='krank'&&ride.zuzahlung?`Zuzahlung: ${zuzahlShort(ride.zuzahlung)}`:'',
     ride.note?`Notiz: ${ride.note}`:'',ride.serieType?`Serie: ${ride.serieType}`:'',
     ride.km?`Strecke: ca. ${ride.km} km`:''].filter(Boolean).join('\n');
   const[hh,mm]=(ride.time||'09:00').split(':').map(Number);
@@ -2812,7 +3078,7 @@ function rideToGCalEvent(ride){
     start:{dateTime:`${ride.date}T${ride.time}:00`,timeZone:'Europe/Berlin'},
     end:{dateTime:`${ride.date}T${String(endH).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`,timeZone:'Europe/Berlin'},
     extendedProperties:{private:{taxiproRideId:ride.id,taxiproVersion:String(ride.localUpdated||Date.now())}},
-    colorId:ride.type==='krank'?'11':ride.type==='privat'?'2':'5',
+    colorId:gcalColorFromRide(ride),
   };
 }
 
@@ -2846,17 +3112,8 @@ async function fetchAllGCalEventsWide(){
   const cals=gcalCalendars.length?gcalCalendars:[{id:gcalCalendarId,summary:'primary'}];
   let all=[];
   for(const calInfo of cals){
-    const cal=encodeURIComponent(calInfo.id);
-    let pageToken='';
-    do{
-      let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin.toISOString())}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=250`;
-      if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
-      const res=await gcalApi(url);
-      if(!res||!res.ok) continue;
-      const data=await res.json();
-      all=all.concat((data.items||[]).map(e=>({...e,_calId:calInfo.id})));
-      pageToken=data.nextPageToken||'';
-    }while(pageToken);
+    const items=await fetchGCalEventsForRange(timeMin.toISOString(),timeMax.toISOString(),calInfo.id);
+    all=all.concat(items);
   }
   if(!all.length) throw new Error('Keine Termine geladen – bitte neu verbinden');
   return all;
@@ -3010,15 +3267,8 @@ function syncFromGoogle(rawEvents){
   let imported=0,updated=0,deleted=0;
   for(const raw of rawEvents){
     if(raw.status==='cancelled'){
-      if(isExcludedGCalEvent(raw)){
+      if(rides.some(r=>r.googleEventId===raw.id)){
         rides=rides.filter(r=>r.googleEventId!==raw.id);
-        deleted++;
-        continue;
-      }
-      const rideId=raw.extendedProperties?.private?.taxiproRideId;
-      const byGcal=rides.find(r=>r.googleEventId===raw.id);
-      if(rideId||byGcal){
-        rides=rides.filter(r=>r.id!==rideId&&r.googleEventId!==raw.id);
         deleted++;
       }
       continue;
@@ -3029,11 +3279,9 @@ function syncFromGoogle(rawEvents){
     let ride=linkedId?rides.find(r=>r.id===linkedId):rides.find(r=>r.googleEventId===ev.id);
     const rideData=parseGCalToRide(raw,ev);
     if(ride){
-      const googleTs=raw.updated?new Date(raw.updated).getTime():0;
-      if(ride.localUpdated&&googleTs&&ride.localUpdated>googleTs+2000) continue;
-      Object.assign(ride,rideData,{id:ride.id,googleEventId:ev.id});
+      Object.assign(ride,rideData,{id:ride.id,googleEventId:ev.id,source:'google'});
       updated++;
-    } else {
+    }else{
       rides.push({...rideData,id:uid()});
       imported++;
     }
@@ -3042,27 +3290,41 @@ function syncFromGoogle(rawEvents){
   if(imported||updated||deleted){save();updateCounts();}
 }
 
+async function fetchGCalEventsForRange(timeMin,timeMax,calId){
+  const cal=encodeURIComponent(calId||gcalCalendarId);
+  let pageToken=null,allItems=[];
+  do{
+    let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=250`;
+    if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
+    const res=await gcalApi(url);
+    if(!res||!res.ok){
+      const errBody=res?await res.text().catch(()=>''):'';
+      throw new Error(`API ${res?.status||'?'} ${errBody.slice(0,120)}`);
+    }
+    const data=await res.json();
+    allItems.push(...(data.items||[]).map(e=>({...e,_calId:calId||gcalCalendarId})));
+    pageToken=data.nextPageToken||null;
+  }while(pageToken);
+  return allItems;
+}
+
+async function importAllGoogleRides(){
+  const now=new Date();
+  const timeMin=new Date(now);timeMin.setMonth(timeMin.getMonth()-12);
+  const timeMax=new Date(now);timeMax.setMonth(timeMax.getMonth()+18);
+  const items=await fetchGCalEventsForRange(timeMin.toISOString(),timeMax.toISOString(),gcalCalendarId);
+  const active=items.filter(e=>e.status!=='cancelled');
+  if(gcalSyncEnabled) syncFromGoogle(items);
+  return{total:active.length,stats:gcalLastSyncStats};
+}
+
 async function fetchGCalEvents(){
   if(!gcalConnected||!gcalToken||gcalFetching) return;
   gcalFetching=true;
   const{timeMin,timeMax}=getGCalRange();
   try{
-    const cal=encodeURIComponent(gcalCalendarId);
-    let pageToken=null,allItems=[];
-    do{
-      let url=`calendars/${cal}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=250`;
-      if(pageToken) url+=`&pageToken=${encodeURIComponent(pageToken)}`;
-      const res=await gcalApi(url);
-      if(!res||!res.ok){
-        const errBody=res?await res.text().catch(()=>''):'';
-        throw new Error(`API ${res?.status||'?'} ${errBody.slice(0,120)}`);
-      }
-      const data=await res.json();
-      allItems.push(...(data.items||[]));
-      pageToken=data.nextPageToken||null;
-    }while(pageToken);
+    const allItems=await fetchGCalEventsForRange(timeMin,timeMax,gcalCalendarId);
     const items=allItems.filter(e=>e.status!=='cancelled'||!isExcludedGCalEvent(e));
-    if(gcalSyncEnabled) syncFromGoogle(items);
     gcalEvents=items.filter(e=>!isExcludedGCalEvent(e)).map(normGCalEvent);
     updateGCalBtn();renderCalendar();renderMiniCal();renderToday();
     if(document.getElementById('modal-gcal')&&!document.getElementById('modal-gcal').classList.contains('hidden')) renderGCalModal();
@@ -3075,8 +3337,18 @@ async function fetchGCalEvents(){
 
 async function fullGCalSync(){
   if(!gcalConnected) return;
-  await fetchGCalEvents();
-  renderGCalModal();
+  if(gcalFetching) return;
+  gcalFetching=true;
+  try{
+    toast('Alle Fahrten aus Google Kalender werden importiert…');
+    const info=await importAllGoogleRides();
+    await fetchGCalEvents();
+    toast(`✅ Google Sync: ${info.stats.imported} neu · ${info.stats.updated} aktualisiert · ${info.total} Termine`);
+    renderGCalModal();
+  }catch(e){
+    console.error('fullGCalSync',e);
+    toast('Google-Import fehlgeschlagen','err');
+  }finally{gcalFetching=false;}
 }
 
 function disconnectGCal(silent=false){
@@ -3096,7 +3368,8 @@ function toggleGCalSync(){
 function toggleGCalImportAll(){
   gcalImportAll=document.getElementById('gcal-import-all').checked;
   localStorage.setItem('tp_gcal_import_all',gcalImportAll?'true':'false');
-  if(gcalConnected) fetchGCalEvents();
+  if(gcalConnected) fullGCalSync();
+  else renderCalendar();
 }
 
 function toggleGCalShow(){
@@ -3288,7 +3561,7 @@ function importAllGCContacts(silent=false){
     customers.push({
       fname:gc.fname,lname:gc.lname,phone:gc.phone||'',email:gc.email||'',
       org:gc.org||'',birth:'',street:gc.street||'',plz:gc.plz||'',city:gc.city||'',
-      type,kk:'',vnr:'',zuzahlungStatus:'ja',stammHosp:'',note:'',
+      type,kk:'',vnr:'',zuzahlungStatus:'NB',stammHosp:'',note:'',
       source:'imported-gc',id:uid()
     });
     imported++;
@@ -3389,11 +3662,11 @@ function selectSR(type,id){
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('#search-wrap')) document.getElementById('search-results').classList.remove('show');
-  ['hosp-ac','from-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('.ac-wrap')) el.classList.remove('show');});
+  ['hosp-ac','from-ac','c-street-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('.ac-wrap')) el.classList.remove('show');});
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ADRESS-AUTOCOMPLETE (Google Maps + Krankenhäuser)
+// ADRESS-AUTOCOMPLETE (Google Maps + OpenStreetMap + Krankenhäuser)
 // ═══════════════════════════════════════════════════════════════
 const addrAcCache={};
 let addrSearchTimer=null;
@@ -3401,6 +3674,10 @@ let mapsPlacesReady=null;
 let placesAutocompleteService=null;
 let placesSessionToken=null;
 let mapsKeyWarned=false;
+// Photon/OSM – kostenloser Fallback ohne API-Schlüssel
+const OSM_PHOTON='https://photon.komoot.io/api/';
+const OSM_BIAS='lat=50.62&lon=7.02'; // Schwerpunkt Rhein-Sieg / Bonn
+const OSM_BBOX='5.86,47.27,15.04,55.06'; // Deutschland
 
 function getGoogleMapsKey(){return GOOGLE_MAPS_API_KEY||localStorage.getItem('tp_maps_key')||'';}
 
@@ -3432,6 +3709,127 @@ async function ensureGoogleMapsPlaces(){
   return true;
 }
 
+function parseGermanAddress(value,main){
+  const street=(main||value.split(',')[0]||value).trim();
+  const plzMatch=(value||'').match(/\b(\d{5})\b/);
+  const plz=plzMatch?plzMatch[1]:'';
+  let city='';
+  if(plz){
+    const after=(value||'').split(plz)[1]||'';
+    city=after.replace(/^[\s,]+/,'').split(',')[0]?.trim()||'';
+  }else{
+    const parts=(value||'').split(',').map(s=>s.trim()).filter(Boolean);
+    if(parts.length>=2) city=parts[parts.length-1].replace(/deutschland/i,'').trim();
+  }
+  return{street,plz,city};
+}
+
+function formatOsmAddress(p){
+  if(!p) return '';
+  const line1=p.name&&p.name!==p.street?p.name:null;
+  const street=[p.street,p.housenumber].filter(Boolean).join(' ');
+  const city=[p.postcode,p.city||p.town||p.village||p.municipality].filter(Boolean).join(' ');
+  return[line1,street,city].filter(Boolean).join(', ')||p.name||street||city||'';
+}
+
+function osmAddressParts(p){
+  return{
+    street:[p.street||p.name,p.housenumber].filter(Boolean).join(' '),
+    plz:p.postcode||'',
+    city:p.city||p.town||p.village||p.municipality||p.district||'',
+  };
+}
+
+function osmPlaceIcon(p){
+  const v=(p.osm_value||'')+(p.type||'')+(p.name||'');
+  if(/hospital|clinic|doctors|healthcare|nursing_home/i.test(v)) return '🏥';
+  if(/school|kindergarten|college|university/i.test(v)) return '🏫';
+  return '📍';
+}
+
+function osmPlaceTag(p){
+  const v=(p.osm_value||'')+(p.name||'').toLowerCase();
+  if(/hospital|clinic|healthcare|doctors/.test(v)) return 'Krankenhaus';
+  if(/school|kindergarten|university|college/.test(v)) return 'Einrichtung';
+  if(p.street) return 'Straße';
+  return 'OpenStreetMap';
+}
+
+function mapOsmProps(p){
+  const value=formatOsmAddress(p);
+  if(!value) return null;
+  const main=p.street||p.name||[p.street,p.housenumber].filter(Boolean).join(' ')||value.split(',')[0];
+  const sub=[p.postcode,p.city||p.town,p.state].filter(Boolean).join(' · ')||'Deutschland';
+  return{
+    icon:osmPlaceIcon(p),
+    main,
+    sub:sub+' · OpenStreetMap',
+    value,
+    tag:osmPlaceTag(p),
+    source:'osm',
+    parts:osmAddressParts(p),
+  };
+}
+
+async function fetchOsmLayer(input,layer,limit){
+  const layerParam=layer?`&layer=${encodeURIComponent(layer)}`:'';
+  const url=`${OSM_PHOTON}?q=${encodeURIComponent(input)}&lang=de&limit=${limit}${layerParam}&${OSM_BIAS}&bbox=${OSM_BBOX}`;
+  const res=await fetch(url);
+  if(!res.ok) return [];
+  const data=await res.json();
+  return(data.features||[]).map(f=>f.properties||{}).filter(p=>!p.countrycode||p.countrycode==='de');
+}
+
+async function searchOsmPlaces(input){
+  try{
+    const [houses,streets,general]=await Promise.all([
+      fetchOsmLayer(input,'house',8),
+      fetchOsmLayer(input,'street',8),
+      fetchOsmLayer(input,'',6),
+    ]);
+    const seen=new Set();
+    const merged=[];
+    [...houses,...streets,...general].forEach(p=>{
+      const hit=mapOsmProps(p);
+      if(!hit) return;
+      const key=hit.value.toLowerCase();
+      if(seen.has(key)) return;
+      seen.add(key);
+      merged.push(hit);
+    });
+    return merged.slice(0,12);
+  }catch(e){return [];}
+}
+
+function searchGooglePlaces(input){
+  return new Promise(async resolve=>{
+    if(!(await ensureGoogleMapsPlaces())) return resolve([]);
+    if(!placesSessionToken) placesSessionToken=new google.maps.places.AutocompleteSessionToken();
+    placesAutocompleteService.getPlacePredictions({
+      input,
+      sessionToken:placesSessionToken,
+      componentRestrictions:{country:'de'},
+    },(predictions,status)=>{
+      if(status!==google.maps.places.PlacesServiceStatus.OK||!predictions) return resolve([]);
+      resolve(predictions.slice(0,10).map(p=>{
+        const types=p.types||[];
+        const isHosp=types.some(t=>/hospital|health|doctor|physician/.test(t));
+        const main=p.structured_formatting?.main_text||p.description;
+        return{
+          icon:isHosp?'🏥':'📍',
+          main,
+          sub:(p.structured_formatting?.secondary_text||'Deutschland')+' · Google Maps',
+          value:p.description,
+          tag:'Google Maps',
+          source:'google',
+          placeId:p.place_id,
+          parts:parseGermanAddress(p.description,main),
+        };
+      }));
+    });
+  });
+}
+
 function searchLocalPlaces(q,includeHospitals,limit=6){
   const ql=q.toLowerCase();
   const hits=[];
@@ -3454,33 +3852,6 @@ function searchLocalPlaces(q,includeHospitals,limit=6){
   return hits;
 }
 
-function searchGooglePlaces(input){
-  return new Promise(async resolve=>{
-    if(!(await ensureGoogleMapsPlaces())) return resolve([]);
-    if(!placesSessionToken) placesSessionToken=new google.maps.places.AutocompleteSessionToken();
-    placesAutocompleteService.getPlacePredictions({
-      input,
-      sessionToken:placesSessionToken,
-      componentRestrictions:{country:'de'},
-    },(predictions,status)=>{
-      if(status!==google.maps.places.PlacesServiceStatus.OK||!predictions) return resolve([]);
-      resolve(predictions.slice(0,8).map(p=>{
-        const types=p.types||[];
-        const isHosp=types.some(t=>/hospital|health|doctor|physician/.test(t));
-        return{
-          icon:isHosp?'🏥':'📍',
-          main:p.structured_formatting?.main_text||p.description,
-          sub:(p.structured_formatting?.secondary_text||'Deutschland')+' · Google Maps',
-          value:p.description,
-          tag:'Google Maps',
-          source:'google',
-          placeId:p.place_id,
-        };
-      }));
-    });
-  });
-}
-
 function renderAddrAc(acId,fieldId,items){
   const ac=document.getElementById(acId);
   if(!ac) return;
@@ -3496,13 +3867,23 @@ function renderAddrAc(acId,fieldId,items){
   ac.classList.add('show');
 }
 
+function applyAddrParts(fieldId,it){
+  if(fieldId==='c-street'&&it.parts){
+    document.getElementById('c-street').value=it.parts.street||it.value;
+    if(it.parts.plz) document.getElementById('c-plz').value=it.parts.plz;
+    if(it.parts.city) document.getElementById('c-city').value=it.parts.city;
+    return;
+  }
+  document.getElementById(fieldId).value=it.value;
+}
+
 function selectAddrSuggestion(acId,idx){
   const it=addrAcCache[acId]?.[idx];
   if(!it) return;
-  document.getElementById(it.fieldId).value=it.value;
+  applyAddrParts(it.fieldId,it);
   document.getElementById(acId).classList.remove('show');
   resetPlacesSession();
-  calcDist();
+  if(it.fieldId==='r-from'||it.fieldId==='r-to') calcDist();
 }
 
 function onAddrSearch(val,acId,fieldId,includeHospitals=false){
@@ -3511,18 +3892,27 @@ function onAddrSearch(val,acId,fieldId,includeHospitals=false){
   if(!val||val.trim().length<2){if(ac) ac.classList.remove('show');return;}
   const q=val.trim();
   const localHits=searchLocalPlaces(q,includeHospitals,6);
-  renderAddrAc(acId,fieldId,localHits);
-  if(ac&&localHits.length) ac.innerHTML+=`<div class="ac-loading" id="${acId}-load">🔍 Google Maps wird durchsucht…</div>`;
+  const loadMsg=getGoogleMapsKey()?'🔍 Straßen werden gesucht (Google Maps + OSM)…':'🔍 Straßen werden gesucht (OpenStreetMap)…';
+  if(localHits.length) renderAddrAc(acId,fieldId,localHits);
+  if(ac){
+    if(!localHits.length) ac.innerHTML='';
+    ac.innerHTML+=`<div class="ac-loading" id="${acId}-load">${loadMsg}</div>`;
+    ac.classList.add('show');
+  }
   addrSearchTimer=setTimeout(async()=>{
-    const mapsHits=await searchGooglePlaces(q);
+    const [mapsHits,osmHits]=await Promise.all([
+      getGoogleMapsKey()?searchGooglePlaces(q):Promise.resolve([]),
+      searchOsmPlaces(q),
+    ]);
     const loadEl=document.getElementById(`${acId}-load`);
     if(loadEl) loadEl.remove();
     const seen=new Set(localHits.map(h=>h.value.toLowerCase()));
-    const merged=[...localHits,...mapsHits.filter(h=>!seen.has(h.value.toLowerCase()))].slice(0,10);
+    const remote=[...mapsHits,...osmHits].filter(h=>!seen.has(h.value.toLowerCase()));
+    const merged=[...localHits,...remote].slice(0,12);
     if(!merged.length){
       if(!getGoogleMapsKey()&&!mapsKeyWarned){
         mapsKeyWarned=true;
-        toast('Google Maps API-Schlüssel fehlt – nur lokale Krankenhäuser/Kunden','warn');
+        toast('Ohne Maps-API-Schlüssel: OpenStreetMap aktiv. Für alle Straßen: Schlüssel unter Kalender → Adresssuche eintragen.','warn');
       }
       if(ac) ac.classList.remove('show');
       return;
@@ -3542,7 +3932,7 @@ function saveMapsApiKey(key){
   placesAutocompleteService=null;
   resetPlacesSession();
   updateMapsKeyStatus();
-  if(k) ensureGoogleMapsPlaces().then(ok=>toast(ok?'Google Maps Adresssuche aktiv':'Maps-Schlüssel ungültig oder API nicht aktiviert',ok?'ok':'warn'));
+  if(k) ensureGoogleMapsPlaces().then(ok=>toast(ok?'Google Maps: alle Straßen deutschlandweit aktiv':'Maps-Schlüssel ungültig oder API nicht aktiviert',ok?'ok':'warn'));
 }
 
 function updateMapsKeyStatus(){
@@ -3552,8 +3942,8 @@ function updateMapsKeyStatus(){
   if(!el) return;
   const k=getGoogleMapsKey();
   el.innerHTML=k
-    ? (placesAutocompleteService?'✅ Adresssuche aktiv · deutschlandweit via Google Maps':'⏳ Maps wird geladen… (JavaScript API + Places aktivieren)')
-    : 'API-Schlüssel in <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" style="color:var(--blue2)">Google Cloud Console</a> erstellen · APIs: <strong>Maps JavaScript API</strong> + <strong>Places API</strong> · HTTP-Referrer: <code style="color:var(--gold)">https://sero91ak.github.io/*</code>';
+    ? (placesAutocompleteService?'✅ <strong>Google Maps aktiv</strong> · alle Straßen deutschlandweit + OpenStreetMap-Fallback':'⏳ Maps wird geladen… (JavaScript API + Places aktivieren)')
+    : '✅ <strong>OpenStreetMap aktiv</strong> · Straßen deutschlandweit · 0 €<br>Beste Treffer: API-Schlüssel in <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" style="color:var(--blue2)">Google Cloud Console</a> · APIs: <strong>Maps JavaScript API</strong> + <strong>Places API</strong> · Referrer: <code style="color:var(--gold)">https://sero91ak.github.io/*</code>';
 }
 
 function onCHospSearch(val){
@@ -3586,8 +3976,9 @@ function selRCust(id){
   document.getElementById('r-cust-ac').classList.remove('show');
   document.getElementById('r-from').value=[c.street,c.plz,c.city].filter(Boolean).join(', ');
   if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
-  const rt=c.type==='re'?'rechn':c.type==='privat'?'privat':'krank';
+  const rt=defaultRideTypeForCustomer(c);
   const el=document.getElementById(`rt-${rt}`);if(el) el.checked=true;
+  if(c.zuzahlungStatus) document.getElementById('r-zuzahl').value=normalizeZuzahlung(c.zuzahlungStatus);
   onRTChange();calcDist();
 }
 
@@ -3627,7 +4018,7 @@ function shareRideWAById(id){
   const r=rides.find(x=>x.id===id);if(!r) return;
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   const name=c?c.fname+' '+c.lname:'Unbekannt';
-  const txt=`🚖 *TaxiPro Fahrtauftrag*\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${r.zuzahlung==='nein'?'Befreit':'Ja'}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(r.from||'')}/${encodeURIComponent(r.to||'')}`;
+  const txt=`🚖 *TaxiPro Fahrtauftrag*\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${zuzahlLabel(r.zuzahlung)}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(r.from||'')}/${encodeURIComponent(r.to||'')}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
 }
 
@@ -3672,7 +4063,7 @@ function renderDrivers(){
       ${todayDispatched>0?`<div style="font-size:11px;color:var(--green2);margin-bottom:8px">✅ ${todayDispatched} Fahrt${todayDispatched>1?'en':''} heute zugewiesen</div>`:''}
       <div class="driver-btns">
         <button class="cc-btn call" style="flex:1" onclick="window.open('tel:${d.phone}')">📞 Anrufen</button>
-        <button class="cc-btn wa" style="flex:1" onclick="window.open('https://wa.me/${d.phone.replace(/\D/g,'')}')">📱 WhatsApp</button>
+        <button class="cc-btn wa" style="flex:1" onclick="window.open('https://wa.me/${normalizeWaPhone(d.phone)||d.phone.replace(/\D/g,'')}')">📱 WhatsApp</button>
         <button class="cc-btn ride" style="flex:1" onclick="openDriverModal('${d.id}')">✏️ Bearbeiten</button>
       </div>
     </div>`;
@@ -3700,10 +4091,12 @@ function openDriverModal(id=null){
 
 function saveDriver(){
   const fname=document.getElementById('d-fname').value.trim();
-  const phone=document.getElementById('d-phone').value.trim();
-  if(!fname||!phone){toast('Name und Telefon pflicht','warn');return;}
+  const lname=document.getElementById('d-lname').value.trim();
+  const phoneRaw=document.getElementById('d-phone').value.trim();
+  if(!fname||!phoneRaw){toast('Name und Telefon pflicht','warn');return;}
+  const phone=normalizeWaPhone(phoneRaw)||phoneRaw;
   const data={
-    fname,lname:document.getElementById('d-lname').value.trim(),
+    fname,lname,
     phone,car:document.getElementById('d-car').value.trim(),
     status:document.querySelector('input[name="ds"]:checked').value,
     note:document.getElementById('d-note').value.trim(),
@@ -3717,6 +4110,11 @@ function saveDriver(){
     toast(`Fahrer ${fname} angelegt`);
   }
   save();closeM('modal-driver');renderDrivers();updateCounts();
+  if(pendingDispatchAfterDriver){
+    const rid=pendingDispatchAfterDriver;
+    pendingDispatchAfterDriver=null;
+    openDriverPicker(rid);
+  }
 }
 
 function deleteDriver(){
@@ -3725,20 +4123,64 @@ function deleteDriver(){
   save();closeM('modal-driver');renderDrivers();updateCounts();toast('Fahrer gelöscht','warn');
 }
 
-// DRIVER PICKER SHEET
+function normalizeWaPhone(phone){
+  let n=(phone||'').replace(/\D/g,'');
+  if(!n) return '';
+  if(n.startsWith('0')) n='49'+n.slice(1);
+  else if(n.startsWith('49')) n=n;
+  else if(n.length>=10) n='49'+n;
+  return n;
+}
+
+function buildDriverDispatchMessage(r){
+  const cust=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  const custName=cust?`${cust.fname} ${cust.lname}`:(r.customerName||'Kunde');
+  const from=r.from||'';
+  const to=r.to||'';
+  const mapsLink=from&&to?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(from||to)}`;
+  const navLink=from?`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(from)}&travelmode=driving`:mapsLink;
+  return`🚖 *FAHRTAUFTRAG – Taxi Meckenheim*
+━━━━━━━━━━━━━━━━━━
+📅 *Datum:* ${r.date}
+⏰ *Abfahrt:* ${r.time} Uhr
+🏷️ *Typ:* ${rideTypeLabel(r)}
+👤 *Kunde:* ${custName}
+${cust&&cust.phone?`📞 *Kundentel.:* ${cust.phone}`:''}
+━━━━━━━━━━━━━━━━━━
+📍 *Abholung:*
+${from||'–'}
+
+🎯 *Ziel:*
+${to||'–'}
+${r.km?`📏 *Strecke:* ca. ${r.km} km`:''}
+${r.type==='krank'&&r.zuzahlung?`💊 *Zuzahlung:* ${zuzahlLabel(r.zuzahlung)}`:''}
+${r.note?`📝 *Hinweis:* ${r.note}`:''}
+━━━━━━━━━━━━━━━━━━
+🗺️ *Zum Kunden:*
+${navLink}
+
+🗺️ *Komplette Route:*
+${mapsLink}`;
+}
+
+function openDriverModalFromDispatch(rideId){
+  pendingDispatchAfterDriver=rideId||dispatchRideId;
+  document.getElementById('driver-picker').classList.add('hidden');
+  openDriverModal();
+}
+
 function openDriverPicker(rideId){
   dispatchRideId=rideId;
   const r=rides.find(x=>x.id===rideId);
   if(!r) return;
   const cust=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
-  const name=cust?cust.fname+' '+cust.lname:'Unbekannt';
-  // Ride info
+  const name=cust?cust.fname+' '+cust.lname:(r.customerName||'Fahrt');
   document.getElementById('dp-ride-info').innerHTML=
-    `<strong>${r.time} Uhr · ${r.date}</strong><br>👤 ${name}<br>📍 ${r.from||'–'}<br>🎯 ${r.to||'–'}${r.km?`<br>📏 ca. ${r.km} km`:''}`;
+    `<strong>${r.time} Uhr · ${r.date}</strong><br>${rideTypeLabel(r)}<br>👤 ${name}<br>📍 ${r.from||'–'}<br>🎯 ${r.to||'–'}${r.km?`<br>📏 ca. ${r.km} km`:''}`;
   // Drivers list
   const el=document.getElementById('dp-drivers-list');
   if(!drivers.length){
-    el.innerHTML=`<div class="dp-empty">Noch keine Fahrer angelegt.<br>Lege zuerst Fahrer an.</div>`;
+    el.innerHTML=`<div class="dp-empty">Noch keine Fahrer angelegt.<br><button type="button" class="dp-add-btn" style="margin-top:10px" onclick="openDriverModalFromDispatch('${rideId}')">＋ Ersten Fahrer anlegen</button></div>`;
   } else {
     const statusLabels={frei:'Verfügbar',besetzt:'Besetzt',pause:'Pause'};
     el.innerHTML=drivers.map(d=>`
@@ -3767,46 +4209,15 @@ function dispatchToDriver(driverId){
   const r=rides.find(x=>x.id===dispatchRideId);
   const d=drivers.find(x=>x.id===driverId);
   if(!r||!d) return;
-  // Mark ride as dispatched
+  const driverPhone=normalizeWaPhone(d.phone);
+  if(!driverPhone){toast('Fahrer hat keine gültige WhatsApp-Nummer','warn');return;}
   r.dispatchedTo=driverId;
+  r.dispatchedAt=Date.now();
   save();
-  // Build WhatsApp message
-  const cust=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
-  const custName=cust?cust.fname+' '+cust.lname:'Kunde';
-  const from=r.from||'';
-  const to=r.to||'';
-  const mapsLink=from?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(from||to)}`;
-  const navLink=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(from)}&travelmode=driving`;
-  const msg=
-`🚖 *FAHRTAUFTRAG – TaxiPro*
-━━━━━━━━━━━━━━━━━━
-📅 *Datum:* ${r.date}
-⏰ *Abfahrt:* ${r.time} Uhr
-👤 *Kunde:* ${custName}
-${cust&&cust.phone?`📞 *Kundentel.:* ${cust.phone}`:''}
-━━━━━━━━━━━━━━━━━━
-📍 *Abholung:*
-${from||'–'}
-
-🎯 *Ziel:*
-${to||'–'}
-${r.km?`📏 *Strecke:* ca. ${r.km} km`:''}
-${r.type==='krank'&&r.zuzahlung?`💊 *Zuzahlung:* ${r.zuzahlung==='nein'?'Befreit ✓':'Ja €'}`:''}
-${r.note?`📝 *Hinweis:* ${r.note}`:''}
-━━━━━━━━━━━━━━━━━━
-🗺️ *Zum Kunden fahren:*
-${navLink}
-
-🗺️ *Komplette Route:*
-${mapsLink}`;
-
-  // Open WhatsApp to driver
-  const driverPhone=d.phone.replace(/\D/g,'');
-  const waUrl=`https://wa.me/${driverPhone}?text=${encodeURIComponent(msg)}`;
-  window.open(waUrl,'_blank');
+  const msg=buildDriverDispatchMessage(r);
+  window.open(`https://wa.me/${driverPhone}?text=${encodeURIComponent(msg)}`,'_blank');
   closeDriverPicker();
-  toast(`✅ Fahrt an ${d.fname} gesendet`);
-  // Re-render
+  toast(`✅ Fahrt an ${d.fname} per WhatsApp gesendet`);
   renderToday();
   if(view==='calendar') renderCalendar();
 }
@@ -4160,8 +4571,10 @@ async function listMsFolderChildren(driveId,itemId){
 
 async function findCustomerExcelInCloud(cust,year){
   if(!msCloudReady()||!cust?.fname||!cust?.lname) return null;
-  if(cust.msExcelItemId&&cust.msExcelDriveId){
-    return{name:cust.excelFileName||'',driveId:cust.msExcelDriveId,itemId:cust.msExcelItemId};
+  const wantType=customerExcelType(cust);
+  if(cust.msExcelItemId&&cust.msExcelDriveId&&cust.excelFileName){
+    const sc=scoreExcelFileName(cust.excelFileName,cust,year,wantType);
+    if(sc>=60) return{name:cust.excelFileName,driveId:cust.msExcelDriveId,itemId:cust.msExcelItemId};
   }
   const queue=[{driveId:msFolderDriveId,itemId:msFolderItemId,depth:0}];
   let best=null,bestScore=0;
@@ -4172,7 +4585,7 @@ async function findCustomerExcelInCloud(cust,year){
     for(const ch of children){
       if(ch.folder) queue.push({driveId:cur.driveId,itemId:ch.id,depth:cur.depth+1});
       else if(ch.name?.toLowerCase().endsWith('.xlsx')&&!ch.name.startsWith('~$')){
-        const sc=scoreExcelFileName(ch.name,cust,year);
+        const sc=scoreExcelFileName(ch.name,cust,year,wantType);
         if(sc>bestScore){bestScore=sc;best={name:ch.name,driveId:cur.driveId,itemId:ch.id};}
       }
     }
@@ -4559,15 +4972,19 @@ function normalizeExcelToken(s){
   return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 }
 
-function scoreExcelFileName(fileName,cust,year){
+function scoreExcelFileName(fileName,cust,year,excelType){
   const base=normalizeExcelToken(fileName.replace(/\.xlsx$/i,''));
   const fn=normalizeExcelToken(cust.fname);
   const ln=normalizeExcelToken(cust.lname);
   const y=String(year);
   if(!fn||!ln||!base.includes(fn)||!base.includes(ln)||!base.includes(y)) return 0;
-  if(base===`${fn} ${ln} ${y}`||base===`${ln} ${fn} ${y}`) return 100;
-  if(base.includes(`${fn} ${ln}`)||base.includes(`${ln} ${fn}`)) return 85;
-  return 60;
+  const isReFile=/\bre\b|rechn|rechnung|rechnungs/.test(base);
+  const wantRe=excelType==='rechn';
+  if(wantRe&&!isReFile) return 0;
+  if(!wantRe&&isReFile) return 0;
+  if(base===`${fn} ${ln} ${y}`||base===`${ln} ${fn} ${y}`) return wantRe?105:100;
+  if(base.includes(`${fn} ${ln}`)||base.includes(`${ln} ${fn}`)) return wantRe?90:85;
+  return wantRe?65:60;
 }
 
 async function* walkExcelDir(dirHandle,depth=0){
@@ -4586,9 +5003,10 @@ async function findCustomerExcelInFolder(cust,year){
   if(!excelFolderHandle||!cust?.fname||!cust?.lname) return null;
   const ok=await ensureHandlePermission(excelFolderHandle);
   if(!ok) return null;
+  const wantType=customerExcelType(cust);
   let best=null,bestScore=0;
   for await (const entry of walkExcelDir(excelFolderHandle)){
-    const sc=scoreExcelFileName(entry.name,cust,year);
+    const sc=scoreExcelFileName(entry.name,cust,year,wantType);
     if(sc>bestScore){bestScore=sc;best={name:entry.name,handle:entry};}
     if(bestScore>=100) break;
   }
@@ -4602,9 +5020,19 @@ function customerHasExcelAccess(cust){
 function updateCustomerExcelUI(c){
   const nameEl=document.getElementById('c-excel-name');
   if(!nameEl) return;
+  const et=c?customerExcelType(c):'kts';
+  document.getElementById('c-excel-type').value=et;
+  const sel=document.getElementById('c-excel-type-select');
+  if(sel) sel.value=et;
+  const lbl=document.getElementById('c-excel-type-label');
+  const desc=document.getElementById('c-excel-type-desc');
+  if(lbl) lbl.textContent=et==='rechn'?'RE Rechnung':'KTS Krankenfahrt';
+  if(desc) desc.textContent=et==='rechn'
+    ?'Rechnungs-Excel (gelb) – getrennt von KTS-Dateien.'
+    :'KTS-Excel (rot) – getrennt von Rechnungs-Dateien. Spalte F: NB/BF.';
   const linked=!!(c?.excelFileName);
   if(msCloudReady()){
-    nameEl.textContent=linked?`☁️ ${c.excelFileName}`:'☁️ Auto-Suche in SharePoint';
+    nameEl.textContent=linked?`☁️ ${c.excelFileName}`:`☁️ Auto-Suche (${et==='rechn'?'RE':'KTS'})`;
     nameEl.style.color='var(--green2)';
   }else{
     nameEl.textContent='Cloud nicht eingerichtet';
@@ -4612,7 +5040,6 @@ function updateCustomerExcelUI(c){
   }
   document.getElementById('c-excel-km').value=c?.excelKm||'';
   document.getElementById('c-excel-dest').value=c?.excelDest||'';
-  document.getElementById('c-excel-type').value=c?.excelType||'kts';
 }
 
 async function linkCustomerExcel(){
@@ -4720,6 +5147,9 @@ function applyTripToSheet(ws,row,ride,cust){
   if(!ws['D'+row]?.v&&km!=='') setCell(ws,'D'+row,hasRoute?'"':km);
   else if(!ws['D'+row]?.v) setCell(ws,'D'+row,'"');
   setCell(ws,'E'+row,excelDirLabel(dir));
+  if(ride.type==='krank'){
+    setCell(ws,'F'+row,zuzahlShort(ride.zuzahlung||cust.zuzahlungStatus||'NB'));
+  }
   const excelDate=new Date(ride.date+'T12:00:00');
   setCell(ws,'B'+row,excelDate);
 }
@@ -4784,6 +5214,12 @@ async function syncRideToExcel(rideId){
   if(!r||!isExcelRide(r)){toast('Nur KTS/Rechnungsfahrten mit Kunde','warn');return;}
   const cust=customers.find(c=>c.id===r.customerId);
   if(!cust){toast('Kunde nicht gefunden','warn');return;}
+  if(!rideMatchesCustomerExcel(cust,r)){
+    toast(cust.type==='re'
+      ?'RE-Kunde: nur Rechnungsfahrten (gelb) → RE-Excel'
+      :'KTS-Kunde: nur Krankenfahrten (rot) → KTS-Excel','warn');
+    return;
+  }
   if(!customerHasExcelAccess(cust)){
     if(confirm('Microsoft Cloud noch nicht eingerichtet. Jetzt einrichten?')) openCloudModal();
     return;
@@ -4899,7 +5335,7 @@ renderCustomers();
 if(gcalConnected) trySilentGoogleRefresh();
 updateMapsKeyStatus();
 if(getGoogleMapsKey()) ensureGoogleMapsPlaces();
-setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fetchGCalEvents();},120000);
+setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
 </script>
 </body>
 </html>
