@@ -1045,7 +1045,8 @@ html.driver-standalone #driver-pwa-banner{display:none!important}
       <p class="drv-login-sub">Deine Fahrten, Navigation &amp; Team-Chat.<br>PIN von der Zentrale eingeben.</p>
       <input type="password" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
       <button type="button" class="drv-login-btn" onclick="driverLoginByPin().catch(()=>{})">Anmelden</button>
-      <p style="font-size:12px;color:#64748b;margin-top:16px;line-height:1.5">Link von der Zentrale? Einfach öffnen – PIN wird erkannt.</p>
+      <p id="driver-login-error" style="display:none;font-size:12px;color:#f87171;margin-top:12px;line-height:1.5;padding:10px;background:rgba(248,113,113,.1);border-radius:10px"></p>
+      <p style="font-size:12px;color:#64748b;margin-top:16px;line-height:1.5">Am einfachsten: <strong>Link von der Zentrale</strong> öffnen (PIN wird automatisch erkannt).</p>
     </div>
   </div>
   <div id="driver-main" class="hidden" style="display:none;flex:1;flex-direction:column;min-height:0">
@@ -1843,11 +1844,14 @@ function isExcludedGCalEvent(raw){
 function shouldDeleteFromGoogleCalendar(raw){
   if(!raw||raw.status==='cancelled') return false;
   if(isPrivateRealAppointment(raw)) return false;
+  if(isKrankenfahrtDispatchEvent(raw)) return true;
   const sum=(raw.summary||'').trim();
   const desc=raw.description||'';
-  if(desc.includes('── TaxiPro Fahrt ──')) return true;
+  if(desc.includes('── TaxiPro Fahrt ──')||desc.includes('TaxiPro Fahrt')) return true;
   if(textHasDemoContent(sum,desc,raw.location)) return true;
   if(/\[demo\]|testfahrt|demo-fahrt/i.test(demoTextBlob(sum,desc))) return true;
+  if(/[🚖🚕]/.test(sum)) return true;
+  if(/\s[-–→]/.test(sum)&&sum.length>8) return true;
   return false;
 }
 
@@ -3350,7 +3354,7 @@ function renderGCalModal(){
   document.getElementById('gcal-refresh-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-disconnect-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-reset-btn').style.display='inline-flex';
-  document.getElementById('gcal-purge-btn').style.display='none';
+  document.getElementById('gcal-purge-btn').style.display=connected?'inline-flex':'none';
   document.getElementById('gcal-sync-toggle').style.display=connected?'flex':'none';
   document.getElementById('gcal-cal-select-wrap').style.display=connected?'block':'none';
   document.getElementById('gcal-import-toggle').style.display=connected?'flex':'none';
@@ -3736,17 +3740,23 @@ function abortGCalRestore(){
 
 async function purgeDemoFromGoogleCalendar(auto=false){
   if(!gcalConnected||!gcalToken){toast('Bitte zuerst Google Kalender verbinden','warn');return;}
+  if(!canWriteToGoogle()){
+    if(!auto) toast('Zuerst „App → Google Schreiben freigeben“ aktivieren','warn');
+    openM('modal-gcal');
+    return;
+  }
   const statusEl=document.getElementById('gcal-purge-status');
-  if(statusEl){statusEl.style.display='block';statusEl.textContent='Suche Demo-Termine in Google Kalender…';}
+  if(statusEl){statusEl.style.display='block';statusEl.textContent='Suche Test-Fahrten in Google Kalender…';}
   try{
     const all=await fetchAllGCalEventsWide();
     const targets=all.filter(shouldDeleteFromGoogleCalendar);
     if(!targets.length){
-      if(statusEl) statusEl.textContent='Keine Demo-/Test-Fahrten mehr gefunden.';
+      if(statusEl) statusEl.textContent='Keine Test-Fahrten mehr gefunden ('+all.length+' Termine geprüft).';
+      localStorage.setItem('tp_demo_purge_done','1');
       if(!auto) toast('Keine Demo-Termine in Google gefunden');
       return;
     }
-    if(!confirm(`${targets.length} Demo-/Test-Fahrten aus Google Kalender löschen?\n\nNUR explizite TaxiPro-Testeinträge. Echte Fahrten bleiben erhalten.`)) return;
+    if(!auto&&!confirm(`${targets.length} Test-Fahrten aus Google Kalender löschen?\n\n(${all.length} Termine geprüft)\nGeburtstage/Urlaub bleiben erhalten.`)) return;
     if(statusEl) statusEl.textContent=`Lösche ${targets.length} Test-Fahrten aus Google Kalender…`;
     let deleted=0,failed=0;
     for(const ev of targets){
@@ -3764,13 +3774,20 @@ async function purgeDemoFromGoogleCalendar(auto=false){
     customers=customers.filter(c=>!isDemoContact(c));
     save();updateCounts();
     await fetchGCalEvents();
-    if(statusEl) statusEl.innerHTML=`<strong>✅ ${deleted} Demo-Termine aus Google Kalender entfernt</strong>${failed?` · ${failed} fehlgeschlagen`:''}`;
-    toast(`🗑️ ${deleted} Demo-Termine aus Google gelöscht`,deleted?'ok':'warn');
+    localStorage.setItem('tp_demo_purge_done','1');
+    if(statusEl) statusEl.innerHTML=`<strong>✅ ${deleted} Test-Fahrten aus Google gelöscht</strong>${failed?` · ${failed} fehlgeschlagen`:''}<br><span style="color:var(--text3)">Google Kalender App jetzt prüfen.</span>`;
+    toast(`🗑️ ${deleted} Test-Fahrten aus Google gelöscht`,deleted?'ok':'warn');
     renderGCalModal();
   }catch(e){
-    if(statusEl) statusEl.innerHTML=`<strong>Fehler:</strong> ${e.message}`;
+    if(statusEl) statusEl.innerHTML=`<strong>Fehler:</strong> ${e.message}<br>Google neu verbinden + Schreiben freigeben.`;
     toast('Google-Löschung fehlgeschlagen','err');
   }
+}
+
+async function autoPurgeDemoOnLoad(){
+  if(localStorage.getItem('tp_demo_purge_done')==='1'||!gcalConnected||!gcalToken) return;
+  if(!canWriteToGoogle()) return;
+  await purgeDemoFromGoogleCalendar(true);
 }
 
 function syncFromGoogle(rawEvents){
@@ -4630,7 +4647,7 @@ function saveDriver(){
     drivers.push(nd);
     toast(`Fahrer ${fname} angelegt · PIN: ${nd.pin}`);
   }
-  save();closeM('modal-driver');renderDrivers();updateCounts();
+  save();syncDriverAuthRegistry();closeM('modal-driver');renderDrivers();updateCounts();
   if(pendingDispatchAfterDriver){
     const rid=pendingDispatchAfterDriver;
     pendingDispatchAfterDriver=null;
@@ -5276,6 +5293,7 @@ async function loadCloudData(force){
     localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
     renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();
     if(currentDriverId) onDriverCloudUpdated();
+    syncDriverAuthRegistry();
     toast('☁️ Daten aus Cloud geladen');
   }catch(e){}
 }
@@ -6096,9 +6114,57 @@ function ensureDriverAccess(d){
   return d;
 }
 
+function syncDriverAuthRegistry(){
+  const registry=drivers.map(d=>({id:d.id,fname:d.fname,lname:d.lname,pin:String(d.pin||''),accessToken:d.accessToken,phone:d.phone||'',car:d.car||'',status:d.status||'frei'}));
+  localStorage.setItem('tp_driver_auth',JSON.stringify(registry));
+}
+
+function loadDriverAuthRegistry(){
+  try{
+    const reg=JSON.parse(localStorage.getItem('tp_driver_auth')||'[]');
+    reg.forEach(upsertDriverLocal);
+  }catch(e){}
+}
+
+function upsertDriverLocal(d){
+  if(!d?.id) return;
+  ensureDriverAccess(d);
+  const i=drivers.findIndex(x=>x.id===d.id);
+  const merged={...(i>=0?drivers[i]:{}),...d};
+  if(i>=0) drivers[i]=merged; else drivers.push(merged);
+  localStorage.setItem('tp_d',JSON.stringify(drivers));
+}
+
+function encodeDriverBoot(d){
+  ensureDriverAccess(d);
+  const payload=JSON.stringify({id:d.id,f:d.fname,l:d.lname,p:String(d.pin),t:d.accessToken,ph:d.phone||'',c:d.car||''});
+  return btoa(unescape(encodeURIComponent(payload))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function decodeDriverBoot(str){
+  try{
+    const pad=str.length%4?'='.repeat(4-str.length%4):'';
+    const json=decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/')+pad)));
+    const o=JSON.parse(json);
+    if(!o.id||!o.t) return null;
+    return{id:o.id,fname:o.f||'',lname:o.l||'',pin:String(o.p||''),accessToken:o.t,phone:o.ph||'',car:o.c||'',status:'frei'};
+  }catch(e){return null;}
+}
+
+function findDriverByPin(pin){
+  const p=String(pin||'').trim();
+  return drivers.find(x=>String(x.pin||'').trim()===p);
+}
+
+function findDriverByToken(token){
+  return drivers.find(x=>x.accessToken===token);
+}
+
 function getDriverAppUrl(d){
-  const base=location.href.split('?')[0].split('#')[0];
-  return base+'?mode=driver&token='+encodeURIComponent(d.accessToken);
+  ensureDriverAccess(d);
+  syncDriverAuthRegistry();
+  const base=location.origin+location.pathname.replace(/[^/]*$/,'')+'index.html';
+  return base+'?mode=driver&token='+encodeURIComponent(d.accessToken)+'&boot='+encodeURIComponent(encodeDriverBoot(d));
 }
 
 function regenerateDriverPin(){
@@ -6143,9 +6209,12 @@ function initAppMode(){
 }
 
 async function initDriverAppAsync(params){
-  if(msCloudReady()) await loadCloudData(true);
+  loadDriverAuthRegistry();
+  const boot=params.get('boot');
+  if(boot){const d=decodeDriverBoot(boot);if(d) upsertDriverLocal(d);}
+  await ensureDriverDataLoaded();
   const token=params.get('token');
-  if(token) driverLoginByToken(token);
+  if(token) await driverLoginByToken(token);
   else if(currentDriverId&&drivers.find(d=>d.id===currentDriverId)) showDriverMain(currentDriverId);
   else showDriverLogin();
   await requestDriverNotifications();
@@ -6153,8 +6222,12 @@ async function initDriverAppAsync(params){
 }
 
 async function ensureDriverDataLoaded(){
+  loadDriverAuthRegistry();
   if(drivers.length) return;
-  if(msCloudReady()) await loadCloudData(true);
+  if(msCloudReady()){
+    await loadCloudData(true);
+    loadDriverAuthRegistry();
+  }
 }
 
 function showDriverLogin(){
@@ -6192,17 +6265,33 @@ function showDriverMain(driverId){
 
 async function driverLoginByPin(){
   const pin=(document.getElementById('driver-pin-input')?.value||'').trim();
+  const errEl=document.getElementById('driver-login-error');
+  if(errEl) errEl.style.display='none';
   if(!pin){toast('PIN eingeben','warn');return;}
   await ensureDriverDataLoaded();
-  const d=drivers.find(x=>String(x.pin)===pin);
-  if(!d){toast('PIN nicht gefunden – Cloud-Verbindung prüfen','err');return;}
+  let d=findDriverByPin(pin);
+  if(!d){
+    const boot=new URLSearchParams(location.search).get('boot');
+    if(boot){const bd=decodeDriverBoot(boot);if(bd&&String(bd.pin).trim()===pin){upsertDriverLocal(bd);d=findDriverByPin(pin);}}
+  }
+  if(!d){
+    const msg='PIN nicht gefunden. Bitte den <strong>Link von der Zentrale</strong> öffnen (nicht nur die App). Die Zentrale muss den Fahrer angelegt und den Link kopiert haben.';
+    if(errEl){errEl.innerHTML=msg;errEl.style.display='block';}
+    toast('PIN nicht gefunden – Link von Zentrale öffnen','err');
+    return;
+  }
   showDriverMain(d.id);
   toast('Willkommen, '+d.fname+'!','ok');
 }
 
-function driverLoginByToken(token){
-  const d=drivers.find(x=>x.accessToken===token);
-  if(!d){showDriverLogin();toast('Ungültiger Link – PIN eingeben','warn');return;}
+async function driverLoginByToken(token){
+  await ensureDriverDataLoaded();
+  let d=findDriverByToken(token);
+  if(!d){
+    const boot=new URLSearchParams(location.search).get('boot');
+    if(boot){const bd=decodeDriverBoot(boot);if(bd&&bd.accessToken===token){upsertDriverLocal(bd);d=findDriverByToken(token);}}
+  }
+  if(!d){showDriverLogin();toast('Ungültiger Link – PIN von Zentrale eingeben','warn');return;}
   if(document.getElementById('driver-pin-input')) document.getElementById('driver-pin-input').value=d.pin||'';
   showDriverMain(d.id);
 }
@@ -6668,6 +6757,7 @@ function purgeDemoData(){
 // INIT
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
+if(drivers.length) syncDriverAuthRegistry();
 initPwa();
 initTheme();
 initMicrosoftCloud();
@@ -6681,7 +6771,10 @@ if(!initAppMode()){
   renderMiniCal();
   renderCalendar();
   renderCustomers();
-  if(gcalConnected) trySilentGoogleRefresh();
+  if(gcalConnected){
+    trySilentGoogleRefresh();
+    setTimeout(()=>autoPurgeDemoOnLoad(),4000);
+  }
   updateMapsKeyStatus();
   setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
 }

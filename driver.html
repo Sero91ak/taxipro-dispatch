@@ -31,7 +31,7 @@ a{color:var(--teal)}
 (function(){
   var q=location.search;
   var sep=q?'&':'?';
-  var target='index.html'+q+sep+'mode=driver';
+  var target='index.html'+q+(q?'&':sep+'')+'mode=driver';
   if(location.hash) target+=location.hash;
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./service-worker.js').catch(function(){});
