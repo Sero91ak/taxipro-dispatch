@@ -1507,6 +1507,10 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <strong>Cloud-Sync aktiv</strong><br>
       <span id="cloud-sync-info">Fahrten &amp; Kunden werden automatisch in SharePoint gespeichert.</span>
     </div>
+    <div style="margin-top:14px;padding:12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r2);font-size:11px;color:var(--blue2);line-height:1.65">
+      <strong>Kein Microsoft-Zugang?</strong> Nutze stattdessen <strong>Google Drive Sync</strong> im 📅 Kalender-Modal – Fahrten und Dokumente kommen trotzdem aufs Fahrer-Handy.
+      <button type="button" class="btn btn-blue btn-sm" style="margin-top:8px" onclick="closeM('modal-cloud');openM('modal-gcal')">☁️ Google Drive Sync einrichten</button>
+    </div>
     <div id="cloud-setup-hint" style="margin-top:14px;padding:10px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r2);font-size:11px;color:var(--yellow2);line-height:1.65"></div>
     <div id="cloud-client-section" style="margin-top:12px;display:none">
       <div class="fr"><label>Azure Client-ID (einmalig)</label><input type="text" id="ms-client-id-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/></div>
@@ -1599,6 +1603,17 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       🔒 <strong>Testmodus aktiv:</strong> Google Kalender wird nur gelesen. Termine fließen automatisch in die App. Google wird <strong>nicht</strong> verändert.
     </div>
     <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
+    <div class="gc-panel" style="margin-top:14px;border:1px solid var(--blue-border);background:var(--blue-bg)">
+      <h4>☁️ Google Drive Sync (ohne Microsoft)</h4>
+      <div class="gc-status" id="gdrv-status-text" style="margin-bottom:10px">
+        <strong>Alternative zu Microsoft Cloud:</strong> Fahrten, Dokumente und Fahrer-Daten werden in deinem Google Drive gespeichert. Fahrer-Handy lädt automatisch – kein SharePoint nötig.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-blue btn-sm" id="gdrv-setup-btn" onclick="setupGoogleDriveSync()">☁️ Google Drive Sync aktivieren</button>
+        <button class="btn btn-secondary btn-sm" id="gdrv-sync-btn" onclick="uploadGoogleDriveSync(true)" style="display:none">🔄 Jetzt hochladen</button>
+      </div>
+      <div id="gdrv-sync-info" style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.5"></div>
+    </div>
     <div class="gc-panel" style="margin-top:12px">
       <h4>🗺️ Adresssuche</h4>
       <div class="gc-status">Kostenlos über <strong>OpenStreetMap</strong> – Straßen, Hausnummern und Orte deutschlandweit. <strong>0 € · kein API-Schlüssel.</strong></div>
@@ -1708,7 +1723,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 <div class="modal">
   <div class="mh"><h3>📄 Dokument an Fahrer senden</h3><button class="mclose" onclick="closeM('modal-driver-doc')">✕</button></div>
   <div class="mbody">
-    <p style="font-size:12px;color:var(--yellow2);margin-bottom:12px;line-height:1.5;padding:10px;background:var(--yellow-bg);border-radius:var(--r2);border:1px solid var(--yellow-border)">⚠️ <strong>Microsoft Cloud muss aktiv sein</strong>, sonst kommt das Dokument nicht auf dem Handy an. Fahrer tippt danach 🔄 in der App.</p>
+    <p style="font-size:12px;color:var(--yellow2);margin-bottom:12px;line-height:1.5;padding:10px;background:var(--yellow-bg);border-radius:var(--r2);border:1px solid var(--yellow-border)">⚠️ <strong>Google Drive Sync aktivieren</strong> (📅 Kalender-Modal → ☁️ Google Drive Sync). Sonst kommt das Dokument nicht auf dem Handy an. Fahrer tippt danach 🔄 in der App.</p>
     <div class="fr"><label>Fahrer</label><select id="dd-driver"></select></div>
     <div class="fr"><label>Titel</label><input type="text" id="dd-title" placeholder="z.B. Abrechnung März 2026 – Dialyse"/></div>
     <div class="fr2 fr">
@@ -1862,6 +1877,9 @@ const SCOPE_CALENDAR_WRITE='https://www.googleapis.com/auth/calendar.events';
 const SCOPE_CONTACTS='https://www.googleapis.com/auth/contacts.readonly';
 const SCOPE_GCAL_IMPORT=SCOPE_CALENDAR_READ+' '+SCOPE_CONTACTS;
 const SCOPE_GCAL_FULL=SCOPE_GCAL_IMPORT+' '+SCOPE_CALENDAR_WRITE;
+const SCOPE_DRIVE_FILE='https://www.googleapis.com/auth/drive.file';
+const SCOPE_GCAL_WITH_DRIVE=SCOPE_GCAL_IMPORT+' '+SCOPE_DRIVE_FILE;
+const GDRV_SYNC_NAME='taxipro-dispatch-sync.json';
 const GCAL_PUSH_ENABLED=false;
 const DEMO_PHONES=['+49 171 1234567','+49 162 9876543','+49 176 5554433','+49 151 2233445','+49 174 8877665',
   '+49 151 9988776','+49 172 4433221','+49 160 7766554','+49 176 3322110','+49 163 8877665',
@@ -1963,6 +1981,8 @@ let gcalSyncEnabled=localStorage.getItem('tp_gcal_sync')!=='false';
 let gcalWriteEnabled=localStorage.getItem('tp_gcal_write')==='true';
 let gcalImportAll=localStorage.getItem('tp_gcal_import_all')!=='false';
 let gcalCalendarId=localStorage.getItem('tp_gcal_cal')||'primary';
+let gdrvFileId=localStorage.getItem('tp_gdrv_file_id')||'';
+let gdrvSyncEnabled=localStorage.getItem('tp_gdrv_sync')==='1';
 const TAXI_KEYWORDS=['fahrt','fahrten','taxi','kranken','krankenfahrt','dialyse','chemo','chemotherapie','strahlen','strahlentherapie','transport','abholung','klinik','krankenhaus','charité','charite','patient','termin','kt ','kts','rollstuhl'];
 let editRideId=null, editCustId=null, editDriverId=null;
 let view='calendar', calV='day';
@@ -2037,11 +2057,12 @@ function checkDataMigration(){
 }
 function checkCloudSetup(){
   if(isDriverAppMode()||document.documentElement.classList.contains('driver-boot')) return;
-  if(sessionStorage.getItem('tp_cloud_hint')||msCloudReady()) return;
+  if(sessionStorage.getItem('tp_cloud_hint')||cloudSyncReady()) return;
   setTimeout(()=>{
-    if(isDriverAppMode()||msCloudReady()) return;
+    if(isDriverAppMode()||cloudSyncReady()) return;
     sessionStorage.setItem('tp_cloud_hint','1');
-    openCloudModal();
+    if(gcalConnected) openM('modal-gcal');
+    else openM('modal-gcal');
   },4000);
 }
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -3123,7 +3144,7 @@ function renderCustDocs(){
     const name=c?custFolderName(c):'';
     hintEl.innerHTML=msCloudReady()
       ?`☁️ SharePoint: <code>${CUST_DOCS_ROOT}/${name}/</code> mit Unterordnern Verordnungen &amp; Genehmigungen`
-      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openCloudModal()">Microsoft Cloud verbinden</span> für automatisches SharePoint-Backup';
+      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openM(\'modal-gcal\')">Google Drive Sync</span> oder <span style="color:var(--blue2);cursor:pointer" onclick="openCloudModal()">Microsoft Cloud</span>';
   }
 }
 
@@ -3460,6 +3481,16 @@ function renderGCalModal(){
   }
   renderGCalPreview();
   updateMapsKeyStatus();
+  const gdrvInfo=document.getElementById('gdrv-sync-info');
+  const gdrvSetup=document.getElementById('gdrv-setup-btn');
+  const gdrvSync=document.getElementById('gdrv-sync-btn');
+  if(gdrvInfo){
+    if(googleDriveSyncReady()) gdrvInfo.innerHTML='<span style="color:var(--green2)">✅ Google Drive Sync aktiv – Fahrer erhalten Fahrten &amp; Dokumente</span>';
+    else if(gcalConnected) gdrvInfo.innerHTML='Google verbunden – klicke <strong>Google Drive Sync aktivieren</strong>';
+    else gdrvInfo.innerHTML='Zuerst <strong>Mit Google verbinden</strong>, dann Drive Sync aktivieren';
+  }
+  if(gdrvSetup) gdrvSetup.style.display=googleDriveSyncReady()?'none':'inline-flex';
+  if(gdrvSync) gdrvSync.style.display=googleDriveSyncReady()?'inline-flex':'none';
 }
 
 function renderGCalCalendarSelect(){
@@ -4870,8 +4901,8 @@ async function dispatchToDriverApp(driverId){
   const pair=assignRideToDriver(dispatchRideId,driverId,'app');
   if(!pair) return;
   closeDriverPicker();
-  const synced=await uploadCloudData(false);
-  if(!synced) toast('⚠️ Cloud nicht aktiv – Fahrer sieht Fahrt erst nach Sync','warn');
+  const synced=await cloudSyncUpload(false);
+  if(!synced) toast('⚠️ Sync nicht aktiv – Google Drive Sync aktivieren','warn');
   else toast(`📱 Fahrt an ${pair.d.fname} gesendet`,'ok');
   pingDriverWhatsApp(pair.d,'🚗 Neue Fahrt in der App: '+pair.r.date+' '+pair.r.time+' Uhr\n\n'+getDriverAppUrl(pair.d));
   renderToday();
@@ -4931,8 +4962,9 @@ function updateStatusBar(){
     gcal.textContent=gcalConnected?'📅 Google Kalender verbunden':'📅 Kalender nicht verbunden';
   }
   if(cloud){
-    cloud.className='status-pill'+(msCloudReady()?' ok':msConnected?' warn':'');
-    cloud.textContent=msCloudReady()?'☁️ SharePoint aktiv':msConnected?'☁️ Ordner verknüpfen':'☁️ Cloud offline';
+    const gdrvOk=googleDriveSyncReady();
+    cloud.className='status-pill'+(msCloudReady()||gdrvOk?' ok':msConnected?' warn':'');
+    cloud.textContent=gdrvOk?'☁️ Google Drive Sync':msCloudReady()?'☁️ SharePoint aktiv':msConnected?'☁️ Ordner verknüpfen':'☁️ Sync offline';
   }
   if(ridesEl) ridesEl.textContent='🚗 Heute: '+today+' Fahrten';
   if(custEl) custEl.textContent='👥 '+customers.length+' Kunden';
@@ -5398,6 +5430,102 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
   return true;
 }
 
+function googleDriveSyncReady(){return gcalConnected&&!!gdrvFileId&&gdrvSyncEnabled;}
+function cloudSyncReady(){return msCloudReady()||googleDriveSyncReady();}
+
+async function googleDriveApi(path,opts={}){
+  return fetch('https://www.googleapis.com/drive/v3'+path,{...opts,headers:{Authorization:'Bearer '+gcalToken,...(opts.headers||{})}});
+}
+
+async function ensureGoogleDrivePublic(fileId){
+  try{
+    await googleDriveApi('/files/'+fileId+'/permissions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:'reader',type:'anyone'})});
+    const url='https://drive.google.com/uc?export=download&id='+fileId;
+    localStorage.setItem('tp_gdrv_public_url',url);
+    localStorage.setItem('tp_public_sync_url',url);
+    return url;
+  }catch(e){return localStorage.getItem('tp_gdrv_public_url')||'';}
+}
+
+async function ensureGoogleDriveSyncFile(){
+  if(!gcalConnected||!gcalToken) throw new Error('GOOGLE_NOT_CONNECTED');
+  if(gdrvFileId) return gdrvFileId;
+  const q=encodeURIComponent("name='"+GDRV_SYNC_NAME+"' and trashed=false");
+  const list=await googleDriveApi('/files?q='+q+'&spaces=drive&fields=files(id,name)');
+  if(list.ok){
+    const data=await list.json();
+    if(data.files?.[0]?.id){
+      gdrvFileId=data.files[0].id;
+      localStorage.setItem('tp_gdrv_file_id',gdrvFileId);
+      await ensureGoogleDrivePublic(gdrvFileId);
+      return gdrvFileId;
+    }
+  }
+  const meta=await googleDriveApi('/files',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:GDRV_SYNC_NAME,mimeType:'application/json'})});
+  if(!meta.ok) throw new Error('GDRIVE_CREATE');
+  const file=await meta.json();
+  gdrvFileId=file.id;
+  localStorage.setItem('tp_gdrv_file_id',gdrvFileId);
+  await ensureGoogleDrivePublic(gdrvFileId);
+  return gdrvFileId;
+}
+
+async function uploadGoogleDriveSync(showToast=false){
+  if(!gcalConnected||!gcalToken){
+    if(showToast){toast('Zuerst Google verbinden','warn');openM('modal-gcal');}
+    return false;
+  }
+  try{
+    const fileId=await ensureGoogleDriveSyncFile();
+    const body=JSON.stringify(buildCloudPayload());
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media',{
+      method:'PATCH',headers:{Authorization:'Bearer '+gcalToken,'Content-Type':'application/json'},body
+    });
+    if(!res.ok) throw new Error('GDRIVE_UPLOAD');
+    await ensureGoogleDrivePublic(fileId);
+    gdrvSyncEnabled=true;
+    localStorage.setItem('tp_gdrv_sync','1');
+    if(showToast) toast('☁️ Google Drive Sync OK','ok');
+    return true;
+  }catch(e){
+    if(showToast) toast('Google Drive Sync fehlgeschlagen – neu aktivieren','err');
+    return false;
+  }
+}
+
+async function fetchGoogleDriveSync(force=false){
+  const fileId=gdrvFileId||localStorage.getItem('tp_gdrv_file_id')||new URLSearchParams(location.search).get('gd');
+  const url=localStorage.getItem('tp_gdrv_public_url')||localStorage.getItem('tp_public_sync_url')||(fileId?'https://drive.google.com/uc?export=download&id='+fileId:'');
+  if(!url) return false;
+  try{
+    const res=await fetch(url);
+    if(!res.ok) return false;
+    const data=JSON.parse(await res.text());
+    return applyCloudPayload(data,{force:true,driverMode:!!currentDriverId});
+  }catch(e){return false;}
+}
+
+function setupGoogleDriveSync(){
+  if(!initGoogleTokenClient(SCOPE_GCAL_WITH_DRIVE,async()=>{
+    gdrvSyncEnabled=true;
+    localStorage.setItem('tp_gdrv_sync','1');
+    await ensureGoogleDriveSyncFile();
+    await uploadGoogleDriveSync(true);
+    renderGCalModal();
+  })){toast('Google-Bibliothek nicht geladen','err');return;}
+  googleTokenClient.requestAccessToken({prompt:'consent'});
+}
+
+async function cloudSyncUpload(showToast=false){
+  if(msCloudReady()) return uploadCloudData(showToast);
+  if(gcalConnected) return uploadGoogleDriveSync(showToast);
+  if(showToast){
+    toast('Google Drive Sync aktivieren (Kalender-Modal)','err');
+    openM('modal-gcal');
+  }
+  return false;
+}
+
 async function fetchPublicCloudData(force=false){
   const publicUrl=localStorage.getItem('tp_public_sync_url');
   if(publicUrl){
@@ -5470,9 +5598,9 @@ function saveLocalOnly(){
 
 function scheduleCloudSave(){
   localStorage.setItem('tp_local_saved',new Date().toISOString());
-  if(!msCloudReady()) return;
   clearTimeout(msCloudSaveTimer);
-  msCloudSaveTimer=setTimeout(()=>uploadCloudData(false),2500);
+  if(msCloudReady()) msCloudSaveTimer=setTimeout(()=>uploadCloudData(false),2500);
+  else if(gcalConnected&&(gdrvSyncEnabled||gdrvFileId)) msCloudSaveTimer=setTimeout(()=>uploadGoogleDriveSync(false),2500);
 }
 
 function updateCloudUI(){
@@ -5533,11 +5661,7 @@ async function initMicrosoftCloud(){
     await loadMsalLibrary().catch(()=>{});
     if(!await ensureMsalReady()){
       updateCloudUI();
-      if(!isDriverAppMode()&&!sessionStorage.getItem('tp_cloud_modal_shown')){
-        sessionStorage.setItem('tp_cloud_modal_shown','1');
-        setTimeout(()=>openCloudModal(),1200);
-      }
-      return;
+        return;
     }
     const redirectResult=await msalInstance.handleRedirectPromise();
     if(redirectResult?.account){
@@ -5551,10 +5675,6 @@ async function initMicrosoftCloud(){
       if(msCloudReady()) await loadCloudData();
     }
     updateCloudUI();
-    if(!isDriverAppMode()&&!msCloudReady()&&!sessionStorage.getItem('tp_cloud_modal_shown')){
-      sessionStorage.setItem('tp_cloud_modal_shown','1');
-      setTimeout(()=>openCloudModal(),1200);
-    }
   }catch(e){
     console.error('MS init',e);
     updateCloudUI();
@@ -6293,7 +6413,8 @@ async function refreshMobileData(){
     return;
   }
   if(gcalConnected){try{await fullGCalSync();}catch(e){}}
-  if(msCloudReady()){try{await loadCloudData(true);}catch(e){}}
+  if(googleDriveSyncReady()){try{await fetchGoogleDriveSync(true);}catch(e){}}
+  else if(msCloudReady()){try{await loadCloudData(true);}catch(e){}}
   renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
   if(view==='gcontacts') renderGCView();
 }
@@ -6458,6 +6579,7 @@ function persistDriverLinkParams(params){
   const ln=params.get('ln');
   const syncUrl=params.get('sy');
   const publicUrl=params.get('pu');
+  const gdrvId=params.get('gd');
   if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
   if(token){localStorage.setItem('tp_driver_token',token);sessionStorage.setItem('tp_driver_token',token);}
   if(id) localStorage.setItem('tp_driver_id',id);
@@ -6466,6 +6588,14 @@ function persistDriverLinkParams(params){
   if(ln) localStorage.setItem('tp_driver_ln',ln);
   if(syncUrl) localStorage.setItem('tp_sync_folder_url',syncUrl);
   if(publicUrl) localStorage.setItem('tp_public_sync_url',publicUrl);
+  if(gdrvId){
+    localStorage.setItem('tp_gdrv_file_id',gdrvId);
+    localStorage.setItem('tp_gdrv_public_url','https://drive.google.com/uc?export=download&id='+gdrvId);
+    localStorage.setItem('tp_public_sync_url','https://drive.google.com/uc?export=download&id='+gdrvId);
+    gdrvFileId=gdrvId;
+    gdrvSyncEnabled=true;
+    localStorage.setItem('tp_gdrv_sync','1');
+  }
   if(boot||token||id||params.get('mode')==='driver') localStorage.setItem('tp_app_role','driver');
 }
 
@@ -6534,6 +6664,8 @@ function getDriverAppUrl(d){
   const pubUrl=localStorage.getItem('tp_public_sync_url');
   if(syncUrl) qs.set('sy',syncUrl);
   if(pubUrl) qs.set('pu',pubUrl);
+  const gdid=localStorage.getItem('tp_gdrv_file_id');
+  if(gdid) qs.set('gd',gdid);
   const base=location.origin+location.pathname.replace(/[^/]*$/,'')+'driver.html';
   return base+'?'+qs.toString();
 }
@@ -6619,6 +6751,8 @@ async function ensureDriverDataLoaded(){
   loadDriverAuthRegistry();
   reapplyDriverBootAuth();
   if(drivers.length) return;
+  if(await fetchGoogleDriveSync(true)){loadDriverAuthRegistry();reapplyDriverBootAuth();if(drivers.length) return;}
+  if(await fetchPublicCloudData(true)){loadDriverAuthRegistry();reapplyDriverBootAuth();if(drivers.length) return;}
   if(msCloudReady()){
     await loadCloudData(true);
     loadDriverAuthRegistry();
@@ -6647,6 +6781,12 @@ function updateDriverUrlForInstall(d){
     qs.set('p',String(d.pin||''));
     if(d.fname) qs.set('fn',d.fname);
     if(d.lname) qs.set('ln',d.lname);
+    const syncUrl=getSyncFolderUrl();
+    const pubUrl=localStorage.getItem('tp_public_sync_url');
+    const gdid=localStorage.getItem('tp_gdrv_file_id');
+    if(syncUrl) qs.set('sy',syncUrl);
+    if(pubUrl) qs.set('pu',pubUrl);
+    if(gdid) qs.set('gd',gdid);
     const base=(location.pathname.replace(/[^/]*$/,'')||'/')+'driver.html?'+qs.toString();
     history.replaceState(null,'',base);
     persistDriverLinkParams(qs);
@@ -7106,17 +7246,17 @@ async function sendDriverDoc(){
   const title=document.getElementById('dd-title').value.trim();
   if(!driverId||!title){toast('Fahrer und Titel pflicht','warn');return;}
   if(!pendingDriverDocFile){toast('Datei hochladen','warn');return;}
-  if(!msCloudReady()){
-    toast('⚠️ Microsoft Cloud muss aktiv sein! Sonst kommt nichts auf dem Handy an.','err');
-    openCloudModal();
+  if(!cloudSyncReady()){
+    toast('⚠️ Google Drive Sync aktivieren (Kalender-Modal) – sonst kommt nichts auf dem Handy an.','err');
+    openM('modal-gcal');
     return;
   }
   driverDocs.push({id:uid(),driverId,title,month:document.getElementById('dd-month').value,type:document.getElementById('dd-type').value,
     fileData:pendingDriverDocFile.data,fileName:pendingDriverDocFile.name,fileType:pendingDriverDocFile.type,
     status:'pending',createdAt:Date.now(),signedAt:null,signatureData:null});
   save();closeM('modal-driver-doc');
-  const synced=await uploadCloudData(true);
-  if(!synced){toast('Cloud-Upload fehlgeschlagen – Fahrer erhält nichts','err');return;}
+  const synced=await cloudSyncUpload(true);
+  if(!synced){toast('Upload fehlgeschlagen – Fahrer erhält nichts','err');return;}
   const d=drivers.find(x=>x.id===driverId);
   toast('Dokument hochgeladen – Fahrer kann 🔄 tippen','ok');
   notifyDriverForDoc(driverId,title);
@@ -7186,7 +7326,8 @@ function onDriverCloudUpdated(){
 
 async function driverPollCloud(manual){
   let ok=false;
-  ok=await fetchPublicCloudData(true);
+  ok=await fetchGoogleDriveSync(true);
+  if(!ok) ok=await fetchPublicCloudData(true);
   if(!ok&&msCloudReady()) ok=await loadCloudData(true);
   if(manual){
     if(ok) toast('✅ Daten aktualisiert','ok');
