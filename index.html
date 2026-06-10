@@ -1181,12 +1181,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
     <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
     <div class="gc-panel" style="margin-top:12px">
       <h4>🗺️ Adresssuche</h4>
-      <div class="gc-status">Straßen deutschlandweit – mit <strong>Google Maps</strong> (beste Treffer) oder kostenlos via <strong>OpenStreetMap</strong>.</div>
-      <div class="fr" style="margin-top:8px;margin-bottom:0">
-        <label>Maps API-Schlüssel (optional)</label>
-        <input type="password" id="maps-api-key" placeholder="AIza… (Cloud Console)" onchange="saveMapsApiKey(this.value)"/>
-      </div>
-      <div id="maps-key-status" style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5"></div>
+      <div class="gc-status">Kostenlos über <strong>OpenStreetMap</strong> – Straßen, Hausnummern und Orte deutschlandweit. <strong>0 € · kein API-Schlüssel.</strong></div>
+      <div id="maps-key-status" style="font-size:11px;color:var(--green2);margin-top:8px;line-height:1.5">✅ Adresssuche aktiv · OpenStreetMap · deutschlandweit · 0 €</div>
     </div>
     <div id="gcal-preview-list"></div>
   </div>
@@ -1318,8 +1314,6 @@ const HOSPITALS=[
 // GOOGLE API – Client ID hier eintragen (Cloud Console)
 // ═══════════════════════════════════════════════════════════════
 const GOOGLE_CLIENT_ID='412271967782-digo7ouqhik73icsdksjrbme2rad9ng6.apps.googleusercontent.com';
-// Google Maps / Places API-Schlüssel (Cloud Console → Maps JavaScript API + Places API)
-const GOOGLE_MAPS_API_KEY=localStorage.getItem('tp_maps_key')||'';
 // Microsoft Azure App – einmal in Azure Portal anlegen (siehe Cloud-Modal)
 const MS_CLIENT_ID=localStorage.getItem('tp_ms_client_id')||'56ac200a-a8cd-45ee-a482-8d6dc477b3ed';
 const MS_TENANT_ID='92713e54-4080-477b-9e22-8a1b4f3eeb14';
@@ -3666,69 +3660,23 @@ document.addEventListener('click',e=>{
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ADRESS-AUTOCOMPLETE (Google Maps + OpenStreetMap + Krankenhäuser)
+// ADRESS-AUTOCOMPLETE (OpenStreetMap kostenlos + Krankenhäuser)
 // ═══════════════════════════════════════════════════════════════
 const addrAcCache={};
 let addrSearchTimer=null;
-let mapsPlacesReady=null;
-let placesAutocompleteService=null;
-let placesSessionToken=null;
-let mapsKeyWarned=false;
-// Photon/OSM – kostenloser Fallback ohne API-Schlüssel
+// Photon/OSM – kostenlos, kein API-Schlüssel (Komoot/OpenStreetMap)
 const OSM_PHOTON='https://photon.komoot.io/api/';
 const OSM_BIAS='lat=50.62&lon=7.02'; // Schwerpunkt Rhein-Sieg / Bonn
 const OSM_BBOX='5.86,47.27,15.04,55.06'; // Deutschland
 
-function getGoogleMapsKey(){return GOOGLE_MAPS_API_KEY||localStorage.getItem('tp_maps_key')||'';}
-
 function escAc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
-
-function resetPlacesSession(){placesSessionToken=null;}
-
-function loadGoogleMapsScript(){
-  if(window.google?.maps?.places) return Promise.resolve(true);
-  if(mapsPlacesReady) return mapsPlacesReady;
-  const key=getGoogleMapsKey();
-  if(!key) return Promise.resolve(false);
-  mapsPlacesReady=new Promise(resolve=>{
-    window.__tpGmapsCb=()=>{resolve(!!window.google?.maps?.places);delete window.__tpGmapsCb;};
-    const s=document.createElement('script');
-    s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&language=de&region=DE&callback=__tpGmapsCb`;
-    s.onerror=()=>resolve(false);
-    document.head.appendChild(s);
-  });
-  return mapsPlacesReady;
-}
-
-async function ensureGoogleMapsPlaces(){
-  if(placesAutocompleteService) return true;
-  if(!(await loadGoogleMapsScript())||!window.google?.maps?.places) return false;
-  placesAutocompleteService=new google.maps.places.AutocompleteService();
-  resetPlacesSession();
-  updateMapsKeyStatus();
-  return true;
-}
-
-function parseGermanAddress(value,main){
-  const street=(main||value.split(',')[0]||value).trim();
-  const plzMatch=(value||'').match(/\b(\d{5})\b/);
-  const plz=plzMatch?plzMatch[1]:'';
-  let city='';
-  if(plz){
-    const after=(value||'').split(plz)[1]||'';
-    city=after.replace(/^[\s,]+/,'').split(',')[0]?.trim()||'';
-  }else{
-    const parts=(value||'').split(',').map(s=>s.trim()).filter(Boolean);
-    if(parts.length>=2) city=parts[parts.length-1].replace(/deutschland/i,'').trim();
-  }
-  return{street,plz,city};
-}
 
 function formatOsmAddress(p){
   if(!p) return '';
-  const line1=p.name&&p.name!==p.street?p.name:null;
-  const street=[p.street,p.housenumber].filter(Boolean).join(' ');
-  const city=[p.postcode,p.city||p.town||p.village||p.municipality].filter(Boolean).join(' ');
+  const streetName=p.street||(p.type==='street'?p.name:'');
+  const line1=p.name&&p.name!==streetName?p.name:null;
+  const street=[streetName,p.housenumber].filter(Boolean).join(' ');
+  const city=[p.postcode,p.city||p.town||p.village||p.municipality||p.district].filter(Boolean).join(' ');
   return[line1,street,city].filter(Boolean).join(', ')||p.name||street||city||'';
 }
 
@@ -3758,7 +3706,7 @@ function osmPlaceTag(p){
 function mapOsmProps(p){
   const value=formatOsmAddress(p);
   if(!value) return null;
-  const main=p.street||p.name||[p.street,p.housenumber].filter(Boolean).join(' ')||value.split(',')[0];
+  const main=p.street||p.housenumber?[p.street||p.name,p.housenumber].filter(Boolean).join(' '):(p.name||value.split(',')[0]);
   const sub=[p.postcode,p.city||p.town,p.state].filter(Boolean).join(' · ')||'Deutschland';
   return{
     icon:osmPlaceIcon(p),
@@ -3780,16 +3728,35 @@ async function fetchOsmLayer(input,layer,limit){
   return(data.features||[]).map(f=>f.properties||{}).filter(p=>!p.countrycode||p.countrycode==='de');
 }
 
+function buildOsmQueries(input){
+  const q=input.trim();
+  const queries=[q];
+  const plzMatch=q.match(/\b(\d{5})\b/);
+  if(plzMatch){
+    const withoutPlz=q.replace(plzMatch[0],'').replace(/\s+/g,' ').trim();
+    if(withoutPlz) queries.push(withoutPlz);
+  }
+  const parts=q.split(/[,\s]+/).filter(Boolean);
+  if(parts.length>=2){
+    queries.push(parts.slice(0,-1).join(' ')+' '+parts[parts.length-1]);
+    queries.push(parts[parts.length-1]+' '+parts.slice(0,-1).join(' '));
+  }
+  return[...new Set(queries)].slice(0,4);
+}
+
 async function searchOsmPlaces(input){
   try{
-    const [houses,streets,general]=await Promise.all([
-      fetchOsmLayer(input,'house',8),
-      fetchOsmLayer(input,'street',8),
-      fetchOsmLayer(input,'',6),
+    const queries=buildOsmQueries(input);
+    const fetches=queries.flatMap(q=>[
+      fetchOsmLayer(q,'house',8),
+      fetchOsmLayer(q,'street',10),
+      fetchOsmLayer(q,'locality',4),
+      fetchOsmLayer(q,'',6),
     ]);
+    const batches=await Promise.all(fetches);
     const seen=new Set();
     const merged=[];
-    [...houses,...streets,...general].forEach(p=>{
+    batches.flat().forEach(p=>{
       const hit=mapOsmProps(p);
       if(!hit) return;
       const key=hit.value.toLowerCase();
@@ -3797,37 +3764,8 @@ async function searchOsmPlaces(input){
       seen.add(key);
       merged.push(hit);
     });
-    return merged.slice(0,12);
+    return merged.slice(0,15);
   }catch(e){return [];}
-}
-
-function searchGooglePlaces(input){
-  return new Promise(async resolve=>{
-    if(!(await ensureGoogleMapsPlaces())) return resolve([]);
-    if(!placesSessionToken) placesSessionToken=new google.maps.places.AutocompleteSessionToken();
-    placesAutocompleteService.getPlacePredictions({
-      input,
-      sessionToken:placesSessionToken,
-      componentRestrictions:{country:'de'},
-    },(predictions,status)=>{
-      if(status!==google.maps.places.PlacesServiceStatus.OK||!predictions) return resolve([]);
-      resolve(predictions.slice(0,10).map(p=>{
-        const types=p.types||[];
-        const isHosp=types.some(t=>/hospital|health|doctor|physician/.test(t));
-        const main=p.structured_formatting?.main_text||p.description;
-        return{
-          icon:isHosp?'🏥':'📍',
-          main,
-          sub:(p.structured_formatting?.secondary_text||'Deutschland')+' · Google Maps',
-          value:p.description,
-          tag:'Google Maps',
-          source:'google',
-          placeId:p.place_id,
-          parts:parseGermanAddress(p.description,main),
-        };
-      }));
-    });
-  });
 }
 
 function searchLocalPlaces(q,includeHospitals,limit=6){
@@ -3882,7 +3820,6 @@ function selectAddrSuggestion(acId,idx){
   if(!it) return;
   applyAddrParts(it.fieldId,it);
   document.getElementById(acId).classList.remove('show');
-  resetPlacesSession();
   if(it.fieldId==='r-from'||it.fieldId==='r-to') calcDist();
 }
 
@@ -3892,58 +3829,29 @@ function onAddrSearch(val,acId,fieldId,includeHospitals=false){
   if(!val||val.trim().length<2){if(ac) ac.classList.remove('show');return;}
   const q=val.trim();
   const localHits=searchLocalPlaces(q,includeHospitals,6);
-  const loadMsg=getGoogleMapsKey()?'🔍 Straßen werden gesucht (Google Maps + OSM)…':'🔍 Straßen werden gesucht (OpenStreetMap)…';
   if(localHits.length) renderAddrAc(acId,fieldId,localHits);
   if(ac){
     if(!localHits.length) ac.innerHTML='';
-    ac.innerHTML+=`<div class="ac-loading" id="${acId}-load">${loadMsg}</div>`;
+    ac.innerHTML+=`<div class="ac-loading" id="${acId}-load">🔍 Straßen werden gesucht (OpenStreetMap)…</div>`;
     ac.classList.add('show');
   }
   addrSearchTimer=setTimeout(async()=>{
-    const [mapsHits,osmHits]=await Promise.all([
-      getGoogleMapsKey()?searchGooglePlaces(q):Promise.resolve([]),
-      searchOsmPlaces(q),
-    ]);
+    const osmHits=await searchOsmPlaces(q);
     const loadEl=document.getElementById(`${acId}-load`);
     if(loadEl) loadEl.remove();
     const seen=new Set(localHits.map(h=>h.value.toLowerCase()));
-    const remote=[...mapsHits,...osmHits].filter(h=>!seen.has(h.value.toLowerCase()));
-    const merged=[...localHits,...remote].slice(0,12);
-    if(!merged.length){
-      if(!getGoogleMapsKey()&&!mapsKeyWarned){
-        mapsKeyWarned=true;
-        toast('Ohne Maps-API-Schlüssel: OpenStreetMap aktiv. Für alle Straßen: Schlüssel unter Kalender → Adresssuche eintragen.','warn');
-      }
-      if(ac) ac.classList.remove('show');
-      return;
-    }
+    const merged=[...localHits,...osmHits.filter(h=>!seen.has(h.value.toLowerCase()))].slice(0,15);
+    if(!merged.length){if(ac) ac.classList.remove('show');return;}
     renderAddrAc(acId,fieldId,merged);
-  },320);
+  },300);
 }
 
 function onHospSearch(val){onAddrSearch(val,'hosp-ac','r-to',true);}
 function selHosp(n,a){document.getElementById('r-to').value=`${n}, ${a}`;document.getElementById('hosp-ac').classList.remove('show');calcDist();}
 
-function saveMapsApiKey(key){
-  const k=(key||'').trim();
-  if(k) localStorage.setItem('tp_maps_key',k);
-  else localStorage.removeItem('tp_maps_key');
-  mapsPlacesReady=null;
-  placesAutocompleteService=null;
-  resetPlacesSession();
-  updateMapsKeyStatus();
-  if(k) ensureGoogleMapsPlaces().then(ok=>toast(ok?'Google Maps: alle Straßen deutschlandweit aktiv':'Maps-Schlüssel ungültig oder API nicht aktiviert',ok?'ok':'warn'));
-}
-
 function updateMapsKeyStatus(){
   const el=document.getElementById('maps-key-status');
-  const inp=document.getElementById('maps-api-key');
-  if(inp&&!inp.value) inp.value=getGoogleMapsKey();
-  if(!el) return;
-  const k=getGoogleMapsKey();
-  el.innerHTML=k
-    ? (placesAutocompleteService?'✅ <strong>Google Maps aktiv</strong> · alle Straßen deutschlandweit + OpenStreetMap-Fallback':'⏳ Maps wird geladen… (JavaScript API + Places aktivieren)')
-    : '✅ <strong>OpenStreetMap aktiv</strong> · Straßen deutschlandweit · 0 €<br>Beste Treffer: API-Schlüssel in <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" style="color:var(--blue2)">Google Cloud Console</a> · APIs: <strong>Maps JavaScript API</strong> + <strong>Places API</strong> · Referrer: <code style="color:var(--gold)">https://sero91ak.github.io/*</code>';
+  if(el) el.innerHTML='✅ Adresssuche aktiv · OpenStreetMap · deutschlandweit · <strong>0 €</strong>';
 }
 
 function onCHospSearch(val){
@@ -5334,7 +5242,6 @@ renderCalendar();
 renderCustomers();
 if(gcalConnected) trySilentGoogleRefresh();
 updateMapsKeyStatus();
-if(getGoogleMapsKey()) ensureGoogleMapsPlaces();
 setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
 </script>
 </body>
