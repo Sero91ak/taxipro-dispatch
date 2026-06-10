@@ -12,21 +12,21 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <title>TaxiPro Fahrer</title>
 <style>
-:root{--bg:#1a2433;--text:#f2f6fa;--gold:#f5a623;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#0a1628;--text:#e8f4fc;--teal:#14b8a6;--blue:#38bdf8;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-top));padding-bottom:calc(24px + var(--safe-bottom))}
-.logo{font-size:22px;font-weight:700;margin-bottom:8px}
-.logo em{color:var(--gold);font-style:normal}
-.sub{font-size:14px;opacity:.75;text-align:center;line-height:1.5;margin-bottom:20px}
-.spinner{width:36px;height:36px;border:3px solid rgba(245,166,35,.25);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+.logo{font-size:24px;font-weight:800;margin-bottom:8px;color:var(--blue)}
+.logo em{color:var(--teal);font-style:normal}
+.sub{font-size:14px;opacity:.8;text-align:center;line-height:1.5;margin-bottom:24px;color:#94b8d4}
+.spinner{width:40px;height:40px;border:3px solid rgba(20,184,166,.2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
-a{color:var(--gold)}
+a{color:var(--teal)}
 </style>
 </head>
 <body>
 <div class="spinner" aria-hidden="true"></div>
 <div class="logo">TaxiPro <em>Fahrer</em></div>
-<p class="sub">App wird geladen…</p>
+<p class="sub">Fahrten, Navigation &amp; Team-Chat</p>
 <script>
 (function(){
   var q=location.search;

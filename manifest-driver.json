@@ -1,14 +1,14 @@
 {
   "name": "TaxiPro Fahrer",
   "short_name": "Fahrer",
-  "description": "Fahrer-App – zugewiesene Fahrten, Navigation, Fahrschein, Dokumente",
+  "description": "Fahrer-App – Fahrten annehmen, Navigation, Team-Chat, QR-Scan",
   "start_url": "./driver.html?source=pwa",
   "scope": "./",
   "id": "./driver.html",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen"],
   "orientation": "portrait-primary",
-  "background_color": "#1a2433",
+  "background_color": "#0a1628",
   "theme_color": "#0a1628",
   "lang": "de",
   "icons": [

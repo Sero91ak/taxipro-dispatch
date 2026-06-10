@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
 :root,[data-theme="dark"]{
   --bg:#1a2433;--bg2:#222e3f;--bg3:#2a384c;--bg4:#33465c;--bg5:#3d5269;
@@ -605,59 +606,87 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .pay-badge.eigen{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
 .pay-badge.bezahlt{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
 .pay-badge.sig{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
-/* ── FAHRER-PORTAL ── */
-#driver-portal{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;flex-direction:column}
+/* ── FAHRER-APP (eigenes Teal-Design, nicht Zentrale) ── */
+#driver-portal{position:fixed;inset:0;z-index:5000;background:#0a1628;display:flex;flex-direction:column;font-family:system-ui,-apple-system,sans-serif;color:#e8f4fc}
 #driver-portal.hidden{display:none!important}
-.drv-login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-top))}
-.drv-login-box{width:100%;max-width:340px;text-align:center}
-.drv-login-box .logo{font-size:22px;margin-bottom:6px}
-.drv-login-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
-.drv-pin-input{font-size:28px;text-align:center;letter-spacing:8px;font-weight:700;padding:14px;margin-bottom:14px;border-radius:var(--r)}
-#driver-topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + var(--safe-top));background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+#driver-portal .drv-login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-top))}
+#driver-portal .drv-login-box{width:100%;max-width:340px;text-align:center}
+#driver-portal .drv-login-box .logo{font-size:24px;font-weight:700;margin-bottom:6px;color:#38bdf8}
+#driver-portal .drv-login-box .logo em{color:#14b8a6;font-style:normal}
+#driver-portal .drv-login-sub{font-size:14px;color:#94b8d4;margin-bottom:24px;line-height:1.5}
+#driver-portal .drv-pin-input{font-size:32px;text-align:center;letter-spacing:10px;font-weight:700;padding:16px;margin-bottom:16px;border-radius:14px;background:#122338;border:2px solid #1e3a5f;color:#e8f4fc}
+#driver-portal .drv-pin-input:focus{border-color:#14b8a6;box-shadow:0 0 0 3px rgba(20,184,166,.25)}
+#driver-portal .drv-login-btn{width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:700;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none}
+#driver-topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + var(--safe-top));background:#0c2238;border-bottom:1px solid #1e3a5f;flex-shrink:0}
+.drv-brand{font-size:22px;flex-shrink:0}
 .drv-user{flex:1;min-width:0}
-.drv-user-name{font-family:var(--font2);font-weight:700;font-size:15px}
-.drv-user-sub{font-size:11px;color:var(--text3)}
-.drv-sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
-.drv-sync-dot.live{background:var(--green);box-shadow:0 0 6px var(--green)}
-#driver-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;padding-bottom:calc(12px + var(--mob-nav-h) + var(--safe-bottom))}
-.drv-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}
-.drv-ride-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;border-left:4px solid var(--gold)}
-.drv-ride-card.krank{border-left-color:var(--red)}
-.drv-ride-card.rechn{border-left-color:var(--yellow)}
-.drv-ride-card.normal{border-left-color:var(--blue)}
-.drv-ride-card.privat{border-left-color:var(--green)}
-.drv-ride-card.done{opacity:.72}
-.drv-ride-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
-.drv-ride-time{font-family:var(--font2);font-size:22px;font-weight:700;line-height:1;flex-shrink:0}
+.drv-user-name{font-weight:700;font-size:16px;color:#e8f4fc}
+.drv-user-sub{font-size:12px;color:#94b8d4}
+.drv-sync-dot{width:8px;height:8px;border-radius:50%;background:#475569;flex-shrink:0}
+.drv-sync-dot.live{background:#14b8a6;box-shadow:0 0 8px #14b8a6}
+#driver-portal .drv-top-btn{padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;background:#122338;border:1px solid #1e3a5f;color:#94b8d4}
+#driver-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:calc(14px + var(--mob-nav-h) + var(--safe-bottom))}
+.drv-section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 12px}
+.drv-ride-card{background:#122338;border:1px solid #1e3a5f;border-radius:16px;padding:16px;margin-bottom:14px}
+.drv-ride-card.krank{border-left:4px solid #f87171}
+.drv-ride-card.rechn{border-left:4px solid #fbbf24}
+.drv-ride-card.normal{border-left:4px solid #38bdf8}
+.drv-ride-card.privat{border-left:4px solid #34d399}
+.drv-ride-card.new{border-color:#14b8a6;box-shadow:0 0 0 1px rgba(20,184,166,.3)}
+.drv-ride-card.done{opacity:.7}
+.drv-ride-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.drv-ride-time{font-size:28px;font-weight:800;line-height:1;color:#38bdf8;flex-shrink:0}
 .drv-ride-meta{flex:1;min-width:0}
-.drv-ride-name{font-weight:700;font-size:15px}
-.drv-ride-addr{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4}
-.drv-ride-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-.drv-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.drv-btn{padding:12px 10px;border-radius:var(--r2);font-size:12px;font-weight:700;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px}
-.drv-btn.primary{background:var(--gold);color:#000;border-color:var(--gold)}
-.drv-btn.maps{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
-.drv-btn.pay-kts{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
-.drv-btn.pay-eigen{background:var(--yellow-bg);color:var(--yellow2);border-color:var(--yellow-border)}
-.drv-btn.sig{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
-.drv-btn.done-btn{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
-.drv-btn.on{outline:2px solid var(--gold);outline-offset:1px}
-.drv-msg-box{margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)}
-.drv-msg-list{max-height:120px;overflow-y:auto;margin-bottom:8px}
-.drv-msg-item{font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)}
-.drv-msg-item:last-child{border-bottom:none}
-.drv-msg-from{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase}
-.drv-msg-input-row{display:flex;gap:6px}
-.drv-msg-input-row input{flex:1;min-width:0}
-.drv-doc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer}
-.drv-doc-card.pending{border-left:4px solid var(--gold)}
-.drv-doc-card.signed{border-left:4px solid var(--green);opacity:.85}
-.drv-doc-title{font-weight:700;font-size:14px;margin-bottom:4px}
-.drv-doc-meta{font-size:11px;color:var(--text2)}
-#driver-bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--mob-nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg2);border-top:1px solid var(--border2);display:flex;z-index:5010}
-.drv-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:600;color:var(--text3);border:none;background:none;position:relative}
-.drv-nav-item.active{color:var(--gold)}
-.drv-nav-badge{position:absolute;top:6px;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.drv-ride-name{font-weight:700;font-size:17px;color:#e8f4fc}
+.drv-ride-addr{font-size:13px;color:#94b8d4;margin-top:4px;line-height:1.45}
+.drv-ride-note{font-size:12px;color:#cbd5e1;margin-top:8px;padding:8px 10px;background:#0a1628;border-radius:8px;line-height:1.4}
+.drv-ride-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.drv-status-pill{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:#1e3a5f;color:#94b8d4}
+.drv-status-pill.accepted{background:rgba(20,184,166,.2);color:#5eead4}
+.drv-status-pill.new{background:rgba(56,189,248,.2);color:#7dd3fc}
+.drv-actions{display:flex;flex-direction:column;gap:10px}
+.drv-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drv-btn{padding:14px 12px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid #1e3a5f;background:#0c2238;color:#e8f4fc;display:flex;align-items:center;justify-content:center;gap:6px;min-height:52px}
+.drv-btn.maps{background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border:none;font-size:15px;min-height:56px}
+.drv-btn-accept{background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none;font-size:16px;min-height:56px;width:100%}
+.drv-btn.pay-kts{background:rgba(56,189,248,.15);color:#7dd3fc;border-color:rgba(56,189,248,.35)}
+.drv-btn.pay-eigen{background:rgba(251,191,36,.15);color:#fcd34d;border-color:rgba(251,191,36,.35)}
+.drv-btn.sig{background:rgba(167,139,250,.15);color:#c4b5fd;border-color:rgba(167,139,250,.35)}
+.drv-btn.done-btn{background:rgba(52,211,153,.15);color:#6ee7b7;border-color:rgba(52,211,153,.35)}
+.drv-btn.qr{background:rgba(148,163,184,.15);color:#cbd5e1}
+.drv-btn.on{outline:2px solid #14b8a6;outline-offset:2px}
+.drv-btn:disabled{opacity:.35}
+.drv-doc-card{background:#122338;border:1px solid #1e3a5f;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer}
+.drv-doc-card.pending{border-left:4px solid #38bdf8}
+.drv-doc-card.signed{border-left:4px solid #14b8a6;opacity:.85}
+.drv-doc-title{font-weight:700;font-size:14px;margin-bottom:4px;color:#e8f4fc}
+.drv-doc-meta{font-size:11px;color:#94b8d4}
+.drv-team-quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.drv-team-quick button{padding:16px 8px;border-radius:14px;font-size:13px;font-weight:700;border:1px solid #1e3a5f;background:#122338;color:#e8f4fc}
+.drv-team-quick button:active{background:#1e3a5f}
+#driver-chat-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;max-height:calc(100dvh - 320px);overflow-y:auto}
+.drv-chat-msg{padding:12px 14px;border-radius:14px;background:#122338;border:1px solid #1e3a5f}
+.drv-chat-msg.traffic{border-left:3px solid #fbbf24}
+.drv-chat-msg.accident{border-left:3px solid #f87171}
+.drv-chat-msg.blitzer{border-left:3px solid #a78bfa}
+.drv-chat-msg.general{border-left:3px solid #64748b}
+.drv-chat-head{font-size:10px;font-weight:700;color:#64748b;margin-bottom:4px}
+.drv-chat-text{font-size:14px;line-height:1.45;color:#e8f4fc}
+.drv-chat-input-row{display:flex;gap:8px;align-items:center}
+.drv-chat-input-row input{flex:1;min-width:0;padding:14px;border-radius:12px;background:#122338;border:1px solid #1e3a5f;color:#e8f4fc;font-size:15px}
+.drv-chat-send{padding:14px 18px;border-radius:12px;background:#14b8a6;color:#fff;font-weight:700;border:none;font-size:16px}
+.drv-profile-card{background:#122338;border:1px solid #1e3a5f;border-radius:16px;padding:20px;margin-bottom:20px;text-align:center}
+.drv-profile-av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#14b8a6,#0284c7);color:#fff;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.drv-profile-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.drv-profile-sub{font-size:13px;color:#94b8d4}
+.drv-logout-btn{width:100%;padding:14px;border-radius:12px;font-size:14px;font-weight:700;background:#1e293b;color:#f87171;border:1px solid rgba(248,113,113,.35);margin-top:16px}
+#driver-bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--mob-nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:#0c2238;border-top:1px solid #1e3a5f;display:flex;z-index:5010}
+.drv-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:#64748b;border:none;background:none;position:relative}
+.drv-nav-item.active{color:#14b8a6}
+.drv-nav-badge{position:absolute;top:6px;right:calc(50% - 22px);background:#f87171;color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+#drv-qr-wrap{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:1;max-height:280px}
+#drv-qr-video{width:100%;height:100%;object-fit:cover;display:block}
+#drv-qr-status{font-size:13px;color:#94b8d4;text-align:center;margin-top:12px}
 .sig-canvas-wrap{border:2px dashed var(--border2);border-radius:var(--r);background:#fff;touch-action:none;margin:12px 0}
 .sig-canvas-wrap canvas{display:block;width:100%;height:180px;cursor:crosshair}
 .sig-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px}
@@ -815,7 +844,7 @@ html.is-mobile .driver-btns{flex-wrap:wrap}
 html.is-mobile .driver-btns .btn{flex:1;min-width:calc(50% - 4px)}
 html.is-mobile .dp-sheet{max-height:92dvh;overflow-y:auto}
 html.driver-mode #pwa-install-banner{display:none!important}
-#driver-pwa-banner{position:fixed;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 8px);left:12px;right:12px;background:var(--bg2);border:1px solid var(--gold);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:5020;box-shadow:var(--shadow)}
+#driver-pwa-banner{position:fixed;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 8px);left:12px;right:12px;background:#122338;border:1px solid #14b8a6;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:5020;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 html.driver-standalone #driver-pwa-banner{display:none!important}
 .mob-week-agenda{display:none}
 </style>
@@ -1008,47 +1037,68 @@ html.driver-standalone #driver-pwa-banner{display:none!important}
 </div><!-- /main -->
 </div><!-- /app -->
 
-<!-- ═══ FAHRER-PORTAL (kein Zentrale-Zugriff) ═══ -->
+<!-- ═══ FAHRER-APP (kein Zentrale-Zugriff) ═══ -->
 <div id="driver-portal" class="hidden">
   <div id="driver-login" class="drv-login-wrap">
     <div class="drv-login-box">
       <div class="logo">TaxiPro <em>Fahrer</em></div>
-      <p class="drv-login-sub">Nur deine zugewiesenen Fahrten &amp; Dokumente.<br>PIN von der Zentrale eingeben.</p>
+      <p class="drv-login-sub">Deine Fahrten, Navigation &amp; Team-Chat.<br>PIN von der Zentrale eingeben.</p>
       <input type="password" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
-          <button type="button" class="btn btn-primary" style="width:100%" onclick="driverLoginByPin().catch(()=>{})">Anmelden</button>
-      <p style="font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5">Link von der Zentrale erhalten? Einfach öffnen – PIN wird automatisch erkannt.</p>
+      <button type="button" class="drv-login-btn" onclick="driverLoginByPin().catch(()=>{})">Anmelden</button>
+      <p style="font-size:12px;color:#64748b;margin-top:16px;line-height:1.5">Link von der Zentrale? Einfach öffnen – PIN wird erkannt.</p>
     </div>
   </div>
   <div id="driver-main" class="hidden" style="display:none;flex:1;flex-direction:column;min-height:0">
     <header id="driver-topbar">
+      <div class="drv-brand" aria-hidden="true">🚕</div>
       <div class="drv-user">
         <div class="drv-user-name" id="drv-user-name">Fahrer</div>
         <div class="drv-user-sub" id="drv-user-sub">Heute · 0 Fahrten</div>
       </div>
       <span class="drv-sync-dot" id="drv-sync-dot" title="Cloud-Sync"></span>
-      <button type="button" class="tb-btn btn-sm" onclick="driverPollCloud(true)" title="Aktualisieren">🔄</button>
-      <button type="button" class="tb-btn btn-sm" onclick="driverLogout()">Abmelden</button>
+      <button type="button" class="drv-top-btn" onclick="driverPollCloud(true)" title="Aktualisieren">🔄</button>
     </header>
     <div id="driver-content">
       <div id="driver-rides-panel">
-        <div class="drv-section-title">Meine Fahrten heute</div>
+        <div class="drv-section-title">Heute</div>
         <div id="driver-rides-list"></div>
-        <div class="drv-section-title" style="margin-top:16px">Kommende Fahrten</div>
+        <div class="drv-section-title" style="margin-top:16px">Kommend</div>
         <div id="driver-rides-upcoming"></div>
       </div>
-      <div id="driver-docs-panel" class="hidden">
-        <div class="drv-section-title">Dokumente von der Zentrale</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Abrechnungen &amp; Fahrscheine – bitte unterschreiben und zurücksenden.</p>
+      <div id="driver-team-panel" class="hidden">
+        <div class="drv-section-title">Team-Radio</div>
+        <p style="font-size:13px;color:#94b8d4;margin-bottom:14px;line-height:1.5">Stau, Unfall, Blitzer – alle Fahrer informieren sich hier.</p>
+        <div class="drv-team-quick">
+          <button type="button" onclick="postDriverChatQuick('traffic')">🚧 Stau</button>
+          <button type="button" onclick="postDriverChatQuick('accident')">💥 Unfall</button>
+          <button type="button" onclick="postDriverChatQuick('blitzer')">📸 Blitzer</button>
+        </div>
+        <div id="driver-chat-list"></div>
+        <div class="drv-chat-input-row">
+          <input type="text" id="driver-chat-input" placeholder="Nachricht an Team…" onkeydown="if(event.key==='Enter')sendDriverChatText()"/>
+          <button type="button" class="drv-chat-send" onclick="sendDriverChatText()">➤</button>
+        </div>
+      </div>
+      <div id="driver-profile-panel" class="hidden">
+        <div class="drv-profile-card">
+          <div class="drv-profile-av" id="drv-profile-av">?</div>
+          <div class="drv-profile-name" id="drv-profile-name">Fahrer</div>
+          <div class="drv-profile-sub" id="drv-profile-sub"></div>
+        </div>
+        <div class="drv-section-title">Dokumente</div>
+        <p style="font-size:12px;color:#94b8d4;margin-bottom:12px;line-height:1.5">Abrechnungen &amp; Fahrscheine – unterschreiben &amp; zurücksenden.</p>
         <div id="driver-docs-list"></div>
+        <button type="button" class="drv-logout-btn" onclick="driverLogout()">Abmelden</button>
       </div>
     </div>
     <nav id="driver-bottom-nav" aria-label="Fahrer-Navigation">
-      <button type="button" class="drv-nav-item active" data-drv-tab="rides" onclick="switchDriverTab('rides')"><span style="font-size:20px">🚗</span>Fahrten</button>
-      <button type="button" class="drv-nav-item" data-drv-tab="docs" onclick="switchDriverTab('docs')"><span style="font-size:20px">📄</span>Dokumente<span class="drv-nav-badge hidden" id="drv-docs-badge">0</span></button>
+      <button type="button" class="drv-nav-item active" data-drv-tab="rides" onclick="switchDriverTab('rides')"><span style="font-size:22px">🚗</span>Fahrten</button>
+      <button type="button" class="drv-nav-item" data-drv-tab="team" onclick="switchDriverTab('team')"><span style="font-size:22px">👥</span>Team</button>
+      <button type="button" class="drv-nav-item" data-drv-tab="profile" onclick="switchDriverTab('profile')"><span style="font-size:22px">👤</span>Profil<span class="drv-nav-badge hidden" id="drv-docs-badge">0</span></button>
     </nav>
     <div id="driver-pwa-banner" class="hidden">
-      <div class="pwa-install-text"><strong>Fahrer-App installieren</strong><span>Auf dem Home-Bildschirm – schneller Zugriff</span></div>
-      <button type="button" class="btn btn-primary btn-sm" onclick="installDriverPwa()">Installieren</button>
+      <div class="pwa-install-text"><strong>Fahrer-App installieren</strong><span>Home-Bildschirm – schneller Zugriff</span></div>
+      <button type="button" class="drv-login-btn" style="padding:10px 16px;font-size:13px" onclick="installDriverPwa()">Installieren</button>
       <button type="button" class="pwa-dismiss" onclick="dismissDriverPwaBanner()" aria-label="Schließen">✕</button>
     </div>
   </div>
@@ -1607,6 +1657,20 @@ html.driver-standalone #driver-pwa-banner{display:none!important}
 </div>
 </div>
 
+<!-- ═══ MODAL: QR-SCAN (Fahrer) ═══ -->
+<div class="overlay hidden" id="modal-driver-qr">
+<div class="modal">
+  <div class="mh"><h3>📷 QR scannen</h3><button class="mclose" onclick="closeDriverQrScanner()">✕</button></div>
+  <div class="mbody">
+    <div id="drv-qr-wrap"><video id="drv-qr-video" playsinline muted></video></div>
+    <p id="drv-qr-status">Kamera wird gestartet…</p>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeDriverQrScanner()">Abbrechen</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ MODAL: UNTERSCHRIFT (Gast / Dokument) ═══ -->
 <div class="overlay hidden" id="modal-signature">
 <div class="modal">
@@ -1795,9 +1859,11 @@ let rides=JSON.parse(localStorage.getItem('tp_r')||'[]');
 let gcContacts=JSON.parse(localStorage.getItem('tp_gc')||'[]');
 let drivers=JSON.parse(localStorage.getItem('tp_d')||'[]');
 let driverDocs=JSON.parse(localStorage.getItem('tp_driver_docs')||'[]');
+let driverChat=JSON.parse(localStorage.getItem('tp_driver_chat')||'[]');
 let currentDriverId=sessionStorage.getItem('tp_driver_session')||null;
 let driverPollTimer=null;
 let driverKnownRideIds=new Set();
+let drvQrStream=null,drvQrTimer=null,drvQrRideId=null;
 let sigContext={type:null,id:null};
 let pendingDriverDocFile=null;
 let gcalEvents=[];
@@ -1827,13 +1893,19 @@ function save(){
   localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
   localStorage.setItem('tp_d',JSON.stringify(drivers));
   localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
+  localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
+  scheduleCloudSave();
+}
+
+function saveDriverChat(){
+  localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
   scheduleCloudSave();
 }
 
 function exportBackup(){
   const data={
     version:1,exported:new Date().toISOString(),
-    customers,rides,gcContacts,drivers,driverDocs,
+    customers,rides,gcContacts,drivers,driverDocs,driverChat,
     settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -4655,6 +4727,18 @@ function closeDriverPicker(e){
   }
 }
 
+function buildDriverShare(cust,r){
+  return{
+    name:cust?`${cust.fname||''} ${cust.lname||''}`.trim():(r.customerName||'Kunde'),
+    phone:cust?.phone||'',
+    from:r.from||'',
+    to:r.to||'',
+    note:r.note||'',
+    zuzahlung:r.zuzahlung||cust?.zuzahlung||'',
+    type:r.type||'normal'
+  };
+}
+
 function assignRideToDriver(rideId,driverId,mode){
   const r=rides.find(x=>x.id===rideId);
   const d=drivers.find(x=>x.id===driverId);
@@ -4663,7 +4747,16 @@ function assignRideToDriver(rideId,driverId,mode){
   r.dispatchedTo=driverId;
   r.dispatchedAt=Date.now();
   r.dispatchMode=mode;
-  r.driverStatus='assigned';
+  if(mode==='app'){
+    const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+    r.driverShare=buildDriverShare(c,r);
+    r.driverStatus='new';
+    r.driverAcceptedAt=null;
+    r.driverCompletedAt=null;
+    if(!r.qrToken) r.qrToken=uid();
+  }else{
+    r.driverStatus='assigned';
+  }
   if(!r.driverMessages) r.driverMessages=[];
   save();
   return{r,d};
@@ -5118,7 +5211,7 @@ async function writeRideToExcelCloud(ride,cust){
 }
 
 function buildCloudPayload(){
-  return{version:3,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,
+  return{version:4,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,
     settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}};
 }
 
@@ -5177,6 +5270,7 @@ async function loadCloudData(force){
     gcContacts=data.gcContacts||gcContacts;
     drivers=data.drivers||drivers;
     driverDocs=data.driverDocs||driverDocs;
+    if(data.driverChat) driverChat=data.driverChat;
     saveLocalOnly();
     localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
     renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();
@@ -5191,6 +5285,7 @@ function saveLocalOnly(){
   localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
   localStorage.setItem('tp_d',JSON.stringify(drivers));
   localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
+  localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
   localStorage.setItem('tp_local_saved',new Date().toISOString());
 }
 
@@ -5940,6 +6035,8 @@ function initDriverPwa(){
   if(mlink) mlink.setAttribute('href','manifest-driver.json');
   const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
   if(appleTitle) appleTitle.setAttribute('content','Fahrer');
+  const themeMeta=document.querySelector('meta[name="theme-color"]');
+  if(themeMeta) themeMeta.setAttribute('content','#0a1628');
   if(isStandalone()) document.documentElement.classList.add('driver-standalone');
   if(deferredInstallPrompt&&!localStorage.getItem('tp_driver_pwa_dismiss')&&!isStandalone())
     document.getElementById('driver-pwa-banner')?.classList.remove('hidden');
@@ -6075,12 +6172,20 @@ function showDriverMain(driverId){
   document.getElementById('driver-login').classList.add('hidden');
   const main=document.getElementById('driver-main');
   main.classList.remove('hidden');main.style.display='flex';
-  document.getElementById('drv-user-name').textContent=d.fname+' '+d.lname;
+  const name=d.fname+' '+d.lname;
+  document.getElementById('drv-user-name').textContent=name;
   const today=rides.filter(r=>r.dispatchedTo===driverId&&r.date===fmtD(new Date())).length;
   document.getElementById('drv-user-sub').textContent='Heute · '+today+' Fahrt'+(today!==1?'en':'');
+  const av=document.getElementById('drv-profile-av');
+  if(av) av.textContent=(d.fname?.[0]||'')+(d.lname?.[0]||'');
+  const pn=document.getElementById('drv-profile-name');
+  if(pn) pn.textContent=name;
+  const ps=document.getElementById('drv-profile-sub');
+  if(ps) ps.textContent=d.phone||d.vehicle||'Fahrer-App';
   driverKnownRideIds=new Set(rides.filter(r=>r.dispatchedTo===driverId).map(r=>r.id));
   renderDriverRides();
   renderDriverDocs();
+  renderDriverChat();
   switchDriverTab('rides');
 }
 
@@ -6110,7 +6215,9 @@ function driverLogout(){
 function switchDriverTab(tab){
   document.querySelectorAll('.drv-nav-item').forEach(b=>b.classList.toggle('active',b.dataset.drvTab===tab));
   document.getElementById('driver-rides-panel').classList.toggle('hidden',tab!=='rides');
-  document.getElementById('driver-docs-panel').classList.toggle('hidden',tab!=='docs');
+  document.getElementById('driver-team-panel').classList.toggle('hidden',tab!=='team');
+  document.getElementById('driver-profile-panel').classList.toggle('hidden',tab!=='profile');
+  if(tab==='team') renderDriverChat();
 }
 
 function getDriverRides(driverId){
@@ -6119,8 +6226,20 @@ function getDriverRides(driverId){
 }
 
 function getRideCustomerBrief(r){
+  if(r.driverShare) return{name:r.driverShare.name||'Kunde',phone:r.driverShare.phone||''};
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   return{name:c?c.fname+' '+c.lname:(r.customerName||'Kunde'),phone:c?.phone||''};
+}
+
+function getDriverShareInfo(r){
+  if(r.driverShare) return r.driverShare;
+  return{name:getRideCustomerBrief(r).name,phone:getRideCustomerBrief(r).phone,from:r.from,to:r.to,note:r.note,zuzahlung:r.zuzahlung,type:r.type};
+}
+
+function driverPaymentBadge(r){
+  if(!r.paymentMark) return '';
+  const labels={kts:'KTS',eigen:'Eigenleistung',bezahlt:'Bezahlt'};
+  return `<span class="drv-status-pill">${labels[r.paymentMark]||r.paymentMark}</span>`;
 }
 
 function paymentBadgeHtml(r){
@@ -6129,39 +6248,158 @@ function paymentBadgeHtml(r){
   return `<span class="pay-badge ${r.paymentMark==='eigen'?'eigen':r.paymentMark==='kts'?'kts':'bezahlt'}">${labels[r.paymentMark]||r.paymentMark}</span>`;
 }
 
+function isRideNewForDriver(r){
+  return r.driverStatus==='new'||(!r.driverAcceptedAt&&r.driverStatus!=='completed'&&r.driverStatus!=='accepted');
+}
+
 function buildDriverRideCard(r){
-  const cust=getRideCustomerBrief(r);
+  const share=getDriverShareInfo(r);
   const vis=rideVisualClass(r);
   const done=r.driverStatus==='completed';
-  const badges=[paymentBadgeHtml(r),r.passengerSignature?'<span class="pay-badge sig">✍️ Unterschrift</span>':''].filter(Boolean).join('');
-  const msgs=(r.driverMessages||[]).slice(-3);
-  return`<div class="drv-ride-card ${vis}${done?' done':''}" id="drv-ride-${r.id}">
+  const isNew=isRideNewForDriver(r);
+  const phone=(share.phone||'').replace(/'/g,'');
+  const zuzTxt=share.zuzahlung==='BF'?'Befreit':share.zuzahlung==='NB'?'Zuzahlung':'';
+  const statusPill=isNew?'<span class="drv-status-pill new">Neu</span>':done?'<span class="drv-status-pill accepted">Erledigt</span>':r.driverAcceptedAt?'<span class="drv-status-pill accepted">Angenommen</span>':'';
+  const badges=[statusPill,driverPaymentBadge(r),r.passengerSignature?'<span class="drv-status-pill">✍️ Signatur</span>':'',zuzTxt?`<span class="drv-status-pill">${zuzTxt}</span>`:''].filter(Boolean).join('');
+  const acceptBtn=isNew?`<button type="button" class="drv-btn drv-btn-accept" onclick="acceptDriverRide('${r.id}')">✓ Fahrt annehmen</button>`:'';
+  const navBtn=!isNew&&!done?`<button type="button" class="drv-btn maps" onclick="driverOpenMaps('${r.id}')">🗺️ Navigation starten</button>`:'';
+  const callBtn=phone&&!done?`<button type="button" class="drv-btn" onclick="window.open('tel:${phone}')">📞 Anrufen</button>`:'';
+  return`<div class="drv-ride-card ${vis}${done?' done':''}${isNew?' new':''}" id="drv-ride-${r.id}">
     <div class="drv-ride-head">
       <div class="drv-ride-time">${r.time}</div>
       <div class="drv-ride-meta">
-        <div class="drv-ride-name">${cust.name}</div>
-        <div class="drv-ride-addr">📍 ${r.from||'–'}</div>
-        <div class="drv-ride-addr">🎯 ${r.to||'–'}</div>
-        ${r.date!==fmtD(new Date())?`<div style="font-size:10px;color:var(--text3);margin-top:4px">📅 ${r.date}</div>`:''}
+        <div class="drv-ride-name">${share.name}</div>
+        <div class="drv-ride-addr">📍 ${share.from||r.from||'–'}</div>
+        <div class="drv-ride-addr">🎯 ${share.to||r.to||'–'}</div>
+        ${r.date!==fmtD(new Date())?`<div style="font-size:11px;color:#64748b;margin-top:4px">📅 ${r.date}</div>`:''}
       </div>
     </div>
+    ${share.note?`<div class="drv-ride-note">📝 ${share.note}</div>`:''}
     ${badges?`<div class="drv-ride-badges">${badges}</div>`:''}
     <div class="drv-actions">
-      <button type="button" class="drv-btn maps" onclick="driverOpenMaps('${r.id}')">🗺️ Navigation</button>
-      ${cust.phone?`<button type="button" class="drv-btn" onclick="window.open('tel:${cust.phone.replace(/'/g,'')}')">📞 Anrufen</button>`:'<button type="button" class="drv-btn" disabled style="opacity:.4">📞 –</button>'}
-      <button type="button" class="drv-btn pay-kts${r.paymentMark==='kts'?' on':''}" onclick="markRidePayment('${r.id}','kts')">🏥 KTS</button>
-      <button type="button" class="drv-btn pay-eigen${r.paymentMark==='eigen'?' on':''}" onclick="markRidePayment('${r.id}','eigen')">💶 Eigenleist.</button>
-      <button type="button" class="drv-btn sig" onclick="openRideSignature('${r.id}')">✍️ Fahrschein</button>
-      <button type="button" class="drv-btn done-btn${done?' on':''}" onclick="markRideCompleted('${r.id}')">${done?'✅ Erledigt':'✓ Erledigt'}</button>
-    </div>
-    <div class="drv-msg-box">
-      <div class="drv-msg-list" id="drv-msgs-${r.id}">${msgs.map(m=>`<div class="drv-msg-item"><div class="drv-msg-from">${m.from==='driver'?'Du':'Zentrale'} · ${new Date(m.at).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</div>${m.text}</div>`).join('')||'<div style="font-size:11px;color:var(--text3)">Nachricht an Zentrale…</div>'}</div>
-      <div class="drv-msg-input-row">
-        <input type="text" id="drv-msg-in-${r.id}" placeholder="Nachricht an Zentrale…" onkeydown="if(event.key==='Enter')sendDriverRideMsg('${r.id}')"/>
-        <button type="button" class="btn btn-primary btn-sm" onclick="sendDriverRideMsg('${r.id}')">➤</button>
+      ${acceptBtn}
+      ${navBtn}
+      <div class="drv-btn-row">
+        ${callBtn||''}
+        <button type="button" class="drv-btn qr" onclick="openDriverQrScanner('${r.id}')">📷 QR Scan</button>
       </div>
+      ${!isNew&&!done?`<div class="drv-btn-row">
+        <button type="button" class="drv-btn pay-kts${r.paymentMark==='kts'?' on':''}" onclick="markRidePayment('${r.id}','kts')">🏥 KTS</button>
+        <button type="button" class="drv-btn pay-eigen${r.paymentMark==='eigen'?' on':''}" onclick="markRidePayment('${r.id}','eigen')">💶 Eigenleist.</button>
+      </div>
+      <div class="drv-btn-row">
+        <button type="button" class="drv-btn sig" onclick="openRideSignature('${r.id}')">✍️ Fahrschein</button>
+        <button type="button" class="drv-btn done-btn${done?' on':''}" onclick="markRideCompleted('${r.id}')">✓ Erledigt</button>
+      </div>`:''}
     </div>
   </div>`;
+}
+
+function acceptDriverRide(rideId){
+  const r=rides.find(x=>x.id===rideId);if(!r) return;
+  r.driverAcceptedAt=Date.now();
+  r.driverStatus='accepted';
+  save();
+  renderDriverRides();
+  toast('Fahrt angenommen','ok');
+  notifyDispatchChange('Angenommen');
+}
+
+function postDriverChatQuick(type){
+  const labels={traffic:'🚧 Stau gemeldet',accident:'💥 Unfall gemeldet',blitzer:'📸 Blitzer gemeldet'};
+  addDriverChatMessage(type,labels[type]||'');
+}
+
+function addDriverChatMessage(type,text,lat,lng){
+  const d=drivers.find(x=>x.id===currentDriverId);
+  if(!d||!text?.trim()) return;
+  driverChat.push({id:uid(),type:type||'general',driverId:currentDriverId,driverName:d.fname+' '+d.lname,text:text.trim(),lat:lat||null,lng:lng||null,timestamp:Date.now()});
+  if(driverChat.length>500) driverChat=driverChat.slice(-500);
+  saveDriverChat();
+  renderDriverChat();
+}
+
+function sendDriverChatText(){
+  const inp=document.getElementById('driver-chat-input');
+  const text=(inp?.value||'').trim();if(!text) return;
+  addDriverChatMessage('general',text);
+  inp.value='';
+}
+
+function renderDriverChat(){
+  const el=document.getElementById('driver-chat-list');
+  if(!el) return;
+  const msgs=[...driverChat].sort((a,b)=>a.timestamp-b.timestamp).slice(-80);
+  if(!msgs.length){el.innerHTML='<p style="font-size:13px;color:#64748b;text-align:center;padding:24px">Noch keine Team-Nachrichten.<br>Stau, Unfall oder Blitzer melden!</p>';return;}
+  el.innerHTML=msgs.map(m=>{
+    const t=new Date(m.timestamp).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    const typeLabels={traffic:'Stau',accident:'Unfall',blitzer:'Blitzer',general:'Info'};
+    return`<div class="drv-chat-msg ${m.type||'general'}"><div class="drv-chat-head">${m.driverName||'Fahrer'} · ${typeLabels[m.type]||'Info'} · ${t}</div><div class="drv-chat-text">${m.text}</div></div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function openDriverQrScanner(rideId){
+  drvQrRideId=rideId||null;
+  openM('modal-driver-qr');
+  startDriverQrCamera();
+}
+
+async function startDriverQrCamera(){
+  const video=document.getElementById('drv-qr-video');
+  const status=document.getElementById('drv-qr-status');
+  if(!video) return;
+  status.textContent='Kamera wird gestartet…';
+  try{
+    drvQrStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    video.srcObject=drvQrStream;
+    await video.play();
+    status.textContent='QR-Code auf Fahrschein scannen';
+    drvQrTimer=setInterval(()=>scanDriverQrFrame(video),400);
+  }catch(e){
+    status.textContent='Kamera nicht verfügbar – Berechtigung prüfen';
+  }
+}
+
+function scanDriverQrFrame(video){
+  if(!video.videoWidth||typeof jsQR==='undefined') return;
+  const canvas=document.createElement('canvas');
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0);
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const code=jsQR(img.data,img.width,img.height);
+  if(code?.data) handleDriverQrResult(code.data);
+}
+
+function handleDriverQrResult(data){
+  closeDriverQrScanner();
+  let token=(data||'').trim();
+  const m=token.match(/taxipro:ride:([a-zA-Z0-9_-]+)/i);
+  if(m) token=m[1];
+  const ride=rides.find(r=>r.id===token||r.qrToken===token||(drvQrRideId&&r.id===drvQrRideId));
+  if(ride&&ride.dispatchedTo===currentDriverId){
+    if(isRideNewForDriver(ride)) acceptDriverRide(ride.id);
+    toast('✅ Fahrt verifiziert: '+(ride.driverShare?.name||getRideCustomerBrief(ride).name),'ok');
+  }else if(ride){
+    toast('Fahrt gehört einem anderen Fahrer','warn');
+  }else{
+    toast('QR-Code nicht erkannt','warn');
+  }
+  drvQrRideId=null;
+}
+
+function closeDriverQrScanner(){
+  clearInterval(drvQrTimer);
+  drvQrTimer=null;
+  if(drvQrStream){
+    drvQrStream.getTracks().forEach(t=>t.stop());
+    drvQrStream=null;
+  }
+  const video=document.getElementById('drv-qr-video');
+  if(video) video.srcObject=null;
+  closeM('modal-driver-qr');
 }
 
 function renderDriverRides(){
@@ -6369,6 +6607,7 @@ function onDriverCloudUpdated(){
   checkDriverNewAssignments();
   renderDriverRides();
   renderDriverDocs();
+  renderDriverChat();
   const dot=document.getElementById('drv-sync-dot');
   if(dot){dot.classList.add('live');setTimeout(()=>dot.classList.remove('live'),2000);}
 }

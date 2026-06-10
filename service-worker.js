@@ -1,4 +1,4 @@
-const CACHE = 'taxipro-dispatch-v3';
+const CACHE = 'taxipro-dispatch-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -33,7 +33,7 @@ self.addEventListener('message', (e) => {
       icon: './icon-192.png',
       badge: './icon-192.png',
       vibrate: [120, 60, 120],
-      data: { url: './index.html?mode=driver' }
+      data: { url: './driver.html' }
     });
   }
 });
