@@ -846,6 +846,7 @@ html.is-mobile .dp-sheet{max-height:92dvh;overflow-y:auto}
 html.driver-mode #pwa-install-banner{display:none!important}
 #driver-pwa-banner{position:fixed;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 8px);left:12px;right:12px;background:#122338;border:1px solid #14b8a6;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:5020;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 html.driver-standalone #driver-pwa-banner{display:none!important}
+html.driver-login-visible #driver-pwa-banner{bottom:calc(20px + var(--safe-bottom))}
 #pwa-install-banner:not(.hidden),#driver-pwa-banner:not(.hidden){display:flex!important}
 #modal-pwa-install .pwa-steps{list-style:none;padding:0;margin:12px 0}
 #modal-pwa-install .pwa-steps li{padding:10px 12px;margin-bottom:8px;background:var(--bg3);border-radius:var(--r2);font-size:13px;line-height:1.45}
@@ -1050,10 +1051,16 @@ html.driver-mode #modal-pwa-install .pwa-steps li{background:#122338}
       <div class="logo">TaxiPro <em>Fahrer</em></div>
       <p class="drv-login-sub">Deine Fahrten, Navigation &amp; Team-Chat.<br>PIN von der Zentrale eingeben.</p>
       <input type="password" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
-      <button type="button" class="drv-login-btn" onclick="driverLoginByPin().catch(()=>{})">Anmelden</button>
+      <button type="button" class="drv-login-btn" id="driver-login-btn" onclick="driverLoginByPin().catch(e=>{console.error(e);toast('Anmeldung fehlgeschlagen – bitte erneut versuchen','err');})">Anmelden</button>
       <p id="driver-login-error" style="display:none;font-size:12px;color:#f87171;margin-top:12px;line-height:1.5;padding:10px;background:rgba(248,113,113,.1);border-radius:10px"></p>
+      <button type="button" class="drv-login-btn" style="margin-top:14px;background:transparent;border:1px solid #14b8a6;color:#5eead4;font-size:13px" onclick="installDriverPwa()">📲 App installieren</button>
       <p style="font-size:12px;color:#64748b;margin-top:16px;line-height:1.5">Am einfachsten: <strong>Link von der Zentrale</strong> öffnen (PIN wird automatisch erkannt).</p>
     </div>
+  </div>
+  <div id="driver-pwa-banner" class="hidden">
+    <div class="pwa-install-text"><strong>Fahrer-App installieren</strong><span>Safari → Teilen → Zum Home-Bildschirm</span></div>
+    <button type="button" class="drv-login-btn" style="padding:10px 16px;font-size:13px" onclick="installDriverPwa()">Installieren</button>
+    <button type="button" class="pwa-dismiss" onclick="dismissDriverPwaBanner()" aria-label="Schließen">✕</button>
   </div>
   <div id="driver-main" class="hidden" style="display:none;flex:1;flex-direction:column;min-height:0">
     <header id="driver-topbar">
@@ -1104,11 +1111,6 @@ html.driver-mode #modal-pwa-install .pwa-steps li{background:#122338}
       <button type="button" class="drv-nav-item" data-drv-tab="team" onclick="switchDriverTab('team')"><span style="font-size:22px">👥</span>Team</button>
       <button type="button" class="drv-nav-item" data-drv-tab="profile" onclick="switchDriverTab('profile')"><span style="font-size:22px">👤</span>Profil<span class="drv-nav-badge hidden" id="drv-docs-badge">0</span></button>
     </nav>
-    <div id="driver-pwa-banner" class="hidden">
-      <div class="pwa-install-text"><strong>Fahrer-App installieren</strong><span>Home-Bildschirm – schneller Zugriff</span></div>
-      <button type="button" class="drv-login-btn" style="padding:10px 16px;font-size:13px" onclick="installDriverPwa()">Installieren</button>
-      <button type="button" class="pwa-dismiss" onclick="dismissDriverPwaBanner()" aria-label="Schließen">✕</button>
-    </div>
   </div>
 </div>
 
@@ -5305,9 +5307,10 @@ async function loadCloudData(force){
     customers=data.customers||customers;
     rides=data.rides||rides;
     gcContacts=data.gcContacts||gcContacts;
-    drivers=data.drivers||drivers;
-    driverDocs=data.driverDocs||driverDocs;
-    if(data.driverChat) driverChat=data.driverChat;
+    if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
+    if(Array.isArray(data.driverDocs)&&data.driverDocs.length) driverDocs=data.driverDocs;
+    if(data.driverChat?.length) driverChat=data.driverChat;
+    reapplyDriverBootAuth();
     saveLocalOnly();
     localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
     renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();
@@ -5392,7 +5395,7 @@ async function initMicrosoftCloud(){
     await loadMsalLibrary().catch(()=>{});
     if(!await ensureMsalReady()){
       updateCloudUI();
-      if(!sessionStorage.getItem('tp_cloud_modal_shown')){
+      if(!isDriverAppMode()&&!sessionStorage.getItem('tp_cloud_modal_shown')){
         sessionStorage.setItem('tp_cloud_modal_shown','1');
         setTimeout(()=>openCloudModal(),1200);
       }
@@ -5410,7 +5413,7 @@ async function initMicrosoftCloud(){
       if(msCloudReady()) await loadCloudData();
     }
     updateCloudUI();
-    if(!msCloudReady()&&!sessionStorage.getItem('tp_cloud_modal_shown')){
+    if(!isDriverAppMode()&&!msCloudReady()&&!sessionStorage.getItem('tp_cloud_modal_shown')){
       sessionStorage.setItem('tp_cloud_modal_shown','1');
       setTimeout(()=>openCloudModal(),1200);
     }
@@ -6246,17 +6249,57 @@ function upsertDriverLocal(d){
 function encodeDriverBoot(d){
   ensureDriverAccess(d);
   const payload=JSON.stringify({id:d.id,f:d.fname,l:d.lname,p:String(d.pin),t:d.accessToken,ph:d.phone||'',c:d.car||''});
-  return btoa(unescape(encodeURIComponent(payload))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const bytes=new TextEncoder().encode(payload);
+  let bin='';
+  for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 
 function decodeDriverBoot(str){
   try{
-    const pad=str.length%4?'='.repeat(4-str.length%4):'';
-    const json=decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/')+pad)));
-    const o=JSON.parse(json);
+    if(!str) return null;
+    const raw=decodeURIComponent(String(str).trim());
+    const pad=raw.length%4?'='.repeat(4-raw.length%4):'';
+    const bin=atob(raw.replace(/-/g,'+').replace(/_/g,'/')+pad);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const o=JSON.parse(new TextDecoder().decode(bytes));
     if(!o.id||!o.t) return null;
     return{id:o.id,fname:o.f||'',lname:o.l||'',pin:String(o.p||''),accessToken:o.t,phone:o.ph||'',car:o.c||'',status:'frei'};
   }catch(e){return null;}
+}
+
+function isDriverAppMode(){
+  const p=new URLSearchParams(location.search);
+  return p.get('mode')==='driver'||p.has('token')||p.has('boot')||location.hash==='#fahrer';
+}
+
+function getDriverBootParam(){
+  return new URLSearchParams(location.search).get('boot')||sessionStorage.getItem('tp_driver_boot')||'';
+}
+
+function getDriverTokenParam(){
+  return new URLSearchParams(location.search).get('token')||sessionStorage.getItem('tp_driver_token')||'';
+}
+
+function captureDriverLinkAuth(params){
+  const boot=params.get('boot');
+  const token=params.get('token');
+  if(boot) sessionStorage.setItem('tp_driver_boot',boot);
+  if(token) sessionStorage.setItem('tp_driver_token',token);
+  if(boot){
+    const d=decodeDriverBoot(boot);
+    if(d){upsertDriverLocal(d);syncDriverAuthRegistry();return d;}
+  }
+  return null;
+}
+
+function reapplyDriverBootAuth(){
+  const boot=getDriverBootParam();
+  if(!boot) return null;
+  const d=decodeDriverBoot(boot);
+  if(d) upsertDriverLocal(d);
+  return d;
 }
 
 function findDriverByPin(pin){
@@ -6302,7 +6345,7 @@ function copyDriverAppLink(driverId){
 
 function initAppMode(){
   const params=new URLSearchParams(location.search);
-  if(params.get('mode')==='driver'||params.has('token')||location.hash==='#fahrer'){
+  if(isDriverAppMode()){
     document.getElementById('app').classList.add('hidden');
     document.querySelector('.fab')?.classList.add('hidden');
     document.getElementById('mobile-bottom-nav')?.classList.add('hidden');
@@ -6318,32 +6361,42 @@ function initAppMode(){
 
 async function initDriverAppAsync(params){
   loadDriverAuthRegistry();
-  const boot=params.get('boot');
-  if(boot){const d=decodeDriverBoot(boot);if(d) upsertDriverLocal(d);}
+  const bootDriver=captureDriverLinkAuth(params);
   await ensureDriverDataLoaded();
-  const token=params.get('token');
-  if(token) await driverLoginByToken(token);
-  else if(currentDriverId&&drivers.find(d=>d.id===currentDriverId)) showDriverMain(currentDriverId);
-  else showDriverLogin();
+  const token=getDriverTokenParam();
+  let loggedIn=false;
+  if(token) loggedIn=await driverLoginByToken(token);
+  if(!loggedIn&&bootDriver?.pin){
+    const pinInput=document.getElementById('driver-pin-input');
+    if(pinInput) pinInput.value=bootDriver.pin;
+    loggedIn=await driverLoginByPin(true);
+  }
+  if(!loggedIn&&currentDriverId&&drivers.find(d=>d.id===currentDriverId)) showDriverMain(currentDriverId);
+  else if(!loggedIn) showDriverLogin();
   await requestDriverNotifications();
   startDriverPolling();
+  if(!isStandalone()) scheduleInstallBanner(true,800);
 }
 
 async function ensureDriverDataLoaded(){
   loadDriverAuthRegistry();
+  reapplyDriverBootAuth();
   if(drivers.length) return;
   if(msCloudReady()){
     await loadCloudData(true);
     loadDriverAuthRegistry();
+    reapplyDriverBootAuth();
   }
 }
 
 function showDriverLogin(){
   currentDriverId=null;
   sessionStorage.removeItem('tp_driver_session');
+  document.documentElement.classList.add('driver-login-visible');
   document.getElementById('driver-login').classList.remove('hidden');
   const main=document.getElementById('driver-main');
   main.classList.add('hidden');main.style.display='none';
+  if(!isStandalone()&&!localStorage.getItem('tp_driver_pwa_dismiss')) scheduleInstallBanner(true,400);
 }
 
 function showDriverMain(driverId){
@@ -6351,6 +6404,7 @@ function showDriverMain(driverId){
   sessionStorage.setItem('tp_driver_session',driverId);
   const d=drivers.find(x=>x.id===driverId);
   if(!d){showDriverLogin();return;}
+  document.documentElement.classList.remove('driver-login-visible');
   document.getElementById('driver-login').classList.add('hidden');
   const main=document.getElementById('driver-main');
   main.classList.remove('hidden');main.style.display='flex';
@@ -6371,37 +6425,51 @@ function showDriverMain(driverId){
   switchDriverTab('rides');
 }
 
-async function driverLoginByPin(){
+async function driverLoginByPin(silent){
+  const btn=document.getElementById('driver-login-btn');
   const pin=(document.getElementById('driver-pin-input')?.value||'').trim();
   const errEl=document.getElementById('driver-login-error');
   if(errEl) errEl.style.display='none';
-  if(!pin){toast('PIN eingeben','warn');return;}
-  await ensureDriverDataLoaded();
-  let d=findDriverByPin(pin);
-  if(!d){
-    const boot=new URLSearchParams(location.search).get('boot');
-    if(boot){const bd=decodeDriverBoot(boot);if(bd&&String(bd.pin).trim()===pin){upsertDriverLocal(bd);d=findDriverByPin(pin);}}
+  if(!pin){if(!silent) toast('PIN eingeben','warn');return false;}
+  if(btn){btn.disabled=true;btn.textContent='Anmelden…';}
+  try{
+    await ensureDriverDataLoaded();
+    let d=findDriverByPin(pin);
+    if(!d){
+      const boot=getDriverBootParam();
+      if(boot){
+        const bd=decodeDriverBoot(boot);
+        if(bd&&String(bd.pin).trim()===pin){upsertDriverLocal(bd);d=findDriverByPin(pin);}
+      }
+    }
+    if(!d){
+      const msg='PIN nicht gefunden. Bitte den <strong>kompletten Link von der Zentrale</strong> in Safari öffnen (nicht nur die PIN). In der Zentrale: Fahrer → <strong>Link kopieren</strong> → per WhatsApp senden → Link antippen.';
+      if(errEl){errEl.innerHTML=msg;errEl.style.display='block';}
+      if(!silent) toast('PIN nicht gefunden – Link von Zentrale öffnen','err');
+      return false;
+    }
+    showDriverMain(d.id);
+    if(!silent) toast('Willkommen, '+d.fname+'!','ok');
+    return true;
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Anmelden';}
   }
-  if(!d){
-    const msg='PIN nicht gefunden. Bitte den <strong>Link von der Zentrale</strong> öffnen (nicht nur die App). Die Zentrale muss den Fahrer angelegt und den Link kopiert haben.';
-    if(errEl){errEl.innerHTML=msg;errEl.style.display='block';}
-    toast('PIN nicht gefunden – Link von Zentrale öffnen','err');
-    return;
-  }
-  showDriverMain(d.id);
-  toast('Willkommen, '+d.fname+'!','ok');
 }
 
 async function driverLoginByToken(token){
   await ensureDriverDataLoaded();
   let d=findDriverByToken(token);
   if(!d){
-    const boot=new URLSearchParams(location.search).get('boot');
-    if(boot){const bd=decodeDriverBoot(boot);if(bd&&bd.accessToken===token){upsertDriverLocal(bd);d=findDriverByToken(token);}}
+    const boot=getDriverBootParam();
+    if(boot){
+      const bd=decodeDriverBoot(boot);
+      if(bd&&bd.accessToken===token){upsertDriverLocal(bd);d=findDriverByToken(token)||drivers.find(x=>x.id===bd.id);}
+    }
   }
-  if(!d){showDriverLogin();toast('Ungültiger Link – PIN von Zentrale eingeben','warn');return;}
+  if(!d) return false;
   if(document.getElementById('driver-pin-input')) document.getElementById('driver-pin-input').value=d.pin||'';
   showDriverMain(d.id);
+  return true;
 }
 
 function driverLogout(){
@@ -6865,6 +6933,7 @@ function purgeDemoData(){
 // INIT
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
+if(isDriverAppMode()) captureDriverLinkAuth(new URLSearchParams(location.search));
 if(drivers.length) syncDriverAuthRegistry();
 initPwa();
 initTheme();
