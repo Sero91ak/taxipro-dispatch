@@ -8,18 +8,24 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="TaxiPro"/>
+<meta name="apple-mobile-web-app-starturl" content="driver.html" id="apple-start-url"/>
 <link rel="manifest" href="manifest.json" id="app-manifest"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <title>TaxiPro Dispatch</title>
 <script>
 (function(){
+  var base=location.pathname.replace(/[^/]*$/,'')||'/';
   var p=new URLSearchParams(location.search);
   var mode=p.get('mode');
-  var driver=mode==='driver'||p.has('token')||p.has('boot');
+  var onDriverHtml=/driver\.html$/i.test(location.pathname);
+  var driver=onDriverHtml||mode==='driver'||p.has('token')||p.has('boot');
   try{
     if(!driver&&localStorage.getItem('tp_app_role')==='driver') driver=true;
-    if(p.get('source')==='pwa'&&!mode&&localStorage.getItem('tp_app_role')==='driver') driver=true;
   }catch(e){}
+  if(p.get('source')==='pwa'&&mode!=='driver'&&mode!=='dispatch'){
+    location.replace(base+'driver.html?source=pwa');
+    return;
+  }
   if(driver){
     document.documentElement.className='driver-boot';
     var m=document.getElementById('app-manifest');
@@ -27,26 +33,18 @@
     var t=document.querySelector('meta[name="apple-mobile-web-app-title"]');
     if(t) t.setAttribute('content','Fahrer');
     document.title='TaxiPro Fahrer';
-    if(mode!=='driver'||(!p.has('token')&&!p.has('boot'))){
-      try{
-        var boot=localStorage.getItem('tp_driver_boot');
-        var token=localStorage.getItem('tp_driver_token');
-        if(boot||token){
-          var qs=new URLSearchParams();
-          qs.set('mode','driver');
-          if(p.get('source')) qs.set('source',p.get('source'));
-          if(token) qs.set('token',token);
-          if(boot) qs.set('boot',boot);
-          var base=location.pathname.replace(/[^/]*$/,'')+'index.html';
-          if(location.search!=='?'+qs.toString()) location.replace(base+'?'+qs.toString());
-        }
-      }catch(e){}
-    }
-  }else if(p.get('source')==='pwa'&&!mode){
     try{
-      if(localStorage.getItem('tp_app_role')==='driver'){
-        location.replace(location.pathname.replace(/[^/]*$/,'')+'index.html?source=pwa&mode=driver');
+      var boot=p.get('boot')||localStorage.getItem('tp_driver_boot');
+      var token=p.get('token')||localStorage.getItem('tp_driver_token');
+      var start=base+'driver.html';
+      if(token||boot){
+        var sqs=new URLSearchParams();
+        if(token) sqs.set('token',token);
+        if(boot) sqs.set('boot',boot);
+        start+='?'+sqs.toString();
       }
+      var as=document.getElementById('apple-start-url');
+      if(as) as.setAttribute('content',start);
     }catch(e){}
   }
 })();
@@ -1102,10 +1100,11 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <p id="driver-login-error" style="display:none;font-size:12px;color:#f87171;margin-top:12px;line-height:1.5;padding:10px;background:rgba(248,113,113,.1);border-radius:10px"></p>
       <div class="drv-install-card" id="driver-install-inline">
         <strong>📲 Fahrer-App installieren (iPhone)</strong>
+        <p id="driver-install-url-hint" style="margin:8px 0;font-size:11px;color:#64748b;word-break:break-all"></p>
         <ol>
-          <li><strong>Jetzt</strong> unten in Safari auf <strong>Teilen</strong> tippen (□ mit Pfeil nach oben)</li>
-          <li>Nach unten scrollen → <strong>„Zum Home-Bildschirm“</strong></li>
-          <li><strong>Hinzufügen</strong> – dann öffnet das Icon immer die Fahrer-App</li>
+          <li>Oben muss <strong>driver.html</strong> in der Adresszeile stehen (wird nach Anmeldung automatisch gesetzt)</li>
+          <li>Safari unten <strong>Teilen</strong> (□↑) → <strong>„Zum Home-Bildschirm“</strong></li>
+          <li>Name: <strong>Fahrer</strong> → <strong>Hinzufügen</strong></li>
         </ol>
         <button type="button" class="drv-login-btn" style="margin-top:12px;background:transparent;border:1px solid #14b8a6;color:#5eead4;font-size:13px" onclick="installDriverPwa()">Anleitung anzeigen</button>
       </div>
@@ -2028,9 +2027,10 @@ function checkDataMigration(){
   },1500);
 }
 function checkCloudSetup(){
+  if(isDriverAppMode()||document.documentElement.classList.contains('driver-boot')) return;
   if(sessionStorage.getItem('tp_cloud_hint')||msCloudReady()) return;
   setTimeout(()=>{
-    if(msCloudReady()) return;
+    if(isDriverAppMode()||msCloudReady()) return;
     sessionStorage.setItem('tp_cloud_hint','1');
     openCloudModal();
   },4000);
@@ -6454,7 +6454,8 @@ async function initDriverAppAsync(params){
     const savedId=localStorage.getItem('tp_driver_session')||currentDriverId;
     if(savedId&&drivers.find(d=>d.id===savedId)){showDriverMain(savedId);loggedIn=true;}
   }
-  if(!loggedIn) showDriverLogin();
+  if(!loggedIn){showDriverLogin();refreshDriverInstallHint();}
+  else refreshDriverInstallHint();
   await requestDriverNotifications();
   startDriverPolling();
   if(!isStandalone()) scheduleInstallBanner(true,800);
@@ -6487,13 +6488,17 @@ function updateDriverUrlForInstall(d){
   ensureDriverAccess(d);
   try{
     const qs=new URLSearchParams();
-    qs.set('mode','driver');
     qs.set('token',d.accessToken);
     qs.set('boot',encodeDriverBoot(d));
-    if(new URLSearchParams(location.search).get('source')) qs.set('source',new URLSearchParams(location.search).get('source'));
-    const target=(location.pathname.replace(/[^/]*$/,'')||'/')+'index.html?'+qs.toString();
-    history.replaceState(null,'',target);
+    const base=(location.pathname.replace(/[^/]*$/,'')||'/')+'driver.html?'+qs.toString();
+    history.replaceState(null,'',base);
     persistDriverLinkParams(qs);
+    const as=document.getElementById('apple-start-url');
+    if(as) as.setAttribute('content',base);
+    const mlink=document.getElementById('app-manifest')||document.querySelector('link[rel="manifest"]');
+    if(mlink) mlink.setAttribute('href','manifest-driver.json');
+    const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if(appleTitle) appleTitle.setAttribute('content','Fahrer');
   }catch(e){}
 }
 
@@ -6525,6 +6530,14 @@ function showDriverMain(driverId){
   renderDriverDocs();
   renderDriverChat();
   switchDriverTab('rides');
+  refreshDriverInstallHint();
+}
+
+function refreshDriverInstallHint(){
+  const el=document.getElementById('driver-install-url-hint');
+  if(!el) return;
+  const ok=/driver\.html/i.test(location.pathname+location.search);
+  el.innerHTML=ok?'<span style="color:#5eead4">✓ Bereit zum Installieren: '+location.pathname.split('/').pop()+location.search.slice(0,40)+'…</span>':'<span style="color:#f87171">⚠️ Erst anmelden – dann wird driver.html in der Adresszeile gesetzt</span>';
 }
 
 async function driverLoginByPin(silent){

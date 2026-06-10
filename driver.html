@@ -8,6 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Fahrer"/>
+<meta name="apple-mobile-web-app-starturl" content="driver.html?source=pwa"/>
 <link rel="manifest" href="manifest-driver.json"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <title>TaxiPro Fahrer</title>
@@ -26,7 +27,7 @@ a{color:var(--teal)}
 <body>
 <div class="spinner" aria-hidden="true"></div>
 <div class="logo">TaxiPro <em>Fahrer</em></div>
-<p class="sub">Fahrten, Navigation &amp; Team-Chat</p>
+<p class="sub">Wird geladen…</p>
 <script>
 (function(){
   var p=new URLSearchParams(location.search);
@@ -36,14 +37,18 @@ a{color:var(--teal)}
     localStorage.setItem('tp_app_role','driver');
     if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
     if(token){localStorage.setItem('tp_driver_token',token);sessionStorage.setItem('tp_driver_token',token);}
+    if(!boot) boot=localStorage.getItem('tp_driver_boot');
+    if(!token) token=localStorage.getItem('tp_driver_token');
   }catch(e){}
-  var q=location.search;
-  var target='index.html'+q+(q?'&':'?')+'mode=driver';
-  if(location.hash) target+=location.hash;
+  var qs=new URLSearchParams();
+  qs.set('mode','driver');
+  if(p.get('source')) qs.set('source',p.get('source'));
+  if(token) qs.set('token',token);
+  if(boot) qs.set('boot',boot);
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(function(){});
   }
-  location.replace(target);
+  location.replace('index.html?'+qs.toString());
 })();
 </script>
 <noscript><p><a href="index.html?mode=driver">TaxiPro Fahrer-App öffnen</a></p></noscript>
