@@ -483,6 +483,18 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .ac-tag{display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
 .ac-tag.hosp{background:var(--red-bg);color:var(--red2);border-color:var(--red-border)}
 .ac-loading{padding:10px 13px;font-size:11px;color:var(--text3)}
+.addr-row{display:flex;gap:8px;align-items:stretch}
+.addr-row .ac-wrap{flex:1;min-width:0}
+.map-inline-btn{width:42px;flex-shrink:0;border-radius:var(--r2);border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue2);font-size:16px;cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center}
+.map-inline-btn:hover{background:rgba(74,158,255,.18)}
+.modal-maps{max-width:min(980px,96vw);width:100%;max-height:94dvh;height:94dvh;overflow:hidden;display:flex;flex-direction:column}
+.maps-mbody{padding:0!important;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.maps-toolbar{padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg3);flex-shrink:0}
+.maps-toolbar .fr2,.maps-toolbar .fr{margin-bottom:8px}
+.maps-toolbar .fr:last-child{margin-bottom:0}
+.maps-btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.maps-frame{flex:1;width:100%;border:none;min-height:300px;background:var(--bg);display:block}
+.maps-hint{font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5}
 /* ride detail */
 .rd-head{background:var(--bg3);border-radius:var(--r);padding:13px;margin-bottom:12px}
 .rd-badges{display:flex;gap:6px;margin-bottom:7px;flex-wrap:wrap}
@@ -631,6 +643,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div id="topbar-btns">
     <button class="tb-btn gc" id="gc-sync-btn" onclick="initiateGoogleSync()">🔵 Kontakte</button>
     <button class="tb-btn gc" id="gcal-sync-btn" onclick="initiateGCalSync()">📅 Kalender</button>
+    <button class="tb-btn" onclick="openMapsApp()" title="Google Maps in der App">🗺️ Maps</button>
     <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel">🌙</button>
     <button class="tb-btn primary" onclick="openRideModal()">＋ Fahrt</button>
     <button class="tb-btn" onclick="openCustomerModal()">👤 Kunde</button>
@@ -655,6 +668,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div class="nav-item" data-view="customers" onclick="switchView('customers')"><span class="nav-icon">👥</span> Kunden <span class="nav-badge" id="nb-cust">0</span></div>
   <div class="nav-item gc-item" data-view="gcontacts" id="nav-gc" onclick="switchView('gcontacts')"><span class="nav-icon">🔵</span> Google Kontakte <span class="nav-badge" id="nb-gc">0</span></div>
   <div class="nav-item gc-item" id="nav-gcal" onclick="initiateGCalSync()"><span class="nav-icon">📅</span> Google Kalender <span class="nav-badge" id="nb-gcal">–</span></div>
+  <div class="nav-item" onclick="openMapsApp()"><span class="nav-icon">🗺️</span> Google Maps</div>
   <div class="nav-item" data-view="drivers" onclick="switchView('drivers')"><span class="nav-icon">👨‍✈️</span> Fahrer <span class="nav-badge" id="nb-drivers">0</span></div>
   <div class="nav-sec">Fahrttyp</div>
   <div class="nav-item" onclick="calFilterType('krank')"><span class="nav-icon">🔴</span> Krankenfahrten (KTS)</div>
@@ -804,16 +818,22 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <div><label>Abfahrt</label><input type="time" id="r-time"/></div>
     </div>
     <div class="fr"><label>Abholadresse</label>
-      <div class="ac-wrap">
-        <input type="text" id="r-from" placeholder="Adresse suchen (Deutschland)…" oninput="onAddrSearch(this.value,'from-ac','r-from',true)" autocomplete="off"/>
-        <div class="ac-list" id="from-ac"></div>
+      <div class="addr-row">
+        <div class="ac-wrap">
+          <input type="text" id="r-from" placeholder="Adresse suchen (Deutschland)…" oninput="onAddrSearch(this.value,'from-ac','r-from',true)" autocomplete="off"/>
+          <div class="ac-list" id="from-ac"></div>
+        </div>
+        <button type="button" class="map-inline-btn" onclick="openMapsApp({from:document.getElementById('r-from').value,to:document.getElementById('r-to').value})" title="Google Maps">🗺️</button>
       </div>
     </div>
     <div class="fr">
       <label>Zieladresse / Krankenhaus</label>
-      <div class="ac-wrap">
-        <input type="text" id="r-to" placeholder="Krankenhaus, Schule oder Adresse…" oninput="onAddrSearch(this.value,'hosp-ac','r-to',true)" autocomplete="off"/>
-        <div class="ac-list" id="hosp-ac"></div>
+      <div class="addr-row">
+        <div class="ac-wrap">
+          <input type="text" id="r-to" placeholder="Krankenhaus, Schule oder Adresse…" oninput="onAddrSearch(this.value,'hosp-ac','r-to',true)" autocomplete="off"/>
+          <div class="ac-list" id="hosp-ac"></div>
+        </div>
+        <button type="button" class="map-inline-btn" onclick="openMapsApp({from:document.getElementById('r-from').value,to:document.getElementById('r-to').value})" title="Google Maps Route">🗺️</button>
       </div>
       <div id="r-dist"></div>
     </div>
@@ -936,6 +956,9 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <div class="fr2 fr">
         <div><label>PLZ</label><input type="text" id="c-plz" placeholder="53340" maxlength="6"/></div>
         <div><label>Stadt</label><input type="text" id="c-city" placeholder="Meckenheim"/></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <button type="button" class="btn btn-sm btn-blue" onclick="openMapsApp({query:[document.getElementById('c-street').value,document.getElementById('c-plz').value,document.getElementById('c-city').value].filter(Boolean).join(', ')})">🗺️ Adresse auf Google Maps</button>
       </div>
     </div>
     <div class="cust-tab-pane" id="cust-tab-kts">
@@ -1198,6 +1221,40 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <div class="mh"><h3>📅 Google Termin</h3><button class="mclose" onclick="closeM('modal-gcal-detail')">✕</button></div>
   <div class="mbody" id="gcal-detail-body"></div>
   <div class="mfooter" id="gcal-detail-footer"></div>
+</div>
+</div>
+
+<!-- ═══ MODAL: GOOGLE MAPS IN-APP ═══ -->
+<div class="overlay hidden" id="modal-maps">
+<div class="modal modal-maps">
+  <div class="mh mh-pro">
+    <div>
+      <h3>🗺️ Google Maps</h3>
+      <div class="mh-sub">Suchen, Route planen, in Fahrt übernehmen oder teilen – direkt in der App</div>
+    </div>
+    <button class="mclose" onclick="closeM('modal-maps')">✕</button>
+  </div>
+  <div class="mbody maps-mbody">
+    <div class="maps-toolbar">
+      <div class="fr" style="margin-bottom:8px">
+        <label>Adresse suchen</label>
+        <input type="text" id="gm-search" placeholder="Straße, PLZ, Ort oder Krankenhaus…" onkeydown="if(event.key==='Enter')gmSearch()" autocomplete="off"/>
+      </div>
+      <div class="fr2 fr">
+        <div><label>Von / Abholung</label><input type="text" id="gm-from" placeholder="Abholadresse" onkeydown="if(event.key==='Enter')gmRoute()" autocomplete="off"/></div>
+        <div><label>Nach / Ziel</label><input type="text" id="gm-to" placeholder="Zieladresse" onkeydown="if(event.key==='Enter')gmRoute()" autocomplete="off"/></div>
+      </div>
+      <div class="maps-btn-row">
+        <button class="btn btn-primary btn-sm" onclick="gmSearch()">🔍 Suchen</button>
+        <button class="btn btn-blue btn-sm" onclick="gmRoute()">🧭 Route</button>
+        <button class="btn btn-secondary btn-sm" onclick="gmApplyToRide()">✅ In Fahrt übernehmen</button>
+        <button class="btn btn-wa btn-sm" onclick="gmShareWA()">📱 Teilen</button>
+        <button class="btn btn-secondary btn-sm" onclick="gmOpenExternal()">↗️ Google Maps App</button>
+      </div>
+      <div class="maps-hint">Kostenlos · Karte öffnet sich hier in der App · Teilen sendet den Google-Maps-Link per WhatsApp</div>
+    </div>
+    <iframe id="gm-frame" class="maps-frame" title="Google Maps" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="about:blank"></iframe>
+  </div>
 </div>
 </div>
 
@@ -3904,11 +3961,93 @@ function openWhatsAppContact(phone){
   if(!n){toast('Keine Telefonnummer','warn');return;}
   window.open(`https://wa.me/${n}`,'_blank');
 }
-function openMaps(addr){window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`,'_blank');}
-function openMapsRoute(from,to){
-  if(!to) return;
-  window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`,'_blank');
+
+function mapsJsStr(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+function gmEmbedUrl(mode,from,to,query){
+  if(mode==='route'&&from&&to) return `https://maps.google.com/maps?saddr=${encodeURIComponent(from)}&daddr=${encodeURIComponent(to)}&dirflg=d&hl=de&output=embed`;
+  const q=query||from||to||'Deutschland';
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=de&output=embed`;
 }
+
+function gmLoadFrame(mode,from,to,query){
+  const frame=document.getElementById('gm-frame');
+  if(!frame) return;
+  frame.src=gmEmbedUrl(mode,from,to,query);
+}
+
+function openMapsApp(opts={}){
+  const from=(opts.from??document.getElementById('r-from')?.value??'').trim();
+  const to=(opts.to??document.getElementById('r-to')?.value??'').trim();
+  const query=(opts.query??'').trim();
+  const searchEl=document.getElementById('gm-search');
+  const fromEl=document.getElementById('gm-from');
+  const toEl=document.getElementById('gm-to');
+  if(searchEl) searchEl.value=query||to||from;
+  if(fromEl) fromEl.value=from;
+  if(toEl) toEl.value=to;
+  if(from&&to) gmLoadFrame('route',from,to);
+  else gmLoadFrame('search','','',query||to||from||'Deutschland');
+  openM('modal-maps');
+}
+
+function gmSearch(){
+  const q=document.getElementById('gm-search')?.value.trim();
+  if(!q){toast('Bitte Adresse eingeben','warn');return;}
+  gmLoadFrame('search','','',q);
+}
+
+function gmRoute(){
+  const from=document.getElementById('gm-from')?.value.trim();
+  const to=document.getElementById('gm-to')?.value.trim();
+  if(!from||!to){toast('Von und Nach ausfüllen','warn');return;}
+  gmLoadFrame('route',from,to);
+}
+
+function gmApplyToRide(){
+  const from=document.getElementById('gm-from')?.value.trim();
+  const to=document.getElementById('gm-to')?.value.trim();
+  const search=document.getElementById('gm-search')?.value.trim();
+  const fromEl=document.getElementById('r-from');
+  const toEl=document.getElementById('r-to');
+  if(!fromEl||!toEl){toast('Fahrt-Formular nicht offen','warn');return;}
+  if(from) fromEl.value=from;
+  if(to) toEl.value=to;
+  else if(search&&!from) toEl.value=search;
+  calcDist();
+  toast('Adressen in Fahrt übernommen','ok');
+}
+
+function gmShareWA(){
+  const from=document.getElementById('gm-from')?.value.trim();
+  const to=document.getElementById('gm-to')?.value.trim();
+  const search=document.getElementById('gm-search')?.value.trim();
+  const link=from&&to
+    ?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`
+    :`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(search||from||to)}`;
+  const txt=`🗺️ *Google Maps*\n${from?`📍 Von: ${from}\n`:''}${to?`🎯 Nach: ${to}\n`:''}${!from&&!to&&search?`📍 ${search}\n`:''}\n${link}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+function gmOpenExternal(){
+  const from=document.getElementById('gm-from')?.value.trim();
+  const to=document.getElementById('gm-to')?.value.trim();
+  const search=document.getElementById('gm-search')?.value.trim();
+  if(from&&to) openMapsRouteExternal(from,to);
+  else openMapsExternal(search||from||to);
+}
+
+function openMapsExternal(addr){
+  if(!addr){toast('Keine Adresse','warn');return;}
+  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`,'_blank');
+}
+function openMapsRouteExternal(from,to){
+  if(!to){openMapsExternal(from);return;}
+  window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from||'')}&destination=${encodeURIComponent(to)}&travelmode=driving`,'_blank');
+}
+
+function openMaps(addr){openMapsApp({query:addr||''});}
+function openMapsRoute(from,to){openMapsApp({from:from||'',to:to||''});}
 
 function shareRideWA(){
   const custId=document.getElementById('r-cust-id').value;
