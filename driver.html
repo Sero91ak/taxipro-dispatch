@@ -29,12 +29,19 @@ a{color:var(--teal)}
 <p class="sub">Fahrten, Navigation &amp; Team-Chat</p>
 <script>
 (function(){
+  var p=new URLSearchParams(location.search);
+  var boot=p.get('boot');
+  var token=p.get('token');
+  try{
+    localStorage.setItem('tp_app_role','driver');
+    if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
+    if(token){localStorage.setItem('tp_driver_token',token);sessionStorage.setItem('tp_driver_token',token);}
+  }catch(e){}
   var q=location.search;
-  var sep=q?'&':'?';
-  var target='index.html'+q+(q?'&':sep+'')+'mode=driver';
+  var target='index.html'+q+(q?'&':'?')+'mode=driver';
   if(location.hash) target+=location.hash;
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./service-worker.js').catch(function(){});
+    navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(function(){});
   }
   location.replace(target);
 })();

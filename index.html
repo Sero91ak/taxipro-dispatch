@@ -851,6 +851,12 @@ html.driver-login-visible #driver-pwa-banner{bottom:calc(20px + var(--safe-botto
 #modal-pwa-install .pwa-steps{list-style:none;padding:0;margin:12px 0}
 #modal-pwa-install .pwa-steps li{padding:10px 12px;margin-bottom:8px;background:var(--bg3);border-radius:var(--r2);font-size:13px;line-height:1.45}
 html.driver-mode #modal-pwa-install .pwa-steps li{background:#122338}
+html.driver-mode .overlay{z-index:6100!important}
+.drv-install-card{margin-top:18px;padding:14px;border-radius:14px;background:#122338;border:1px solid #14b8a6;text-align:left;font-size:12px;line-height:1.55;color:#94b8d4}
+.drv-install-card strong{color:#5eead4;display:block;margin-bottom:8px;font-size:13px}
+.drv-install-card ol{margin:8px 0 0 18px;padding:0}
+.drv-install-card li{margin-bottom:6px}
+html.driver-standalone .drv-install-card{display:none}
 .mob-week-agenda{display:none}
 </style>
 </head>
@@ -1053,7 +1059,15 @@ html.driver-mode #modal-pwa-install .pwa-steps li{background:#122338}
       <input type="password" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
       <button type="button" class="drv-login-btn" id="driver-login-btn" onclick="driverLoginByPin().catch(e=>{console.error(e);toast('Anmeldung fehlgeschlagen – bitte erneut versuchen','err');})">Anmelden</button>
       <p id="driver-login-error" style="display:none;font-size:12px;color:#f87171;margin-top:12px;line-height:1.5;padding:10px;background:rgba(248,113,113,.1);border-radius:10px"></p>
-      <button type="button" class="drv-login-btn" style="margin-top:14px;background:transparent;border:1px solid #14b8a6;color:#5eead4;font-size:13px" onclick="installDriverPwa()">📲 App installieren</button>
+      <div class="drv-install-card" id="driver-install-inline">
+        <strong>📲 Fahrer-App installieren (iPhone)</strong>
+        <ol>
+          <li><strong>Jetzt</strong> unten in Safari auf <strong>Teilen</strong> tippen (□ mit Pfeil nach oben)</li>
+          <li>Nach unten scrollen → <strong>„Zum Home-Bildschirm“</strong></li>
+          <li><strong>Hinzufügen</strong> – dann öffnet das Icon immer die Fahrer-App</li>
+        </ol>
+        <button type="button" class="drv-login-btn" style="margin-top:12px;background:transparent;border:1px solid #14b8a6;color:#5eead4;font-size:13px" onclick="installDriverPwa()">Anleitung anzeigen</button>
+      </div>
       <p style="font-size:12px;color:#64748b;margin-top:16px;line-height:1.5">Am einfachsten: <strong>Link von der Zentrale</strong> öffnen (PIN wird automatisch erkannt).</p>
     </div>
   </div>
@@ -1885,7 +1899,7 @@ let gcContacts=JSON.parse(localStorage.getItem('tp_gc')||'[]');
 let drivers=JSON.parse(localStorage.getItem('tp_d')||'[]');
 let driverDocs=JSON.parse(localStorage.getItem('tp_driver_docs')||'[]');
 let driverChat=JSON.parse(localStorage.getItem('tp_driver_chat')||'[]');
-let currentDriverId=sessionStorage.getItem('tp_driver_session')||null;
+let currentDriverId=localStorage.getItem('tp_driver_session')||sessionStorage.getItem('tp_driver_session')||null;
 let driverPollTimer=null;
 let driverKnownRideIds=new Set();
 let drvQrStream=null,drvQrTimer=null,drvQrRideId=null;
@@ -6185,6 +6199,9 @@ async function installDriverPwa(){
     if(outcome==='accepted') dismissDriverPwaBanner();
     return;
   }
+  const card=document.getElementById('driver-install-inline');
+  if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.style.borderColor='#38bdf8';}
+  if(isIOS()) toast('Safari → Teilen → Zum Home-Bildschirm','ok');
   showInstallHelp(true);
 }
 
@@ -6271,22 +6288,38 @@ function decodeDriverBoot(str){
 
 function isDriverAppMode(){
   const p=new URLSearchParams(location.search);
-  return p.get('mode')==='driver'||p.has('token')||p.has('boot')||location.hash==='#fahrer';
+  if(p.get('mode')==='dispatch') return false;
+  if(p.get('mode')==='driver'||p.has('token')||p.has('boot')||location.hash==='#fahrer') return true;
+  if(/driver\.html$/i.test(location.pathname)) return true;
+  if(isStandalone()&&localStorage.getItem('tp_app_role')==='driver') return true;
+  return false;
 }
 
 function getDriverBootParam(){
-  return new URLSearchParams(location.search).get('boot')||sessionStorage.getItem('tp_driver_boot')||'';
+  return new URLSearchParams(location.search).get('boot')||localStorage.getItem('tp_driver_boot')||sessionStorage.getItem('tp_driver_boot')||'';
 }
 
 function getDriverTokenParam(){
-  return new URLSearchParams(location.search).get('token')||sessionStorage.getItem('tp_driver_token')||'';
+  return new URLSearchParams(location.search).get('token')||localStorage.getItem('tp_driver_token')||sessionStorage.getItem('tp_driver_token')||'';
+}
+
+function persistDriverLinkParams(params){
+  const boot=params.get('boot');
+  const token=params.get('token');
+  if(boot){
+    localStorage.setItem('tp_driver_boot',boot);
+    sessionStorage.setItem('tp_driver_boot',boot);
+  }
+  if(token){
+    localStorage.setItem('tp_driver_token',token);
+    sessionStorage.setItem('tp_driver_token',token);
+  }
+  if(boot||token||params.get('mode')==='driver') localStorage.setItem('tp_app_role','driver');
 }
 
 function captureDriverLinkAuth(params){
-  const boot=params.get('boot');
-  const token=params.get('token');
-  if(boot) sessionStorage.setItem('tp_driver_boot',boot);
-  if(token) sessionStorage.setItem('tp_driver_token',token);
+  persistDriverLinkParams(params);
+  const boot=params.get('boot')||localStorage.getItem('tp_driver_boot');
   if(boot){
     const d=decodeDriverBoot(boot);
     if(d){upsertDriverLocal(d);syncDriverAuthRegistry();return d;}
@@ -6314,8 +6347,8 @@ function findDriverByToken(token){
 function getDriverAppUrl(d){
   ensureDriverAccess(d);
   syncDriverAuthRegistry();
-  const base=location.origin+location.pathname.replace(/[^/]*$/,'')+'index.html';
-  return base+'?mode=driver&token='+encodeURIComponent(d.accessToken)+'&boot='+encodeURIComponent(encodeDriverBoot(d));
+  const base=location.origin+location.pathname.replace(/[^/]*$/,'')+'driver.html';
+  return base+'?token='+encodeURIComponent(d.accessToken)+'&boot='+encodeURIComponent(encodeDriverBoot(d));
 }
 
 function regenerateDriverPin(){
@@ -6330,7 +6363,7 @@ function updateDriverAppLinkBox(d){
   ensureDriverAccess(d);
   const url=getDriverAppUrl(d);
   box.classList.remove('hidden');
-  box.innerHTML=`📱 <strong>Fahrer-App Link</strong> (PIN: <code>${d.pin}</code>)<br><code style="font-size:9px">${url}</code><br>
+  box.innerHTML=`📱 <strong>Fahrer-App Link</strong> (PIN: <code>${d.pin}</code>)<br><span style="font-size:11px;color:var(--text2)">Fahrer öffnet Link in <strong>Safari</strong> → Teilen → Zum Home-Bildschirm</span><br><code style="font-size:9px;word-break:break-all">${url}</code><br>
     <button type="button" class="btn btn-sm btn-blue" style="margin-top:8px" onclick="copyDriverAppLink('${d.id}')">📋 Link kopieren</button>
     <button type="button" class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="openDriverDocModal('${d.id}')">📄 Dokument senden</button>`;
 }
@@ -6371,8 +6404,11 @@ async function initDriverAppAsync(params){
     if(pinInput) pinInput.value=bootDriver.pin;
     loggedIn=await driverLoginByPin(true);
   }
-  if(!loggedIn&&currentDriverId&&drivers.find(d=>d.id===currentDriverId)) showDriverMain(currentDriverId);
-  else if(!loggedIn) showDriverLogin();
+  if(!loggedIn){
+    const savedId=localStorage.getItem('tp_driver_session')||currentDriverId;
+    if(savedId&&drivers.find(d=>d.id===savedId)){showDriverMain(savedId);loggedIn=true;}
+  }
+  if(!loggedIn) showDriverLogin();
   await requestDriverNotifications();
   startDriverPolling();
   if(!isStandalone()) scheduleInstallBanner(true,800);
@@ -6391,6 +6427,7 @@ async function ensureDriverDataLoaded(){
 
 function showDriverLogin(){
   currentDriverId=null;
+  localStorage.removeItem('tp_driver_session');
   sessionStorage.removeItem('tp_driver_session');
   document.documentElement.classList.add('driver-login-visible');
   document.getElementById('driver-login').classList.remove('hidden');
@@ -6401,6 +6438,8 @@ function showDriverLogin(){
 
 function showDriverMain(driverId){
   currentDriverId=driverId;
+  localStorage.setItem('tp_driver_session',driverId);
+  localStorage.setItem('tp_app_role','driver');
   sessionStorage.setItem('tp_driver_session',driverId);
   const d=drivers.find(x=>x.id===driverId);
   if(!d){showDriverLogin();return;}
