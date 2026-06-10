@@ -2,9 +2,14 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no"/>
 <meta name="theme-color" content="#0a1628"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="TaxiPro"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <title>TaxiPro Dispatch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -41,6 +46,7 @@
   --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
   --shadow:0 8px 28px rgba(0,0,0,.1);
 }
+.hidden{display:none!important}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overscroll-behavior:none}
 button{cursor:pointer;border:none;background:none;font-family:var(--font);color:var(--text)}
@@ -560,9 +566,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .dp-title{font-family:var(--font2);font-size:15px;font-weight:700;margin-bottom:4px}
 .dp-ride-info{font-size:12px;color:var(--text2);margin-bottom:16px;padding:10px 12px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);line-height:1.6}
 .dp-drivers{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:14px}
-.dp-driver-card{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);cursor:pointer;transition:.15s}
+.dp-driver-card{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);transition:.15s;flex-wrap:wrap}
 .dp-driver-card:hover{background:var(--bg4);border-color:var(--gold)}
-.dp-driver-card:active{transform:scale(.98)}
 .dp-av{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:var(--font2);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .dp-info{flex:1;min-width:0}
 .dp-name{font-weight:700;font-size:14px}
@@ -589,6 +594,73 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .driver-name{font-weight:700;font-size:15px}
 .driver-phone{font-size:12px;color:var(--text2);margin-top:2px}
 .driver-btns{display:flex;gap:6px}
+.driver-app-link{font-size:10px;color:var(--blue2);word-break:break-all;margin-top:8px;padding:8px 10px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r2);line-height:1.5}
+.driver-app-link code{font-size:10px;color:var(--gold)}
+.dp-actions{display:flex;gap:6px;flex-shrink:0}
+.dp-act-btn{padding:8px 12px;border-radius:var(--r2);font-size:11px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);color:var(--text);white-space:nowrap}
+.dp-act-btn.app{background:var(--gold3);color:var(--gold);border-color:rgba(245,166,35,.4)}
+.dp-act-btn.wa{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.pay-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:9px;font-weight:700}
+.pay-badge.kts{background:var(--blue-bg);color:var(--blue2);border:1px solid var(--blue-border)}
+.pay-badge.eigen{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.pay-badge.bezahlt{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
+.pay-badge.sig{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+/* ── FAHRER-PORTAL ── */
+#driver-portal{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;flex-direction:column}
+#driver-portal.hidden{display:none!important}
+.drv-login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-top))}
+.drv-login-box{width:100%;max-width:340px;text-align:center}
+.drv-login-box .logo{font-size:22px;margin-bottom:6px}
+.drv-login-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.drv-pin-input{font-size:28px;text-align:center;letter-spacing:8px;font-weight:700;padding:14px;margin-bottom:14px;border-radius:var(--r)}
+#driver-topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + var(--safe-top));background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.drv-user{flex:1;min-width:0}
+.drv-user-name{font-family:var(--font2);font-weight:700;font-size:15px}
+.drv-user-sub{font-size:11px;color:var(--text3)}
+.drv-sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.drv-sync-dot.live{background:var(--green);box-shadow:0 0 6px var(--green)}
+#driver-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;padding-bottom:calc(12px + var(--mob-nav-h) + var(--safe-bottom))}
+.drv-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}
+.drv-ride-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;border-left:4px solid var(--gold)}
+.drv-ride-card.krank{border-left-color:var(--red)}
+.drv-ride-card.rechn{border-left-color:var(--yellow)}
+.drv-ride-card.normal{border-left-color:var(--blue)}
+.drv-ride-card.privat{border-left-color:var(--green)}
+.drv-ride-card.done{opacity:.72}
+.drv-ride-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.drv-ride-time{font-family:var(--font2);font-size:22px;font-weight:700;line-height:1;flex-shrink:0}
+.drv-ride-meta{flex:1;min-width:0}
+.drv-ride-name{font-weight:700;font-size:15px}
+.drv-ride-addr{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4}
+.drv-ride-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.drv-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drv-btn{padding:12px 10px;border-radius:var(--r2);font-size:12px;font-weight:700;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px}
+.drv-btn.primary{background:var(--gold);color:#000;border-color:var(--gold)}
+.drv-btn.maps{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.drv-btn.pay-kts{background:var(--blue-bg);color:var(--blue2);border-color:var(--blue-border)}
+.drv-btn.pay-eigen{background:var(--yellow-bg);color:var(--yellow2);border-color:var(--yellow-border)}
+.drv-btn.sig{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
+.drv-btn.done-btn{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.drv-btn.on{outline:2px solid var(--gold);outline-offset:1px}
+.drv-msg-box{margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)}
+.drv-msg-list{max-height:120px;overflow-y:auto;margin-bottom:8px}
+.drv-msg-item{font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)}
+.drv-msg-item:last-child{border-bottom:none}
+.drv-msg-from{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase}
+.drv-msg-input-row{display:flex;gap:6px}
+.drv-msg-input-row input{flex:1;min-width:0}
+.drv-doc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer}
+.drv-doc-card.pending{border-left:4px solid var(--gold)}
+.drv-doc-card.signed{border-left:4px solid var(--green);opacity:.85}
+.drv-doc-title{font-weight:700;font-size:14px;margin-bottom:4px}
+.drv-doc-meta{font-size:11px;color:var(--text2)}
+#driver-bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--mob-nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg2);border-top:1px solid var(--border2);display:flex;z-index:5010}
+.drv-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:600;color:var(--text3);border:none;background:none;position:relative}
+.drv-nav-item.active{color:var(--gold)}
+.drv-nav-badge{position:absolute;top:6px;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.sig-canvas-wrap{border:2px dashed var(--border2);border-radius:var(--r);background:#fff;touch-action:none;margin:12px 0}
+.sig-canvas-wrap canvas{display:block;width:100%;height:180px;cursor:crosshair}
+.sig-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px}
 /* responsive */
 @media(max-width:900px){
   .cust-list.list-view>.cust-list-header,.cust-list.list-view>.cust-row{min-width:640px}
@@ -623,6 +695,129 @@ h1,h2,h3,h4{font-family:var(--font2)}
   .cust-row .cr-btn{width:28px;height:28px}
   .cust-toolbar-row .tb-btn.btn-sm{padding:5px 8px;font-size:10px}
 }
+/* ── MOBILE APP / PWA ── */
+:root{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);--mob-nav-h:64px}
+#mobile-menu-btn,#mobile-search-btn{display:none}
+#mobile-bottom-nav,#mobile-drawer,#mobile-drawer-backdrop,#pwa-install-banner{display:none}
+.geo-btn{width:42px;flex-shrink:0;border-radius:var(--r2);border:1px solid var(--green-border);background:var(--green-bg);color:var(--green2);font-size:16px;cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center}
+.geo-btn:hover{background:rgba(46,213,115,.18)}
+@media(max-width:700px){
+  html.is-mobile #mobile-menu-btn,html.is-mobile #mobile-search-btn{display:flex}
+  html.is-mobile #mobile-bottom-nav{display:flex}
+  html.is-mobile .fab{display:none}
+  html.is-mobile #app{padding-bottom:calc(var(--mob-nav-h) + var(--safe-bottom))}
+  html.is-mobile #topbar{padding:8px 12px;padding-top:calc(8px + var(--safe-top));gap:8px;min-height:52px}
+  html.is-mobile #status-bar{padding:6px 12px;-webkit-overflow-scrolling:touch}
+  html.is-mobile #search-wrap{max-width:none}
+  html.is-mobile #search-wrap.mobile-collapsed{display:none}
+  html.is-mobile #search-wrap.mobile-open{display:block;position:absolute;left:12px;right:12px;top:calc(52px + var(--safe-top));z-index:60;background:var(--bg2);padding:8px;border-radius:var(--r);border:1px solid var(--border2);box-shadow:var(--shadow)}
+  html.is-mobile .logo{font-size:15px}
+  html.is-mobile .logo em{font-size:15px}
+  html.is-mobile #topbar-btns .tb-btn{display:none}
+  html.is-mobile #topbar-btns .tb-btn.primary{display:none}
+  html.is-mobile .mob-menu-btn{width:40px;height:40px;border-radius:var(--r2);background:var(--bg3);border:1px solid var(--border2);font-size:18px;align-items:center;justify-content:center;flex-shrink:0}
+  html.is-mobile .overlay{align-items:flex-end;padding:0;padding-bottom:var(--safe-bottom)}
+  html.is-mobile .overlay .modal{border-radius:20px 20px 0 0;max-height:calc(94dvh - var(--safe-bottom));margin:0}
+  html.is-mobile .modal-maps{max-height:calc(100dvh - var(--safe-bottom));height:calc(100dvh - var(--safe-bottom));border-radius:0}
+  html.is-mobile .mh{padding:16px 16px 12px;position:sticky;top:0;background:var(--bg2);z-index:2}
+  html.is-mobile .mclose{width:36px;height:36px;font-size:18px}
+  html.is-mobile .mfooter{padding:12px 16px calc(12px + var(--safe-bottom));position:sticky;bottom:0;background:var(--bg2);border-top:1px solid var(--border)}
+  html.is-mobile .toolbar{padding:8px 12px;gap:6px}
+  html.is-mobile .cal-title{font-size:13px}
+  html.is-mobile .view-tab{padding:6px 12px;font-size:12px;min-height:36px;display:flex;align-items:center}
+  html.is-mobile .cal-nav-btn,html.is-mobile .today-btn{min-width:36px;min-height:36px}
+  html.is-mobile .sch-list{padding:6px 0}
+  html.is-mobile .sch-row{grid-template-columns:4px 54px 1fr;grid-template-rows:auto auto auto;padding:14px 12px 10px;min-height:0;gap:4px 10px;margin:6px 10px;border:1px solid var(--border);border-radius:var(--r);border-bottom:1px solid var(--border)}
+  html.is-mobile .sch-row:nth-child(even){background:var(--bg2)}
+  html.is-mobile .sch-dot{grid-row:1/span 2;align-self:start;margin-top:8px;width:8px;height:8px}
+  html.is-mobile .sch-time{grid-column:2;grid-row:1;font-size:18px;font-weight:700;font-family:var(--font2)}
+  html.is-mobile .sch-body{grid-column:2/4;grid-row:2;flex-direction:column;align-items:flex-start;gap:4px;overflow:visible}
+  html.is-mobile .sch-title{max-width:100%;font-size:14px;flex-shrink:1}
+  html.is-mobile .sch-addr{font-size:12px;white-space:normal;line-height:1.4;overflow:visible;text-overflow:unset}
+  html.is-mobile .sch-excel{display:none}
+  html.is-mobile .sch-mob-actions{grid-column:1/4;grid-row:3;display:flex;gap:8px;margin-top:8px;padding-top:10px;border-top:1px solid var(--border);width:100%}
+  html.is-mobile .sch-dispatch,html.is-mobile .sch-del{width:44px;height:44px;opacity:1;font-size:16px;flex-shrink:0}
+  html.is-mobile .sch-mob-map{flex:1;min-height:44px;border-radius:var(--r2);border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue2);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px}
+  html.is-mobile .wk-body{display:none}
+  html.is-mobile .mob-week-agenda{display:block;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 10px}
+  html.is-mobile .mob-wk-day{margin-bottom:14px}
+  html.is-mobile .mob-wk-day-h{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:8px 4px 6px;border-bottom:1px solid var(--border);margin-bottom:6px}
+  html.is-mobile .mob-wk-day-h.today{color:var(--gold)}
+  html.is-mobile .mob-wk-ride{display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;min-height:52px}
+  html.is-mobile .mob-wk-ride-time{font-family:var(--font2);font-weight:700;font-size:16px;flex-shrink:0;min-width:48px}
+  html.is-mobile .mob-wk-ride-info{flex:1;min-width:0}
+  html.is-mobile .mob-wk-ride-name{font-weight:700;font-size:13px}
+  html.is-mobile .mob-wk-ride-addr{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.is-mobile .tr-card{padding:16px;margin-bottom:12px}
+  html.is-mobile .cc-btn{min-height:40px;font-size:12px}
+  html.is-mobile .toast-wrap{top:auto;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 12px);right:12px;left:12px}
+  html.is-mobile .toast{min-width:0;max-width:none}
+  html.is-mobile input,html.is-mobile select,html.is-mobile textarea{font-size:16px;padding:11px 14px}
+  html.is-mobile .btn{min-height:44px;padding:11px 16px}
+  html.is-mobile .btn-sm{min-height:38px}
+  html.is-mobile .rg .ro{padding:10px 12px;min-height:44px}
+  html.is-mobile .mo-wrap{padding:6px}
+  html.is-mobile .mo-cell{min-height:48px;padding:4px}
+  html.is-mobile .day-tl{min-height:1200px}
+  html.is-mobile body.drawer-open{overflow:hidden}
+}
+#mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--mob-nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg2);border-top:1px solid var(--border2);z-index:200;display:none;align-items:stretch;justify-content:space-around;box-shadow:0 -4px 24px rgba(0,0,0,.25)}
+.mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;color:var(--text3);font-size:10px;font-weight:600;position:relative;min-height:44px;border:none;background:none}
+.mob-nav-item.active{color:var(--gold)}
+.mob-nav-icon{font-size:20px;line-height:1}
+.mob-nav-lbl{font-size:9px;letter-spacing:.2px}
+.mob-nav-badge{position:absolute;top:4px;right:calc(50% - 22px);background:var(--gold);color:#000;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.mob-nav-fab{width:52px;height:52px;border-radius:50%;background:var(--gold);color:#000;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:-18px;border:3px solid var(--bg2);box-shadow:0 4px 18px rgba(245,166,35,.45);flex-shrink:0;align-self:flex-start}
+#mobile-drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;backdrop-filter:blur(3px)}
+#mobile-drawer{position:fixed;top:0;left:0;bottom:0;width:min(300px,88vw);background:var(--bg2);z-index:301;display:flex;flex-direction:column;transform:translateX(-105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);padding-top:var(--safe-top);box-shadow:var(--shadow)}
+#mobile-drawer.open{transform:translateX(0)}
+@media(max-width:700px){
+  html.is-mobile #mobile-drawer:not(.hidden){display:flex}
+  html.is-mobile #mobile-drawer-backdrop:not(.hidden){display:block}
+}
+.md-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);font-family:var(--font2);font-size:15px;font-weight:700;flex-shrink:0}
+#mobile-drawer-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--safe-bottom)}
+#mobile-drawer-content #sidebar{display:flex!important;width:100%;border:none}
+#pwa-install-banner{position:fixed;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 8px);left:12px;right:12px;background:var(--bg2);border:1px solid var(--gold);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:150;box-shadow:var(--shadow)}
+html:not(.is-mobile) #pwa-install-banner{bottom:calc(16px + var(--safe-bottom))}
+.pwa-install-text{flex:1;min-width:0}
+.pwa-install-text strong{display:block;font-size:13px;margin-bottom:2px}
+.pwa-install-text span{font-size:11px;color:var(--text2)}
+.pwa-dismiss{width:28px;height:28px;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:12px;flex-shrink:0}
+html.standalone #pwa-install-banner{display:none!important}
+#mobile-quick-bar{display:none;gap:6px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0}
+html.is-mobile #mobile-quick-bar{display:flex}
+.mob-qbtn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:8px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;min-height:36px}
+.mob-qbtn.primary{background:var(--gold3);color:var(--gold);border-color:rgba(245,166,35,.35)}
+.mob-qbtn.gc{color:var(--blue2);border-color:var(--blue-border);background:var(--blue-bg)}
+#pull-refresh-indicator{position:fixed;top:0;left:50%;transform:translate(-50%,-120%);z-index:400;background:var(--bg2);border:1px solid var(--border2);border-radius:0 0 var(--r) var(--r);padding:8px 16px;font-size:12px;font-weight:600;color:var(--gold);transition:transform .2s;pointer-events:none;box-shadow:var(--shadow-sm)}
+#pull-refresh-indicator.visible{transform:translate(-50%,calc(8px + var(--safe-top)))}
+#pull-refresh-indicator.loading::after{content:' …';animation:dots 1s infinite}
+@keyframes dots{0%,100%{opacity:.3}50%{opacity:1}}
+html.is-mobile #view-today>div:last-child{padding:10px 12px calc(14px + var(--mob-nav-h) + var(--safe-bottom))!important}
+html.is-mobile #view-drivers>div:last-child{padding-bottom:calc(14px + var(--mob-nav-h) + var(--safe-bottom))!important}
+html.is-mobile #view-drivers>div:last-child>div:last-child{grid-template-columns:1fr!important}
+html.is-mobile #view-drivers .toolbar{flex-wrap:wrap;gap:8px}
+html.is-mobile #view-drivers .toolbar h2{flex:1 1 100%;font-size:15px}
+html.is-mobile .tr-card .cc-btn{min-width:40px;min-height:40px}
+html.is-mobile .tr-card>div:first-child{flex-wrap:wrap}
+html.is-mobile .tr-card>div:first-child>div:last-child{flex:1 1 100%;justify-content:flex-start;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+html.is-mobile .stats-bar{padding:8px 12px;gap:6px;-webkit-overflow-scrolling:touch}
+html.is-mobile .stat-chip{flex-shrink:0;font-size:11px;padding:5px 10px}
+html.is-mobile #status-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+html.is-mobile #status-bar::-webkit-scrollbar{display:none}
+html.is-mobile #content{position:relative}
+html.is-mobile .toolbar{flex-wrap:wrap}
+html.is-mobile .view-tabs{width:100%;justify-content:stretch}
+html.is-mobile .view-tab{flex:1;text-align:center;justify-content:center}
+html.is-mobile .driver-card{padding:16px}
+html.is-mobile .driver-btns{flex-wrap:wrap}
+html.is-mobile .driver-btns .btn{flex:1;min-width:calc(50% - 4px)}
+html.is-mobile .dp-sheet{max-height:92dvh;overflow-y:auto}
+html.driver-mode #pwa-install-banner{display:none!important}
+#driver-pwa-banner{position:fixed;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 8px);left:12px;right:12px;background:var(--bg2);border:1px solid var(--gold);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:5020;box-shadow:var(--shadow)}
+html.driver-standalone #driver-pwa-banner{display:none!important}
+.mob-week-agenda{display:none}
 </style>
 </head>
 <body>
@@ -630,6 +825,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
 
 <!-- TOPBAR -->
 <div id="topbar">
+  <button type="button" class="mob-menu-btn" id="mobile-menu-btn" onclick="openMobileDrawer()" aria-label="Menü">☰</button>
+  <button type="button" class="mob-menu-btn" id="mobile-search-btn" onclick="toggleMobileSearch()" aria-label="Suche">🔍</button>
   <div class="logo-wrap">
     <div class="logo">TaxiPro <em>Dispatch</em></div>
     <div class="logo-sub">Taxi Meckenheim GmbH</div>
@@ -655,6 +852,35 @@ h1,h2,h3,h4{font-family:var(--font2)}
   <span class="status-pill info" id="status-rides">🚗 Heute: 0</span>
   <span class="status-pill" id="status-cust">👥 0 Kunden</span>
 </div>
+<div id="mobile-quick-bar" aria-label="Schnellzugriff">
+  <button type="button" class="mob-qbtn primary" onclick="openRideModal()">＋ Fahrt</button>
+  <button type="button" class="mob-qbtn" onclick="switchView('today')">🚗 Heute</button>
+  <button type="button" class="mob-qbtn" onclick="switchView('drivers')">👨‍✈️ Fahrer</button>
+  <button type="button" class="mob-qbtn gc" onclick="initiateGCalSync()">📅 Sync</button>
+  <button type="button" class="mob-qbtn gc" onclick="initiateGoogleSync()">🔵 Kontakte</button>
+  <button type="button" class="mob-qbtn" onclick="openMapsApp()">🗺️ Maps</button>
+  <button type="button" class="mob-qbtn" onclick="openCloudModal()">☁️ Cloud</button>
+</div>
+<div id="pull-refresh-indicator" aria-hidden="true">↓ Ziehen zum Aktualisieren</div>
+
+<div id="pwa-install-banner" class="hidden">
+  <div class="pwa-install-text"><strong>Als App installieren</strong><span>Schneller Zugriff vom Home-Bildschirm</span></div>
+  <button type="button" class="btn btn-primary btn-sm" onclick="installPwa()">Installieren</button>
+  <button type="button" class="pwa-dismiss" onclick="dismissPwaBanner()" aria-label="Schließen">✕</button>
+</div>
+
+<nav id="mobile-bottom-nav" aria-label="Hauptnavigation">
+  <button type="button" class="mob-nav-item active" data-view="calendar" onclick="switchView('calendar')"><span class="mob-nav-icon">📅</span><span class="mob-nav-lbl">Kalender</span></button>
+  <button type="button" class="mob-nav-item" data-view="today" onclick="switchView('today')"><span class="mob-nav-icon">🚗</span><span class="mob-nav-lbl">Heute</span><span class="mob-nav-badge" id="mob-nb-today">0</span></button>
+  <button type="button" class="mob-nav-fab" onclick="openRideModal()" aria-label="Neue Fahrt">＋</button>
+  <button type="button" class="mob-nav-item" data-view="customers" onclick="switchView('customers')"><span class="mob-nav-icon">👥</span><span class="mob-nav-lbl">Kunden</span></button>
+  <button type="button" class="mob-nav-item" data-view="drivers" onclick="switchView('drivers')"><span class="mob-nav-icon">👨‍✈️</span><span class="mob-nav-lbl">Fahrer</span><span class="mob-nav-badge" id="mob-nb-drivers">0</span></button>
+</nav>
+<div id="mobile-drawer-backdrop" class="hidden" onclick="closeMobileDrawer()"></div>
+<aside id="mobile-drawer" class="hidden" aria-hidden="true">
+  <div class="md-header"><span>Menü</span><button type="button" class="mclose" onclick="closeMobileDrawer()">✕</button></div>
+  <div id="mobile-drawer-content"></div>
+</aside>
 
 <!-- MAIN -->
 <div id="main">
@@ -752,7 +978,8 @@ h1,h2,h3,h4{font-family:var(--font2)}
       <button class="tb-btn primary" onclick="openDriverModal()">＋ Fahrer</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:14px">
-      <div class="driver-hint"><strong>So funktioniert's:</strong> Fahrer hier anlegen (Name + WhatsApp-Nummer). Bei jeder Fahrt auf <strong>🚀</strong> tippen → Fahrer wählen → WhatsApp öffnet sich mit dem kompletten Fahrtauftrag.</div>
+      <div class="driver-hint"><strong>Fahrer-App:</strong> Fahrer anlegen → PIN &amp; App-Link wird erzeugt. Fahrer installiert TaxiPro auf dem Handy und meldet sich mit PIN an. Bei Fahrten <strong>🚀</strong> → <strong>📱 App</strong> (in der App) oder <strong>📲 WA</strong> (WhatsApp). Fahrer sehen nur ihre Fahrten – Maps, Zahlung (KTS/Eigenleistung), Fahrschein-Unterschrift &amp; Monatsdokumente.</div>
+      <button class="tb-btn primary" onclick="openDriverDocModal()" style="margin-bottom:12px">📄 Dokument an Fahrer senden</button>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;align-content:start" id="drivers-list"></div>
     </div>
   </div>
@@ -780,6 +1007,52 @@ h1,h2,h3,h4{font-family:var(--font2)}
 </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /app -->
+
+<!-- ═══ FAHRER-PORTAL (kein Zentrale-Zugriff) ═══ -->
+<div id="driver-portal" class="hidden">
+  <div id="driver-login" class="drv-login-wrap">
+    <div class="drv-login-box">
+      <div class="logo">TaxiPro <em>Fahrer</em></div>
+      <p class="drv-login-sub">Nur deine zugewiesenen Fahrten &amp; Dokumente.<br>PIN von der Zentrale eingeben.</p>
+      <input type="password" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
+          <button type="button" class="btn btn-primary" style="width:100%" onclick="driverLoginByPin().catch(()=>{})">Anmelden</button>
+      <p style="font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5">Link von der Zentrale erhalten? Einfach öffnen – PIN wird automatisch erkannt.</p>
+    </div>
+  </div>
+  <div id="driver-main" class="hidden" style="display:none;flex:1;flex-direction:column;min-height:0">
+    <header id="driver-topbar">
+      <div class="drv-user">
+        <div class="drv-user-name" id="drv-user-name">Fahrer</div>
+        <div class="drv-user-sub" id="drv-user-sub">Heute · 0 Fahrten</div>
+      </div>
+      <span class="drv-sync-dot" id="drv-sync-dot" title="Cloud-Sync"></span>
+      <button type="button" class="tb-btn btn-sm" onclick="driverPollCloud(true)" title="Aktualisieren">🔄</button>
+      <button type="button" class="tb-btn btn-sm" onclick="driverLogout()">Abmelden</button>
+    </header>
+    <div id="driver-content">
+      <div id="driver-rides-panel">
+        <div class="drv-section-title">Meine Fahrten heute</div>
+        <div id="driver-rides-list"></div>
+        <div class="drv-section-title" style="margin-top:16px">Kommende Fahrten</div>
+        <div id="driver-rides-upcoming"></div>
+      </div>
+      <div id="driver-docs-panel" class="hidden">
+        <div class="drv-section-title">Dokumente von der Zentrale</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Abrechnungen &amp; Fahrscheine – bitte unterschreiben und zurücksenden.</p>
+        <div id="driver-docs-list"></div>
+      </div>
+    </div>
+    <nav id="driver-bottom-nav" aria-label="Fahrer-Navigation">
+      <button type="button" class="drv-nav-item active" data-drv-tab="rides" onclick="switchDriverTab('rides')"><span style="font-size:20px">🚗</span>Fahrten</button>
+      <button type="button" class="drv-nav-item" data-drv-tab="docs" onclick="switchDriverTab('docs')"><span style="font-size:20px">📄</span>Dokumente<span class="drv-nav-badge hidden" id="drv-docs-badge">0</span></button>
+    </nav>
+    <div id="driver-pwa-banner" class="hidden">
+      <div class="pwa-install-text"><strong>Fahrer-App installieren</strong><span>Auf dem Home-Bildschirm – schneller Zugriff</span></div>
+      <button type="button" class="btn btn-primary btn-sm" onclick="installDriverPwa()">Installieren</button>
+      <button type="button" class="pwa-dismiss" onclick="dismissDriverPwaBanner()" aria-label="Schließen">✕</button>
+    </div>
+  </div>
+</div>
 
 <!-- FAB -->
 <button class="fab" onclick="openRideModal()">＋</button>
@@ -823,6 +1096,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
           <input type="text" id="r-from" placeholder="Adresse suchen (Deutschland)…" oninput="onAddrSearch(this.value,'from-ac','r-from',true)" autocomplete="off"/>
           <div class="ac-list" id="from-ac"></div>
         </div>
+        <button type="button" class="geo-btn" onclick="useMyLocation('r-from')" title="Mein Standort">📍</button>
         <button type="button" class="map-inline-btn" onclick="openMapsApp({from:document.getElementById('r-from').value,to:document.getElementById('r-to').value})" title="Google Maps">🗺️</button>
       </div>
     </div>
@@ -833,6 +1107,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
           <input type="text" id="r-to" placeholder="Krankenhaus, Schule oder Adresse…" oninput="onAddrSearch(this.value,'hosp-ac','r-to',true)" autocomplete="off"/>
           <div class="ac-list" id="hosp-ac"></div>
         </div>
+        <button type="button" class="geo-btn" onclick="useMyLocation('r-to')" title="Mein Standort">📍</button>
         <button type="button" class="map-inline-btn" onclick="openMapsApp({from:document.getElementById('r-from').value,to:document.getElementById('r-to').value})" title="Google Maps Route">🗺️</button>
       </div>
       <div id="r-dist"></div>
@@ -1292,12 +1567,68 @@ h1,h2,h3,h4{font-family:var(--font2)}
       </div>
     </div>
     <div class="fr"><label>Notiz</label><input type="text" id="d-note" placeholder="Führerschein Klasse, Sprachen…"/></div>
+    <div class="fr2 fr">
+      <div><label>App-PIN (4–6 Ziffern)</label><input type="text" id="d-pin" inputmode="numeric" maxlength="6" placeholder="z.B. 4821"/></div>
+      <div><label>PIN zurücksetzen</label><button type="button" class="btn btn-secondary btn-sm" style="width:100%;margin-top:0" onclick="regenerateDriverPin()">🔑 Neue PIN</button></div>
+    </div>
+    <div id="d-app-link-box" class="driver-app-link hidden"></div>
   </div>
   <div class="mfooter">
     <button class="btn btn-danger btn-sm" id="d-delete-btn" style="display:none;margin-right:auto" onclick="deleteDriver()">🗑️</button>
     <button class="btn btn-secondary" onclick="closeM('modal-driver')">Abbrechen</button>
     <button class="btn btn-primary" onclick="saveDriver()">💾 Speichern</button>
   </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: FAHRER-DOKUMENT SENDEN ═══ -->
+<div class="overlay hidden" id="modal-driver-doc">
+<div class="modal">
+  <div class="mh"><h3>📄 Dokument an Fahrer senden</h3><button class="mclose" onclick="closeM('modal-driver-doc')">✕</button></div>
+  <div class="mbody">
+    <div class="fr"><label>Fahrer</label><select id="dd-driver"></select></div>
+    <div class="fr"><label>Titel</label><input type="text" id="dd-title" placeholder="z.B. Abrechnung März 2026 – Dialyse"/></div>
+    <div class="fr2 fr">
+      <div><label>Monat</label><input type="month" id="dd-month"/></div>
+      <div><label>Typ</label><select id="dd-type"><option value="abrechnung">Monatsabrechnung</option><option value="fahrschein">Fahrschein / Unterschrift</option><option value="sonstiges">Sonstiges</option></select></div>
+    </div>
+    <div class="doc-upload-zone" id="dd-dropzone" onclick="document.getElementById('dd-file').click()">
+      <div class="du-icon">📎</div>
+      <div class="du-title">PDF oder Bild hochladen</div>
+      <div class="du-sub">Excel-Export, Fahrschein-Vorlage, Abrechnung…</div>
+    </div>
+    <input type="file" id="dd-file" accept="image/*,application/pdf" style="display:none" onchange="onDriverDocFileSelect(this)"/>
+    <div id="dd-file-name" style="font-size:12px;color:var(--green2);display:none"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-driver-doc')">Abbrechen</button>
+    <button class="btn btn-primary" onclick="sendDriverDoc()">📤 An Fahrer senden</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: UNTERSCHRIFT (Gast / Dokument) ═══ -->
+<div class="overlay hidden" id="modal-signature">
+<div class="modal">
+  <div class="mh"><h3 id="sig-modal-title">✍️ Unterschrift</h3><button class="mclose" onclick="closeSignatureModal()">✕</button></div>
+  <div class="mbody">
+    <p class="sig-hint" id="sig-hint">Gast bitte hier unterschreiben (Finger auf dem Display)</p>
+    <div class="sig-canvas-wrap"><canvas id="sig-canvas"></canvas></div>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="clearSignatureCanvas()">🗑️ Löschen</button>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeSignatureModal()">Abbrechen</button>
+    <button class="btn btn-primary" onclick="saveSignature()">✅ Speichern &amp; senden</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: FAHRER-DOKUMENT ANSEHEN (Zentrale) ═══ -->
+<div class="overlay hidden" id="modal-dispatch-doc">
+<div class="modal modal-lg">
+  <div class="mh"><h3 id="dispatch-doc-title">Dokument</h3><button class="mclose" onclick="closeM('modal-dispatch-doc')">✕</button></div>
+  <div class="mbody" id="dispatch-doc-body"></div>
+  <div class="mfooter" id="dispatch-doc-footer"></div>
 </div>
 </div>
 
@@ -1463,6 +1794,12 @@ let customers=JSON.parse(localStorage.getItem('tp_c')||'[]');
 let rides=JSON.parse(localStorage.getItem('tp_r')||'[]');
 let gcContacts=JSON.parse(localStorage.getItem('tp_gc')||'[]');
 let drivers=JSON.parse(localStorage.getItem('tp_d')||'[]');
+let driverDocs=JSON.parse(localStorage.getItem('tp_driver_docs')||'[]');
+let currentDriverId=sessionStorage.getItem('tp_driver_session')||null;
+let driverPollTimer=null;
+let driverKnownRideIds=new Set();
+let sigContext={type:null,id:null};
+let pendingDriverDocFile=null;
 let gcalEvents=[];
 let gcalCalendars=[];
 let gcalToken=localStorage.getItem('tp_gcal_token')||null;
@@ -1489,13 +1826,14 @@ function save(){
   localStorage.setItem('tp_r',JSON.stringify(rides));
   localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
   localStorage.setItem('tp_d',JSON.stringify(drivers));
+  localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
   scheduleCloudSave();
 }
 
 function exportBackup(){
   const data={
     version:1,exported:new Date().toISOString(),
-    customers,rides,gcContacts,drivers,
+    customers,rides,gcContacts,drivers,driverDocs,
     settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1517,6 +1855,7 @@ function importBackup(input){
       rides=data.rides||[];
       gcContacts=data.gcContacts||[];
       drivers=data.drivers||[];
+      driverDocs=data.driverDocs||[];
       if(data.settings?.gcalCalendarId) gcalCalendarId=data.settings.gcalCalendarId;
       save();
       renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
@@ -1529,6 +1868,7 @@ function importBackup(input){
 
 function checkDataMigration(){
   migrateKtsReData();
+  drivers.forEach(d=>ensureDriverAccess(d));
   if(rides.length||customers.length) return;
   setTimeout(()=>{
     toast('Keine Daten? Cloud verbinden, Backup laden oder Google Kalender','warn');
@@ -1662,6 +2002,9 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('.nav-item[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
+  document.querySelectorAll('.mob-nav-item[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
+  closeMobileDrawer();
+  closeMobileSearch();
   if(v==='calendar') renderCalendar();
   if(v==='customers') renderCustomers();
   if(v==='today') renderToday();
@@ -1879,12 +2222,18 @@ function renderDayV(container){
         const sync=r.googleEventId?' 📅':'';
         const dispatched=r.dispatchedTo?drivers.find(d=>d.id===r.dispatchedTo):null;
         const dispatchBadge=dispatched?` · ✅ ${dispatched.fname}`:'';
+        const fromQ=(r.from||'').replace(/'/g,"\\'"),toQ=(r.to||'').replace(/'/g,"\\'");
+        const deskActs=`<button class="sch-dispatch" title="An Fahrer senden" onclick="event.stopPropagation();openDriverPicker('${r.id}')">🚀</button>
+          <button class="sch-del" title="Fahrt löschen" onclick="event.stopPropagation();deleteRide('${r.id}')">🗑️</button>`;
+        const mobActs=`<div class="sch-mob-actions">
+          <button type="button" class="sch-mob-map" onclick="event.stopPropagation();openMapsRoute('${fromQ}','${toQ}')">🗺️ Route</button>
+          <button type="button" class="sch-dispatch" title="An Fahrer senden" onclick="event.stopPropagation();openDriverPicker('${r.id}')">🚀</button>
+          <button type="button" class="sch-del" title="Fahrt löschen" onclick="event.stopPropagation();deleteRide('${r.id}')">🗑️</button>
+        </div>`;
         row.innerHTML=`<div class="sch-dot"></div><div class="sch-time">${r.time}</div>
           <div class="sch-body"><span class="sch-title">${name}</span>${code?`<span class="sch-code">${code}</span>`:''}
           <span class="sch-addr">${addr}${sync}${r.excelSynced?' · ✅ Excel':''}${dispatchBadge}</span></div>
-          ${buildExcelControlsHtml(r)}
-          <button class="sch-dispatch" title="An Fahrer senden (WhatsApp)" onclick="event.stopPropagation();openDriverPicker('${r.id}')">🚀</button>
-          <button class="sch-del" title="Fahrt löschen" onclick="event.stopPropagation();deleteRide('${r.id}')">🗑️</button>`;
+          ${buildExcelControlsHtml(r)}${isMobileLayout()?'':deskActs}${isMobileLayout()?mobActs:''}`;
         row.onclick=()=>showRideDetail(r.id);
       } else {
         const ev=item.data;
@@ -1981,8 +2330,44 @@ function renderWeekV(container){
     if(ds===fmtD(new Date())){const now=new Date();const nl=document.createElement('div');nl.style.cssText=`position:absolute;left:0;right:0;top:${now.getHours()*60+now.getMinutes()}px;height:2px;background:var(--gold);z-index:8`;col.appendChild(nl);}
     area.appendChild(col);
   });
-  body.appendChild(area);wrap.appendChild(body);container.appendChild(wrap);
-  setTimeout(()=>body.scrollTop=7*60,30);
+  body.appendChild(area);wrap.appendChild(body);
+  if(isMobileLayout()){
+    const agenda=document.createElement('div');agenda.className='mob-week-agenda';
+    let hasAny=false;
+    days.forEach(day=>{
+      const ds=fmtD(day);
+      const dr=filteredRides(ds);
+      const ge=filteredGCalEvents(ds);
+      if(!dr.length&&!ge.length) return;
+      hasAny=true;
+      const dayEl=document.createElement('div');dayEl.className='mob-wk-day';
+      const isT=ds===todayStr;
+      dayEl.innerHTML=`<div class="mob-wk-day-h${isT?' today':''}">${DE_DAYS_SHORT[(day.getDay()+6)%7]} ${day.getDate()}.${day.getMonth()+1}.</div>`;
+      dr.forEach(r=>{
+        const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+        const name=c?c.fname+' '+c.lname:'–';
+        const vis=rideVisualClass(r);
+        const rideEl=document.createElement('div');rideEl.className='mob-wk-ride';
+        rideEl.innerHTML=`<div class="mob-wk-ride-time" style="color:var(--${vis==='krank'?'red2':vis==='rechn'?'yellow2':vis==='privat'?'green2':'blue2'})">${r.time}</div>
+          <div class="mob-wk-ride-info"><div class="mob-wk-ride-name">${name}</div><div class="mob-wk-ride-addr">→ ${r.to||'–'}</div></div>
+          <button type="button" class="sch-dispatch" onclick="event.stopPropagation();openDriverPicker('${r.id}')">🚀</button>`;
+        rideEl.onclick=()=>showRideDetail(r.id);
+        dayEl.appendChild(rideEl);
+      });
+      ge.forEach(ev=>{
+        const rideEl=document.createElement('div');rideEl.className='mob-wk-ride';
+        rideEl.innerHTML=`<div class="mob-wk-ride-time">📅</div>
+          <div class="mob-wk-ride-info"><div class="mob-wk-ride-name">${ev.title}</div><div class="mob-wk-ride-addr">${ev.location||'Google'}</div></div>`;
+        rideEl.onclick=()=>showGCalDetail(ev.id);
+        dayEl.appendChild(rideEl);
+      });
+      agenda.appendChild(dayEl);
+    });
+    if(!hasAny) agenda.innerHTML='<div class="sch-empty"><span class="ei">📋</span>Keine Fahrten in dieser Woche</div>';
+    wrap.appendChild(agenda);
+  }
+  container.appendChild(wrap);
+  if(!isMobileLayout()) setTimeout(()=>body.scrollTop=7*60,30);
 }
 
 function renderMonthV(container){
@@ -2279,7 +2664,9 @@ function showRideDetail(id){
     ${r.km?`<div class="drow"><div class="drow-icon">📏</div><div><div class="drow-lbl">Distanz</div><div class="drow-val">ca. ${r.km} km</div></div></div>`:''}
     ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${zuzahlLabel(r.zuzahlung)}</div></div></div>`:''}
     ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
-    ${r.dispatchedTo?(()=>{const d=drivers.find(x=>x.id===r.dispatchedTo);return d?`<div class="drow"><div class="drow-icon">🚀</div><div><div class="drow-lbl">Fahrer</div><div class="drow-val" style="color:var(--green2)">✅ ${d.fname} ${d.lname} · ${d.phone||'–'}</div></div></div>`:'';})():''}
+    ${r.dispatchedTo?(()=>{const d=drivers.find(x=>x.id===r.dispatchedTo);const pb=dispatchPaymentBadge(r);return d?`<div class="drow"><div class="drow-icon">🚀</div><div><div class="drow-lbl">Fahrer</div><div class="drow-val" style="color:var(--green2)">✅ ${d.fname} ${d.lname} · ${r.dispatchMode==='app'?'📱 App':'📲 WhatsApp'}</div>${pb?`<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">${pb}</div>`:''}</div></div>`:'';})():''}
+    ${dispatchDriverMessagesHtml(r)}
+    ${r.passengerSignature?`<div class="drow"><div class="drow-icon">✍️</div><div><div class="drow-lbl">Fahrschein-Unterschrift</div><img src="${r.passengerSignature}" style="max-width:100%;background:#fff;border-radius:var(--r2);margin-top:6px;padding:6px" alt="Unterschrift"/></div></div>`:''}
     ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Aus Google importiert</div></div></div>`:''}
     ${r.source==='google'&&!r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Quelle</div><div class="drow-val">Importiert aus Google</div></div></div>`:''}
     ${buildExcelDetailHtml(r)}
@@ -4057,16 +4444,16 @@ function shareRideWA(){
   const time=document.getElementById('r-time').value;
   const from=document.getElementById('r-from').value;
   const to=document.getElementById('r-to').value;
-  const txt=`🚖 *TaxiPro Fahrtauftrag*\n\n👤 *Kunde:* ${name}\n📅 *Datum:* ${date}\n⏰ *Abfahrt:* ${time} Uhr\n📍 *Von:* ${from||'–'}\n🎯 *Nach:* ${to||'–'}\n\n🗺️ Navigation:\nhttps://www.google.com/maps/dir/${encodeURIComponent(from||'')}/${encodeURIComponent(to||'')}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+  const txt=`🚖 TaxiPro Fahrtauftrag\n\n👤 Kunde: ${name}\n📅 Datum: ${date}\n⏰ Abfahrt: ${time} Uhr\n📍 Von: ${from||'–'}\n🎯 Nach: ${to||'–'}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(from||'')}/${encodeURIComponent(to||'')}`;
+  if(!nativeShare(txt,'Fahrtauftrag')) window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
 }
 
 function shareRideWAById(id){
   const r=rides.find(x=>x.id===id);if(!r) return;
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   const name=c?c.fname+' '+c.lname:'Unbekannt';
-  const txt=`🚖 *TaxiPro Fahrtauftrag*\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${zuzahlLabel(r.zuzahlung)}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(r.from||'')}/${encodeURIComponent(r.to||'')}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+  const txt=`🚖 TaxiPro Fahrtauftrag\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${zuzahlLabel(r.zuzahlung)}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(r.from||'')}/${encodeURIComponent(r.to||'')}`;
+  if(!nativeShare(txt,'Fahrtauftrag')) window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
 }
 
 function shareCustomerWA(){
@@ -4097,6 +4484,8 @@ function renderDrivers(){
     const statusColors={frei:'var(--green2)',besetzt:'var(--red2)',pause:'var(--yellow2)'};
     const statusLabels={frei:'🟢 Verfügbar',besetzt:'🔴 Besetzt',pause:'⏸️ Pause'};
     const todayDispatched=rides.filter(r=>r.date===fmtD(new Date())&&r.dispatchedTo===d.id).length;
+    const docSigned=driverDocs.filter(x=>x.driverId===d.id&&x.status==='signed').length;
+    const docPending=driverDocs.filter(x=>x.driverId===d.id&&x.status!=='signed').length;
     return`<div class="driver-card">
       <div class="driver-top">
         <div class="driver-av-lg">${(d.fname||'?').charAt(0)}${(d.lname||'').charAt(0)}</div>
@@ -4108,10 +4497,13 @@ function renderDrivers(){
         <div><span class="dp-status ${d.status||'frei'}">${statusLabels[d.status||'frei']}</span></div>
       </div>
       ${todayDispatched>0?`<div style="font-size:11px;color:var(--green2);margin-bottom:8px">✅ ${todayDispatched} Fahrt${todayDispatched>1?'en':''} heute zugewiesen</div>`:''}
-      <div class="driver-btns">
-        <button class="cc-btn call" style="flex:1" onclick="window.open('tel:${d.phone}')">📞 Anrufen</button>
-        <button class="cc-btn wa" style="flex:1" onclick="window.open('https://wa.me/${normalizeWaPhone(d.phone)||d.phone.replace(/\D/g,'')}')">📱 WhatsApp</button>
-        <button class="cc-btn ride" style="flex:1" onclick="openDriverModal('${d.id}')">✏️ Bearbeiten</button>
+      ${docSigned||docPending?`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">📄 ${docSigned} unterschrieben${docPending?` · ${docPending} offen`:''}</div>`:''}
+      <div class="driver-btns" style="flex-wrap:wrap">
+        <button class="cc-btn dispatch" style="flex:1;min-width:45%" onclick="copyDriverAppLink('${d.id}')">📱 App-Link</button>
+        <button class="cc-btn ride" style="flex:1;min-width:45%" onclick="openDriverModal('${d.id}')">✏️ Bearbeiten</button>
+        <button class="cc-btn call" style="flex:1" onclick="window.open('tel:${d.phone}')">📞</button>
+        <button class="cc-btn wa" style="flex:1" onclick="window.open('https://wa.me/${normalizeWaPhone(d.phone)||d.phone.replace(/\D/g,'')}')">📲</button>
+        <button class="cc-btn map" style="flex:1" onclick="openDriverDocModal('${d.id}')">📄 Dok.</button>
       </div>
     </div>`;
   }).join('');
@@ -4129,8 +4521,12 @@ function openDriverModal(id=null){
     document.getElementById('d-car').value=d.car||'';
     document.getElementById('d-note').value=d.note||'';
     document.getElementById(`ds-${d.status||'frei'}`).checked=true;
+    document.getElementById('d-pin').value=d.pin||'';
+    updateDriverAppLinkBox(d);
   } else {
     ['d-fname','d-lname','d-phone','d-car','d-note'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('d-pin').value='';
+    document.getElementById('d-app-link-box').classList.add('hidden');
     document.getElementById('ds-frei').checked=true;
   }
   openM('modal-driver');
@@ -4142,19 +4538,24 @@ function saveDriver(){
   const phoneRaw=document.getElementById('d-phone').value.trim();
   if(!fname||!phoneRaw){toast('Name und Telefon pflicht','warn');return;}
   const phone=normalizeWaPhone(phoneRaw)||phoneRaw;
+  const pin=(document.getElementById('d-pin')?.value||'').trim();
   const data={
     fname,lname,
     phone,car:document.getElementById('d-car').value.trim(),
     status:document.querySelector('input[name="ds"]:checked').value,
     note:document.getElementById('d-note').value.trim(),
+    pin:pin||undefined,
   };
   if(editDriverId){
     const i=drivers.findIndex(d=>d.id===editDriverId);
-    if(i!==-1) drivers[i]={...drivers[i],...data};
+    if(i!==-1){drivers[i]=ensureDriverAccess({...drivers[i],...data});if(pin) drivers[i].pin=pin;}
     toast('Fahrer aktualisiert');
+    updateDriverAppLinkBox(drivers[i]);
   } else {
-    drivers.push({...data,id:uid()});
-    toast(`Fahrer ${fname} angelegt`);
+    const nd=ensureDriverAccess({...data,id:uid()});
+    if(pin) nd.pin=pin;
+    drivers.push(nd);
+    toast(`Fahrer ${fname} angelegt · PIN: ${nd.pin}`);
   }
   save();closeM('modal-driver');renderDrivers();updateCounts();
   if(pendingDispatchAfterDriver){
@@ -4231,14 +4632,17 @@ function openDriverPicker(rideId){
   } else {
     const statusLabels={frei:'Verfügbar',besetzt:'Besetzt',pause:'Pause'};
     el.innerHTML=drivers.map(d=>`
-      <div class="dp-driver-card" onclick="dispatchToDriver('${d.id}')">
+      <div class="dp-driver-card">
         <div class="dp-av">${(d.fname||'?').charAt(0)}${(d.lname||'').charAt(0)}</div>
         <div class="dp-info">
           <div class="dp-name">${d.fname} ${d.lname}</div>
           <div class="dp-phone">${d.phone}${d.car?` · ${d.car}`:''}</div>
         </div>
         <span class="dp-status ${d.status||'frei'}">${statusLabels[d.status||'frei']}</span>
-        <div class="dp-send-icon">📲</div>
+        <div class="dp-actions">
+          <button type="button" class="dp-act-btn app" onclick="dispatchToDriverApp('${d.id}')">📱 App</button>
+          <button type="button" class="dp-act-btn wa" onclick="dispatchToDriverWA('${d.id}')">📲 WA</button>
+        </div>
       </div>`).join('');
   }
   document.getElementById('driver-picker').classList.remove('hidden');
@@ -4251,20 +4655,41 @@ function closeDriverPicker(e){
   }
 }
 
-function dispatchToDriver(driverId){
-  if(!dispatchRideId) return;
-  const r=rides.find(x=>x.id===dispatchRideId);
+function assignRideToDriver(rideId,driverId,mode){
+  const r=rides.find(x=>x.id===rideId);
   const d=drivers.find(x=>x.id===driverId);
-  if(!r||!d) return;
-  const driverPhone=normalizeWaPhone(d.phone);
-  if(!driverPhone){toast('Fahrer hat keine gültige WhatsApp-Nummer','warn');return;}
+  if(!r||!d) return null;
+  ensureDriverAccess(d);
   r.dispatchedTo=driverId;
   r.dispatchedAt=Date.now();
+  r.dispatchMode=mode;
+  r.driverStatus='assigned';
+  if(!r.driverMessages) r.driverMessages=[];
   save();
-  const msg=buildDriverDispatchMessage(r);
+  return{r,d};
+}
+
+function dispatchToDriverApp(driverId){
+  if(!dispatchRideId) return;
+  const pair=assignRideToDriver(dispatchRideId,driverId,'app');
+  if(!pair) return;
+  closeDriverPicker();
+  toast(`📱 Fahrt an ${pair.d.fname} in der App zugewiesen`,'ok');
+  renderToday();
+  if(view==='calendar') renderCalendar();
+}
+
+function dispatchToDriverWA(driverId){
+  if(!dispatchRideId) return;
+  const rideId=dispatchRideId;
+  const pair=assignRideToDriver(rideId,driverId,'wa');
+  if(!pair) return;
+  const driverPhone=normalizeWaPhone(pair.d.phone);
+  if(!driverPhone){toast('Fahrer hat keine gültige WhatsApp-Nummer','warn');return;}
+  const msg=buildDriverDispatchMessage(pair.r);
   window.open(`https://wa.me/${driverPhone}?text=${encodeURIComponent(msg)}`,'_blank');
   closeDriverPicker();
-  toast(`✅ Fahrt an ${d.fname} per WhatsApp gesendet`);
+  toast(`✅ Fahrt an ${pair.d.fname} per WhatsApp gesendet`);
   renderToday();
   if(view==='calendar') renderCalendar();
 }
@@ -4275,7 +4700,12 @@ function dispatchToDriver(driverId){
 function openM(id){document.getElementById(id).classList.remove('hidden');}
 function closeM(id){document.getElementById(id).classList.add('hidden');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  closeMobileDrawer();
+  closeMobileSearch();
+  document.querySelectorAll('.overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
+});
 
 function toast(msg,type='ok'){
   const w=document.getElementById('toast-wrap');
@@ -4304,10 +4734,15 @@ function updateStatusBar(){
 }
 
 function updateCounts(){
+  const todayN=rides.filter(r=>r.date===fmtD(new Date())).length;
   document.getElementById('nb-cust').textContent=customers.length;
-  document.getElementById('nb-today').textContent=rides.filter(r=>r.date===fmtD(new Date())).length;
+  document.getElementById('nb-today').textContent=todayN;
   document.getElementById('nb-gc').textContent=gcContacts.length;
   document.getElementById('nb-drivers').textContent=drivers.length;
+  const mobToday=document.getElementById('mob-nb-today');
+  if(mobToday){mobToday.textContent=todayN;mobToday.style.display=todayN>0?'flex':'none';}
+  const mobDrv=document.getElementById('mob-nb-drivers');
+  if(mobDrv){mobDrv.textContent=drivers.length;mobDrv.style.display=drivers.length>0?'flex':'none';}
   const gcBtn=document.getElementById('gc-sync-btn');
   if(gcContacts.length>0){gcBtn.classList.add('synced');gcBtn.textContent=`✅ ${gcContacts.length}`;}
   updateStatusBar();
@@ -4683,7 +5118,7 @@ async function writeRideToExcelCloud(ride,cust){
 }
 
 function buildCloudPayload(){
-  return{version:2,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,
+  return{version:3,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,
     settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}};
 }
 
@@ -4727,7 +5162,7 @@ async function uploadCloudData(showToast=false){
   }catch(e){if(showToast) toast('Cloud-Sync fehlgeschlagen','err');}
 }
 
-async function loadCloudData(){
+async function loadCloudData(force){
   if(!msCloudReady()) return;
   try{
     await ensureCloudDataFile();
@@ -4736,14 +5171,16 @@ async function loadCloudData(){
     const data=await res.json();
     if(!data?.rides&&!data?.customers) return;
     const localTs=localStorage.getItem('tp_local_saved')||'';
-    if(data.exported&&localTs&&data.exported<=localTs) return;
+    if(!force&&data.exported&&localTs&&data.exported<=localTs) return;
     customers=data.customers||customers;
     rides=data.rides||rides;
     gcContacts=data.gcContacts||gcContacts;
     drivers=data.drivers||drivers;
+    driverDocs=data.driverDocs||driverDocs;
     saveLocalOnly();
     localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
     renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();
+    if(currentDriverId) onDriverCloudUpdated();
     toast('☁️ Daten aus Cloud geladen');
   }catch(e){}
 }
@@ -4753,6 +5190,7 @@ function saveLocalOnly(){
   localStorage.setItem('tp_r',JSON.stringify(rides));
   localStorage.setItem('tp_gc',JSON.stringify(gcContacts));
   localStorage.setItem('tp_d',JSON.stringify(drivers));
+  localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
   localStorage.setItem('tp_local_saved',new Date().toISOString());
 }
 
@@ -5345,6 +5783,628 @@ function promptExcelLink(customerId){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// MOBILE APP + PWA
+// ═══════════════════════════════════════════════════════════════
+let deferredInstallPrompt=null;
+
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+}
+function isMobileLayout(){return window.matchMedia('(max-width:700px)').matches;}
+
+function initMobileLayout(){
+  const mob=isMobileLayout();
+  document.documentElement.classList.toggle('is-mobile',mob);
+  const sw=document.getElementById('search-wrap');
+  if(sw){
+    if(mob&&!sw.classList.contains('mobile-open')) sw.classList.add('mobile-collapsed');
+    else{sw.classList.remove('mobile-collapsed');sw.classList.remove('mobile-open');}
+  }
+  if(mob&&!localStorage.getItem('tp_mobile_inited')){
+    if(calV==='month') setCalView('day');
+    localStorage.setItem('tp_mobile_inited','1');
+  }
+}
+
+function initMobileDrawer(){
+  const src=document.getElementById('sidebar');
+  const tgt=document.getElementById('mobile-drawer-content');
+  if(src&&tgt&&!tgt.dataset.ready){
+    tgt.innerHTML=src.innerHTML;
+    tgt.dataset.ready='1';
+  }
+}
+
+function openMobileDrawer(){
+  initMobileDrawer();
+  const bd=document.getElementById('mobile-drawer-backdrop');
+  const dr=document.getElementById('mobile-drawer');
+  if(bd){bd.classList.remove('hidden');bd.classList.add('open');}
+  if(dr){dr.classList.remove('hidden');dr.classList.add('open');dr.setAttribute('aria-hidden','false');}
+  document.body.classList.add('drawer-open');
+}
+
+function closeMobileDrawer(){
+  const bd=document.getElementById('mobile-drawer-backdrop');
+  const dr=document.getElementById('mobile-drawer');
+  if(bd){bd.classList.add('hidden');bd.classList.remove('open');}
+  if(dr){dr.classList.remove('open');dr.setAttribute('aria-hidden','true');setTimeout(()=>dr.classList.add('hidden'),280);}
+  document.body.classList.remove('drawer-open');
+}
+
+function toggleMobileSearch(){
+  const sw=document.getElementById('search-wrap');
+  if(!sw) return;
+  const open=sw.classList.toggle('mobile-open');
+  sw.classList.toggle('mobile-collapsed',!open);
+  if(open){const inp=document.getElementById('global-search');if(inp)setTimeout(()=>inp.focus(),80);}
+  else closeMobileSearch();
+}
+
+function closeMobileSearch(){
+  const sw=document.getElementById('search-wrap');
+  if(sw){sw.classList.remove('mobile-open');sw.classList.add('mobile-collapsed');}
+}
+
+function showPwaBanner(){document.getElementById('pwa-install-banner')?.classList.remove('hidden');}
+function dismissPwaBanner(){
+  localStorage.setItem('tp_pwa_dismiss','1');
+  document.getElementById('pwa-install-banner')?.classList.add('hidden');
+}
+
+async function installPwa(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    dismissPwaBanner();
+    return;
+  }
+  toast(isMobileLayout()?'Browser-Menü → „Zum Home-Bildschirm hinzufügen“':'Browser-Adressleiste → App installieren','warn');
+}
+
+function initPwa(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  }
+  if(isStandalone()) document.documentElement.classList.add('standalone');
+  window.addEventListener('beforeinstallprompt',(e)=>{
+    e.preventDefault();
+    deferredInstallPrompt=e;
+    const isDriver=!document.getElementById('driver-portal')?.classList.contains('hidden');
+    if(isDriver){
+      if(!localStorage.getItem('tp_driver_pwa_dismiss')&&!isStandalone())
+        document.getElementById('driver-pwa-banner')?.classList.remove('hidden');
+    }else if(!localStorage.getItem('tp_pwa_dismiss')&&!isStandalone()) showPwaBanner();
+  });
+  initMobileLayout();
+  initPullToRefresh();
+  window.addEventListener('resize',()=>initMobileLayout());
+}
+
+let pullStartY=0,pullActive=false,pullReady=false;
+function initPullToRefresh(){
+  const zones=[document.getElementById('content'),document.getElementById('driver-content')];
+  zones.forEach(zone=>{
+    if(!zone) return;
+    zone.addEventListener('touchstart',e=>{
+      const sc=zone.scrollTop||0;
+      if(sc>8) return;
+      pullStartY=e.touches[0].clientY;
+      pullActive=true;
+      pullReady=false;
+    },{passive:true});
+    zone.addEventListener('touchmove',e=>{
+      if(!pullActive) return;
+      const sc=zone.scrollTop||0;
+      if(sc>8){pullActive=false;return;}
+      const dy=e.touches[0].clientY-pullStartY;
+      const ind=document.getElementById('pull-refresh-indicator');
+      if(dy>40&&ind){
+        ind.classList.add('visible');
+        pullReady=dy>85;
+        ind.textContent=pullReady?'↑ Loslassen zum Aktualisieren':'↓ Ziehen zum Aktualisieren';
+      }
+    },{passive:true});
+    zone.addEventListener('touchend',async()=>{
+      if(!pullActive) return;
+      pullActive=false;
+      const ind=document.getElementById('pull-refresh-indicator');
+      if(pullReady&&ind){
+        ind.classList.add('loading');
+        ind.textContent='Aktualisiere';
+        await refreshMobileData();
+        ind.classList.remove('visible','loading');
+        ind.textContent='↓ Ziehen zum Aktualisieren';
+        toast('Aktualisiert','ok');
+      }else if(ind){ind.classList.remove('visible');}
+      pullReady=false;
+    },{passive:true});
+  });
+}
+
+async function refreshMobileData(){
+  if(!document.getElementById('driver-portal')?.classList.contains('hidden')){
+    await driverPollCloud(true);
+    return;
+  }
+  if(gcalConnected){try{await fullGCalSync();}catch(e){}}
+  if(msCloudReady()){try{await loadCloudData(true);}catch(e){}}
+  renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
+  if(view==='gcontacts') renderGCView();
+}
+
+function initDriverPwa(){
+  document.documentElement.classList.add('driver-mode');
+  const mlink=document.querySelector('link[rel="manifest"]');
+  if(mlink) mlink.setAttribute('href','manifest-driver.json');
+  const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+  if(appleTitle) appleTitle.setAttribute('content','Fahrer');
+  if(isStandalone()) document.documentElement.classList.add('driver-standalone');
+  if(deferredInstallPrompt&&!localStorage.getItem('tp_driver_pwa_dismiss')&&!isStandalone())
+    document.getElementById('driver-pwa-banner')?.classList.remove('hidden');
+}
+
+function showDriverPwaBanner(){document.getElementById('driver-pwa-banner')?.classList.remove('hidden');}
+function dismissDriverPwaBanner(){
+  localStorage.setItem('tp_driver_pwa_dismiss','1');
+  document.getElementById('driver-pwa-banner')?.classList.add('hidden');
+}
+async function installDriverPwa(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    dismissDriverPwaBanner();
+    return;
+  }
+  toast('Browser-Menü → „Zum Home-Bildschirm hinzufügen“','warn');
+}
+
+function useMyLocation(fieldId){
+  if(!navigator.geolocation){toast('Standort nicht verfügbar','warn');return;}
+  toast('Standort wird ermittelt…');
+  navigator.geolocation.getCurrentPosition(async(pos)=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    try{
+      const res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=de`,{headers:{'Accept-Language':'de'}});
+      const data=await res.json();
+      const addr=data.display_name||`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      const el=document.getElementById(fieldId);
+      if(el){el.value=addr;if(typeof calcDist==='function')calcDist();}
+      toast('Standort übernommen','ok');
+    }catch(e){
+      const el=document.getElementById(fieldId);
+      if(el) el.value=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      toast('Koordinaten übernommen','ok');
+    }
+  },()=>toast('Standortzugriff verweigert','err'),{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+}
+
+function nativeShare(text,title){
+  if(navigator.share){
+    navigator.share({title:title||'TaxiPro',text}).catch(()=>{});
+    return true;
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FAHRER-APP (Portal – kein Zentrale-Zugriff)
+// ═══════════════════════════════════════════════════════════════
+function ensureDriverAccess(d){
+  if(!d.accessToken) d.accessToken=uid();
+  if(!d.pin) d.pin=String(Math.floor(1000+Math.random()*9000));
+  return d;
+}
+
+function getDriverAppUrl(d){
+  const base=location.href.split('?')[0].split('#')[0];
+  return base+'?mode=driver&token='+encodeURIComponent(d.accessToken);
+}
+
+function regenerateDriverPin(){
+  const pin=String(Math.floor(1000+Math.random()*9000));
+  document.getElementById('d-pin').value=pin;
+  toast('Neue PIN: '+pin,'ok');
+}
+
+function updateDriverAppLinkBox(d){
+  const box=document.getElementById('d-app-link-box');
+  if(!box||!d) return;
+  ensureDriverAccess(d);
+  const url=getDriverAppUrl(d);
+  box.classList.remove('hidden');
+  box.innerHTML=`📱 <strong>Fahrer-App Link</strong> (PIN: <code>${d.pin}</code>)<br><code style="font-size:9px">${url}</code><br>
+    <button type="button" class="btn btn-sm btn-blue" style="margin-top:8px" onclick="copyDriverAppLink('${d.id}')">📋 Link kopieren</button>
+    <button type="button" class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="openDriverDocModal('${d.id}')">📄 Dokument senden</button>`;
+}
+
+function copyDriverAppLink(driverId){
+  const d=drivers.find(x=>x.id===driverId);if(!d) return;
+  ensureDriverAccess(d);
+  const txt=getDriverAppUrl(d)+'\nPIN: '+d.pin;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast('Link kopiert','ok'));
+  else toast('Link: '+getDriverAppUrl(d),'ok');
+}
+
+function initAppMode(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('mode')==='driver'||params.has('token')||location.hash==='#fahrer'){
+    document.getElementById('app').classList.add('hidden');
+    document.querySelector('.fab')?.classList.add('hidden');
+    document.getElementById('mobile-bottom-nav')?.classList.add('hidden');
+    document.getElementById('pwa-install-banner')?.classList.add('hidden');
+    document.getElementById('driver-portal').classList.remove('hidden');
+    document.title='TaxiPro Fahrer';
+    initDriverPwa();
+    initDriverAppAsync(params);
+    return true;
+  }
+  return false;
+}
+
+async function initDriverAppAsync(params){
+  if(msCloudReady()) await loadCloudData(true);
+  const token=params.get('token');
+  if(token) driverLoginByToken(token);
+  else if(currentDriverId&&drivers.find(d=>d.id===currentDriverId)) showDriverMain(currentDriverId);
+  else showDriverLogin();
+  await requestDriverNotifications();
+  startDriverPolling();
+}
+
+async function ensureDriverDataLoaded(){
+  if(drivers.length) return;
+  if(msCloudReady()) await loadCloudData(true);
+}
+
+function showDriverLogin(){
+  currentDriverId=null;
+  sessionStorage.removeItem('tp_driver_session');
+  document.getElementById('driver-login').classList.remove('hidden');
+  const main=document.getElementById('driver-main');
+  main.classList.add('hidden');main.style.display='none';
+}
+
+function showDriverMain(driverId){
+  currentDriverId=driverId;
+  sessionStorage.setItem('tp_driver_session',driverId);
+  const d=drivers.find(x=>x.id===driverId);
+  if(!d){showDriverLogin();return;}
+  document.getElementById('driver-login').classList.add('hidden');
+  const main=document.getElementById('driver-main');
+  main.classList.remove('hidden');main.style.display='flex';
+  document.getElementById('drv-user-name').textContent=d.fname+' '+d.lname;
+  const today=rides.filter(r=>r.dispatchedTo===driverId&&r.date===fmtD(new Date())).length;
+  document.getElementById('drv-user-sub').textContent='Heute · '+today+' Fahrt'+(today!==1?'en':'');
+  driverKnownRideIds=new Set(rides.filter(r=>r.dispatchedTo===driverId).map(r=>r.id));
+  renderDriverRides();
+  renderDriverDocs();
+  switchDriverTab('rides');
+}
+
+async function driverLoginByPin(){
+  const pin=(document.getElementById('driver-pin-input')?.value||'').trim();
+  if(!pin){toast('PIN eingeben','warn');return;}
+  await ensureDriverDataLoaded();
+  const d=drivers.find(x=>String(x.pin)===pin);
+  if(!d){toast('PIN nicht gefunden – Cloud-Verbindung prüfen','err');return;}
+  showDriverMain(d.id);
+  toast('Willkommen, '+d.fname+'!','ok');
+}
+
+function driverLoginByToken(token){
+  const d=drivers.find(x=>x.accessToken===token);
+  if(!d){showDriverLogin();toast('Ungültiger Link – PIN eingeben','warn');return;}
+  if(document.getElementById('driver-pin-input')) document.getElementById('driver-pin-input').value=d.pin||'';
+  showDriverMain(d.id);
+}
+
+function driverLogout(){
+  stopDriverPolling();
+  showDriverLogin();
+  document.getElementById('driver-pin-input').value='';
+}
+
+function switchDriverTab(tab){
+  document.querySelectorAll('.drv-nav-item').forEach(b=>b.classList.toggle('active',b.dataset.drvTab===tab));
+  document.getElementById('driver-rides-panel').classList.toggle('hidden',tab!=='rides');
+  document.getElementById('driver-docs-panel').classList.toggle('hidden',tab!=='docs');
+}
+
+function getDriverRides(driverId){
+  return rides.filter(r=>r.dispatchedTo===driverId&&r.dispatchMode==='app')
+    .sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+}
+
+function getRideCustomerBrief(r){
+  const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
+  return{name:c?c.fname+' '+c.lname:(r.customerName||'Kunde'),phone:c?.phone||''};
+}
+
+function paymentBadgeHtml(r){
+  if(!r.paymentMark) return '';
+  const labels={kts:'KTS / KK',eigen:'Eigenleistung',bezahlt:'Bezahlt',befreit:'Befreit'};
+  return `<span class="pay-badge ${r.paymentMark==='eigen'?'eigen':r.paymentMark==='kts'?'kts':'bezahlt'}">${labels[r.paymentMark]||r.paymentMark}</span>`;
+}
+
+function buildDriverRideCard(r){
+  const cust=getRideCustomerBrief(r);
+  const vis=rideVisualClass(r);
+  const done=r.driverStatus==='completed';
+  const badges=[paymentBadgeHtml(r),r.passengerSignature?'<span class="pay-badge sig">✍️ Unterschrift</span>':''].filter(Boolean).join('');
+  const msgs=(r.driverMessages||[]).slice(-3);
+  return`<div class="drv-ride-card ${vis}${done?' done':''}" id="drv-ride-${r.id}">
+    <div class="drv-ride-head">
+      <div class="drv-ride-time">${r.time}</div>
+      <div class="drv-ride-meta">
+        <div class="drv-ride-name">${cust.name}</div>
+        <div class="drv-ride-addr">📍 ${r.from||'–'}</div>
+        <div class="drv-ride-addr">🎯 ${r.to||'–'}</div>
+        ${r.date!==fmtD(new Date())?`<div style="font-size:10px;color:var(--text3);margin-top:4px">📅 ${r.date}</div>`:''}
+      </div>
+    </div>
+    ${badges?`<div class="drv-ride-badges">${badges}</div>`:''}
+    <div class="drv-actions">
+      <button type="button" class="drv-btn maps" onclick="driverOpenMaps('${r.id}')">🗺️ Navigation</button>
+      ${cust.phone?`<button type="button" class="drv-btn" onclick="window.open('tel:${cust.phone.replace(/'/g,'')}')">📞 Anrufen</button>`:'<button type="button" class="drv-btn" disabled style="opacity:.4">📞 –</button>'}
+      <button type="button" class="drv-btn pay-kts${r.paymentMark==='kts'?' on':''}" onclick="markRidePayment('${r.id}','kts')">🏥 KTS</button>
+      <button type="button" class="drv-btn pay-eigen${r.paymentMark==='eigen'?' on':''}" onclick="markRidePayment('${r.id}','eigen')">💶 Eigenleist.</button>
+      <button type="button" class="drv-btn sig" onclick="openRideSignature('${r.id}')">✍️ Fahrschein</button>
+      <button type="button" class="drv-btn done-btn${done?' on':''}" onclick="markRideCompleted('${r.id}')">${done?'✅ Erledigt':'✓ Erledigt'}</button>
+    </div>
+    <div class="drv-msg-box">
+      <div class="drv-msg-list" id="drv-msgs-${r.id}">${msgs.map(m=>`<div class="drv-msg-item"><div class="drv-msg-from">${m.from==='driver'?'Du':'Zentrale'} · ${new Date(m.at).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</div>${m.text}</div>`).join('')||'<div style="font-size:11px;color:var(--text3)">Nachricht an Zentrale…</div>'}</div>
+      <div class="drv-msg-input-row">
+        <input type="text" id="drv-msg-in-${r.id}" placeholder="Nachricht an Zentrale…" onkeydown="if(event.key==='Enter')sendDriverRideMsg('${r.id}')"/>
+        <button type="button" class="btn btn-primary btn-sm" onclick="sendDriverRideMsg('${r.id}')">➤</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDriverRides(){
+  if(!currentDriverId) return;
+  const all=getDriverRides(currentDriverId);
+  const today=fmtD(new Date());
+  const todayRides=all.filter(r=>r.date===today);
+  const upcoming=all.filter(r=>r.date>today);
+  const elToday=document.getElementById('driver-rides-list');
+  const elUp=document.getElementById('driver-rides-upcoming');
+  elToday.innerHTML=todayRides.length?todayRides.map(buildDriverRideCard).join('')
+    :'<div class="empty" style="padding:32px 16px"><div class="ei">🚗</div><p>Keine Fahrten heute.<br>Die Zentrale weist dir Fahrten per App zu.</p></div>';
+  elUp.innerHTML=upcoming.length?upcoming.map(buildDriverRideCard).join('')
+    :'<p style="font-size:12px;color:var(--text3);padding:8px 0">Keine weiteren Fahrten geplant.</p>';
+}
+
+function renderDriverDocs(){
+  if(!currentDriverId) return;
+  const docs=driverDocs.filter(d=>d.driverId===currentDriverId).sort((a,b)=>b.createdAt-a.createdAt);
+  const pending=docs.filter(d=>d.status!=='signed').length;
+  const badge=document.getElementById('drv-docs-badge');
+  if(badge){badge.textContent=pending;badge.classList.toggle('hidden',!pending);}
+  const el=document.getElementById('driver-docs-list');
+  if(!docs.length){el.innerHTML='<div class="empty" style="padding:24px"><div class="ei">📄</div><p>Noch keine Dokumente von der Zentrale.</p></div>';return;}
+  el.innerHTML=docs.map(d=>`<div class="drv-doc-card ${d.status}" onclick="openDriverDocSign('${d.id}')">
+    <div class="drv-doc-title">${d.title}</div>
+    <div class="drv-doc-meta">${d.month||''} · ${d.type==='abrechnung'?'Abrechnung':d.type==='fahrschein'?'Fahrschein':'Dokument'} · ${d.status==='signed'?'✅ Unterschrieben':'⏳ Unterschrift nötig'}</div>
+  </div>`).join('');
+}
+
+function driverOpenMaps(rideId){
+  const r=rides.find(x=>x.id===rideId);if(!r) return;
+  openMapsRouteExternal(r.from||'',r.to||'');
+}
+
+function markRidePayment(rideId,mark){
+  const r=rides.find(x=>x.id===rideId);if(!r) return;
+  r.paymentMark=mark;
+  r.paymentMarkedAt=Date.now();
+  save();
+  renderDriverRides();
+  toast(mark==='kts'?'KTS markiert':'Eigenleistung markiert','ok');
+  notifyDispatchChange('Zahlung: '+rideId);
+}
+
+function markRideCompleted(rideId){
+  const r=rides.find(x=>x.id===rideId);if(!r) return;
+  r.driverStatus=r.driverStatus==='completed'?null:'completed';
+  r.driverCompletedAt=r.driverStatus==='completed'?Date.now():null;
+  save();
+  renderDriverRides();
+  toast(r.driverStatus==='completed'?'Fahrt abgeschlossen':'Wieder geöffnet','ok');
+}
+
+function sendDriverRideMsg(rideId){
+  const inp=document.getElementById('drv-msg-in-'+rideId);
+  const text=(inp?.value||'').trim();if(!text) return;
+  const r=rides.find(x=>x.id===rideId);if(!r) return;
+  if(!r.driverMessages) r.driverMessages=[];
+  r.driverMessages.push({from:'driver',text,at:Date.now()});
+  save();
+  inp.value='';
+  renderDriverRides();
+  notifyDispatchChange('Nachricht');
+}
+
+function openRideSignature(rideId){
+  sigContext={type:'ride',id:rideId};
+  document.getElementById('sig-modal-title').textContent='✍️ Fahrschein – Gast unterschreiben';
+  document.getElementById('sig-hint').textContent='Gast bitte mit dem Finger unterschreiben (Fahrschein / Dialysefahrt)';
+  openM('modal-signature');
+  initSignatureCanvas();
+}
+
+function openDriverDocSign(docId){
+  const doc=driverDocs.find(d=>d.id===docId);if(!doc) return;
+  if(doc.status==='signed'){viewSignedDriverDoc(docId);return;}
+  sigContext={type:'doc',id:docId};
+  document.getElementById('sig-modal-title').textContent='✍️ '+doc.title;
+  document.getElementById('sig-hint').textContent='Bitte als Fahrer unterschreiben und an die Zentrale zurücksenden.';
+  openM('modal-signature');
+  initSignatureCanvas();
+}
+
+function viewSignedDriverDoc(docId){
+  const doc=driverDocs.find(d=>d.id===docId);if(!doc) return;
+  document.getElementById('dispatch-doc-title').textContent=doc.title;
+  document.getElementById('dispatch-doc-body').innerHTML=`
+    ${doc.fileData?`<img src="${doc.fileData}" style="max-width:100%;border-radius:var(--r);margin-bottom:12px" alt="Dokument"/>`:''}
+    ${doc.signatureData?`<p style="font-size:12px;font-weight:700;margin-bottom:6px">Unterschrift:</p><img src="${doc.signatureData}" style="max-width:100%;background:#fff;border-radius:var(--r2);padding:8px"/>`:''}`;
+  document.getElementById('dispatch-doc-footer').innerHTML='<button class="btn btn-secondary" onclick="closeM(\'modal-dispatch-doc\')">Schließen</button>';
+  openM('modal-dispatch-doc');
+}
+
+let sigDrawing=false,sigLast=null;
+function initSignatureCanvas(){
+  const canvas=document.getElementById('sig-canvas');
+  if(!canvas) return;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=Math.floor(rect.width)||300;
+  canvas.height=180;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle='#1a2332';ctx.lineWidth=2.5;ctx.lineCap='round';
+  const pos=e=>{const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(canvas.width/r.width),y:(t.clientY-r.top)*(canvas.height/r.height)};};
+  const start=e=>{e.preventDefault();sigDrawing=true;sigLast=pos(e);};
+  const move=e=>{if(!sigDrawing)return;e.preventDefault();const p=pos(e);ctx.beginPath();ctx.moveTo(sigLast.x,sigLast.y);ctx.lineTo(p.x,p.y);ctx.stroke();sigLast=p;};
+  const end=()=>{sigDrawing=false;};
+  canvas.onmousedown=start;canvas.onmousemove=move;canvas.onmouseup=end;canvas.onmouseleave=end;
+  canvas.ontouchstart=start;canvas.ontouchmove=move;canvas.ontouchend=end;
+}
+
+function clearSignatureCanvas(){
+  const canvas=document.getElementById('sig-canvas');if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+
+function closeSignatureModal(){closeM('modal-signature');sigContext={type:null,id:null};}
+
+function saveSignature(){
+  const canvas=document.getElementById('sig-canvas');
+  if(!canvas||!sigContext.type){closeSignatureModal();return;}
+  const data=canvas.toDataURL('image/png');
+  if(sigContext.type==='ride'){
+    const r=rides.find(x=>x.id===sigContext.id);
+    if(r){r.passengerSignature=data;r.signatureAt=Date.now();save();renderDriverRides();toast('Fahrschein gespeichert','ok');}
+  }else if(sigContext.type==='doc'){
+    const doc=driverDocs.find(d=>d.id===sigContext.id);
+    if(doc){doc.signatureData=data;doc.status='signed';doc.signedAt=Date.now();save();renderDriverDocs();toast('Dokument unterschrieben & gesendet','ok');}
+  }
+  closeSignatureModal();
+  notifyDispatchChange('Unterschrift');
+}
+
+function openDriverDocModal(driverId){
+  const sel=document.getElementById('dd-driver');
+  if(sel) sel.innerHTML=drivers.map(d=>`<option value="${d.id}"${d.id===driverId?' selected':''}>${d.fname} ${d.lname}</option>`).join('');
+  document.getElementById('dd-title').value='';
+  document.getElementById('dd-month').value=new Date().toISOString().slice(0,7);
+  pendingDriverDocFile=null;
+  document.getElementById('dd-file-name').style.display='none';
+  openM('modal-driver-doc');
+}
+
+function onDriverDocFileSelect(input){
+  const file=input.files?.[0];if(!file) return;
+  if(file.size>4*1024*1024){toast('Datei max. 4 MB','warn');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{pendingDriverDocFile={name:file.name,data:e.target.result,type:file.type};document.getElementById('dd-file-name').textContent='✅ '+file.name;document.getElementById('dd-file-name').style.display='block';};
+  reader.readAsDataURL(file);
+}
+
+function sendDriverDoc(){
+  const driverId=document.getElementById('dd-driver').value;
+  const title=document.getElementById('dd-title').value.trim();
+  if(!driverId||!title){toast('Fahrer und Titel pflicht','warn');return;}
+  if(!pendingDriverDocFile){toast('Datei hochladen','warn');return;}
+  driverDocs.push({id:uid(),driverId,title,month:document.getElementById('dd-month').value,type:document.getElementById('dd-type').value,
+    fileData:pendingDriverDocFile.data,fileName:pendingDriverDocFile.name,fileType:pendingDriverDocFile.type,
+    status:'pending',createdAt:Date.now(),signedAt:null,signatureData:null});
+  save();closeM('modal-driver-doc');
+  toast('Dokument an Fahrer gesendet','ok');
+  notifyDriverForDoc(driverId,title);
+}
+
+function notifyDriverForDoc(driverId,title){
+  if(currentDriverId===driverId) renderDriverDocs();
+  pushDriverNotification('📄 Neues Dokument',title);
+}
+
+function notifyDispatchChange(_hint){
+  scheduleCloudSave();
+}
+
+async function requestDriverNotifications(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='default') await Notification.requestPermission();
+}
+
+function pushDriverNotification(title,body,tag){
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  try{
+    if(navigator.serviceWorker?.controller){
+      navigator.serviceWorker.controller.postMessage({type:'notify',title,body,tag:tag||'taxipro-driver'});
+    }else new Notification(title,{body,tag:tag||'taxipro-driver',icon:'./icon-192.png'});
+  }catch(e){}
+}
+
+function checkDriverNewAssignments(){
+  if(!currentDriverId) return;
+  const mine=rides.filter(r=>r.dispatchedTo===currentDriverId&&r.dispatchMode==='app');
+  const newOnes=mine.filter(r=>!driverKnownRideIds.has(r.id));
+  newOnes.forEach(r=>{
+    driverKnownRideIds.add(r.id);
+    const c=getRideCustomerBrief(r);
+    pushDriverNotification('🚗 Neue Fahrt',r.time+' Uhr · '+c.name+' · '+r.date,'ride-'+r.id);
+  });
+  const newDocs=driverDocs.filter(d=>d.driverId===currentDriverId&&d.status==='pending'&&!d._notified);
+  newDocs.forEach(d=>{d._notified=true;pushDriverNotification('📄 Dokument',d.title,'doc-'+d.id);});
+  if(newOnes.length) renderDriverRides();
+}
+
+function onDriverCloudUpdated(){
+  checkDriverNewAssignments();
+  renderDriverRides();
+  renderDriverDocs();
+  const dot=document.getElementById('drv-sync-dot');
+  if(dot){dot.classList.add('live');setTimeout(()=>dot.classList.remove('live'),2000);}
+}
+
+async function driverPollCloud(manual){
+  if(msCloudReady()) await loadCloudData(true);
+  else if(manual) toast('Cloud nicht verbunden – Zentrale muss Microsoft Cloud aktivieren','warn');
+  checkDriverNewAssignments();
+  if(manual&&!msCloudReady()) renderDriverRides();
+}
+
+function startDriverPolling(){
+  stopDriverPolling();
+  if(!document.getElementById('driver-portal')||document.getElementById('driver-portal').classList.contains('hidden')) return;
+  driverPollCloud(false);
+  driverPollTimer=setInterval(()=>{if(currentDriverId) driverPollCloud(false);},45000);
+}
+
+function stopDriverPolling(){clearInterval(driverPollTimer);driverPollTimer=null;}
+
+function dispatchPaymentBadge(r){
+  if(!r.paymentMark&&!r.passengerSignature) return '';
+  let h=paymentBadgeHtml(r);
+  if(r.passengerSignature) h+='<span class="pay-badge sig">✍️ Fahrschein</span>';
+  if(r.driverStatus==='completed') h+='<span class="pay-badge bezahlt">✓ Erledigt</span>';
+  return h;
+}
+
+function dispatchDriverMessagesHtml(r){
+  if(!r.driverMessages?.length) return '';
+  return`<div class="drow"><div class="drow-icon">💬</div><div><div class="drow-lbl">Fahrer-Nachrichten</div>
+    ${r.driverMessages.map(m=>`<div class="drow-val" style="font-size:11px;margin-top:4px"><strong>${m.from==='driver'?'Fahrer':'Zentrale'}:</strong> ${m.text}</div>`).join('')}
+  </div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // DEMO DATA ENTFERNEN
 // ═══════════════════════════════════════════════════════════════
 function purgeDemoData(){
@@ -5368,20 +6428,23 @@ function purgeDemoData(){
 // INIT
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
+initPwa();
 initTheme();
 initMicrosoftCloud();
-setContactViewMode(contactViewMode);
-setContactSort(contactSort);
-checkDataMigration();
-checkCloudSetup();
-updateCounts();
-updateGCalBtn();
-renderMiniCal();
-renderCalendar();
-renderCustomers();
-if(gcalConnected) trySilentGoogleRefresh();
-updateMapsKeyStatus();
-setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
+if(!initAppMode()){
+  setContactViewMode(contactViewMode);
+  setContactSort(contactSort);
+  checkDataMigration();
+  checkCloudSetup();
+  updateCounts();
+  updateGCalBtn();
+  renderMiniCal();
+  renderCalendar();
+  renderCustomers();
+  if(gcalConnected) trySilentGoogleRefresh();
+  updateMapsKeyStatus();
+  setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
+}
 </script>
 </body>
 </html>
