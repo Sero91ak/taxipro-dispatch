@@ -16,35 +16,43 @@
 (function(){
   var base=location.pathname.replace(/[^/]*$/,'')||'/';
   var p=new URLSearchParams(location.search);
+  if(location.hash.length>1){new URLSearchParams(location.hash.slice(1)).forEach(function(v,k){if(!p.has(k))p.set(k,v);});}
   var mode=p.get('mode');
   var onDriverHtml=/driver\.html$/i.test(location.pathname);
-  var driver=onDriverHtml||mode==='driver'||p.has('token')||p.has('boot');
-  try{
-    if(!driver&&localStorage.getItem('tp_app_role')==='driver') driver=true;
-  }catch(e){}
+  var driver=onDriverHtml||mode==='driver'||p.has('token')||p.has('boot')||p.has('t')||(p.has('d')&&p.has('t'));
+  var standalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
+  try{if(!driver&&standalone&&localStorage.getItem('tp_app_role')==='driver')driver=true;}catch(e){}
+  if(!driver&&mode!=='dispatch'&&standalone){
+    try{if(localStorage.getItem('tp_app_role')==='driver'){
+      var rq=new URLSearchParams();
+      var tid=localStorage.getItem('tp_driver_id'),tt=localStorage.getItem('tp_driver_token'),tp=localStorage.getItem('tp_driver_pin');
+      if(tid)rq.set('d',tid);if(tt)rq.set('t',tt);if(tp)rq.set('p',tp);
+      var tfn=localStorage.getItem('tp_driver_fn'),tln=localStorage.getItem('tp_driver_ln');
+      if(tfn)rq.set('fn',tfn);if(tln)rq.set('ln',tln);
+      location.replace(base+'driver.html?'+rq.toString());return;
+    }}catch(e){}
+  }
   if(p.get('source')==='pwa'&&mode!=='driver'&&mode!=='dispatch'){
-    location.replace(base+'driver.html?source=pwa');
+    try{
+      var pq=new URLSearchParams();pq.set('source','pwa');
+      var id=localStorage.getItem('tp_driver_id'),tk=localStorage.getItem('tp_driver_token'),pn=localStorage.getItem('tp_driver_pin');
+      if(id)pq.set('d',id);if(tk)pq.set('t',tk);if(pn)pq.set('p',pn);
+      location.replace(base+'driver.html?'+pq.toString());
+    }catch(e){location.replace(base+'driver.html?source=pwa');}
     return;
   }
   if(driver){
     document.documentElement.className='driver-boot';
-    var m=document.getElementById('app-manifest');
-    if(m) m.setAttribute('href','manifest-driver.json');
-    var t=document.querySelector('meta[name="apple-mobile-web-app-title"]');
-    if(t) t.setAttribute('content','Fahrer');
+    var m=document.getElementById('app-manifest');if(m)m.setAttribute('href','manifest-driver.json');
+    var mt=document.querySelector('meta[name="apple-mobile-web-app-title"]');if(mt)mt.setAttribute('content','Fahrer');
     document.title='TaxiPro Fahrer';
     try{
-      var boot=p.get('boot')||localStorage.getItem('tp_driver_boot');
-      var token=p.get('token')||localStorage.getItem('tp_driver_token');
-      var start=base+'driver.html';
-      if(token||boot){
-        var sqs=new URLSearchParams();
-        if(token) sqs.set('token',token);
-        if(boot) sqs.set('boot',boot);
-        start+='?'+sqs.toString();
-      }
-      var as=document.getElementById('apple-start-url');
-      if(as) as.setAttribute('content',start);
+      var sqs=new URLSearchParams();
+      var did=p.get('d')||localStorage.getItem('tp_driver_id');
+      var tkn=p.get('t')||p.get('token')||localStorage.getItem('tp_driver_token');
+      var pin=p.get('p')||localStorage.getItem('tp_driver_pin');
+      if(did)sqs.set('d',did);if(tkn)sqs.set('t',tkn);if(pin)sqs.set('p',pin);
+      var as=document.getElementById('apple-start-url');if(as)as.setAttribute('content',base+'driver.html'+(sqs.toString()?'?'+sqs:''));
     }catch(e){}
   }
 })();
@@ -1095,7 +1103,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <div class="drv-login-box">
       <div class="logo">TaxiPro <em>Fahrer</em></div>
       <p class="drv-login-sub">Deine Fahrten, Navigation &amp; Team-Chat.<br>PIN von der Zentrale eingeben.</p>
-      <input type="password" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
+      <input type="tel" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="PIN" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
       <button type="button" class="drv-login-btn" id="driver-login-btn" onclick="driverLoginByPin().catch(e=>{console.error(e);toast('Anmeldung fehlgeschlagen – bitte erneut versuchen','err');})">Anmelden</button>
       <p id="driver-login-error" style="display:none;font-size:12px;color:#f87171;margin-top:12px;line-height:1.5;padding:10px;background:rgba(248,113,113,.1);border-radius:10px"></p>
       <div class="drv-install-card" id="driver-install-inline">
@@ -6327,48 +6335,79 @@ function decodeDriverBoot(str){
   }catch(e){return null;}
 }
 
-function isDriverAppMode(){
+function getAllDriverParams(){
   const p=new URLSearchParams(location.search);
+  if(location.hash.length>1) new URLSearchParams(location.hash.slice(1)).forEach((v,k)=>{if(!p.has(k))p.set(k,v);});
+  return p;
+}
+
+function isDriverAppMode(){
+  const p=getAllDriverParams();
   if(p.get('mode')==='dispatch') return false;
-  if(p.get('mode')==='driver'||p.has('token')||p.has('boot')||location.hash==='#fahrer') return true;
+  if(p.get('mode')==='driver'||p.has('token')||p.has('boot')||p.has('t')||(p.has('d')&&p.has('t'))||location.hash==='#fahrer') return true;
   if(/driver\.html$/i.test(location.pathname)) return true;
   if(document.documentElement.classList.contains('driver-boot')) return true;
   try{
-    if(p.get('source')==='pwa'&&localStorage.getItem('tp_app_role')==='driver') return true;
-    if(isStandalone()&&localStorage.getItem('tp_app_role')==='driver') return true;
+    if((p.get('source')==='pwa'||isStandalone())&&localStorage.getItem('tp_app_role')==='driver') return true;
   }catch(e){}
   return false;
 }
 
 function getDriverBootParam(){
-  return new URLSearchParams(location.search).get('boot')||localStorage.getItem('tp_driver_boot')||sessionStorage.getItem('tp_driver_boot')||'';
+  return getAllDriverParams().get('boot')||localStorage.getItem('tp_driver_boot')||sessionStorage.getItem('tp_driver_boot')||'';
 }
 
 function getDriverTokenParam(){
-  return new URLSearchParams(location.search).get('token')||localStorage.getItem('tp_driver_token')||sessionStorage.getItem('tp_driver_token')||'';
+  const p=getAllDriverParams();
+  return p.get('t')||p.get('token')||localStorage.getItem('tp_driver_token')||sessionStorage.getItem('tp_driver_token')||'';
+}
+
+function resolveDriverFromLinkParams(params){
+  const id=params.get('d');
+  const token=params.get('t')||params.get('token');
+  const pin=String(params.get('p')||'').trim();
+  if(id&&token){
+    return{id,fname:params.get('fn')||'',lname:params.get('ln')||'',pin,accessToken:token,phone:params.get('ph')||'',car:params.get('c')||'',status:'frei'};
+  }
+  const boot=params.get('boot');
+  if(boot) return decodeDriverBoot(boot);
+  return null;
 }
 
 function persistDriverLinkParams(params){
   const boot=params.get('boot');
-  const token=params.get('token');
-  if(boot){
-    localStorage.setItem('tp_driver_boot',boot);
-    sessionStorage.setItem('tp_driver_boot',boot);
-  }
-  if(token){
-    localStorage.setItem('tp_driver_token',token);
-    sessionStorage.setItem('tp_driver_token',token);
-  }
-  if(boot||token||params.get('mode')==='driver') localStorage.setItem('tp_app_role','driver');
+  const token=params.get('t')||params.get('token');
+  const id=params.get('d');
+  const pin=params.get('p');
+  const fn=params.get('fn');
+  const ln=params.get('ln');
+  if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
+  if(token){localStorage.setItem('tp_driver_token',token);sessionStorage.setItem('tp_driver_token',token);}
+  if(id) localStorage.setItem('tp_driver_id',id);
+  if(pin) localStorage.setItem('tp_driver_pin',String(pin));
+  if(fn) localStorage.setItem('tp_driver_fn',fn);
+  if(ln) localStorage.setItem('tp_driver_ln',ln);
+  if(boot||token||id||params.get('mode')==='driver') localStorage.setItem('tp_app_role','driver');
 }
 
 function captureDriverLinkAuth(params){
   persistDriverLinkParams(params);
+  const d=resolveDriverFromLinkParams(params);
+  if(d){upsertDriverLocal(d);syncDriverAuthRegistry();return d;}
   const boot=params.get('boot')||localStorage.getItem('tp_driver_boot');
   if(boot){
-    const d=decodeDriverBoot(boot);
-    if(d){upsertDriverLocal(d);syncDriverAuthRegistry();return d;}
+    const bd=decodeDriverBoot(boot);
+    if(bd){upsertDriverLocal(bd);syncDriverAuthRegistry();return bd;}
   }
+  try{
+    const id=localStorage.getItem('tp_driver_id');
+    const token=localStorage.getItem('tp_driver_token');
+    const pin=localStorage.getItem('tp_driver_pin');
+    if(id&&token){
+      const sd={id,fname:localStorage.getItem('tp_driver_fn')||'',lname:localStorage.getItem('tp_driver_ln')||'',pin:pin||'',accessToken:token,status:'frei'};
+      upsertDriverLocal(sd);syncDriverAuthRegistry();return sd;
+    }
+  }catch(e){}
   return null;
 }
 
@@ -6382,7 +6421,21 @@ function reapplyDriverBootAuth(){
 
 function findDriverByPin(pin){
   const p=String(pin||'').trim();
-  return drivers.find(x=>String(x.pin||'').trim()===p);
+  let d=drivers.find(x=>String(x.pin||'').trim()===p);
+  if(d) return d;
+  try{
+    const reg=JSON.parse(localStorage.getItem('tp_driver_auth')||'[]');
+    const hit=reg.find(x=>String(x.pin||'').trim()===p);
+    if(hit){upsertDriverLocal(hit);return drivers.find(x=>x.id===hit.id)||hit;}
+    const sid=localStorage.getItem('tp_driver_id');
+    const spin=localStorage.getItem('tp_driver_pin');
+    const stoken=localStorage.getItem('tp_driver_token');
+    if(spin&&String(spin).trim()===p&&sid&&stoken){
+      const sd={id:sid,fname:localStorage.getItem('tp_driver_fn')||'',lname:localStorage.getItem('tp_driver_ln')||'',pin:spin,accessToken:stoken,status:'frei'};
+      upsertDriverLocal(sd);return sd;
+    }
+  }catch(e){}
+  return null;
 }
 
 function findDriverByToken(token){
@@ -6392,8 +6445,14 @@ function findDriverByToken(token){
 function getDriverAppUrl(d){
   ensureDriverAccess(d);
   syncDriverAuthRegistry();
+  const qs=new URLSearchParams();
+  qs.set('d',d.id);
+  qs.set('t',d.accessToken);
+  qs.set('p',String(d.pin||''));
+  if(d.fname) qs.set('fn',d.fname);
+  if(d.lname) qs.set('ln',d.lname);
   const base=location.origin+location.pathname.replace(/[^/]*$/,'')+'driver.html';
-  return base+'?token='+encodeURIComponent(d.accessToken)+'&boot='+encodeURIComponent(encodeDriverBoot(d));
+  return base+'?'+qs.toString();
 }
 
 function regenerateDriverPin(){
@@ -6410,19 +6469,30 @@ function updateDriverAppLinkBox(d){
   box.classList.remove('hidden');
   box.innerHTML=`📱 <strong>Fahrer-App Link</strong> (PIN: <code>${d.pin}</code>)<br><span style="font-size:11px;color:var(--text2)">Fahrer öffnet Link in <strong>Safari</strong> → Teilen → Zum Home-Bildschirm</span><br><code style="font-size:9px;word-break:break-all">${url}</code><br>
     <button type="button" class="btn btn-sm btn-blue" style="margin-top:8px" onclick="copyDriverAppLink('${d.id}')">📋 Link kopieren</button>
+    <button type="button" class="btn btn-sm btn-green" style="margin-top:8px" onclick="shareDriverAppLink('${d.id}')">📲 Per WhatsApp senden</button>
     <button type="button" class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="openDriverDocModal('${d.id}')">📄 Dokument senden</button>`;
 }
 
 function copyDriverAppLink(driverId){
   const d=drivers.find(x=>x.id===driverId);if(!d) return;
   ensureDriverAccess(d);
-  const txt=getDriverAppUrl(d)+'\nPIN: '+d.pin;
-  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast('Link kopiert','ok'));
-  else toast('Link: '+getDriverAppUrl(d),'ok');
+  const url=getDriverAppUrl(d);
+  const txt='🚕 TaxiPro Fahrer-App\n\n👉 LINK ANTIPPEN (nicht nur PIN!):\n'+url+'\n\nPIN: '+d.pin+'\n\nIn Safari öffnen → anmelden → Zum Home-Bildschirm';
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast('Link + PIN kopiert','ok'));
+  else toast('Link: '+url,'ok');
+}
+
+function shareDriverAppLink(driverId){
+  const d=drivers.find(x=>x.id===driverId);if(!d) return;
+  ensureDriverAccess(d);
+  const url=getDriverAppUrl(d);
+  const txt='TaxiPro Fahrer-App für '+d.fname+'\n'+url+'\nPIN: '+d.pin;
+  if(navigator.share) navigator.share({title:'TaxiPro Fahrer',text:txt,url}).catch(()=>copyDriverAppLink(driverId));
+  else copyDriverAppLink(driverId);
 }
 
 function initAppMode(){
-  const params=new URLSearchParams(location.search);
+  const params=getAllDriverParams();
   if(isDriverAppMode()){
     document.documentElement.classList.add('driver-boot');
     document.getElementById('app').classList.add('hidden');
@@ -6488,8 +6558,11 @@ function updateDriverUrlForInstall(d){
   ensureDriverAccess(d);
   try{
     const qs=new URLSearchParams();
-    qs.set('token',d.accessToken);
-    qs.set('boot',encodeDriverBoot(d));
+    qs.set('d',d.id);
+    qs.set('t',d.accessToken);
+    qs.set('p',String(d.pin||''));
+    if(d.fname) qs.set('fn',d.fname);
+    if(d.lname) qs.set('ln',d.lname);
     const base=(location.pathname.replace(/[^/]*$/,'')||'/')+'driver.html?'+qs.toString();
     history.replaceState(null,'',base);
     persistDriverLinkParams(qs);
@@ -6548,19 +6621,24 @@ async function driverLoginByPin(silent){
   if(!pin){if(!silent) toast('PIN eingeben','warn');return false;}
   if(btn){btn.disabled=true;btn.textContent='Anmelden…';}
   try{
+    captureDriverLinkAuth(getAllDriverParams());
     await ensureDriverDataLoaded();
     let d=findDriverByPin(pin);
+    if(!d){
+      const bd=resolveDriverFromLinkParams(getAllDriverParams());
+      if(bd&&String(bd.pin).trim()===pin){upsertDriverLocal(bd);d=findDriverByPin(pin)||bd;}
+    }
     if(!d){
       const boot=getDriverBootParam();
       if(boot){
         const bd=decodeDriverBoot(boot);
-        if(bd&&String(bd.pin).trim()===pin){upsertDriverLocal(bd);d=findDriverByPin(pin);}
+        if(bd&&String(bd.pin).trim()===pin){upsertDriverLocal(bd);d=findDriverByPin(pin)||bd;}
       }
     }
     if(!d){
-      const msg='PIN nicht gefunden. Bitte den <strong>kompletten Link von der Zentrale</strong> in Safari öffnen (nicht nur die PIN). In der Zentrale: Fahrer → <strong>Link kopieren</strong> → per WhatsApp senden → Link antippen.';
+      const msg='PIN nicht gefunden.<br><br>1. <strong>Link antippen</strong> (nicht nur PIN abschreiben)<br>2. In <strong>Safari</strong> öffnen<br>3. Zentrale: Fahrer → <strong>Link kopieren</strong> → neu senden<br>4. Altes TaxiPro-Icon vom Handy löschen';
       if(errEl){errEl.innerHTML=msg;errEl.style.display='block';}
-      if(!silent) toast('PIN nicht gefunden – Link von Zentrale öffnen','err');
+      if(!silent) toast('Bitte Link von Zentrale antippen','err');
       return false;
     }
     showDriverMain(d.id);
@@ -6572,8 +6650,13 @@ async function driverLoginByPin(silent){
 }
 
 async function driverLoginByToken(token){
+  captureDriverLinkAuth(getAllDriverParams());
   await ensureDriverDataLoaded();
   let d=findDriverByToken(token);
+  if(!d){
+    const bd=resolveDriverFromLinkParams(getAllDriverParams());
+    if(bd&&bd.accessToken===token){upsertDriverLocal(bd);d=bd;}
+  }
   if(!d){
     const boot=getDriverBootParam();
     if(boot){
@@ -7048,7 +7131,7 @@ function purgeDemoData(){
 // INIT
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
-if(isDriverAppMode()) captureDriverLinkAuth(new URLSearchParams(location.search));
+if(isDriverAppMode()) captureDriverLinkAuth(getAllDriverParams());
 if(drivers.length) syncDriverAuthRegistry();
 initPwa();
 initTheme();

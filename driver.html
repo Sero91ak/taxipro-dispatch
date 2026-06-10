@@ -31,19 +31,29 @@ a{color:var(--teal)}
 <script>
 (function(){
   var p=new URLSearchParams(location.search);
-  var boot=p.get('boot');
-  var token=p.get('token');
+  if(location.hash.length>1){new URLSearchParams(location.hash.slice(1)).forEach(function(v,k){if(!p.has(k))p.set(k,v);});}
+  var boot=p.get('boot'),token=p.get('t')||p.get('token'),id=p.get('d'),pin=p.get('p');
   try{
     localStorage.setItem('tp_app_role','driver');
     if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
     if(token){localStorage.setItem('tp_driver_token',token);sessionStorage.setItem('tp_driver_token',token);}
-    if(!boot) boot=localStorage.getItem('tp_driver_boot');
+    if(id) localStorage.setItem('tp_driver_id',id);
+    if(pin) localStorage.setItem('tp_driver_pin',pin);
+    if(p.get('fn')) localStorage.setItem('tp_driver_fn',p.get('fn'));
+    if(p.get('ln')) localStorage.setItem('tp_driver_ln',p.get('ln'));
     if(!token) token=localStorage.getItem('tp_driver_token');
+    if(!id) id=localStorage.getItem('tp_driver_id');
+    if(!pin) pin=localStorage.getItem('tp_driver_pin');
+    if(!boot) boot=localStorage.getItem('tp_driver_boot');
   }catch(e){}
   var qs=new URLSearchParams();
   qs.set('mode','driver');
   if(p.get('source')) qs.set('source',p.get('source'));
-  if(token) qs.set('token',token);
+  if(id) qs.set('d',id);
+  if(token) qs.set('t',token);
+  if(pin) qs.set('p',pin);
+  if(p.get('fn')) qs.set('fn',p.get('fn'));
+  if(p.get('ln')) qs.set('ln',p.get('ln'));
   if(boot) qs.set('boot',boot);
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(function(){});
