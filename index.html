@@ -846,6 +846,10 @@ html.is-mobile .dp-sheet{max-height:92dvh;overflow-y:auto}
 html.driver-mode #pwa-install-banner{display:none!important}
 #driver-pwa-banner{position:fixed;bottom:calc(var(--mob-nav-h) + var(--safe-bottom) + 8px);left:12px;right:12px;background:#122338;border:1px solid #14b8a6;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:5020;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 html.driver-standalone #driver-pwa-banner{display:none!important}
+#pwa-install-banner:not(.hidden),#driver-pwa-banner:not(.hidden){display:flex!important}
+#modal-pwa-install .pwa-steps{list-style:none;padding:0;margin:12px 0}
+#modal-pwa-install .pwa-steps li{padding:10px 12px;margin-bottom:8px;background:var(--bg3);border-radius:var(--r2);font-size:13px;line-height:1.45}
+html.driver-mode #modal-pwa-install .pwa-steps li{background:#122338}
 .mob-week-agenda{display:none}
 </style>
 </head>
@@ -933,6 +937,8 @@ html.driver-standalone #driver-pwa-banner{display:none!important}
   <div class="nav-item" onclick="calFilterType('all')"><span class="nav-icon">📋</span> Alle</div>
   <div class="nav-sec">Cloud</div>
   <div class="nav-item" id="nav-cloud" onclick="openCloudModal()"><span class="nav-icon">☁️</span> Microsoft Cloud <span class="nav-badge" id="nb-cloud">–</span></div>
+  <div class="nav-sec">App</div>
+  <div class="nav-item" id="nav-install-app" onclick="installPwa()"><span class="nav-icon">📲</span> Als App installieren</div>
   <div class="nav-sec">Daten</div>
   <div class="nav-item" onclick="exportBackup()"><span class="nav-icon">💾</span> Backup speichern</div>
   <div class="nav-item" onclick="document.getElementById('import-file').click()"><span class="nav-icon">📂</span> Backup laden</div>
@@ -1089,6 +1095,7 @@ html.driver-standalone #driver-pwa-banner{display:none!important}
         <div class="drv-section-title">Dokumente</div>
         <p style="font-size:12px;color:#94b8d4;margin-bottom:12px;line-height:1.5">Abrechnungen &amp; Fahrscheine – unterschreiben &amp; zurücksenden.</p>
         <div id="driver-docs-list"></div>
+        <button type="button" class="drv-login-btn" style="margin:16px 0 12px;width:100%" onclick="installDriverPwa()">📲 App installieren</button>
         <button type="button" class="drv-logout-btn" onclick="driverLogout()">Abmelden</button>
       </div>
     </div>
@@ -1684,6 +1691,18 @@ html.driver-standalone #driver-pwa-banner{display:none!important}
   <div class="mfooter">
     <button class="btn btn-secondary" onclick="closeSignatureModal()">Abbrechen</button>
     <button class="btn btn-primary" onclick="saveSignature()">✅ Speichern &amp; senden</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODAL: PWA INSTALL ═══ -->
+<div class="overlay hidden" id="modal-pwa-install">
+<div class="modal">
+  <div class="mh"><h3 id="pwa-install-modal-title">App installieren</h3><button class="mclose" onclick="closeM('modal-pwa-install')">✕</button></div>
+  <div class="mbody" id="pwa-install-modal-body"></div>
+  <div class="mfooter">
+    <button type="button" class="btn btn-primary" id="pwa-install-modal-action" onclick="triggerPwaInstall()">Jetzt installieren</button>
+    <button type="button" class="btn btn-secondary" onclick="closeM('modal-pwa-install')">Schließen</button>
   </div>
 </div>
 </div>
@@ -5900,11 +5919,88 @@ function promptExcelLink(customerId){
 // MOBILE APP + PWA
 // ═══════════════════════════════════════════════════════════════
 let deferredInstallPrompt=null;
+let pwaInstallContext='dispatch';
 
 function isStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
 }
 function isMobileLayout(){return window.matchMedia('(max-width:700px)').matches;}
+function isIOS(){
+  return /iPad|iPhone|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+}
+function isAndroid(){return /Android/i.test(navigator.userAgent);}
+function getInstallPlatform(){
+  if(isIOS()) return 'ios';
+  if(isAndroid()) return 'android';
+  if(/Chrome|Edg/i.test(navigator.userAgent)) return 'chrome-desktop';
+  return 'other';
+}
+function canShowInstallBanner(isDriver){
+  const key=isDriver?'tp_driver_pwa_dismiss':'tp_pwa_dismiss';
+  return !localStorage.getItem(key)&&!isStandalone();
+}
+function maybeShowInstallBanner(isDriver){
+  if(!canShowInstallBanner(isDriver)) return;
+  if(isDriver) document.getElementById('driver-pwa-banner')?.classList.remove('hidden');
+  else showPwaBanner();
+}
+function getInstallInstructions(platform,isDriver){
+  const appName=isDriver?'TaxiPro Fahrer':'TaxiPro Dispatch';
+  if(platform==='ios'){
+    return{title:appName+' auf iPhone/iPad',steps:[
+      '<strong>1.</strong> Unten in Safari auf <strong>Teilen</strong> tippen (□ mit Pfeil nach oben)',
+      '<strong>2.</strong> Nach unten scrollen → <strong>„Zum Home-Bildschirm“</strong>',
+      '<strong>3.</strong> <strong>Hinzufügen</strong> tippen – App liegt auf dem Home-Bildschirm'
+    ],actionLabel:'Verstanden'};
+  }
+  if(platform==='android'){
+    return{title:appName+' auf Android',steps:deferredInstallPrompt?[
+      '<strong>1.</strong> Unten auf <strong>Jetzt installieren</strong> tippen',
+      '<strong>2.</strong> Im Dialog bestätigen – fertig!'
+    ]:[
+      '<strong>1.</strong> Browser-Menü <strong>⋮</strong> oben rechts öffnen',
+      '<strong>2.</strong> <strong>„App installieren“</strong> oder <strong>„Zum Startbildschirm“</strong> wählen',
+      '<strong>3.</strong> Bestätigen – App liegt auf dem Startbildschirm'
+    ],actionLabel:deferredInstallPrompt?'Jetzt installieren':'Verstanden'};
+  }
+  return{title:appName+' installieren',steps:deferredInstallPrompt?[
+    '<strong>1.</strong> Unten auf <strong>Jetzt installieren</strong> klicken',
+    '<strong>2.</strong> Oder in der Adressleiste <strong>App installieren</strong> wählen'
+  ]:[
+    '<strong>1.</strong> Browser-Menü öffnen (⋮ oder ⋯)',
+    '<strong>2.</strong> <strong>„App installieren“</strong> wählen'
+  ],actionLabel:deferredInstallPrompt?'Jetzt installieren':'Verstanden'};
+}
+function showInstallHelp(isDriver){
+  pwaInstallContext=isDriver?'driver':'dispatch';
+  const info=getInstallInstructions(getInstallPlatform(),isDriver);
+  const titleEl=document.getElementById('pwa-install-modal-title');
+  const bodyEl=document.getElementById('pwa-install-modal-body');
+  const actionEl=document.getElementById('pwa-install-modal-action');
+  if(titleEl) titleEl.textContent=info.title;
+  if(bodyEl) bodyEl.innerHTML='<p style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5">So installierst du die App auf deinem Gerät:</p><ol class="pwa-steps">'+info.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol>';
+  if(actionEl) actionEl.textContent=info.actionLabel;
+  openM('modal-pwa-install');
+}
+async function triggerPwaInstall(){
+  const isDriver=pwaInstallContext==='driver';
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const {outcome}=await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    closeM('modal-pwa-install');
+    if(outcome==='accepted'){
+      if(isDriver) dismissDriverPwaBanner(); else dismissPwaBanner();
+      toast('App installiert – öffne sie vom Home-Bildschirm','ok');
+    }
+    return;
+  }
+  closeM('modal-pwa-install');
+}
+function updateInstallNavVisibility(){
+  const nav=document.getElementById('nav-install-app');
+  if(nav) nav.style.display=isStandalone()?'none':'';
+}
 
 function initMobileLayout(){
   const mob=isMobileLayout();
@@ -5969,27 +6065,40 @@ function dismissPwaBanner(){
 async function installPwa(){
   if(deferredInstallPrompt){
     deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
+    const {outcome}=await deferredInstallPrompt.userChoice;
     deferredInstallPrompt=null;
-    dismissPwaBanner();
+    if(outcome==='accepted') dismissPwaBanner();
     return;
   }
-  toast(isMobileLayout()?'Browser-Menü → „Zum Home-Bildschirm hinzufügen“':'Browser-Adressleiste → App installieren','warn');
+  showInstallHelp(false);
+}
+
+function scheduleInstallBanner(isDriver,delay){
+  setTimeout(()=>maybeShowInstallBanner(isDriver),delay);
 }
 
 function initPwa(){
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-  }
+    navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).then(()=>{
+      if((isMobileLayout()||isIOS())&&!isStandalone()) scheduleInstallBanner(false,2000);
+    }).catch(()=>{
+      if((isMobileLayout()||isIOS())&&!isStandalone()) scheduleInstallBanner(false,2000);
+    });
+  }else if((isMobileLayout()||isIOS())&&!isStandalone()) scheduleInstallBanner(false,2000);
   if(isStandalone()) document.documentElement.classList.add('standalone');
+  updateInstallNavVisibility();
   window.addEventListener('beforeinstallprompt',(e)=>{
     e.preventDefault();
     deferredInstallPrompt=e;
     const isDriver=!document.getElementById('driver-portal')?.classList.contains('hidden');
-    if(isDriver){
-      if(!localStorage.getItem('tp_driver_pwa_dismiss')&&!isStandalone())
-        document.getElementById('driver-pwa-banner')?.classList.remove('hidden');
-    }else if(!localStorage.getItem('tp_pwa_dismiss')&&!isStandalone()) showPwaBanner();
+    maybeShowInstallBanner(isDriver);
+  });
+  window.addEventListener('appinstalled',()=>{
+    deferredInstallPrompt=null;
+    dismissPwaBanner();
+    dismissDriverPwaBanner();
+    updateInstallNavVisibility();
+    toast('App installiert','ok');
   });
   initMobileLayout();
   initPullToRefresh();
@@ -6057,8 +6166,7 @@ function initDriverPwa(){
   const themeMeta=document.querySelector('meta[name="theme-color"]');
   if(themeMeta) themeMeta.setAttribute('content','#0a1628');
   if(isStandalone()) document.documentElement.classList.add('driver-standalone');
-  if(deferredInstallPrompt&&!localStorage.getItem('tp_driver_pwa_dismiss')&&!isStandalone())
-    document.getElementById('driver-pwa-banner')?.classList.remove('hidden');
+  scheduleInstallBanner(true,1500);
 }
 
 function showDriverPwaBanner(){document.getElementById('driver-pwa-banner')?.classList.remove('hidden');}
@@ -6069,12 +6177,12 @@ function dismissDriverPwaBanner(){
 async function installDriverPwa(){
   if(deferredInstallPrompt){
     deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
+    const {outcome}=await deferredInstallPrompt.userChoice;
     deferredInstallPrompt=null;
-    dismissDriverPwaBanner();
+    if(outcome==='accepted') dismissDriverPwaBanner();
     return;
   }
-  toast('Browser-Menü → „Zum Home-Bildschirm hinzufügen“','warn');
+  showInstallHelp(true);
 }
 
 function useMyLocation(fieldId){

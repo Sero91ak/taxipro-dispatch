@@ -2,6 +2,7 @@
   "name": "TaxiPro Dispatch",
   "short_name": "TaxiPro",
   "description": "Disposition für Taxi- und Krankentransport – Kalender, Kunden, Fahrer",
+  "prefer_related_applications": false,
   "start_url": "./index.html?source=pwa",
   "shortcuts": [
     {
