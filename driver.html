@@ -33,6 +33,7 @@ a{color:var(--teal)}
   var p=new URLSearchParams(location.search);
   if(location.hash.length>1){new URLSearchParams(location.hash.slice(1)).forEach(function(v,k){if(!p.has(k))p.set(k,v);});}
   var boot=p.get('boot'),token=p.get('t')||p.get('token'),id=p.get('d'),pin=p.get('p');
+  var sy=p.get('sy'),pu=p.get('pu');
   try{
     localStorage.setItem('tp_app_role','driver');
     if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
@@ -41,6 +42,8 @@ a{color:var(--teal)}
     if(pin) localStorage.setItem('tp_driver_pin',pin);
     if(p.get('fn')) localStorage.setItem('tp_driver_fn',p.get('fn'));
     if(p.get('ln')) localStorage.setItem('tp_driver_ln',p.get('ln'));
+    if(sy) localStorage.setItem('tp_sync_folder_url',sy);
+    if(pu) localStorage.setItem('tp_public_sync_url',pu);
     if(!token) token=localStorage.getItem('tp_driver_token');
     if(!id) id=localStorage.getItem('tp_driver_id');
     if(!pin) pin=localStorage.getItem('tp_driver_pin');
@@ -54,6 +57,8 @@ a{color:var(--teal)}
   if(pin) qs.set('p',pin);
   if(p.get('fn')) qs.set('fn',p.get('fn'));
   if(p.get('ln')) qs.set('ln',p.get('ln'));
+  if(sy) qs.set('sy',sy);
+  if(pu) qs.set('pu',pu);
   if(boot) qs.set('boot',boot);
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(function(){});

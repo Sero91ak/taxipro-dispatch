@@ -1708,6 +1708,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 <div class="modal">
   <div class="mh"><h3>📄 Dokument an Fahrer senden</h3><button class="mclose" onclick="closeM('modal-driver-doc')">✕</button></div>
   <div class="mbody">
+    <p style="font-size:12px;color:var(--yellow2);margin-bottom:12px;line-height:1.5;padding:10px;background:var(--yellow-bg);border-radius:var(--r2);border:1px solid var(--yellow-border)">⚠️ <strong>Microsoft Cloud muss aktiv sein</strong>, sonst kommt das Dokument nicht auf dem Handy an. Fahrer tippt danach 🔄 in der App.</p>
     <div class="fr"><label>Fahrer</label><select id="dd-driver"></select></div>
     <div class="fr"><label>Titel</label><input type="text" id="dd-title" placeholder="z.B. Abrechnung März 2026 – Dialyse"/></div>
     <div class="fr2 fr">
@@ -4864,14 +4865,23 @@ function assignRideToDriver(rideId,driverId,mode){
   return{r,d};
 }
 
-function dispatchToDriverApp(driverId){
+async function dispatchToDriverApp(driverId){
   if(!dispatchRideId) return;
   const pair=assignRideToDriver(dispatchRideId,driverId,'app');
   if(!pair) return;
   closeDriverPicker();
-  toast(`📱 Fahrt an ${pair.d.fname} in der App zugewiesen`,'ok');
+  const synced=await uploadCloudData(false);
+  if(!synced) toast('⚠️ Cloud nicht aktiv – Fahrer sieht Fahrt erst nach Sync','warn');
+  else toast(`📱 Fahrt an ${pair.d.fname} gesendet`,'ok');
+  pingDriverWhatsApp(pair.d,'🚗 Neue Fahrt in der App: '+pair.r.date+' '+pair.r.time+' Uhr\n\n'+getDriverAppUrl(pair.d));
   renderToday();
   if(view==='calendar') renderCalendar();
+}
+
+function pingDriverWhatsApp(driver,message){
+  const phone=normalizeWaPhone(driver?.phone);
+  if(!phone) return;
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank');
 }
 
 function dispatchToDriverWA(driverId){
@@ -5144,7 +5154,7 @@ async function finishMicrosoftConnect(account){
   if(!account) return;
   toast('Microsoft verbunden ☁️');
   if(msFolderShareUrl) await saveMsFolderUrl(true);
-  if(msCloudReady()){await loadCloudData();await uploadCloudData(false);}
+  if(msCloudReady()){await loadCloudData();await uploadCloudData(false);await ensurePublicSyncLink();}
 }
 
 async function connectMicrosoft(){
@@ -5223,6 +5233,7 @@ async function saveMsFolderUrl(silent=false){
     localStorage.setItem('tp_ms_folder_drive',msFolderDriveId);
     localStorage.setItem('tp_ms_folder_item',msFolderItemId);
     await ensureCloudDataFile();
+    await ensurePublicSyncLink();
     updateCloudUI();
     if(!silent) toast('SharePoint-Ordner verknüpft ✓');
   }catch(e){
@@ -5340,8 +5351,81 @@ async function ensureCloudDataFile(){
   localStorage.setItem('tp_ms_data_item',msCloudDataItemId);
 }
 
+async function ensurePublicSyncLink(){
+  if(!msCloudReady()||!msCloudDataItemId) return localStorage.getItem('tp_public_sync_url')||'';
+  try{
+    const res=await msGraph('/drives/'+msCloudDataDriveId+'/items/'+msCloudDataItemId+'/createLink',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'view',scope:'anonymous'})
+    });
+    if(res.ok){
+      const j=await res.json();
+      const webUrl=j.link?.webUrl;
+      if(webUrl){localStorage.setItem('tp_public_sync_url',webUrl);return webUrl;}
+    }
+  }catch(e){}
+  return localStorage.getItem('tp_public_sync_url')||'';
+}
+
+function getSyncFolderUrl(){
+  return localStorage.getItem('tp_sync_folder_url')||localStorage.getItem('tp_ms_folder_url')||DEFAULT_MS_FOLDER_URL;
+}
+
+function applyCloudPayload(data,{force=false,driverMode=false}={}){
+  if(!data) return false;
+  const localTs=localStorage.getItem('tp_local_saved')||'';
+  if(!force&&data.exported&&localTs&&data.exported<=localTs) return false;
+  if(driverMode){
+    if(Array.isArray(data.rides)) rides=data.rides;
+    if(Array.isArray(data.driverDocs)) driverDocs=data.driverDocs;
+    if(data.driverChat?.length) driverChat=data.driverChat;
+    if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
+  }else{
+    if(!data?.rides&&!data?.customers&&!data?.driverDocs) return false;
+    customers=data.customers||customers;
+    rides=data.rides||rides;
+    gcContacts=data.gcContacts||gcContacts;
+    if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
+    if(Array.isArray(data.driverDocs)&&data.driverDocs.length) driverDocs=data.driverDocs;
+    if(data.driverChat?.length) driverChat=data.driverChat;
+  }
+  reapplyDriverBootAuth();
+  saveLocalOnly();
+  localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
+  if(driverMode||currentDriverId) onDriverCloudUpdated();
+  else{renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();}
+  syncDriverAuthRegistry();
+  return true;
+}
+
+async function fetchPublicCloudData(force=false){
+  const publicUrl=localStorage.getItem('tp_public_sync_url');
+  if(publicUrl){
+    try{
+      const res=await fetch(publicUrl);
+      if(res.ok){
+        const data=await res.json();
+        if(applyCloudPayload(data,{force:true,driverMode:!!currentDriverId})) return true;
+      }
+    }catch(e){}
+  }
+  const folderUrl=getSyncFolderUrl();
+  if(folderUrl){
+    try{
+      const shareId=encodeShareUrl(folderUrl);
+      const apiUrl='https://graph.microsoft.com/v1.0/shares/'+shareId+'/driveItem/root:/'+MS_CLOUD_DATA_FILE+':/content';
+      const res=await fetch(apiUrl);
+      if(res.ok){
+        const data=await res.json();
+        if(applyCloudPayload(data,{force:true,driverMode:!!currentDriverId})) return true;
+      }
+    }catch(e){}
+  }
+  return false;
+}
+
 async function uploadCloudData(showToast=false){
-  if(!msCloudReady()) return;
+  if(!msCloudReady()) return false;
   try{
     await ensureCloudDataFile();
     const token=await getMsToken();
@@ -5352,35 +5436,26 @@ async function uploadCloudData(showToast=false){
     if(!res.ok) throw new Error('upload');
     msCloudLastSync=new Date().toISOString();
     localStorage.setItem('tp_ms_last_sync',msCloudLastSync);
+    await ensurePublicSyncLink();
     updateCloudUI();
     if(showToast) toast('☁️ Cloud synchronisiert');
-  }catch(e){if(showToast) toast('Cloud-Sync fehlgeschlagen','err');}
+    return true;
+  }catch(e){if(showToast) toast('Cloud-Sync fehlgeschlagen','err');return false;}
 }
 
 async function loadCloudData(force){
-  if(!msCloudReady()) return;
+  if(!msCloudReady()) return false;
   try{
     await ensureCloudDataFile();
     const res=await msGraph('/drives/'+msCloudDataDriveId+'/items/'+msCloudDataItemId+'/content');
-    if(!res.ok) return;
+    if(!res.ok) return false;
     const data=await res.json();
-    if(!data?.rides&&!data?.customers) return;
-    const localTs=localStorage.getItem('tp_local_saved')||'';
-    if(!force&&data.exported&&localTs&&data.exported<=localTs) return;
-    customers=data.customers||customers;
-    rides=data.rides||rides;
-    gcContacts=data.gcContacts||gcContacts;
-    if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
-    if(Array.isArray(data.driverDocs)&&data.driverDocs.length) driverDocs=data.driverDocs;
-    if(data.driverChat?.length) driverChat=data.driverChat;
-    reapplyDriverBootAuth();
-    saveLocalOnly();
-    localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
-    renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();
-    if(currentDriverId) onDriverCloudUpdated();
-    syncDriverAuthRegistry();
-    toast('☁️ Daten aus Cloud geladen');
+    if(applyCloudPayload(data,{force,driverMode:false})){
+      if(!currentDriverId) toast('☁️ Daten aus Cloud geladen');
+      return true;
+    }
   }catch(e){}
+  return false;
 }
 
 function saveLocalOnly(){
@@ -6381,12 +6456,16 @@ function persistDriverLinkParams(params){
   const pin=params.get('p');
   const fn=params.get('fn');
   const ln=params.get('ln');
+  const syncUrl=params.get('sy');
+  const publicUrl=params.get('pu');
   if(boot){localStorage.setItem('tp_driver_boot',boot);sessionStorage.setItem('tp_driver_boot',boot);}
   if(token){localStorage.setItem('tp_driver_token',token);sessionStorage.setItem('tp_driver_token',token);}
   if(id) localStorage.setItem('tp_driver_id',id);
   if(pin) localStorage.setItem('tp_driver_pin',String(pin));
   if(fn) localStorage.setItem('tp_driver_fn',fn);
   if(ln) localStorage.setItem('tp_driver_ln',ln);
+  if(syncUrl) localStorage.setItem('tp_sync_folder_url',syncUrl);
+  if(publicUrl) localStorage.setItem('tp_public_sync_url',publicUrl);
   if(boot||token||id||params.get('mode')==='driver') localStorage.setItem('tp_app_role','driver');
 }
 
@@ -6451,6 +6530,10 @@ function getDriverAppUrl(d){
   qs.set('p',String(d.pin||''));
   if(d.fname) qs.set('fn',d.fname);
   if(d.lname) qs.set('ln',d.lname);
+  const syncUrl=getSyncFolderUrl();
+  const pubUrl=localStorage.getItem('tp_public_sync_url');
+  if(syncUrl) qs.set('sy',syncUrl);
+  if(pubUrl) qs.set('pu',pubUrl);
   const base=location.origin+location.pathname.replace(/[^/]*$/,'')+'driver.html';
   return base+'?'+qs.toString();
 }
@@ -6461,10 +6544,11 @@ function regenerateDriverPin(){
   toast('Neue PIN: '+pin,'ok');
 }
 
-function updateDriverAppLinkBox(d){
+async function updateDriverAppLinkBox(d){
   const box=document.getElementById('d-app-link-box');
   if(!box||!d) return;
   ensureDriverAccess(d);
+  if(msCloudReady()) await ensurePublicSyncLink();
   const url=getDriverAppUrl(d);
   box.classList.remove('hidden');
   box.innerHTML=`📱 <strong>Fahrer-App Link</strong> (PIN: <code>${d.pin}</code>)<br><span style="font-size:11px;color:var(--text2)">Fahrer öffnet Link in <strong>Safari</strong> → Teilen → Zum Home-Bildschirm</span><br><code style="font-size:9px;word-break:break-all">${url}</code><br>
@@ -6887,7 +6971,7 @@ function renderDriverDocs(){
   const badge=document.getElementById('drv-docs-badge');
   if(badge){badge.textContent=pending;badge.classList.toggle('hidden',!pending);}
   const el=document.getElementById('driver-docs-list');
-  if(!docs.length){el.innerHTML='<div class="empty" style="padding:24px"><div class="ei">📄</div><p>Noch keine Dokumente von der Zentrale.</p></div>';return;}
+  if(!docs.length){el.innerHTML='<div class="empty" style="padding:24px"><div class="ei">📄</div><p>Noch keine Dokumente.<br><button type="button" class="drv-login-btn" style="margin-top:12px;padding:10px;font-size:13px" onclick="driverPollCloud(true)">🔄 Jetzt laden</button></p></div>';return;}
   el.innerHTML=docs.map(d=>`<div class="drv-doc-card ${d.status}" onclick="openDriverDocSign('${d.id}')">
     <div class="drv-doc-title">${d.title}</div>
     <div class="drv-doc-meta">${d.month||''} · ${d.type==='abrechnung'?'Abrechnung':d.type==='fahrschein'?'Fahrschein':'Dokument'} · ${d.status==='signed'?'✅ Unterschrieben':'⏳ Unterschrift nötig'}</div>
@@ -7017,17 +7101,41 @@ function onDriverDocFileSelect(input){
   reader.readAsDataURL(file);
 }
 
-function sendDriverDoc(){
+async function sendDriverDoc(){
   const driverId=document.getElementById('dd-driver').value;
   const title=document.getElementById('dd-title').value.trim();
   if(!driverId||!title){toast('Fahrer und Titel pflicht','warn');return;}
   if(!pendingDriverDocFile){toast('Datei hochladen','warn');return;}
+  if(!msCloudReady()){
+    toast('⚠️ Microsoft Cloud muss aktiv sein! Sonst kommt nichts auf dem Handy an.','err');
+    openCloudModal();
+    return;
+  }
   driverDocs.push({id:uid(),driverId,title,month:document.getElementById('dd-month').value,type:document.getElementById('dd-type').value,
     fileData:pendingDriverDocFile.data,fileName:pendingDriverDocFile.name,fileType:pendingDriverDocFile.type,
     status:'pending',createdAt:Date.now(),signedAt:null,signatureData:null});
   save();closeM('modal-driver-doc');
-  toast('Dokument an Fahrer gesendet','ok');
+  const synced=await uploadCloudData(true);
+  if(!synced){toast('Cloud-Upload fehlgeschlagen – Fahrer erhält nichts','err');return;}
+  const d=drivers.find(x=>x.id===driverId);
+  toast('Dokument hochgeladen – Fahrer kann 🔄 tippen','ok');
   notifyDriverForDoc(driverId,title);
+  if(d) pingDriverWhatsApp(d,'📄 Neues Dokument: '+title+'\n\nApp öffnen → Profil → Dokumente\noder 🔄 tippen:\n'+getDriverAppUrl(d));
+  tryShareDocFile(d,title,pendingDriverDocFile);
+}
+
+function tryShareDocFile(driver,title,fileObj){
+  if(!fileObj?.data||!navigator.share) return;
+  try{
+    const arr=fileObj.data.split(',');
+    const mime=arr[0].match(/:(.*?);/)?.[1]||fileObj.type||'application/octet-stream';
+    const bin=atob(arr[1]);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const blob=new Blob([bytes],{type:mime});
+    const f=new File([blob],fileObj.name||'dokument.pdf',{type:mime});
+    if(navigator.canShare?.({files:[f]})) navigator.share({title:title,text:'Dokument von TaxiPro Zentrale',files:[f]}).catch(()=>{});
+  }catch(e){}
 }
 
 function notifyDriverForDoc(driverId,title){
@@ -7077,17 +7185,32 @@ function onDriverCloudUpdated(){
 }
 
 async function driverPollCloud(manual){
-  if(msCloudReady()) await loadCloudData(true);
-  else if(manual) toast('Cloud nicht verbunden – Zentrale muss Microsoft Cloud aktivieren','warn');
+  let ok=false;
+  ok=await fetchPublicCloudData(true);
+  if(!ok&&msCloudReady()) ok=await loadCloudData(true);
+  if(manual){
+    if(ok) toast('✅ Daten aktualisiert','ok');
+    else toast('Keine Verbindung zur Zentrale – Link neu öffnen oder warten','warn');
+  }
   checkDriverNewAssignments();
-  if(manual&&!msCloudReady()) renderDriverRides();
+  renderDriverRides();
+  renderDriverDocs();
+  updateDriverSyncStatus(ok);
+}
+
+function updateDriverSyncStatus(live){
+  const dot=document.getElementById('drv-sync-dot');
+  if(dot){
+    dot.title=live?'Mit Zentrale verbunden':'Warte auf Zentrale…';
+    dot.classList.toggle('live',!!live);
+  }
 }
 
 function startDriverPolling(){
   stopDriverPolling();
   if(!document.getElementById('driver-portal')||document.getElementById('driver-portal').classList.contains('hidden')) return;
   driverPollCloud(false);
-  driverPollTimer=setInterval(()=>{if(currentDriverId) driverPollCloud(false);},45000);
+  driverPollTimer=setInterval(()=>{if(currentDriverId) driverPollCloud(false);},20000);
 }
 
 function stopDriverPolling(){clearInterval(driverPollTimer);driverPollTimer=null;}
