@@ -1928,6 +1928,7 @@ function importBackup(input){
       gcContacts=data.gcContacts||[];
       drivers=data.drivers||[];
       driverDocs=data.driverDocs||[];
+      driverChat=data.driverChat||[];
       if(data.settings?.gcalCalendarId) gcalCalendarId=data.settings.gcalCalendarId;
       save();
       renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
