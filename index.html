@@ -946,7 +946,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <button type="button" class="mob-qbtn gc" onclick="initiateGCalSync()">📅 Sync</button>
   <button type="button" class="mob-qbtn gc" onclick="initiateGoogleSync()">🔵 Kontakte</button>
   <button type="button" class="mob-qbtn" onclick="openMapsApp()">🗺️ Maps</button>
-  <button type="button" class="mob-qbtn" onclick="openCloudModal()">☁️ Cloud</button>
+  <button type="button" class="mob-qbtn" onclick="initiateGCalSync()">☁️ Drive</button>
 </div>
 <div id="pull-refresh-indicator" aria-hidden="true">↓ Ziehen zum Aktualisieren</div>
 
@@ -989,8 +989,8 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-item" onclick="calFilterType('normal')"><span class="nav-icon">🔵</span> Normale Fahrten</div>
   <div class="nav-item" onclick="calFilterType('privat')"><span class="nav-icon">🟢</span> Privatfahrten</div>
   <div class="nav-item" onclick="calFilterType('all')"><span class="nav-icon">📋</span> Alle</div>
-  <div class="nav-sec">Cloud</div>
-  <div class="nav-item" id="nav-cloud" onclick="openCloudModal()"><span class="nav-icon">☁️</span> Microsoft Cloud <span class="nav-badge" id="nb-cloud">–</span></div>
+  <div class="nav-sec">Sync</div>
+  <div class="nav-item gc-item" id="nav-cloud" onclick="initiateGCalSync()"><span class="nav-icon">☁️</span> Google Drive Sync <span class="nav-badge" id="nb-cloud">–</span></div>
   <div class="nav-sec">App</div>
   <div class="nav-item" id="nav-install-app" onclick="installPwa()"><span class="nav-icon">📲</span> Als App installieren</div>
   <div class="nav-sec">Daten</div>
@@ -1406,7 +1406,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
           <div class="pro-panel-icon">📄</div>
           <div>
             <div class="pro-panel-title">Verordnungen &amp; Genehmigungen</div>
-            <div class="pro-panel-desc">Scannen oder hochladen – pro Kunde ein Ordner. Mit Microsoft Cloud automatisch in SharePoint unter <strong>Kunden-Unterlagen</strong>.</div>
+            <div class="pro-panel-desc">Scannen oder hochladen – pro Kunde lokal gespeichert. Mit Google Drive Sync werden Fahrten &amp; Dokumente automatisch synchronisiert.</div>
           </div>
         </div>
         <div class="doc-stats" id="c-doc-stats">
@@ -1446,7 +1446,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
         </div>
         <input type="hidden" id="c-excel-type" value="kts"/>
         <div class="excel-file-row">
-          <button type="button" class="btn btn-blue btn-sm" onclick="openCloudModal()">☁️ Cloud einrichten</button>
+          <button type="button" class="btn btn-blue btn-sm" onclick="linkExcelFolder()">📂 Excel-Ordner wählen</button>
           <span class="excel-file-name" id="c-excel-name">–</span>
         </div>
         <div class="fr2 fr" style="margin-top:12px">
@@ -1468,58 +1468,6 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <button class="btn btn-secondary" onclick="closeM('modal-customer')">Abbrechen</button>
     <button class="btn btn-wa" id="c-wa-btn" onclick="shareCustomerWA()">📱 Teilen</button>
     <button class="btn btn-primary" onclick="saveCustomer()">💾 Speichern</button>
-  </div>
-</div>
-</div>
-
-<!-- ═══ MODAL: MICROSOFT CLOUD (SharePoint live) ═══ -->
-<div class="overlay hidden" id="modal-cloud">
-<div class="modal">
-  <div class="mh"><h3>☁️ Microsoft Cloud – live online</h3><button class="mclose" onclick="closeM('modal-cloud')">✕</button></div>
-  <div class="mbody">
-    <div class="gc-panel">
-      <h4>Einmal einrichten – überall nutzen</h4>
-      <div class="gc-status" id="cloud-status-text">
-        Mit Microsoft anmelden → SharePoint-Ordner verknüpfen → Fahrten, Kunden und Excel laufen live in der Cloud.
-        Kein PC-Ordner, kein VPN, kein erneutes Anmelden (Token bleibt gespeichert).
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button class="btn btn-blue" id="ms-connect-btn" onclick="connectMicrosoft()">☁️ Mit Microsoft verbinden</button>
-        <button class="btn btn-secondary" id="ms-reload-lib-btn" onclick="reloadMsalLibrary()" style="display:none">🔄 Bibliothek neu laden</button>
-        <button class="btn btn-secondary" id="ms-disconnect-btn" onclick="disconnectMicrosoft()" style="display:none">Trennen</button>
-      </div>
-      <div id="cloud-error-hint" style="display:none;margin-top:10px;padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r2);font-size:11px;color:var(--red2);line-height:1.6"></div>
-      <div id="cloud-steps" style="margin-top:12px">
-        <div class="cloud-step" id="cloud-step-ms"><span class="cloud-step-icon">1</span><span>Microsoft angemeldet</span></div>
-        <div class="cloud-step" id="cloud-step-folder"><span class="cloud-step-icon">2</span><span>SharePoint-Ordner verknüpft</span></div>
-      </div>
-    </div>
-    <div id="cloud-folder-section" style="display:none;margin-top:14px">
-      <div class="fsec">SharePoint-Ordner (Excel-Dateien)</div>
-      <div class="fr">
-        <label>Ordner-Link aus SharePoint einfügen</label>
-        <input type="url" id="ms-folder-url" placeholder="https://…sharepoint.com/…"/>
-      </div>
-      <button class="btn btn-primary btn-sm" onclick="saveMsFolderUrl()">📂 Ordner verknüpfen</button>
-      <div class="excel-file-name" id="ms-folder-status" style="margin-top:8px">–</div>
-    </div>
-    <div id="cloud-sync-section" style="display:none;margin-top:14px;padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);font-size:11px;color:var(--text2);line-height:1.6">
-      <strong>Cloud-Sync aktiv</strong><br>
-      <span id="cloud-sync-info">Fahrten &amp; Kunden werden automatisch in SharePoint gespeichert.</span>
-    </div>
-    <div style="margin-top:14px;padding:12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r2);font-size:11px;color:var(--blue2);line-height:1.65">
-      <strong>Kein Microsoft-Zugang?</strong> Nutze stattdessen <strong>Google Drive Sync</strong> im 📅 Kalender-Modal – Fahrten und Dokumente kommen trotzdem aufs Fahrer-Handy.
-      <button type="button" class="btn btn-blue btn-sm" style="margin-top:8px" onclick="closeM('modal-cloud');openM('modal-gcal')">☁️ Google Drive Sync einrichten</button>
-    </div>
-    <div id="cloud-setup-hint" style="margin-top:14px;padding:10px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r2);font-size:11px;color:var(--yellow2);line-height:1.65"></div>
-    <div id="cloud-client-section" style="margin-top:12px;display:none">
-      <div class="fr"><label>Azure Client-ID (einmalig)</label><input type="text" id="ms-client-id-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/></div>
-      <button class="btn btn-secondary btn-sm" onclick="saveMsClientId()">💾 Client-ID speichern</button>
-    </div>
-  </div>
-  <div class="mfooter">
-    <button class="btn btn-secondary" onclick="closeM('modal-cloud')">Schließen</button>
-    <button class="btn btn-secondary" id="cloud-sync-now-btn" style="display:none" onclick="uploadCloudData(true)">🔄 Jetzt synchronisieren</button>
   </div>
 </div>
 </div>
@@ -1604,9 +1552,9 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     </div>
     <div id="gcal-sync-stats" style="display:none;font-size:11px;color:var(--text2);margin:8px 0;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)"></div>
     <div class="gc-panel" style="margin-top:14px;border:1px solid var(--blue-border);background:var(--blue-bg)">
-      <h4>☁️ Google Drive Sync (ohne Microsoft)</h4>
+      <h4>☁️ Google Drive Sync</h4>
       <div class="gc-status" id="gdrv-status-text" style="margin-bottom:10px">
-        <strong>Alternative zu Microsoft Cloud:</strong> Fahrten, Dokumente und Fahrer-Daten werden in deinem Google Drive gespeichert. Fahrer-Handy lädt automatisch – kein SharePoint nötig.
+        Fahrten, Dokumente und Fahrer-Daten werden in deinem <strong>Google Drive</strong> gespeichert. Das Fahrer-Handy lädt automatisch alle 20 Sekunden.
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-blue btn-sm" id="gdrv-setup-btn" onclick="setupGoogleDriveSync()">☁️ Google Drive Sync aktivieren</button>
@@ -2055,16 +2003,7 @@ function checkDataMigration(){
     toast('Keine Daten? Cloud verbinden, Backup laden oder Google Kalender','warn');
   },1500);
 }
-function checkCloudSetup(){
-  if(isDriverAppMode()||document.documentElement.classList.contains('driver-boot')) return;
-  if(sessionStorage.getItem('tp_cloud_hint')||cloudSyncReady()) return;
-  setTimeout(()=>{
-    if(isDriverAppMode()||cloudSyncReady()) return;
-    sessionStorage.setItem('tp_cloud_hint','1');
-    if(gcalConnected) openM('modal-gcal');
-    else openM('modal-gcal');
-  },4000);
-}
+function checkCloudSetup(){}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmtD=d=>new Date(d).toISOString().slice(0,10);
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
@@ -3142,9 +3081,9 @@ function renderCustDocs(){
   }
   if(hintEl){
     const name=c?custFolderName(c):'';
-    hintEl.innerHTML=msCloudReady()
-      ?`☁️ SharePoint: <code>${CUST_DOCS_ROOT}/${name}/</code> mit Unterordnern Verordnungen &amp; Genehmigungen`
-      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openM(\'modal-gcal\')">Google Drive Sync</span> oder <span style="color:var(--blue2);cursor:pointer" onclick="openCloudModal()">Microsoft Cloud</span>';
+    hintEl.innerHTML=googleDriveSyncReady()
+      ?'☁️ Google Drive Sync aktiv – Fahrten &amp; Dokumente werden synchronisiert'
+      :'📁 Lokal gespeichert – <span style="color:var(--blue2);cursor:pointer" onclick="openM(\'modal-gcal\')">Google Drive Sync aktivieren</span> für Fahrer-Handy';
   }
 }
 
@@ -3499,7 +3438,10 @@ function renderGCalCalendarSelect(){
   sel.innerHTML=gcalCalendars.map(c=>`<option value="${c.id}"${c.id===gcalCalendarId?' selected':''}>${c.summary}${c.primary?' (Haupt)':''}</option>`).join('');
 }
 
-function getGoogleScopes(){return gcalWriteEnabled?SCOPE_GCAL_FULL:SCOPE_GCAL_IMPORT;}
+function getGoogleScopes(){
+  const base=gcalWriteEnabled?SCOPE_GCAL_FULL:SCOPE_GCAL_IMPORT;
+  return(gdrvSyncEnabled||gdrvFileId)?base+' '+SCOPE_DRIVE_FILE:base;
+}
 function canWriteToGoogle(){return gcalWriteEnabled&&gcalConnected&&!!gcalToken;}
 
 async function gcalApi(path,method='GET',body=null){
@@ -4963,8 +4905,8 @@ function updateStatusBar(){
   }
   if(cloud){
     const gdrvOk=googleDriveSyncReady();
-    cloud.className='status-pill'+(msCloudReady()||gdrvOk?' ok':msConnected?' warn':'');
-    cloud.textContent=gdrvOk?'☁️ Google Drive Sync':msCloudReady()?'☁️ SharePoint aktiv':msConnected?'☁️ Ordner verknüpfen':'☁️ Sync offline';
+    cloud.className='status-pill'+(gdrvOk?' ok':gcalConnected?' warn':'');
+    cloud.textContent=gdrvOk?'☁️ Google Drive Sync aktiv':gcalConnected?'☁️ Drive Sync einrichten':'☁️ Google verbinden';
   }
   if(ridesEl) ridesEl.textContent='🚗 Heute: '+today+' Fahrten';
   if(custEl) custEl.textContent='👥 '+customers.length+' Kunden';
@@ -5023,7 +4965,7 @@ function getMsRedirectUri(){
   return location.origin+location.pathname;
 }
 
-function msCloudReady(){return msConnected&&!!msFolderDriveId&&!!msFolderItemId;}
+function msCloudReady(){return false;}
 
 function getMsSetupHTML(){
   if(MS_CLIENT_ID&&MS_CLIENT_ID!=='YOUR_MS_CLIENT_ID') return '';
@@ -5431,7 +5373,7 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
 }
 
 function googleDriveSyncReady(){return gcalConnected&&!!gdrvFileId&&gdrvSyncEnabled;}
-function cloudSyncReady(){return msCloudReady()||googleDriveSyncReady();}
+function cloudSyncReady(){return googleDriveSyncReady();}
 
 async function googleDriveApi(path,opts={}){
   return fetch('https://www.googleapis.com/drive/v3'+path,{...opts,headers:{Authorization:'Bearer '+gcalToken,...(opts.headers||{})}});
@@ -5485,6 +5427,7 @@ async function uploadGoogleDriveSync(showToast=false){
     await ensureGoogleDrivePublic(fileId);
     gdrvSyncEnabled=true;
     localStorage.setItem('tp_gdrv_sync','1');
+    updateCloudUI();
     if(showToast) toast('☁️ Google Drive Sync OK','ok');
     return true;
   }catch(e){
@@ -5505,22 +5448,33 @@ async function fetchGoogleDriveSync(force=false){
   }catch(e){return false;}
 }
 
+async function finishGoogleDriveSetup(){
+  gdrvSyncEnabled=true;
+  localStorage.setItem('tp_gdrv_sync','1');
+  await ensureGoogleDriveSyncFile();
+  await uploadGoogleDriveSync(true);
+  renderGCalModal();
+  updateCloudUI();
+}
+
 function setupGoogleDriveSync(){
-  if(!initGoogleTokenClient(SCOPE_GCAL_WITH_DRIVE,async()=>{
-    gdrvSyncEnabled=true;
-    localStorage.setItem('tp_gdrv_sync','1');
-    await ensureGoogleDriveSyncFile();
-    await uploadGoogleDriveSync(true);
-    renderGCalModal();
-  })){toast('Google-Bibliothek nicht geladen','err');return;}
-  googleTokenClient.requestAccessToken({prompt:'consent'});
+  if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID'){toast('GOOGLE_CLIENT_ID fehlt','warn');return;}
+  if(location.protocol==='file:'){toast('App nicht als Datei öffnen – über https://sero91ak.github.io/taxipro-dispatch/','warn');return;}
+  whenGoogleReady(()=>{
+    googleTokenClient=null;
+    if(!initGoogleTokenClient(SCOPE_GCAL_WITH_DRIVE,async()=>{
+      if(!gcalConnected){await loadGCalendars();updateGCalBtn();}
+      await finishGoogleDriveSetup();
+    })){toast('Google-Bibliothek nicht geladen','err');return;}
+    googleTokenClient.requestAccessToken({prompt:'consent'});
+  });
 }
 
 async function cloudSyncUpload(showToast=false){
-  if(msCloudReady()) return uploadCloudData(showToast);
+  if(googleDriveSyncReady()) return uploadGoogleDriveSync(showToast);
   if(gcalConnected) return uploadGoogleDriveSync(showToast);
   if(showToast){
-    toast('Google Drive Sync aktivieren (Kalender-Modal)','err');
+    toast('Google Drive Sync aktivieren','err');
     openM('modal-gcal');
   }
   return false;
@@ -5531,18 +5485,6 @@ async function fetchPublicCloudData(force=false){
   if(publicUrl){
     try{
       const res=await fetch(publicUrl);
-      if(res.ok){
-        const data=await res.json();
-        if(applyCloudPayload(data,{force:true,driverMode:!!currentDriverId})) return true;
-      }
-    }catch(e){}
-  }
-  const folderUrl=getSyncFolderUrl();
-  if(folderUrl){
-    try{
-      const shareId=encodeShareUrl(folderUrl);
-      const apiUrl='https://graph.microsoft.com/v1.0/shares/'+shareId+'/driveItem/root:/'+MS_CLOUD_DATA_FILE+':/content';
-      const res=await fetch(apiUrl);
       if(res.ok){
         const data=await res.json();
         if(applyCloudPayload(data,{force:true,driverMode:!!currentDriverId})) return true;
@@ -5599,87 +5541,19 @@ function saveLocalOnly(){
 function scheduleCloudSave(){
   localStorage.setItem('tp_local_saved',new Date().toISOString());
   clearTimeout(msCloudSaveTimer);
-  if(msCloudReady()) msCloudSaveTimer=setTimeout(()=>uploadCloudData(false),2500);
-  else if(gcalConnected&&(gdrvSyncEnabled||gdrvFileId)) msCloudSaveTimer=setTimeout(()=>uploadGoogleDriveSync(false),2500);
+  if(gcalConnected&&(gdrvSyncEnabled||gdrvFileId)) msCloudSaveTimer=setTimeout(()=>uploadGoogleDriveSync(false),2500);
 }
 
 function updateCloudUI(){
-  const connected=msConnected&&!!(msalInstance?.getAllAccounts()?.length);
-  msConnected=connected;
+  const gdrvOk=googleDriveSyncReady();
   const badge=document.getElementById('nb-cloud');
   const nav=document.getElementById('nav-cloud');
-  if(badge) badge.textContent=msCloudReady()?'✓':connected?'◐':'–';
-  if(nav) nav.classList.toggle('connected',msCloudReady());
-  const connBtn=document.getElementById('ms-connect-btn');
-  const discBtn=document.getElementById('ms-disconnect-btn');
-  const folderSec=document.getElementById('cloud-folder-section');
-  const syncSec=document.getElementById('cloud-sync-section');
-  const syncBtn=document.getElementById('cloud-sync-now-btn');
-  const statusEl=document.getElementById('cloud-status-text');
-  const folderStatus=document.getElementById('ms-folder-status');
-  const syncInfo=document.getElementById('cloud-sync-info');
-  const setupHint=document.getElementById('cloud-setup-hint');
-  const clientSec=document.getElementById('cloud-client-section');
-  if(setupHint) setupHint.innerHTML=getMsSetupHTML();
-  if(clientSec) clientSec.style.display=(MS_CLIENT_ID==='YOUR_MS_CLIENT_ID')?'block':'none';
-  if(connBtn) connBtn.style.display=connected?'none':'inline-flex';
-  if(discBtn) discBtn.style.display=connected?'inline-flex':'none';
-  if(folderSec) folderSec.style.display=connected?'block':'none';
-  if(syncSec) syncSec.style.display=msCloudReady()?'block':'none';
-  if(syncBtn) syncBtn.style.display=msCloudReady()?'inline-flex':'none';
-  const urlInput=document.getElementById('ms-folder-url');
-  if(urlInput&&!urlInput.value) urlInput.value=msFolderShareUrl;
-  if(statusEl){
-    statusEl.textContent=msCloudReady()
-      ?'✅ Live online – Excel & Fahrten laufen über SharePoint. Von überall mit Browser nutzen.'
-      :connected?'Microsoft verbunden – jetzt SharePoint-Ordner-Link einfügen und verknüpfen.':
-      'Einmal Microsoft verbinden → SharePoint-Ordner verknüpfen → fertig.';
-  }
-  if(folderStatus){
-    folderStatus.textContent=msCloudReady()?('✅ Ordner aktiv · '+msFolderShareUrl.slice(0,60)+'…'):'Ordner noch nicht verknüpft';
-    folderStatus.style.color=msCloudReady()?'var(--green2)':'var(--text3)';
-  }
-  if(syncInfo&&msCloudLastSync) syncInfo.textContent='Letzter Sync: '+msCloudLastSync.slice(0,19).replace('T',' ')+' · '+rides.length+' Fahrten · '+customers.length+' Kunden';
-  const stepMs=document.getElementById('cloud-step-ms');
-  const stepFolder=document.getElementById('cloud-step-folder');
-  if(stepMs) stepMs.classList.toggle('done',connected);
-  if(stepFolder) stepFolder.classList.toggle('done',msCloudReady());
-  if(stepMs&&connected) stepMs.querySelector('.cloud-step-icon').textContent='✓';
-  if(stepFolder&&msCloudReady()) stepFolder.querySelector('.cloud-step-icon').textContent='✓';
-  if(stepMs&&!connected) stepMs.querySelector('.cloud-step-icon').textContent='1';
-  if(stepFolder&&!msCloudReady()) stepFolder.querySelector('.cloud-step-icon').textContent='2';
+  if(badge) badge.textContent=gdrvOk?'✓':gcalConnected?'◐':'–';
+  if(nav) nav.classList.toggle('connected',gdrvOk);
   updateStatusBar();
 }
 
-function openCloudModal(){
-  updateCloudUI();
-  openM('modal-cloud');
-}
-
-async function initMicrosoftCloud(){
-  try{
-    await loadMsalLibrary().catch(()=>{});
-    if(!await ensureMsalReady()){
-      updateCloudUI();
-        return;
-    }
-    const redirectResult=await msalInstance.handleRedirectPromise();
-    if(redirectResult?.account){
-      msConnected=true;
-      toast('Microsoft verbunden ☁️');
-    }else{
-      msConnected=!!(await getMsAccount());
-    }
-    if(msConnected){
-      if(msFolderShareUrl&&!msFolderDriveId) await saveMsFolderUrl(true);
-      if(msCloudReady()) await loadCloudData();
-    }
-    updateCloudUI();
-  }catch(e){
-    console.error('MS init',e);
-    updateCloudUI();
-  }
-}
+function openCloudModal(){initiateGCalSync();}
 
 function whenGoogleReady(fn,attempt=0){
   if(window.google?.accounts?.oauth2) return fn();
@@ -6100,7 +5974,7 @@ async function syncRideToExcel(rideId){
     return;
   }
   if(!customerHasExcelAccess(cust)){
-    if(confirm('Microsoft Cloud noch nicht eingerichtet. Jetzt einrichten?')) openCloudModal();
+    if(confirm('Excel-Ordner noch nicht verknüpft. Jetzt Ordner wählen?')) linkExcelFolder();
     return;
   }
   if(!excelSupported()){toast('Excel-Sync: Chrome oder Edge verwenden','warn');return;}
@@ -6144,7 +6018,7 @@ function buildExcelControlsHtml(r){
   const dirBtns=dirs.map(d=>`<button type="button" class="excel-dir${dir===d?' on':''}" title="${excelDirLabel(d)}" onclick="event.stopPropagation();setRideExcelDir('${r.id}','${d}')">${d==='hin-rueck'?'↔':d==='hin'?'→':'←'}</button>`).join('');
   const syncBtn=linked
     ?`<button type="button" class="excel-sync${synced?' done':''}" title="${synced?'In Excel – erneut schreiben':'Automatisch in Excel eintragen'}" onclick="event.stopPropagation();syncRideToExcel('${r.id}')">${synced?'✅':'📊'}</button>`
-    :`<button type="button" class="excel-sync off" title="Cloud einrichten" onclick="event.stopPropagation();openCloudModal()">📊</button>`;
+    :`<button type="button" class="excel-sync off" title="Excel-Ordner wählen" onclick="event.stopPropagation();linkExcelFolder()">📊</button>`;
   return `<div class="sch-excel" onclick="event.stopPropagation()"><div class="excel-dir-row">${dirBtns}</div>${syncBtn}</div>`;
 }
 
@@ -6155,8 +6029,8 @@ function buildExcelDetailHtml(r){
   const dir=r.excelDir||'hin-rueck';
   const dirs=['hin-rueck','hin','rueck'];
   const fileInfo=cust?.excelFileName?`Datei: <strong style="color:var(--green2)">${cust.excelFileName}</strong>`:
-    msCloudReady()?`SharePoint-Ordner aktiv – Auto-Suche`:
-    '⚠️ Microsoft Cloud einrichten (Sidebar → ☁️)';
+    excelFolderHandle?`Ordner: <strong style="color:var(--green2)">${excelFolderName||'Excel'}</strong>`:
+    '⚠️ Excel-Ordner wählen (Kunde → Excel-Tab)';
   return `<div class="excel-detail-box">
     <div class="excel-panel-h">📊 Excel-Abrechnung</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
@@ -6166,13 +6040,13 @@ function buildExcelDetailHtml(r){
     <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Hin/Rückfahrt: <strong>${excelDirLabel(dir)}</strong></div>
     <div class="excel-detail-btns">
       ${dirs.map(d=>`<button type="button" class="btn btn-sm${dir===d?' btn-primary':' btn-secondary'}" onclick="setRideExcelDir('${r.id}','${d}')">${d==='hin-rueck'?'↔ Hin+Rück':d==='hin'?'→ Hinfahrt':'← Rückfahrt'}</button>`).join('')}
-      ${linked?`<button type="button" class="btn btn-sm btn-blue" onclick="syncRideToExcel('${r.id}')">${r.excelSynced?'🔄 Excel aktualisieren':'📊 In Excel eintragen'}</button>`:`<button type="button" class="btn btn-sm btn-secondary" onclick="openCloudModal()">☁️ Cloud einrichten</button>`}
+      ${linked?`<button type="button" class="btn btn-sm btn-blue" onclick="syncRideToExcel('${r.id}')">${r.excelSynced?'🔄 Excel aktualisieren':'📊 In Excel eintragen'}</button>`:`<button type="button" class="btn btn-sm btn-secondary" onclick="linkExcelFolder()">📂 Excel-Ordner</button>`}
     </div>
   </div>`;
 }
 
 function promptExcelLink(customerId){
-  if(!msCloudReady()){openCloudModal();return;}
+  if(!excelFolderHandle){linkExcelFolder();return;}
   toast('📊 im Kalender klicken – Excel wird automatisch gefunden');
 }
 
@@ -6414,7 +6288,6 @@ async function refreshMobileData(){
   }
   if(gcalConnected){try{await fullGCalSync();}catch(e){}}
   if(googleDriveSyncReady()){try{await fetchGoogleDriveSync(true);}catch(e){}}
-  else if(msCloudReady()){try{await loadCloudData(true);}catch(e){}}
   renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
   if(view==='gcontacts') renderGCView();
 }
@@ -6680,7 +6553,7 @@ async function updateDriverAppLinkBox(d){
   const box=document.getElementById('d-app-link-box');
   if(!box||!d) return;
   ensureDriverAccess(d);
-  if(msCloudReady()) await ensurePublicSyncLink();
+  if(googleDriveSyncReady()) await uploadGoogleDriveSync(false);
   const url=getDriverAppUrl(d);
   box.classList.remove('hidden');
   box.innerHTML=`📱 <strong>Fahrer-App Link</strong> (PIN: <code>${d.pin}</code>)<br><span style="font-size:11px;color:var(--text2)">Fahrer öffnet Link in <strong>Safari</strong> → Teilen → Zum Home-Bildschirm</span><br><code style="font-size:9px;word-break:break-all">${url}</code><br>
@@ -6752,12 +6625,7 @@ async function ensureDriverDataLoaded(){
   reapplyDriverBootAuth();
   if(drivers.length) return;
   if(await fetchGoogleDriveSync(true)){loadDriverAuthRegistry();reapplyDriverBootAuth();if(drivers.length) return;}
-  if(await fetchPublicCloudData(true)){loadDriverAuthRegistry();reapplyDriverBootAuth();if(drivers.length) return;}
-  if(msCloudReady()){
-    await loadCloudData(true);
-    loadDriverAuthRegistry();
-    reapplyDriverBootAuth();
-  }
+  if(await fetchPublicCloudData(true)){loadDriverAuthRegistry();reapplyDriverBootAuth();}
 }
 
 function showDriverLogin(){
@@ -7328,7 +7196,6 @@ async function driverPollCloud(manual){
   let ok=false;
   ok=await fetchGoogleDriveSync(true);
   if(!ok) ok=await fetchPublicCloudData(true);
-  if(!ok&&msCloudReady()) ok=await loadCloudData(true);
   if(manual){
     if(ok) toast('✅ Daten aktualisiert','ok');
     else toast('Keine Verbindung zur Zentrale – Link neu öffnen oder warten','warn');
@@ -7399,12 +7266,11 @@ if(isDriverAppMode()) captureDriverLinkAuth(getAllDriverParams());
 if(drivers.length) syncDriverAuthRegistry();
 initPwa();
 initTheme();
-initMicrosoftCloud();
+updateCloudUI();
 if(!initAppMode()){
   setContactViewMode(contactViewMode);
   setContactSort(contactSort);
   checkDataMigration();
-  checkCloudSetup();
   updateCounts();
   updateGCalBtn();
   renderMiniCal();
