@@ -548,6 +548,13 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .maps-btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .maps-frame{flex:1;width:100%;border:none;min-height:300px;background:var(--bg);display:block}
 .maps-hint{font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5}
+.maps-mobile-panel{display:flex;flex-direction:column;gap:12px;padding:16px;flex:1;overflow-y:auto;background:var(--bg2)}
+.maps-mobile-panel.hidden{display:none}
+.maps-mobile-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:14px;line-height:1.7;font-size:13px}
+.maps-mobile-card strong{display:block;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.maps-mobile-actions{display:flex;flex-direction:column;gap:8px}
+.maps-mobile-actions .btn{padding:12px 16px;font-size:14px}
+.dp-wa-hint{font-size:11px;color:var(--text2);line-height:1.55;margin-bottom:12px;padding:10px 12px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r2)}
 /* ride detail */
 .rd-head{background:var(--bg3);border-radius:var(--r);padding:13px;margin-bottom:12px}
 .rd-badges{display:flex;gap:6px;margin-bottom:7px;flex-wrap:wrap}
@@ -1067,7 +1074,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <button class="tb-btn primary" onclick="openDriverModal()">＋ Fahrer</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:14px">
-      <div class="driver-hint"><strong>Fahrer-App:</strong> Fahrer anlegen → PIN &amp; App-Link wird erzeugt. Fahrer installiert TaxiPro auf dem Handy und meldet sich mit PIN an. Bei Fahrten <strong>🚀</strong> → <strong>📱 App</strong> (in der App) oder <strong>📲 WA</strong> (WhatsApp). Fahrer sehen nur ihre Fahrten – Maps, Zahlung (KTS/Eigenleistung), Fahrschein-Unterschrift &amp; Monatsdokumente.</div>
+      <div class="driver-hint"><strong>Fahrer-App:</strong> Fahrer anlegen → PIN &amp; App-Link wird erzeugt. Fahrer öffnet Link in <strong>Safari</strong> → Zum Home-Bildschirm. Bei Fahrten <strong>🚀</strong> → <strong>📱 App</strong> (Fahrt in der App, braucht Google-Drive-Sync) oder <strong>📲 WA</strong> (WhatsApp + Google-Maps-Link). Navigation: in der Fahrer-App <strong>🗺️ Navigation starten</strong> oder Maps-Link in WhatsApp antippen.</div>
       <button class="tb-btn primary" onclick="openDriverDocModal()" style="margin-bottom:12px">📄 Dokument an Fahrer senden</button>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;align-content:start" id="drivers-list"></div>
     </div>
@@ -1598,11 +1605,11 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <div class="maps-toolbar">
       <div class="fr" style="margin-bottom:8px">
         <label>Adresse suchen</label>
-        <input type="text" id="gm-search" placeholder="Straße, PLZ, Ort oder Krankenhaus…" onkeydown="if(event.key==='Enter')gmSearch()" autocomplete="off"/>
+        <input type="text" id="gm-search" placeholder="Straße, PLZ, Ort oder Krankenhaus…" oninput="updateGmMobileSummary()" onkeydown="if(event.key==='Enter')gmSearch()" autocomplete="off"/>
       </div>
       <div class="fr2 fr">
-        <div><label>Von / Abholung</label><input type="text" id="gm-from" placeholder="Abholadresse" onkeydown="if(event.key==='Enter')gmRoute()" autocomplete="off"/></div>
-        <div><label>Nach / Ziel</label><input type="text" id="gm-to" placeholder="Zieladresse" onkeydown="if(event.key==='Enter')gmRoute()" autocomplete="off"/></div>
+        <div><label>Von / Abholung</label><input type="text" id="gm-from" placeholder="Abholadresse" oninput="updateGmMobileSummary()" onkeydown="if(event.key==='Enter')gmRoute()" autocomplete="off"/></div>
+        <div><label>Nach / Ziel</label><input type="text" id="gm-to" placeholder="Zieladresse" oninput="updateGmMobileSummary()" onkeydown="if(event.key==='Enter')gmRoute()" autocomplete="off"/></div>
       </div>
       <div class="maps-btn-row">
         <button class="btn btn-primary btn-sm" onclick="gmSearch()">🔍 Suchen</button>
@@ -1611,7 +1618,15 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
         <button class="btn btn-wa btn-sm" onclick="gmShareWA()">📱 Teilen</button>
         <button class="btn btn-secondary btn-sm" onclick="gmOpenExternal()">↗️ Google Maps App</button>
       </div>
-      <div class="maps-hint">Kostenlos · Karte öffnet sich hier in der App · Teilen sendet den Google-Maps-Link per WhatsApp</div>
+      <div class="maps-hint" id="gm-hint-desktop">Kostenlos · Karte im Browser · Auf dem Handy öffnet sich die Google Maps App</div>
+    </div>
+    <div id="gm-mobile-panel" class="maps-mobile-panel hidden">
+      <div class="maps-mobile-card" id="gm-mobile-summary">Adresse eingeben und Navigation starten.</div>
+      <div class="maps-mobile-actions">
+        <button type="button" class="btn btn-primary" onclick="gmOpenExternal()">🧭 In Google Maps öffnen</button>
+        <button type="button" class="btn btn-wa" onclick="gmShareWA()">📱 Link per WhatsApp teilen</button>
+      </div>
+      <div class="maps-hint">Auf dem Handy / nach „Zum Home-Bildschirm“ funktioniert die eingebettete Karte oft nicht – der Button oben öffnet direkt die Google Maps App.</div>
     </div>
     <iframe id="gm-frame" class="maps-frame" title="Google Maps" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="about:blank"></iframe>
   </div>
@@ -1623,6 +1638,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 <div class="dp-sheet">
   <div class="dp-handle"></div>
   <div class="dp-title">🚀 Fahrt zuweisen an Fahrer</div>
+  <div class="dp-wa-hint">📲 Fahrer antippen → WhatsApp mit Auftrag + Navigation-Link. Fahrer braucht nur WhatsApp/Google Maps, nicht diese App.</div>
   <div class="dp-ride-info" id="dp-ride-info">–</div>
   <div class="dp-drivers" id="dp-drivers-list"></div>
   <button class="dp-add-btn" onclick="openDriverModalFromDispatch()">＋ Neuen Fahrer anlegen</button>
@@ -4499,6 +4515,58 @@ function openWhatsAppContact(phone){
 
 function mapsJsStr(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
+function isInstalledOrMobile(){
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    ||window.matchMedia('(display-mode: standalone)').matches
+    ||navigator.standalone===true;
+}
+
+function buildMapsLinks(from,to){
+  const route=from&&to?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`:'';
+  const pickup=from?`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(from)}&travelmode=driving`:'';
+  const search=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(from||to||'')}`;
+  return{route:route||search,pickup:pickup||search,search};
+}
+
+function openExternalUrl(url){
+  if(!url) return false;
+  if(isInstalledOrMobile()){location.href=url;return true;}
+  const w=window.open(url,'_blank');
+  return!!w;
+}
+
+function openWhatsAppUrl(url){
+  if(!url) return;
+  if(isInstalledOrMobile()) location.href=url;
+  else{
+    const w=window.open(url,'_blank');
+    if(!w) location.href=url;
+  }
+}
+
+function syncMapsView(){
+  const mobile=isInstalledOrMobile();
+  const frame=document.getElementById('gm-frame');
+  const panel=document.getElementById('gm-mobile-panel');
+  const hint=document.getElementById('gm-hint-desktop');
+  if(frame) frame.style.display=mobile?'none':'block';
+  if(panel) panel.classList.toggle('hidden',!mobile);
+  if(hint) hint.style.display=mobile?'none':'block';
+  updateGmMobileSummary();
+}
+
+function updateGmMobileSummary(){
+  const el=document.getElementById('gm-mobile-summary');
+  if(!el) return;
+  const from=document.getElementById('gm-from')?.value.trim()||'–';
+  const to=document.getElementById('gm-to')?.value.trim()||'–';
+  const search=document.getElementById('gm-search')?.value.trim();
+  el.innerHTML=`
+    ${search?`<div><strong>Suche</strong>${search}</div>`:''}
+    <div><strong>Abholung</strong>${from}</div>
+    <div><strong>Ziel</strong>${to}</div>`;
+}
+
 function gmEmbedUrl(mode,from,to,query){
   if(mode==='route'&&from&&to) return `https://maps.google.com/maps?saddr=${encodeURIComponent(from)}&daddr=${encodeURIComponent(to)}&dirflg=d&hl=de&output=embed`;
   const q=query||from||to||'Deutschland';
@@ -4521,22 +4589,29 @@ function openMapsApp(opts={}){
   if(searchEl) searchEl.value=query||to||from;
   if(fromEl) fromEl.value=from;
   if(toEl) toEl.value=to;
-  if(from&&to) gmLoadFrame('route',from,to);
-  else gmLoadFrame('search','','',query||to||from||'Deutschland');
+  syncMapsView();
+  if(!isInstalledOrMobile()){
+    if(from&&to) gmLoadFrame('route',from,to);
+    else gmLoadFrame('search','','',query||to||from||'Deutschland');
+  }
   openM('modal-maps');
 }
 
 function gmSearch(){
   const q=document.getElementById('gm-search')?.value.trim();
   if(!q){toast('Bitte Adresse eingeben','warn');return;}
-  gmLoadFrame('search','','',q);
+  syncMapsView();
+  if(isInstalledOrMobile()) openMapsExternal(q);
+  else gmLoadFrame('search','','',q);
 }
 
 function gmRoute(){
   const from=document.getElementById('gm-from')?.value.trim();
   const to=document.getElementById('gm-to')?.value.trim();
   if(!from||!to){toast('Von und Nach ausfüllen','warn');return;}
-  gmLoadFrame('route',from,to);
+  syncMapsView();
+  if(isInstalledOrMobile()) openMapsRouteExternal(from,to);
+  else gmLoadFrame('route',from,to);
 }
 
 function gmApplyToRide(){
@@ -4557,11 +4632,10 @@ function gmShareWA(){
   const from=document.getElementById('gm-from')?.value.trim();
   const to=document.getElementById('gm-to')?.value.trim();
   const search=document.getElementById('gm-search')?.value.trim();
-  const link=from&&to
-    ?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`
-    :`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(search||from||to)}`;
+  const links=buildMapsLinks(from,to);
+  const link=from&&to?links.route:links.search;
   const txt=`🗺️ *Google Maps*\n${from?`📍 Von: ${from}\n`:''}${to?`🎯 Nach: ${to}\n`:''}${!from&&!to&&search?`📍 ${search}\n`:''}\n${link}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+  openWhatsAppUrl(`https://wa.me/?text=${encodeURIComponent(txt)}`);
 }
 
 function gmOpenExternal(){
@@ -4574,15 +4648,21 @@ function gmOpenExternal(){
 
 function openMapsExternal(addr){
   if(!addr){toast('Keine Adresse','warn');return;}
-  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`,'_blank');
+  openExternalUrl(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`);
 }
 function openMapsRouteExternal(from,to){
   if(!to){openMapsExternal(from);return;}
-  window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from||'')}&destination=${encodeURIComponent(to)}&travelmode=driving`,'_blank');
+  openExternalUrl(buildMapsLinks(from,to).route);
 }
 
-function openMaps(addr){openMapsApp({query:addr||''});}
-function openMapsRoute(from,to){openMapsApp({from:from||'',to:to||''});}
+function openMaps(addr){
+  if(isInstalledOrMobile()&&addr) openMapsExternal(addr);
+  else openMapsApp({query:addr||''});
+}
+function openMapsRoute(from,to){
+  if(isInstalledOrMobile()&&from&&to) openMapsRouteExternal(from,to);
+  else openMapsApp({from:from||'',to:to||''});
+}
 
 function shareRideWA(){
   const custId=document.getElementById('r-cust-id').value;
@@ -4592,16 +4672,18 @@ function shareRideWA(){
   const time=document.getElementById('r-time').value;
   const from=document.getElementById('r-from').value;
   const to=document.getElementById('r-to').value;
-  const txt=`🚖 TaxiPro Fahrtauftrag\n\n👤 Kunde: ${name}\n📅 Datum: ${date}\n⏰ Abfahrt: ${time} Uhr\n📍 Von: ${from||'–'}\n🎯 Nach: ${to||'–'}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(from||'')}/${encodeURIComponent(to||'')}`;
-  if(!nativeShare(txt,'Fahrtauftrag')) window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+  const links=buildMapsLinks(from,to);
+  const txt=`🚖 TaxiPro Fahrtauftrag\n\n👤 Kunde: ${name}\n📅 Datum: ${date}\n⏰ Abfahrt: ${time} Uhr\n📍 Von: ${from||'–'}\n🎯 Nach: ${to||'–'}\n\n🗺️ Navigation:\n${links.route}`;
+  if(!nativeShare(txt,'Fahrtauftrag')) openWhatsAppUrl(`https://wa.me/?text=${encodeURIComponent(txt)}`);
 }
 
 function shareRideWAById(id){
   const r=rides.find(x=>x.id===id);if(!r) return;
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   const name=c?c.fname+' '+c.lname:'Unbekannt';
-  const txt=`🚖 TaxiPro Fahrtauftrag\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${zuzahlLabel(r.zuzahlung)}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ https://www.google.com/maps/dir/${encodeURIComponent(r.from||'')}/${encodeURIComponent(r.to||'')}`;
-  if(!nativeShare(txt,'Fahrtauftrag')) window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+  const links=buildMapsLinks(r.from||'',r.to||'');
+  const txt=`🚖 TaxiPro Fahrtauftrag\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${zuzahlLabel(r.zuzahlung)}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ Navigation:\n${links.route}`;
+  if(!nativeShare(txt,'Fahrtauftrag')) openWhatsAppUrl(`https://wa.me/?text=${encodeURIComponent(txt)}`);
 }
 
 function shareCustomerWA(){
@@ -4733,8 +4815,7 @@ function buildDriverDispatchMessage(r){
   const custName=cust?`${cust.fname} ${cust.lname}`:(r.customerName||'Kunde');
   const from=r.from||'';
   const to=r.to||'';
-  const mapsLink=from&&to?`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(from||to)}`;
-  const navLink=from?`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(from)}&travelmode=driving`:mapsLink;
+  const links=buildMapsLinks(from,to);
   return`🚖 *FAHRTAUFTRAG – Taxi Meckenheim*
 ━━━━━━━━━━━━━━━━━━
 📅 *Datum:* ${r.date}
@@ -4752,11 +4833,11 @@ ${r.km?`📏 *Strecke:* ca. ${r.km} km`:''}
 ${r.type==='krank'&&r.zuzahlung?`💊 *Zuzahlung:* ${zuzahlLabel(r.zuzahlung)}`:''}
 ${r.note?`📝 *Hinweis:* ${r.note}`:''}
 ━━━━━━━━━━━━━━━━━━
-🗺️ *Zum Kunden:*
-${navLink}
+🗺️ *Zum Kunden (tippen):*
+${links.pickup}
 
-🗺️ *Komplette Route:*
-${mapsLink}`;
+🗺️ *Komplette Route (tippen):*
+${links.route}`;
 }
 
 function openDriverModalFromDispatch(rideId){
@@ -4844,9 +4925,10 @@ async function dispatchToDriverApp(driverId){
   if(!pair) return;
   closeDriverPicker();
   const synced=await cloudSyncUpload(false);
-  if(!synced) toast('⚠️ Sync nicht aktiv – Google Drive Sync aktivieren','warn');
-  else toast(`📱 Fahrt an ${pair.d.fname} gesendet`,'ok');
-  pingDriverWhatsApp(pair.d,'🚗 Neue Fahrt in der App: '+pair.r.date+' '+pair.r.time+' Uhr\n\n'+getDriverAppUrl(pair.d));
+  if(!synced) toast('⚠️ Google Drive Sync aktivieren (Kalender-Modal) – sonst sieht der Fahrer die Fahrt nicht','warn');
+  else toast(`📱 Fahrt an ${pair.d.fname} in der App`,'ok');
+  const links=buildMapsLinks(pair.r.from||'',pair.r.to||'');
+  pingDriverWhatsApp(pair.d,'🚗 Neue Fahrt: '+pair.r.date+' '+pair.r.time+' Uhr\n📍 '+pair.r.from+'\n🎯 '+pair.r.to+'\n\nApp öffnen:\n'+getDriverAppUrl(pair.d)+'\n\n🗺️ Navigation:\n'+links.route);
   renderToday();
   if(view==='calendar') renderCalendar();
 }
@@ -4854,7 +4936,7 @@ async function dispatchToDriverApp(driverId){
 function pingDriverWhatsApp(driver,message){
   const phone=normalizeWaPhone(driver?.phone);
   if(!phone) return;
-  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank');
+  openWhatsAppUrl('https://wa.me/'+phone+'?text='+encodeURIComponent(message));
 }
 
 function dispatchToDriverWA(driverId){
@@ -4865,9 +4947,9 @@ function dispatchToDriverWA(driverId){
   const driverPhone=normalizeWaPhone(pair.d.phone);
   if(!driverPhone){toast('Fahrer hat keine gültige WhatsApp-Nummer','warn');return;}
   const msg=buildDriverDispatchMessage(pair.r);
-  window.open(`https://wa.me/${driverPhone}?text=${encodeURIComponent(msg)}`,'_blank');
+  openWhatsAppUrl(`https://wa.me/${driverPhone}?text=${encodeURIComponent(msg)}`);
   closeDriverPicker();
-  toast(`✅ Fahrt an ${pair.d.fname} per WhatsApp gesendet`);
+  toast(`✅ WhatsApp an ${pair.d.fname} – 🗺️ Link für Navigation`);
   renderToday();
   if(view==='calendar') renderCalendar();
 }
@@ -6818,7 +6900,7 @@ function buildDriverRideCard(r){
   const statusPill=isNew?'<span class="drv-status-pill new">Neu</span>':done?'<span class="drv-status-pill accepted">Erledigt</span>':r.driverAcceptedAt?'<span class="drv-status-pill accepted">Angenommen</span>':'';
   const badges=[statusPill,driverPaymentBadge(r),r.passengerSignature?'<span class="drv-status-pill">✍️ Signatur</span>':'',zuzTxt?`<span class="drv-status-pill">${zuzTxt}</span>`:''].filter(Boolean).join('');
   const acceptBtn=isNew?`<button type="button" class="drv-btn drv-btn-accept" onclick="acceptDriverRide('${r.id}')">✓ Fahrt annehmen</button>`:'';
-  const navBtn=!isNew&&!done?`<button type="button" class="drv-btn maps" onclick="driverOpenMaps('${r.id}')">🗺️ Navigation starten</button>`:'';
+  const navBtn=!done?`<button type="button" class="drv-btn maps" onclick="driverOpenMaps('${r.id}')">🗺️ Navigation starten</button>`:'';
   const callBtn=phone&&!done?`<button type="button" class="drv-btn" onclick="window.open('tel:${phone}')">📞 Anrufen</button>`:'';
   return`<div class="drv-ride-card ${vis}${done?' done':''}${isNew?' new':''}" id="drv-ride-${r.id}">
     <div class="drv-ride-head">
