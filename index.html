@@ -521,6 +521,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
 @keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 .ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);z-index:600;max-height:240px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
 .ac-list.show{display:block}
+.ac-list.ac-fixed{position:fixed;right:auto;z-index:10050}
+.modal .fr:has(.ac-wrap){position:relative;z-index:2;overflow:visible}
+.modal .mbody .ac-wrap{z-index:3}
+.modal-pro .cust-tab-pane .fr:has(.ac-wrap){overflow:visible;position:relative;z-index:2}
 .ac-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s}
 .ac-item:last-child{border-bottom:none}
 .ac-item:hover{background:var(--bg4)}
@@ -670,6 +674,20 @@ h1,h2,h3,h4{font-family:var(--font2)}
 #driver-portal .drv-pin-input{font-size:32px;text-align:center;letter-spacing:10px;font-weight:700;padding:16px;margin-bottom:16px;border-radius:14px;background:#122338;border:2px solid #1e3a5f;color:#e8f4fc}
 #driver-portal .drv-pin-input:focus{border-color:#14b8a6;box-shadow:0 0 0 3px rgba(20,184,166,.25)}
 #driver-portal .drv-login-btn{width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:700;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none}
+.drv-shift-card{background:#122338;border:1px solid #1e3a5f;border-radius:14px;padding:14px;margin-bottom:16px}
+.drv-shift-card .drv-shift-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.drv-shift-card .drv-shift-status{font-size:15px;font-weight:700;color:#5eead4;margin-bottom:10px;line-height:1.5}
+.drv-shift-card .drv-shift-meta{font-size:12px;color:#94b8d4;margin-bottom:12px;line-height:1.5}
+.drv-shift-actions{display:flex;gap:8px;flex-wrap:wrap}
+.drv-shift-btn{flex:1;min-width:120px;padding:12px;border-radius:12px;font-size:13px;font-weight:700;border:none;cursor:pointer}
+.drv-shift-btn.start{background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff}
+.drv-shift-btn.end{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.shift-overview{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;margin-bottom:14px}
+.shift-overview h4{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px}
+.shift-overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.shift-overview-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:12px;line-height:1.55}
+.shift-overview-item strong{display:block;font-size:13px;color:var(--text);margin-bottom:4px}
+.shift-live{color:var(--green2);font-weight:700}
 #driver-topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + var(--safe-top));background:#0c2238;border-bottom:1px solid #1e3a5f;flex-shrink:0}
 .drv-brand{font-size:22px;flex-shrink:0}
 .drv-user{flex:1;min-width:0}
@@ -1076,6 +1094,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <div style="flex:1;overflow-y:auto;padding:14px">
       <div class="driver-hint"><strong>Fahrer-App:</strong> Fahrer anlegen → PIN &amp; App-Link wird erzeugt. Fahrer öffnet Link in <strong>Safari</strong> → Zum Home-Bildschirm. Bei Fahrten <strong>🚀</strong> → <strong>📱 App</strong> (Fahrt in der App, braucht Google-Drive-Sync) oder <strong>📲 WA</strong> (WhatsApp + Google-Maps-Link). Navigation: in der Fahrer-App <strong>🗺️ Navigation starten</strong> oder Maps-Link in WhatsApp antippen.</div>
       <button class="tb-btn primary" onclick="openDriverDocModal()" style="margin-bottom:12px">📄 Dokument an Fahrer senden</button>
+      <div id="dispatcher-shift-overview" class="shift-overview"></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;align-content:start" id="drivers-list"></div>
     </div>
   </div>
@@ -1143,6 +1162,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     </header>
     <div id="driver-content">
       <div id="driver-rides-panel">
+        <div class="drv-shift-card" id="drv-shift-card"></div>
         <div class="drv-section-title">Heute</div>
         <div id="driver-rides-list"></div>
         <div class="drv-section-title" style="margin-top:16px">Kommend</div>
@@ -1930,6 +1950,7 @@ let gcContacts=JSON.parse(localStorage.getItem('tp_gc')||'[]');
 let drivers=JSON.parse(localStorage.getItem('tp_d')||'[]');
 let driverDocs=JSON.parse(localStorage.getItem('tp_driver_docs')||'[]');
 let driverChat=JSON.parse(localStorage.getItem('tp_driver_chat')||'[]');
+let driverShifts=JSON.parse(localStorage.getItem('tp_driver_shifts')||'[]');
 let currentDriverId=localStorage.getItem('tp_driver_session')||sessionStorage.getItem('tp_driver_session')||null;
 let driverPollTimer=null;
 let driverKnownRideIds=new Set();
@@ -1966,6 +1987,7 @@ function save(){
   localStorage.setItem('tp_d',JSON.stringify(drivers));
   localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
   localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
+  localStorage.setItem('tp_driver_shifts',JSON.stringify(driverShifts));
   scheduleCloudSave();
 }
 
@@ -4264,8 +4286,10 @@ function selectSR(type,id){
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('#search-wrap')) document.getElementById('search-results').classList.remove('show');
-  ['hosp-ac','from-ac','c-street-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('.ac-wrap')) el.classList.remove('show');});
+  ['hosp-ac','from-ac','c-street-ac','c-hosp-ac','r-cust-ac'].forEach(id=>{const el=document.getElementById(id);if(el&&!e.target.closest('#'+id)&&!e.target.closest('.ac-wrap')){el.classList.remove('show');clearAcFixed();}});
 });
+window.addEventListener('resize',clearAcFixed);
+document.querySelectorAll('.modal .mbody,.modal-pro .mbody').forEach(el=>el.addEventListener('scroll',clearAcFixed,{passive:true}));
 
 // ═══════════════════════════════════════════════════════════════
 // ADRESS-AUTOCOMPLETE (OpenStreetMap kostenlos + Krankenhäuser)
@@ -4336,35 +4360,45 @@ async function fetchOsmLayer(input,layer,limit){
   return(data.features||[]).map(f=>f.properties||{}).filter(p=>!p.countrycode||p.countrycode==='de');
 }
 
-function buildOsmQueries(input){
-  const q=input.trim();
-  const queries=[q];
-  const plzMatch=q.match(/\b(\d{5})\b/);
-  if(plzMatch){
-    const withoutPlz=q.replace(plzMatch[0],'').replace(/\s+/g,' ').trim();
-    if(withoutPlz) queries.push(withoutPlz);
-  }
-  const parts=q.split(/[,\s]+/).filter(Boolean);
-  if(parts.length>=2){
-    queries.push(parts.slice(0,-1).join(' ')+' '+parts[parts.length-1]);
-    queries.push(parts[parts.length-1]+' '+parts.slice(0,-1).join(' '));
-  }
-  return[...new Set(queries)].slice(0,4);
+async function searchNominatimPlaces(input){
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=de&limit=10&accept-language=de&q=${encodeURIComponent(input)}`;
+    const res=await fetch(url,{headers:{'Accept-Language':'de'}});
+    if(!res.ok) return [];
+    const data=await res.json();
+    if(!Array.isArray(data)) return [];
+    return data.map(item=>{
+      const addr=item.address||{};
+      const street=[addr.road||addr.pedestrian||addr.footway,addr.house_number].filter(Boolean).join(' ');
+      const city=addr.city||addr.town||addr.village||addr.municipality||addr.county||'';
+      const plz=addr.postcode||'';
+      const short=[street,plz,city].filter(Boolean).join(', ');
+      const value=short||item.display_name||'';
+      if(!value) return null;
+      return{
+        icon:'📍',
+        main:street||value.split(',')[0],
+        sub:[plz,city].filter(Boolean).join(' · ')||'Deutschland',
+        value,
+        tag:street?'Straße':'Adresse',
+        source:'nominatim',
+        parts:{street,plz,city},
+      };
+    }).filter(Boolean);
+  }catch(e){return [];}
 }
 
 async function searchOsmPlaces(input){
   try{
-    const queries=buildOsmQueries(input);
-    const fetches=queries.flatMap(q=>[
-      fetchOsmLayer(q,'house',8),
+    const q=input.trim();
+    const [houses,streets,nominatim]=await Promise.all([
+      fetchOsmLayer(q,'house',10),
       fetchOsmLayer(q,'street',10),
-      fetchOsmLayer(q,'locality',4),
-      fetchOsmLayer(q,'',6),
+      searchNominatimPlaces(q),
     ]);
-    const batches=await Promise.all(fetches);
     const seen=new Set();
     const merged=[];
-    batches.flat().forEach(p=>{
+    [...houses,...streets].forEach(p=>{
       const hit=mapOsmProps(p);
       if(!hit) return;
       const key=hit.value.toLowerCase();
@@ -4372,8 +4406,32 @@ async function searchOsmPlaces(input){
       seen.add(key);
       merged.push(hit);
     });
+    nominatim.forEach(hit=>{
+      const key=hit.value.toLowerCase();
+      if(seen.has(key)) return;
+      seen.add(key);
+      merged.push(hit);
+    });
     return merged.slice(0,15);
-  }catch(e){return [];}
+  }catch(e){return searchNominatimPlaces(input);}
+}
+
+function positionAcList(acId,fieldId){
+  const ac=document.getElementById(acId);
+  const field=document.getElementById(fieldId);
+  if(!ac||!field||!ac.classList.contains('show')) return;
+  const r=field.getBoundingClientRect();
+  ac.classList.add('ac-fixed');
+  ac.style.top=Math.min(r.bottom+4,window.innerHeight-260)+'px';
+  ac.style.left=r.left+'px';
+  ac.style.width=Math.max(r.width,220)+'px';
+}
+
+function clearAcFixed(){
+  document.querySelectorAll('.ac-list.ac-fixed').forEach(el=>{
+    el.classList.remove('ac-fixed');
+    el.style.top=el.style.left=el.style.width='';
+  });
 }
 
 function searchLocalPlaces(q,includeHospitals,limit=6){
@@ -4401,7 +4459,7 @@ function searchLocalPlaces(q,includeHospitals,limit=6){
 function renderAddrAc(acId,fieldId,items){
   const ac=document.getElementById(acId);
   if(!ac) return;
-  if(!items.length){ac.classList.remove('show');return;}
+  if(!items.length){ac.classList.remove('show');clearAcFixed();return;}
   addrAcCache[acId]=items.map(it=>({...it,fieldId}));
   ac.innerHTML=items.map((it,i)=>{
     const tag=it.tag?`<span class="ac-tag${it.tag==='Krankenhaus'?' hosp':''}">${escAc(it.tag)}</span>`:'';
@@ -4411,6 +4469,7 @@ function renderAddrAc(acId,fieldId,items){
     </div>`;
   }).join('');
   ac.classList.add('show');
+  requestAnimationFrame(()=>positionAcList(acId,fieldId));
 }
 
 function applyAddrParts(fieldId,it){
@@ -4428,6 +4487,7 @@ function selectAddrSuggestion(acId,idx){
   if(!it) return;
   applyAddrParts(it.fieldId,it);
   document.getElementById(acId).classList.remove('show');
+  clearAcFixed();
   if(it.fieldId==='r-from'||it.fieldId==='r-to') calcDist();
 }
 
@@ -4449,9 +4509,16 @@ function onAddrSearch(val,acId,fieldId,includeHospitals=false){
     if(loadEl) loadEl.remove();
     const seen=new Set(localHits.map(h=>h.value.toLowerCase()));
     const merged=[...localHits,...osmHits.filter(h=>!seen.has(h.value.toLowerCase()))].slice(0,15);
-    if(!merged.length){if(ac) ac.classList.remove('show');return;}
+    if(!merged.length){
+      if(ac){
+        ac.innerHTML=`<div class="ac-loading">Keine Treffer – PLZ + Ort oder Straße + Stadt eingeben</div>`;
+        ac.classList.add('show');
+        positionAcList(acId,fieldId);
+      }
+      return;
+    }
     renderAddrAc(acId,fieldId,merged);
-  },300);
+  },280);
 }
 
 function onHospSearch(val){onAddrSearch(val,'hosp-ac','r-to',true);}
@@ -4702,9 +4769,105 @@ function shareCustomerWAById(id){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// FAHRER-SCHICHTEN (Beginn / Ende)
+// ═══════════════════════════════════════════════════════════════
+function fmtShiftTime(ts){
+  return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+}
+
+function fmtShiftDuration(ms){
+  if(!ms||ms<0) return '0 min';
+  const h=Math.floor(ms/3600000);
+  const m=Math.round((ms%3600000)/60000);
+  return h?`${h} Std ${m} Min`:`${m} Min`;
+}
+
+function getDriverOpenShift(driverId){
+  const today=fmtD(new Date());
+  return driverShifts.find(s=>s.driverId===driverId&&s.date===today&&!s.endAt)||null;
+}
+
+function getDriverShiftMinutes(driverId,dateStr){
+  const closed=driverShifts.filter(s=>s.driverId===driverId&&s.date===dateStr&&s.endAt);
+  let total=closed.reduce((sum,s)=>sum+(s.endAt-s.startAt),0);
+  const open=getDriverOpenShift(driverId);
+  if(open&&open.date===dateStr) total+=Date.now()-open.startAt;
+  return total;
+}
+
+function getDriverMonthMinutes(driverId,year,month){
+  return driverShifts.filter(s=>{
+    if(s.driverId!==driverId||!s.endAt) return false;
+    const d=new Date(s.date+'T12:00:00');
+    return d.getFullYear()===year&&d.getMonth()===month;
+  }).reduce((sum,s)=>sum+(s.endAt-s.startAt),0);
+}
+
+function startDriverShift(){
+  if(!currentDriverId) return;
+  const open=getDriverOpenShift(currentDriverId);
+  if(open){toast('Schicht läuft bereits seit '+fmtShiftTime(open.startAt),'warn');return;}
+  driverShifts.push({id:uid(),driverId:currentDriverId,date:fmtD(new Date()),startAt:Date.now(),endAt:null});
+  save();
+  renderDriverShiftCard();
+  renderDispatcherShiftOverview();
+  toast('Schicht gestartet','ok');
+}
+
+function endDriverShift(){
+  if(!currentDriverId) return;
+  const open=getDriverOpenShift(currentDriverId);
+  if(!open){toast('Keine laufende Schicht','warn');return;}
+  open.endAt=Date.now();
+  save();
+  renderDriverShiftCard();
+  renderDispatcherShiftOverview();
+  if(!currentDriverId) renderDrivers();
+  toast('Schicht beendet · '+fmtShiftDuration(open.endAt-open.startAt),'ok');
+}
+
+function renderDriverShiftCard(){
+  const el=document.getElementById('drv-shift-card');
+  if(!el||!currentDriverId) return;
+  const open=getDriverOpenShift(currentDriverId);
+  const todayMin=getDriverShiftMinutes(currentDriverId,fmtD(new Date()));
+  const now=new Date();
+  const monthMin=getDriverMonthMinutes(currentDriverId,now.getFullYear(),now.getMonth())+(open?Date.now()-open.startAt:0);
+  if(open){
+    el.innerHTML=`<div class="drv-shift-title">Arbeitszeit</div>
+      <div class="drv-shift-status">🟢 Schicht läuft seit ${fmtShiftTime(open.startAt)}</div>
+      <div class="drv-shift-meta">Heute: ${fmtShiftDuration(todayMin)} · Monat: ${fmtShiftDuration(monthMin)}</div>
+      <div class="drv-shift-actions"><button type="button" class="drv-shift-btn end" onclick="endDriverShift()">⏹ Schicht beenden</button></div>`;
+  }else{
+    el.innerHTML=`<div class="drv-shift-title">Arbeitszeit</div>
+      <div class="drv-shift-status">⚪ Keine laufende Schicht</div>
+      <div class="drv-shift-meta">Heute: ${fmtShiftDuration(todayMin)} · Monat: ${fmtShiftDuration(monthMin)}</div>
+      <div class="drv-shift-actions"><button type="button" class="drv-shift-btn start" onclick="startDriverShift()">▶ Schicht beginnen</button></div>`;
+  }
+}
+
+function renderDispatcherShiftOverview(){
+  const el=document.getElementById('dispatcher-shift-overview');
+  if(!el) return;
+  if(!drivers.length){el.innerHTML='';return;}
+  const today=fmtD(new Date());
+  const now=new Date();
+  const monthLabel=DE_MONTHS[now.getMonth()]+' '+now.getFullYear();
+  el.innerHTML=`<h4>⏱️ Arbeitszeiten · ${today}</h4>
+    <div class="shift-overview-grid">${drivers.map(d=>{
+      const open=getDriverOpenShift(d.id);
+      const dayMin=getDriverShiftMinutes(d.id,today);
+      const monthMin=getDriverMonthMinutes(d.id,now.getFullYear(),now.getMonth())+(open?Date.now()-open.startAt:0);
+      const live=open?`<span class="shift-live"> · läuft seit ${fmtShiftTime(open.startAt)}</span>`:'';
+      return`<div class="shift-overview-item"><strong>${d.fname} ${d.lname}</strong>Heute: ${fmtShiftDuration(dayMin)}${live}<br>${monthLabel}: ${fmtShiftDuration(monthMin)}</div>`;
+    }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // DRIVERS
 // ═══════════════════════════════════════════════════════════════
 function renderDrivers(){
+  renderDispatcherShiftOverview();
   const el=document.getElementById('drivers-list');
   if(!drivers.length){
     el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">👨‍✈️</div><p>Noch keine Fahrer angelegt.<br>Füge deine Fahrer hinzu um Fahrten direkt zuzuweisen.</p></div>`;
@@ -4727,6 +4890,7 @@ function renderDrivers(){
         <div><span class="dp-status ${d.status||'frei'}">${statusLabels[d.status||'frei']}</span></div>
       </div>
       ${todayDispatched>0?`<div style="font-size:11px;color:var(--green2);margin-bottom:8px">✅ ${todayDispatched} Fahrt${todayDispatched>1?'en':''} heute zugewiesen</div>`:''}
+      ${(()=>{const open=getDriverOpenShift(d.id);const dayMin=getDriverShiftMinutes(d.id,fmtD(new Date()));return`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">⏱️ Heute: ${fmtShiftDuration(dayMin)}${open?' · <span class="shift-live">läuft</span>':''}</div>`;})()}
       ${docSigned||docPending?`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">📄 ${docSigned} unterschrieben${docPending?` · ${docPending} offen`:''}</div>`:''}
       <div class="driver-btns" style="flex-wrap:wrap">
         <button class="cc-btn dispatch" style="flex:1;min-width:45%" onclick="copyDriverAppLink('${d.id}')">📱 App-Link</button>
@@ -5380,7 +5544,7 @@ async function writeRideToExcelCloud(ride,cust){
 }
 
 function buildCloudPayload(){
-  return{version:4,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,
+  return{version:5,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,
     settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}};
 }
 
@@ -5435,6 +5599,7 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
     if(Array.isArray(data.rides)) rides=data.rides;
     if(Array.isArray(data.driverDocs)) driverDocs=data.driverDocs;
     if(data.driverChat?.length) driverChat=data.driverChat;
+    if(Array.isArray(data.driverShifts)) driverShifts=data.driverShifts;
     if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
   }else{
     if(!data?.rides&&!data?.customers&&!data?.driverDocs) return false;
@@ -5444,12 +5609,13 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
     if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
     if(Array.isArray(data.driverDocs)&&data.driverDocs.length) driverDocs=data.driverDocs;
     if(data.driverChat?.length) driverChat=data.driverChat;
+    if(Array.isArray(data.driverShifts)) driverShifts=data.driverShifts;
   }
   reapplyDriverBootAuth();
   saveLocalOnly();
   localStorage.setItem('tp_local_saved',data.exported||new Date().toISOString());
   if(driverMode||currentDriverId) onDriverCloudUpdated();
-  else{renderCalendar();renderToday();renderCustomers();renderDrivers();updateCounts();renderMiniCal();}
+  else{renderCalendar();renderToday();renderCustomers();renderDrivers();renderDispatcherShiftOverview();updateCounts();renderMiniCal();}
   syncDriverAuthRegistry();
   return true;
 }
@@ -5617,6 +5783,7 @@ function saveLocalOnly(){
   localStorage.setItem('tp_d',JSON.stringify(drivers));
   localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
   localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
+  localStorage.setItem('tp_driver_shifts',JSON.stringify(driverShifts));
   localStorage.setItem('tp_local_saved',new Date().toISOString());
 }
 
@@ -6773,6 +6940,7 @@ function showDriverMain(driverId){
   const ps=document.getElementById('drv-profile-sub');
   if(ps) ps.textContent=d.phone||d.vehicle||'Fahrer-App';
   driverKnownRideIds=new Set(rides.filter(r=>r.dispatchedTo===driverId).map(r=>r.id));
+  renderDriverShiftCard();
   renderDriverRides();
   renderDriverDocs();
   renderDriverChat();
@@ -7267,6 +7435,7 @@ function checkDriverNewAssignments(){
 
 function onDriverCloudUpdated(){
   checkDriverNewAssignments();
+  renderDriverShiftCard();
   renderDriverRides();
   renderDriverDocs();
   renderDriverChat();
