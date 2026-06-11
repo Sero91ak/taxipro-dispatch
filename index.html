@@ -33,6 +33,10 @@
       if(tid)rq.set('d',tid);if(tt)rq.set('t',tt);if(tp)rq.set('p',tp);
       var tfn=localStorage.getItem('tp_driver_fn'),tln=localStorage.getItem('tp_driver_ln');
       if(tfn)rq.set('fn',tfn);if(tln)rq.set('ln',tln);
+      var gdid=localStorage.getItem('tp_gdrv_file_id');
+      var sy=localStorage.getItem('tp_sync_folder_url');
+      if(gdid)rq.set('gd',gdid);
+      if(sy)rq.set('sy',sy);
     }catch(e){}
     return base+'driver.html?'+rq.toString();
   }
@@ -80,6 +84,8 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 :root,[data-theme="dark"]{
   --bg:#1a2433;--bg2:#222e3f;--bg3:#2a384c;--bg4:#33465c;--bg5:#3d5269;
@@ -201,6 +207,18 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .cust-serie-date-grid{display:flex;flex-wrap:wrap;gap:6px}
 .cust-serie-date{font-size:11px;padding:4px 8px;background:var(--bg4);border-radius:6px;font-weight:600;color:var(--text2)}
 .cust-serie-planner{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:14px;margin-bottom:14px}
+.scan-drop{border:2px dashed var(--border2);border-radius:var(--r2);padding:24px;text-align:center;cursor:pointer;background:var(--bg3);transition:.15s}
+.scan-drop:hover,.scan-drop.drag{border-color:var(--gold);background:var(--gold3)}
+.scan-drop-icon{font-size:32px;margin-bottom:8px}
+.scan-preview{max-width:100%;max-height:220px;border-radius:var(--r2);border:1px solid var(--border2);margin:10px 0}
+.scan-progress{font-size:12px;color:var(--text2);margin:8px 0}
+.scan-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.scan-table th,.scan-table td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
+.scan-table th{font-size:10px;color:var(--text3);text-transform:uppercase}
+.scan-table tr.cancelled td{opacity:.45;text-decoration:line-through}
+.scan-table tr.suspect td{background:rgba(232,68,68,.08)}
+.scan-table input[type="time"],.scan-table input[type="date"],.scan-table input[type="text"]{width:100%;padding:6px 8px;font-size:12px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text)}
+.scan-warn{font-size:11px;color:var(--red2);padding:8px 10px;background:var(--red-bg);border-radius:var(--r2);margin:8px 0;line-height:1.5}
 
 .nav-sec{padding:12px 12px 3px;font-size:9px;font-weight:700;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase}
 .nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;border-radius:7px;margin:1px 5px;font-size:12px;font-weight:500;color:var(--text2);transition:.12s}
@@ -986,6 +1004,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <button class="tb-btn gc" id="gcal-sync-btn" onclick="initiateGCalSync()">📅 Kalender</button>
     <button class="tb-btn" onclick="openMapsApp()" title="Google Maps in der App">🗺️ Maps</button>
     <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel">🌙</button>
+    <button class="tb-btn" onclick="openScanImportModal()" title="Terminplan scannen">📷 Scan</button>
     <button class="tb-btn primary" onclick="openRideModal()">＋ Fahrt</button>
     <button class="tb-btn" onclick="openCustomerModal()">👤 Kunde</button>
   </div>
@@ -1050,6 +1069,8 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-item gc-item" id="nav-cloud" onclick="initiateGCalSync()"><span class="nav-icon">☁️</span> Google Drive Sync <span class="nav-badge" id="nb-cloud">–</span></div>
   <div class="nav-sec">App</div>
   <div class="nav-item" id="nav-install-app" onclick="installPwa()"><span class="nav-icon">📲</span> Als App installieren</div>
+  <div class="nav-sec">Import</div>
+  <div class="nav-item" onclick="openScanImportModal()"><span class="nav-icon">📷</span> Termin-Scan (PDF/Foto)</div>
   <div class="nav-sec">Daten</div>
   <div class="nav-item" onclick="exportBackup()"><span class="nav-icon">💾</span> Backup speichern</div>
   <div class="nav-item" onclick="document.getElementById('import-file').click()"><span class="nav-icon">📂</span> Backup laden</div>
@@ -1700,6 +1721,51 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="mh"><h3>📅 Google Termin</h3><button class="mclose" onclick="closeM('modal-gcal-detail')">✕</button></div>
   <div class="mbody" id="gcal-detail-body"></div>
   <div class="mfooter" id="gcal-detail-footer"></div>
+</div>
+</div>
+
+<!-- ═══ MODAL: TERMIN-SCAN ═══ -->
+<div class="overlay hidden" id="modal-scan-import">
+<div class="modal modal-lg modal-pro">
+  <div class="mh mh-pro">
+    <div>
+      <h3>📷 Termin-Scan importieren</h3>
+      <div class="mh-sub">PDF oder Foto hochladen – Termine erkennen, bearbeiten, gestrichene auslassen</div>
+    </div>
+    <button class="mclose" onclick="closeM('modal-scan-import')">✕</button>
+  </div>
+  <div class="mbody">
+    <label class="scan-drop" id="scan-drop-zone" for="scan-file-input">
+      <div class="scan-drop-icon">📄</div>
+      <div style="font-weight:600;margin-bottom:4px">PDF oder Foto hier ablegen / klicken</div>
+      <div style="font-size:11px;color:var(--text2)">WhatsApp-Scan, Krankenhaus-Terminplan, Verordnung…</div>
+      <input type="file" id="scan-file-input" accept="image/*,application/pdf" capture="environment" style="display:none" onchange="handleScanFileUpload(this)"/>
+    </label>
+    <div id="scan-progress" class="scan-progress hidden"></div>
+    <img id="scan-preview-img" class="scan-preview hidden" alt="Scan-Vorschau"/>
+    <div class="fr2 fr" style="margin-top:10px">
+      <div><label>Kunde zuordnen (optional)</label>
+        <input type="text" id="scan-cust-search" placeholder="Name suchen…" oninput="onScanCustSearch(this.value)" autocomplete="off"/>
+        <input type="hidden" id="scan-cust-id"/>
+        <div class="ac-list" id="scan-cust-ac"></div>
+      </div>
+      <div><label>Standard-Ziel</label><input type="text" id="scan-default-to" placeholder="z.B. UKB Bonn"/></div>
+    </div>
+    <div id="scan-warn-box" class="scan-warn hidden"></div>
+    <div id="scan-review-wrap" style="display:none;margin-top:12px">
+      <div class="fsec" style="margin-top:0">Erkannte Termine <span id="scan-count-label" style="font-size:11px;color:var(--text3)"></span></div>
+      <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
+        <table class="scan-table" id="scan-review-table">
+          <thead><tr><th>✓</th><th>Datum</th><th>Zeit</th><th>Text / Name</th><th>Status</th></tr></thead>
+          <tbody id="scan-review-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-scan-import')">Abbrechen</button>
+    <button class="btn btn-primary" id="scan-import-btn" onclick="importScanAppointments()" disabled>📅 In Kalender übernehmen</button>
+  </div>
 </div>
 </div>
 
@@ -3805,9 +3871,14 @@ function renderGCalModal(){
   const gdrvSetup=document.getElementById('gdrv-setup-btn');
   const gdrvSync=document.getElementById('gdrv-sync-btn');
   if(gdrvInfo){
-    if(googleDriveSyncReady()) gdrvInfo.innerHTML='<span style="color:var(--green2)">✅ Google Drive Sync aktiv – Fahrer erhalten Fahrten &amp; Dokumente</span>';
-    else if(gcalConnected) gdrvInfo.innerHTML='Google verbunden – klicke <strong>Google Drive Sync aktivieren</strong>';
-    else gdrvInfo.innerHTML='Zuerst <strong>Mit Google verbinden</strong>, dann Drive Sync aktivieren';
+    const fileId=gdrvFileId||localStorage.getItem('tp_gdrv_file_id');
+    if(googleDriveSyncReady()) gdrvInfo.innerHTML=`<span style="color:var(--green2)">✅ Google Drive Sync aktiv – alle Geräte &amp; Fahrer synchronisiert</span><br>
+      <span style="font-size:10px;color:var(--text3)">Neues Handy/PC: Sync-Link öffnen – Daten laden automatisch. Upload braucht einmalig Google-Anmeldung.</span><br>
+      <button type="button" class="btn btn-sm btn-blue" style="margin-top:8px" onclick="copyCloudSyncLink()">📋 Sync-Link kopieren</button>`;
+    else if(fileId) gdrvInfo.innerHTML=`☁️ Cloud-Datei bekannt (ID: ${fileId.slice(0,8)}…) – Daten werden geladen. Für Upload: <strong>Google verbinden</strong>.<br>
+      <button type="button" class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="copyCloudSyncLink()">📋 Sync-Link kopieren</button>`;
+    else if(gcalConnected) gdrvInfo.innerHTML='Google verbunden – klicke <strong>Google Drive Sync aktivieren</strong> (einmalig)';
+    else gdrvInfo.innerHTML='Zuerst <strong>Mit Google verbinden</strong>, dann Drive Sync aktivieren – danach läuft alles auf allen Geräten';
   }
   if(gdrvSetup) gdrvSetup.style.display=googleDriveSyncReady()?'none':'inline-flex';
   if(gdrvSync) gdrvSync.style.display=googleDriveSyncReady()?'inline-flex':'none';
@@ -5887,8 +5958,12 @@ async function writeRideToExcelCloud(ride,cust){
 }
 
 function buildCloudPayload(){
-  return{version:5,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,
-    settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}};
+  const pubUrl=localStorage.getItem('tp_gdrv_public_url')||localStorage.getItem('tp_public_sync_url')||'';
+  return{version:6,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,
+    settings:{
+      gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark',
+      sync:{gdrvFileId:gdrvFileId||localStorage.getItem('tp_gdrv_file_id')||'',gdrvPublicUrl:pubUrl,gdrvSyncEnabled:!!gdrvSyncEnabled}
+    }};
 }
 
 async function ensureCloudDataFile(){
@@ -5938,6 +6013,20 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
   if(!data) return false;
   const localTs=localStorage.getItem('tp_local_saved')||'';
   if(!force&&data.exported&&localTs&&data.exported<=localTs) return false;
+  if(data.settings?.sync){
+    const s=data.settings.sync;
+    if(s.gdrvFileId){
+      gdrvFileId=s.gdrvFileId;
+      localStorage.setItem('tp_gdrv_file_id',s.gdrvFileId);
+      const u=s.gdrvPublicUrl||'https://drive.google.com/uc?export=download&id='+s.gdrvFileId;
+      localStorage.setItem('tp_gdrv_public_url',u);
+      localStorage.setItem('tp_public_sync_url',u);
+    }else if(s.gdrvPublicUrl){
+      localStorage.setItem('tp_gdrv_public_url',s.gdrvPublicUrl);
+      localStorage.setItem('tp_public_sync_url',s.gdrvPublicUrl);
+    }
+    if(s.gdrvSyncEnabled){gdrvSyncEnabled=true;localStorage.setItem('tp_gdrv_sync','1');}
+  }
   if(driverMode){
     if(Array.isArray(data.rides)) rides=data.rides;
     if(Array.isArray(data.driverDocs)) driverDocs=data.driverDocs;
@@ -6014,6 +6103,7 @@ async function uploadGoogleDriveSync(showToast=false){
     const res=await fetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media',{
       method:'PATCH',headers:{Authorization:'Bearer '+gcalToken,'Content-Type':'application/json'},body
     });
+    if(res.status===401){disconnectGCal();if(showToast){toast('Google abgelaufen – bitte neu verbinden','warn');openM('modal-gcal');}return false;}
     if(!res.ok) throw new Error('GDRIVE_UPLOAD');
     await ensureGoogleDrivePublic(fileId);
     gdrvSyncEnabled=true;
@@ -6048,7 +6138,7 @@ async function finishGoogleDriveSetup(){
   updateCloudUI();
 }
 
-function setupGoogleDriveSync(){
+function setupGoogleDriveSync(forceConsent=false){
   if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID'){toast('GOOGLE_CLIENT_ID fehlt','warn');return;}
   if(location.protocol==='file:'){toast('App nicht als Datei öffnen – über https://sero91ak.github.io/taxipro-dispatch/','warn');return;}
   whenGoogleReady(()=>{
@@ -6057,8 +6147,42 @@ function setupGoogleDriveSync(){
       if(!gcalConnected){await loadGCalendars();updateGCalBtn();}
       await finishGoogleDriveSetup();
     })){toast('Google-Bibliothek nicht geladen','err');return;}
-    googleTokenClient.requestAccessToken({prompt:'consent'});
+    googleTokenClient.requestAccessToken({prompt:forceConsent?'consent':''});
   });
+}
+function copyCloudSyncLink(){
+  const fileId=gdrvFileId||localStorage.getItem('tp_gdrv_file_id');
+  const pub=localStorage.getItem('tp_gdrv_public_url')||localStorage.getItem('tp_public_sync_url')||(fileId?'https://drive.google.com/uc?export=download&id='+fileId:'');
+  const appUrl=location.origin+location.pathname.replace(/[^/]*$/,'')+'?gd='+(fileId||'');
+  const txt='☁️ TaxiPro Sync\n\nApp-Link (neues Gerät):\n'+appUrl+'\n\nCloud-Datei:\n'+pub;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast('Sync-Link kopiert – auf neuem Gerät öffnen','ok'));
+  else toast(appUrl,'ok');
+}
+let dispatchCloudPollTimer=null;
+async function dispatchCloudPoll(silent=true){
+  if(isDriverAppMode()||currentDriverId) return;
+  const pulled=await fetchGoogleDriveSync(true);
+  if(pulled&&!silent) toast('☁️ Daten aktualisiert','ok');
+}
+async function initDispatchCloudSync(){
+  const params=new URLSearchParams(location.search);
+  const gdParam=params.get('gd');
+  if(gdParam&&!gdrvFileId){
+    gdrvFileId=gdParam;
+    localStorage.setItem('tp_gdrv_file_id',gdParam);
+    localStorage.setItem('tp_gdrv_public_url','https://drive.google.com/uc?export=download&id='+gdParam);
+    localStorage.setItem('tp_public_sync_url','https://drive.google.com/uc?export=download&id='+gdParam);
+    gdrvSyncEnabled=true;
+    localStorage.setItem('tp_gdrv_sync','1');
+  }
+  const hasCloud=gdrvFileId||localStorage.getItem('tp_gdrv_file_id')||localStorage.getItem('tp_public_sync_url');
+  if(hasCloud){
+    const ok=await fetchGoogleDriveSync(true);
+    if(ok) toast('☁️ Daten von Cloud geladen','ok');
+  }
+  if(gcalToken) trySilentGoogleRefresh();
+  if(dispatchCloudPollTimer) clearInterval(dispatchCloudPollTimer);
+  dispatchCloudPollTimer=setInterval(()=>dispatchCloudPoll(true),30000);
 }
 
 async function cloudSyncUpload(showToast=false){
@@ -6156,7 +6280,13 @@ function whenGoogleReady(fn,attempt=0){
 function trySilentGoogleRefresh(){
   if(!gcalToken) return;
   whenGoogleReady(()=>{
-    if(!initGoogleTokenClient(getGoogleScopes(),async()=>{await loadGCalendars();await fullGCalSync();})) return;
+    const onOk=async()=>{
+      await loadGCalendars();
+      updateGCalBtn();
+      if(googleDriveSyncReady()) await uploadGoogleDriveSync(false);
+      if(gcalSyncEnabled) await fullGCalSync();
+    };
+    if(!initGoogleTokenClient(getGoogleScopes(),onOk)) return;
     googleTokenClient.requestAccessToken({prompt:''});
   });
 }
@@ -7888,6 +8018,204 @@ function purgeDemoData(){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// TERMIN-SCAN IMPORT (PDF / Foto + OCR)
+// ═══════════════════════════════════════════════════════════════
+let scanImportRows=[];
+let scanOcrWorker=null;
+
+function openScanImportModal(){
+  scanImportRows=[];
+  document.getElementById('scan-file-input').value='';
+  document.getElementById('scan-progress').classList.add('hidden');
+  document.getElementById('scan-preview-img').classList.add('hidden');
+  document.getElementById('scan-review-wrap').style.display='none';
+  document.getElementById('scan-import-btn').disabled=true;
+  document.getElementById('scan-warn-box').classList.add('hidden');
+  document.getElementById('scan-cust-search').value='';
+  document.getElementById('scan-cust-id').value='';
+  document.getElementById('scan-default-to').value='';
+  openM('modal-scan-import');
+}
+function setScanProgress(msg){const el=document.getElementById('scan-progress');if(el){el.textContent=msg;el.classList.remove('hidden');}}
+function onScanCustSearch(q){
+  const ac=document.getElementById('scan-cust-ac');if(!ac) return;
+  const ql=(q||'').trim().toLowerCase();
+  if(ql.length<2){ac.innerHTML='';ac.classList.remove('show');return;}
+  const hits=customers.filter(c=>(c.fname+' '+c.lname).toLowerCase().includes(ql)||(c.lname+' '+c.fname).toLowerCase().includes(ql)).slice(0,8);
+  ac.innerHTML=hits.map(c=>`<div class="ac-item" onclick="pickScanCustomer('${c.id}')">${c.fname} ${c.lname}</div>`).join('');
+  ac.classList.toggle('show',!!hits.length);
+}
+function pickScanCustomer(id){
+  const c=customers.find(x=>x.id===id);if(!c) return;
+  document.getElementById('scan-cust-id').value=id;
+  document.getElementById('scan-cust-search').value=c.fname+' '+c.lname;
+  if(c.stammHosp) document.getElementById('scan-default-to').value=c.stammHosp;
+  document.getElementById('scan-cust-ac').classList.remove('show');
+}
+async function handleScanFileUpload(input){
+  const file=input?.files?.[0];if(!file) return;
+  setScanProgress('Datei wird vorbereitet…');
+  try{
+    let canvas;
+    if(file.type==='application/pdf'||file.name.toLowerCase().endsWith('.pdf')){
+      canvas=await renderPdfFirstPage(file);
+    }else{
+      canvas=await renderImageFile(file);
+    }
+    const prev=document.getElementById('scan-preview-img');
+    if(prev){prev.src=canvas.toDataURL('image/jpeg',0.92);prev.classList.remove('hidden');}
+    await runScanOcr(canvas);
+  }catch(e){
+    setScanProgress('');
+    toast('Scan konnte nicht gelesen werden: '+(e.message||'Fehler'),'err');
+  }
+}
+async function renderPdfFirstPage(file){
+  if(!window.pdfjsLib) throw new Error('PDF-Bibliothek fehlt');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const page=await pdf.getPage(1);
+  const vp=page.getViewport({scale:2});
+  const canvas=document.createElement('canvas');
+  canvas.width=vp.width;canvas.height=vp.height;
+  await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+  return canvas;
+}
+function renderImageFile(file){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const maxW=2400,maxH=3200;
+      let w=img.width,h=img.height;
+      if(w>maxW){h=h*maxW/w;w=maxW;}
+      if(h>maxH){w=w*maxH/h;h=maxH;}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      res(canvas);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('Bild fehlerhaft'));};
+    img.src=url;
+  });
+}
+async function runScanOcr(canvas){
+  if(!window.Tesseract) throw new Error('OCR-Bibliothek fehlt');
+  setScanProgress('Texterkennung läuft (kann 20–60 Sek. dauern)…');
+  const {data}=await Tesseract.recognize(canvas,'deu+eng',{logger:m=>{if(m.status==='recognizing text'&&m.progress) setScanProgress('OCR: '+Math.round(m.progress*100)+'%');}});
+  setScanProgress('Termine werden erkannt…');
+  scanImportRows=parseScanOcrToAppointments(data);
+  renderScanReviewTable();
+  setScanProgress(scanImportRows.length?scanImportRows.length+' Termin(e) erkannt – bitte prüfen':'Keine Termine erkannt – Zeiten manuell ergänzen oder anderes Foto');
+}
+const SCAN_CANCEL_WORDS=/\b(absage|storno|storniert|entf[aä]llt|annuliert|gestrichen|durchgestrichen|nicht mehr|geplatzt|cancelled|canceled)\b/i;
+const SCAN_CANCEL_PREFIX=/^[x×✗✕X\-\–—]\s*/;
+function parseScanOcrToAppointments(ocrData){
+  const lines=(ocrData.text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const words=ocrData.words||[];
+  const yearDefault=new Date().getFullYear();
+  const rows=[];
+  const seen=new Set();
+  lines.forEach((line,idx)=>{
+    const dateM=line.match(/(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?/);
+    const timeM=line.match(/(\d{1,2})[:\.](\d{2})\s*(?:Uhr)?/i);
+    if(!dateM&&!timeM) return;
+    let day=dateM?parseInt(dateM[1],10):null;
+    let month=dateM?parseInt(dateM[2],10):null;
+    let year=dateM&&dateM[3]?parseInt(dateM[3],10):yearDefault;
+    if(year<100) year+=2000;
+    if(!day||!month) return;
+    const iso=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const hh=timeM?String(parseInt(timeM[1],10)).padStart(2,'0'):'08:00';
+    const mm=timeM?timeM[2]:'00';
+    const time=`${hh}:${mm}`;
+    const key=iso+'|'+time+'|'+line.slice(0,40);
+    if(seen.has(key)) return;
+    seen.add(key);
+    const cancelled=SCAN_CANCEL_WORDS.test(line)||SCAN_CANCEL_PREFIX.test(line);
+    const garbledDate=/[OIl][0-9]|[0-9][OIl]/.test((dateM&&dateM[0])||'');
+    const lineWords=words.filter(w=>(w.text||'').trim()&&line.includes((w.text||'').trim()));
+    const avgConf=lineWords.length?lineWords.reduce((s,w)=>s+(w.confidence||0),0)/lineWords.length:80;
+    const suspect=cancelled||garbledDate||avgConf<55;
+    let label=line.replace(dateM?dateM[0]:'','').replace(timeM?timeM[0]:'','').replace(/\s+/g,' ').trim();
+    rows.push({id:uid(),date:iso,time,label,cancelled,suspect,include:!suspect&&!cancelled,raw:line});
+  });
+  if(!rows.length){
+    const blob=(ocrData.text||'').replace(/\s+/g,' ');
+    const re=/(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?[^0-9]{0,20}(\d{1,2})[:\.](\d{2})/g;
+    let m;
+    while((m=re.exec(blob))){
+      let y=m[3]?parseInt(m[3],10):yearDefault;if(y<100)y+=2000;
+      const iso=`${y}-${String(parseInt(m[2],10)).padStart(2,'0')}-${String(parseInt(m[1],10)).padStart(2,'0')}`;
+      const time=`${String(parseInt(m[4],10)).padStart(2,'0')}:${m[5]}`;
+      const ctx=blob.slice(Math.max(0,m.index-10),m.index+60);
+      const cancelled=SCAN_CANCEL_WORDS.test(ctx);
+      rows.push({id:uid(),date:iso,time,label:ctx.trim().slice(0,80),cancelled,suspect:cancelled,include:!cancelled,raw:ctx});
+    }
+  }
+  return rows.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+}
+function renderScanReviewTable(){
+  const wrap=document.getElementById('scan-review-wrap');
+  const body=document.getElementById('scan-review-body');
+  const warn=document.getElementById('scan-warn-box');
+  if(!wrap||!body) return;
+  wrap.style.display='block';
+  const cancelledN=scanImportRows.filter(r=>r.cancelled||r.suspect).length;
+  if(warn){
+    if(cancelledN) warn.classList.remove('hidden'),warn.innerHTML=`⚠️ <strong>${cancelledN}</strong> Termin(e) wirken gestrichen/abgesagt – sind <strong>nicht</strong> vorausgewählt. Bitte prüfen bevor du importierst.`;
+    else warn.classList.add('hidden');
+  }
+  body.innerHTML=scanImportRows.map((r,i)=>`<tr class="${r.cancelled?'cancelled':''}${r.suspect&&!r.cancelled?' suspect':''}" data-i="${i}">
+    <td><input type="checkbox" ${r.include?'checked':''} onchange="scanImportRows[${i}].include=this.checked"/></td>
+    <td><input type="date" value="${r.date}" onchange="scanImportRows[${i}].date=this.value"/></td>
+    <td><input type="time" value="${r.time}" onchange="scanImportRows[${i}].time=this.value"/></td>
+    <td><input type="text" value="${escAttr(r.label)}" onchange="scanImportRows[${i}].label=this.value"/></td>
+    <td style="font-size:10px">${r.cancelled?'🚫 gestrichen':r.suspect?'⚠️ prüfen':'✓'}</td>
+  </tr>`).join('');
+  document.getElementById('scan-count-label').textContent=`(${scanImportRows.filter(r=>r.include).length} von ${scanImportRows.length} ausgewählt)`;
+  document.getElementById('scan-import-btn').disabled=!scanImportRows.some(r=>r.include);
+}
+function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function importScanAppointments(){
+  const selected=scanImportRows.filter(r=>r.include);
+  if(!selected.length){toast('Keine Termine ausgewählt','warn');return;}
+  const custId=document.getElementById('scan-cust-id').value;
+  const cust=customers.find(c=>c.id===custId);
+  const defaultTo=document.getElementById('scan-default-to').value.trim()||(cust?.stammHosp||'');
+  const type=cust?defaultRideTypeForCustomer(cust):'krank';
+  const from=cust?[cust.street,cust.plz,cust.city].filter(Boolean).join(', '):'';
+  selected.forEach(r=>{
+    rides.push({
+      id:uid(),type,customerId:custId||null,date:r.date,time:r.time,from,to:defaultTo,
+      verordnung:'',zuzahlung:type==='krank'?normalizeZuzahlung(cust?.zuzahlungStatus||'NB'):'',
+      note:(r.label?'Scan: '+r.label:'').trim(),serie:false,reminder:false,reminderMin:'30',
+      serieType:'',km:estKm(from,defaultTo),localUpdated:Date.now(),source:'scan-import',
+      excelDir:(type==='krank'||type==='rechn')?'hin-rueck':undefined,
+    });
+  });
+  save();
+  closeM('modal-scan-import');
+  renderCalendar();renderToday();updateCounts();renderMiniCal();
+  toast(selected.length+' Termin(e) in Kalender übernommen','ok');
+}
+(function initScanDropZone(){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const z=document.getElementById('scan-drop-zone');
+    if(!z) return;
+    z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag');});
+    z.addEventListener('dragleave',()=>z.classList.remove('drag'));
+    z.addEventListener('drop',e=>{
+      e.preventDefault();z.classList.remove('drag');
+      const f=e.dataTransfer?.files?.[0];
+      if(f){const inp=document.getElementById('scan-file-input');if(inp){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;handleScanFileUpload(inp);}}
+    });
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
 purgeDemoData();
@@ -7906,10 +8234,8 @@ if(!initAppMode()){
   renderMiniCal();
   renderCalendar();
   renderCustomers();
-  if(gcalConnected){
-    trySilentGoogleRefresh();
-    setTimeout(()=>autoPurgeDemoOnLoad(),4000);
-  }
+  initDispatchCloudSync();
+  setTimeout(()=>autoPurgeDemoOnLoad(),4000);
   updateMapsKeyStatus();
   setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
 }

@@ -1,5 +1,4 @@
-const CACHE = 'taxipro-dispatch-v16';
-const ASSETS = [
+const CACHE = 'taxipro-dispatch-v17';const ASSETS = [
   './',
   './index.html',
   './home.html',
