@@ -1,7 +1,7 @@
 {
   "name": "TaxiPro Fahrer",
   "short_name": "Fahrer",
-  "description": "Fahrer-App – Fahrten annehmen, Navigation, Team-Chat, QR-Scan",
+  "description": "Fahrer-App – Fahrten, Navigation, Team-Chat, Fahrschein, Schicht",
   "prefer_related_applications": false,
   "start_url": "./driver.html?source=pwa",
   "scope": "./",

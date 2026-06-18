@@ -1,50 +1,51 @@
-# TaxiPro Dispatch
+# TaxiPro – Taxi Meckenheim GmbH
 
-Disposition-App für Taxi- und Krankentransport-Unternehmen.
+Professionelles Dispositions-System – **zwei getrennte Apps**, kostenlos, ohne API-Key.
 
-**Online:** https://sero91ak.github.io/taxipro-dispatch/
+**Startseite:** https://sero91ak.github.io/taxipro-dispatch/home.html
 
-## Als App auf dem Smartphone installieren
+## Zwei Apps – getrennt installieren
 
-TaxiPro ist eine **Progressive Web App (PWA)** – installierbar wie eine native App:
+| App | URL | Home-Bildschirm |
+|-----|-----|-----------------|
+| **Zentrale / Disponent** | `dispatch.html` | Name: **Zentrale** (Gold) |
+| **Fahrer** | `driver.html` | Name: **Fahrer** (Teal) |
 
-- **Android (Chrome):** Menü → „App installieren“ oder Banner „Installieren“
-- **iPhone (Safari):** Teilen → „Zum Home-Bildschirm“
+### Zentrale installieren (Disponent / Admin)
+1. `dispatch.html` öffnen (nicht `index.html` direkt!)
+2. **iPhone:** Safari → Teilen → Zum Home-Bildschirm → **Zentrale**
+3. **Android:** „Zentrale-App installieren“ oder Menü → App installieren
 
-Nach der Installation startet TaxiPro im Vollbild mit Bottom-Navigation, Schnellzugriff-Leiste, Pull-to-Refresh, Touch-optimierten Formularen und Standort-Button (📍) für Abholadressen.
+### Fahrer-App installieren
+1. Link von der Zentrale erhalten oder `driver.html` öffnen
+2. **iPhone:** Safari → Teilen → Zum Home-Bildschirm → **Fahrer**
+3. PIN eingeben oder Link mit Token öffnen
 
-**Disponent mobil:** Kalender-Karten mit Route & Fahrer-Zuweisung, Wochen-Ansicht als Liste, Fahrer direkt in der Bottom-Navigation, Schnellbuttons für Sync/Maps/Cloud.
+## Zentrale – Funktionen
 
-## Fahrer-App (separater Zugang)
+- Kalender (Plan / Woche / Monat), Heute-Ansicht, Kundenkatalog
+- Kranken-, Rechnungs-, Privat- und Serienfahrten
+- **Adresssuche kostenlos** (OpenStreetMap / Photon – 0 €)
+- Google Kalender + Google Drive Sync
+- Fahrer-Vermittlung: **📱 App** oder **📲 WhatsApp**
+- Mobile PWA: Bottom-Nav, Schnellzugriff, Pull-to-Refresh
 
-Fahrer sehen **keine Zentrale** – nur ihre zugewiesenen Fahrten und Dokumente.
+## Fahrer-App – Funktionen
 
-**Zentrale (Disposition):**
-1. Fahrer anlegen → PIN & App-Link wird erzeugt
-2. Bei Fahrt auf **🚀** → **📱 App** (Fahrt erscheint in der Fahrer-App) oder **📲 WA** (WhatsApp)
-3. **Microsoft Cloud** verbinden (SharePoint) – damit Fahrer-Handys synchronisieren
-4. Monatsende: **📄 Dokument an Fahrer senden** (Excel/PDF) → Fahrer unterschreibt in der App
+- Nur zugewiesene Fahrten (kein Zugang zur Zentrale)
+- Navigation (Google Maps Links), Anrufen, KTS / Eigenleistung
+- Fahrschein-Unterschrift, Team-Chat, Schicht Start/Ende
+- Push + Sync alle ~45 Sek.
 
-**Fahrer-App installieren (eigene App auf dem Home-Bildschirm):**
-- Link von der Zentrale öffnen oder `driver.html` aufrufen
-- **Android:** Banner „Fahrer-App installieren“ oder Browser-Menü → App installieren
-- **iPhone:** Safari → Teilen → „Zum Home-Bildschirm“ (erscheint als **Fahrer**, nicht Dispatch)
+## Kosten
 
-**Fahrer (Smartphone):**
-- Link öffnen: `index.html?mode=driver&token=…` oder PIN eingeben
-- **🗺️ Navigation** → Google Maps
-- **🏥 KTS** / **💶 Eigenleistung** → Zahlungsstatus an Zentrale
-- **✍️ Fahrschein** → Gast-Unterschrift auf dem Display (Dialyse etc.)
-- **💬 Nachricht** an die Zentrale
-- **📄 Dokumente** → Monatsabrechnungen unterschreiben
+- App-Nutzung: **kostenlos**
+- Adresssuche: **OpenStreetMap** (kein Google API-Key nötig)
+- Google Maps Links zum Navigieren: kostenlos
 
-**Push-Benachrichtigungen:** Beim ersten Öffnen Benachrichtigungen erlauben. Neue Fahrten & Dokumente werden per Push + Cloud-Sync (alle 45 Sek.) gemeldet.
+## Google Kalender (OAuth)
 
-Fahrer-Einstieg auch über: `driver.html`
-
-## Google Kalender verbinden
-
-In der [Google Cloud Console](https://console.cloud.google.com) unter OAuth-Client diese Origin eintragen:
+In der [Google Cloud Console](https://console.cloud.google.com) Origin eintragen:
 
 - `https://sero91ak.github.io`
-- `http://localhost:8080` (für lokale Entwicklung)
+- `http://localhost:8080`

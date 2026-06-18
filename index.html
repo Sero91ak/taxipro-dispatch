@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="TaxiPro" id="apple-app-title"/>
-<meta name="apple-mobile-web-app-starturl" content="driver.html" id="apple-start-url"/>
+<meta name="apple-mobile-web-app-starturl" content="dispatch.html?source=pwa" id="apple-start-url"/>
 <script>
 (function(){
   var base=location.pathname.replace(/[^/]*$/,'')||'/';
@@ -16,9 +16,15 @@
   if(location.hash.length>1){new URLSearchParams(location.hash.slice(1)).forEach(function(v,k){if(!p.has(k))p.set(k,v);});}
   var mode=p.get('mode');
   var onDriverHtml=/driver\.html$/i.test(location.pathname);
+  var onDispatchHtml=/dispatch\.html$/i.test(location.pathname);
   var driver=onDriverHtml||mode==='driver'||p.has('token')||p.has('boot')||p.has('t')||(p.has('d')&&p.has('t'));
+  var dispatch=onDispatchHtml||mode==='dispatch';
   var standalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
-  try{if(!driver&&standalone&&localStorage.getItem('tp_app_role')==='driver')driver=true;}catch(e){}
+  try{
+    var role=localStorage.getItem('tp_app_role');
+    if(!driver&&standalone&&role==='driver') driver=true;
+    if(!driver&&!dispatch&&standalone&&role==='dispatch') dispatch=true;
+  }catch(e){}
   function driverPwaUrl(){
     var rq=new URLSearchParams();rq.set('source','pwa');
     try{
@@ -29,23 +35,18 @@
     }catch(e){}
     return base+'driver.html?'+rq.toString();
   }
+  function dispatchPwaUrl(){return base+'dispatch.html?source=pwa';}
   if(standalone){
     try{
-      if(localStorage.getItem('tp_app_role')==='driver'&&!onDriverHtml){
-        location.replace(driverPwaUrl());return;
+      var r=localStorage.getItem('tp_app_role');
+      if(r==='driver'&&!onDriverHtml){location.replace(driverPwaUrl());return;}
+      if((r==='dispatch'||!r)&&!onDispatchHtml&&!onDriverHtml&&!driver){
+        location.replace(dispatchPwaUrl());return;
       }
     }catch(e){}
   }
-  if(p.get('source')==='pwa'&&mode!=='driver'&&mode!=='dispatch'){
-    try{
-      var pq=new URLSearchParams();pq.set('source','pwa');
-      var id=localStorage.getItem('tp_driver_id'),tk=localStorage.getItem('tp_driver_token'),pn=localStorage.getItem('tp_driver_pin');
-      if(id)pq.set('d',id);if(tk)pq.set('t',tk);if(pn)pq.set('p',pn);
-      location.replace(base+'driver.html?'+pq.toString());
-    }catch(e){location.replace(base+'driver.html?source=pwa');}
-    return;
-  }
   window.__TP_DRIVER_BOOT__=driver;
+  window.__TP_DISPATCH_BOOT__=dispatch;
   document.write('<link rel="manifest" href="'+(driver?'manifest-driver.json':'manifest.json')+'" id="app-manifest"/>');
   if(driver){
     document.documentElement.className='driver-boot';
@@ -62,8 +63,11 @@
       if(!onDriverHtml) history.replaceState(null,'',drvUrl);
     }catch(e){}
   }else{
-    document.title='TaxiPro Dispatch';
-    var mt2=document.getElementById('apple-app-title');if(mt2)mt2.setAttribute('content','TaxiPro');
+    document.documentElement.classList.add('dispatch-boot');
+    document.title='TaxiPro Zentrale';
+    var mt2=document.getElementById('apple-app-title');if(mt2)mt2.setAttribute('content','Zentrale');
+    var as2=document.getElementById('apple-start-url');if(as2)as2.setAttribute('content',dispatchPwaUrl());
+    if(dispatch||mode==='dispatch'){try{localStorage.setItem('tp_app_role','dispatch');}catch(e){}}
   }
 })();
 </script>
@@ -121,6 +125,10 @@ h1,h2,h3,h4{font-family:var(--font2)}
 
 /* TOPBAR */
 #topbar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--bg2);border-bottom:1px solid var(--border);min-height:58px;flex-shrink:0;position:relative;z-index:50;box-shadow:var(--shadow-sm)}
+html.dispatch-boot #topbar{background:linear-gradient(180deg,rgba(245,166,35,.06),var(--bg2));border-bottom-color:rgba(245,166,35,.12)}
+html.dispatch-boot #topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.45}
+html.dispatch-boot .logo em{background:linear-gradient(135deg,var(--gold),#ffd68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);background:linear-gradient(135deg,rgba(245,166,35,.08),var(--bg2))}
 #topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent-line);opacity:.85}
 .logo-wrap{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
 .logo{font-family:var(--font2);font-size:18px;font-weight:700;color:var(--gold);white-space:nowrap;letter-spacing:-.4px;line-height:1.1}
@@ -685,7 +693,7 @@ h1,h2,h3,h4{font-family:var(--font2)}
 .pay-badge.bezahlt{background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)}
 .pay-badge.sig{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
 /* ── FAHRER-APP (eigenes Teal-Design, nicht Zentrale) ── */
-#driver-portal{position:fixed;inset:0;z-index:5000;background:#0a1628;display:flex;flex-direction:column;font-family:system-ui,-apple-system,sans-serif;color:#e8f4fc}
+#driver-portal{position:fixed;inset:0;z-index:5000;background:radial-gradient(ellipse 100% 60% at 50% -10%,rgba(20,184,166,.12),transparent),#0a1628;display:flex;flex-direction:column;font-family:var(--font),system-ui,-apple-system,sans-serif;color:#e8f4fc}
 #driver-portal.hidden{display:none!important}
 #driver-portal .drv-login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-top))}
 #driver-portal .drv-login-box{width:100%;max-width:340px;text-align:center}
@@ -961,8 +969,8 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <button type="button" class="mob-menu-btn" id="mobile-menu-btn" onclick="openMobileDrawer()" aria-label="Menü">☰</button>
   <button type="button" class="mob-menu-btn" id="mobile-search-btn" onclick="toggleMobileSearch()" aria-label="Suche">🔍</button>
   <div class="logo-wrap">
-    <div class="logo">TaxiPro <em>Dispatch</em></div>
-    <div class="logo-sub">Taxi Meckenheim GmbH</div>
+    <div class="logo">TaxiPro <em>Zentrale</em></div>
+    <div class="logo-sub">Taxi Meckenheim GmbH · Disposition</div>
   </div>
   <div id="search-wrap">
     <span class="si">🔍</span>
@@ -997,7 +1005,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 <div id="pull-refresh-indicator" aria-hidden="true">↓ Ziehen zum Aktualisieren</div>
 
 <div id="pwa-install-banner" class="hidden">
-  <div class="pwa-install-text"><strong>Als App installieren</strong><span>Schneller Zugriff vom Home-Bildschirm</span></div>
+  <div class="pwa-install-text"><strong>Zentrale-App installieren</strong><span>Disponent · Kalender &amp; Kunden · vom Home-Bildschirm</span></div>
   <button type="button" class="btn btn-primary btn-sm" onclick="installPwa()">Installieren</button>
   <button type="button" class="pwa-dismiss" onclick="dismissPwaBanner()" aria-label="Schließen">✕</button>
 </div>
@@ -6661,12 +6669,14 @@ function maybeShowInstallBanner(isDriver){
   else showPwaBanner();
 }
 function getInstallInstructions(platform,isDriver){
-  const appName=isDriver?'TaxiPro Fahrer':'TaxiPro Dispatch';
+  const appName=isDriver?'TaxiPro Fahrer':'TaxiPro Zentrale';
+  const entryHint=isDriver?'<strong>Wichtig:</strong> Von <strong>driver.html</strong> installieren.':'<strong>Wichtig:</strong> Von <strong>dispatch.html</strong> installieren – nicht index.html.';
   if(platform==='ios'){
     return{title:appName+' auf iPhone/iPad',steps:[
+      entryHint,
       '<strong>1.</strong> Unten in Safari auf <strong>Teilen</strong> tippen (□ mit Pfeil nach oben)',
       '<strong>2.</strong> Nach unten scrollen → <strong>„Zum Home-Bildschirm“</strong>',
-      '<strong>3.</strong> <strong>Hinzufügen</strong> tippen – App liegt auf dem Home-Bildschirm'
+      '<strong>3.</strong> Name prüfen (<strong>'+(isDriver?'Fahrer':'Zentrale')+'</strong>) → <strong>Hinzufügen</strong>'
     ],actionLabel:'Verstanden'};
   }
   if(platform==='android'){
@@ -7023,7 +7033,7 @@ function getAllDriverParams(){
 
 function isDriverAppMode(){
   const p=getAllDriverParams();
-  if(p.get('mode')==='dispatch') return false;
+  if(p.get('mode')==='dispatch'||window.__TP_DISPATCH_BOOT__||/dispatch\.html$/i.test(location.pathname)) return false;
   if(p.get('mode')==='driver'||p.has('token')||p.has('boot')||p.has('t')||(p.has('d')&&p.has('t'))||location.hash==='#fahrer') return true;
   if(/driver\.html$/i.test(location.pathname)) return true;
   if(document.documentElement.classList.contains('driver-boot')) return true;
@@ -7884,6 +7894,7 @@ initPwa();
 initTheme();
 updateCloudUI();
 if(!initAppMode()){
+  try{localStorage.setItem('tp_app_role','dispatch');}catch(e){}
   setContactViewMode(contactViewMode);
   setContactSort(contactSort);
   checkDataMigration();
