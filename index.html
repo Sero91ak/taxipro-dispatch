@@ -704,6 +704,42 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .driver-btns{display:flex;gap:6px}
 .driver-app-link{font-size:10px;color:var(--blue2);word-break:break-all;margin-top:8px;padding:8px 10px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r2);line-height:1.5}
 .driver-app-link code{font-size:10px;color:var(--gold)}
+/* ── PRÜFLISTE / FAHRTEVERWALTUNG ── */
+.review-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.review-toolbar h2{font-size:16px;font-weight:700;flex:1;min-width:140px}
+.review-filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.review-filters select,.review-filters input{max-width:160px;padding:7px 10px;font-size:12px;height:34px}
+.review-stats{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.review-stat{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;transition:.12s}
+.review-stat.on{background:var(--gold3);border-color:rgba(245,166,35,.4);color:var(--gold)}
+.review-stat.pending{border-color:var(--yellow-border);color:var(--yellow2)}
+.review-stat.approved{border-color:var(--green-border);color:var(--green2)}
+.review-stat.flagged{border-color:var(--red-border);color:var(--red2)}
+.review-body{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch}
+.review-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;transition:.15s}
+.review-card:hover{border-color:var(--border2);background:var(--bg3)}
+.review-card.flagged{border-left:3px solid var(--red)}
+.review-card.approved{border-left:3px solid var(--green)}
+.review-card.exported{border-left:3px solid var(--blue);opacity:.85}
+.review-card input[type=checkbox]{width:18px;height:18px;margin-top:4px;accent-color:var(--gold)}
+.review-main{min-width:0}
+.review-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:4px}
+.review-name{font-weight:700;font-size:14px}
+.review-meta{font-size:11px;color:var(--text2);line-height:1.5}
+.review-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.review-flag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
+.review-flag.info{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
+.review-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.review-act{padding:6px 10px;border-radius:var(--r2);font-size:10px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);white-space:nowrap}
+.review-act.ok{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
+.review-act.no{background:var(--red-bg);color:var(--red2);border-color:var(--red-border)}
+.review-batch{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.review-pipeline{font-size:10px;color:var(--text3);padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border);line-height:1.6;flex-shrink:0}
+.review-pipeline strong{color:var(--gold)}
+@media(max-width:640px){
+  .review-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+  .review-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}
+}
 .dp-actions{display:flex;gap:6px;flex-shrink:0}
 .dp-act-btn{padding:8px 12px;border-radius:var(--r2);font-size:11px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);color:var(--text);white-space:nowrap}
 .dp-act-btn.app{background:var(--gold3);color:var(--gold);border-color:rgba(245,166,35,.4)}
@@ -1013,6 +1049,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <span class="status-pill" id="status-gcal">📅 Kalender</span>
   <span class="status-pill" id="status-cloud">☁️ Cloud</span>
   <span class="status-pill info" id="status-rides">🚗 Heute: 0</span>
+  <span class="status-pill warn" id="status-review" onclick="switchView('review')" style="cursor:pointer" title="Prüfliste öffnen">🔍 Prüfung: 0</span>
   <span class="status-pill" id="status-cust">👥 0 Kunden</span>
 </div>
 <div id="mobile-quick-bar" aria-label="Schnellzugriff">
@@ -1035,6 +1072,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 <nav id="mobile-bottom-nav" aria-label="Hauptnavigation">
   <button type="button" class="mob-nav-item active" data-view="calendar" onclick="switchView('calendar')"><span class="mob-nav-icon">📅</span><span class="mob-nav-lbl">Kalender</span></button>
   <button type="button" class="mob-nav-item" data-view="today" onclick="switchView('today')"><span class="mob-nav-icon">🚗</span><span class="mob-nav-lbl">Heute</span><span class="mob-nav-badge" id="mob-nb-today">0</span></button>
+  <button type="button" class="mob-nav-item" data-view="review" onclick="switchView('review')"><span class="mob-nav-icon">🔍</span><span class="mob-nav-lbl">Prüfung</span><span class="mob-nav-badge" id="mob-nb-review">0</span></button>
   <button type="button" class="mob-nav-fab" onclick="openRideModal()" aria-label="Neue Fahrt">＋</button>
   <button type="button" class="mob-nav-item" data-view="customers" onclick="switchView('customers')"><span class="mob-nav-icon">👥</span><span class="mob-nav-lbl">Kunden</span></button>
   <button type="button" class="mob-nav-item" data-view="drivers" onclick="switchView('drivers')"><span class="mob-nav-icon">👨‍✈️</span><span class="mob-nav-lbl">Fahrer</span><span class="mob-nav-badge" id="mob-nb-drivers">0</span></button>
@@ -1054,6 +1092,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-sec">Navigation</div>
   <div class="nav-item active" data-view="calendar" onclick="switchView('calendar')"><span class="nav-icon">📅</span> Kalender</div>
   <div class="nav-item" data-view="today" onclick="switchView('today')"><span class="nav-icon">🚗</span> Heute <span class="nav-badge" id="nb-today">0</span></div>
+  <div class="nav-item" data-view="review" onclick="switchView('review')"><span class="nav-icon">🔍</span> Prüfliste <span class="nav-badge" id="nb-review">0</span></div>
   <div class="nav-item" data-view="customers" onclick="switchView('customers')"><span class="nav-icon">👥</span> Kunden <span class="nav-badge" id="nb-cust">0</span></div>
   <div class="nav-item gc-item" data-view="gcontacts" id="nav-gc" onclick="switchView('gcontacts')"><span class="nav-icon">🔵</span> Google Kontakte <span class="nav-badge" id="nb-gc">0</span></div>
   <div class="nav-item gc-item" id="nav-gcal" onclick="initiateGCalSync()"><span class="nav-icon">📅</span> Google Kalender <span class="nav-badge" id="nb-gcal">–</span></div>
@@ -1149,6 +1188,41 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <button class="tb-btn primary" onclick="openDriverDocModal()" style="margin-bottom:12px">📄 Dokument an Fahrer senden</button>
       <div id="dispatcher-shift-overview" class="shift-overview"></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;align-content:start" id="drivers-list"></div>
+    </div>
+  </div>
+
+  <!-- PRÜFLISTE / FAHRTEVERWALTUNG -->
+  <div class="view" id="view-review">
+    <div class="review-pipeline"><strong>Google Kalender</strong> → <strong>Datenbank</strong> → automatische Erkennung → <strong>Prüfliste</strong> → Freigabe → Excel/PDF-Export · Excel nur Vorlage, nicht Hauptdatenbank</div>
+    <div class="review-toolbar">
+      <h2>🔍 Prüfliste</h2>
+      <div class="review-filters">
+        <select id="review-filter-module" onchange="reviewFilter.module=this.value;renderReviewView()">
+          <option value="all">Alle Module</option>
+          <option value="kts">🔴 KTS Krankenfahrten</option>
+          <option value="re">🟡 RE Rechnungsfahrten</option>
+        </select>
+        <select id="review-filter-status" onchange="reviewFilter.status=this.value;renderReviewView()">
+          <option value="pending">⏳ Offen</option>
+          <option value="flagged">⚠️ Mit Hinweisen</option>
+          <option value="approved">✅ Freigegeben</option>
+          <option value="exported">📤 Exportiert</option>
+          <option value="all">Alle Status</option>
+        </select>
+        <input type="month" id="review-filter-month" onchange="reviewFilter.month=this.value;renderReviewView()"/>
+        <input type="text" id="review-filter-search" placeholder="🔍 Name/Ort…" oninput="reviewFilter.search=this.value;renderReviewView()"/>
+      </div>
+      <button class="tb-btn gc" onclick="fullGCalSync()">📅 Google Sync</button>
+      <button class="tb-btn" onclick="refreshAllRideReviews()">🔄 Prüfen</button>
+    </div>
+    <div class="review-stats" id="review-stats"></div>
+    <div class="review-body" id="review-list"></div>
+    <div class="review-batch">
+      <button class="tb-btn" onclick="reviewSelectAll(true)">Alle wählen</button>
+      <button class="tb-btn" onclick="reviewSelectAll(false)">Auswahl aufheben</button>
+      <button class="tb-btn primary" onclick="approveSelectedRides()">✅ Freigeben</button>
+      <button class="tb-btn" onclick="rejectSelectedRides()">✕ Ablehnen</button>
+      <button class="tb-btn" onclick="openReviewExportModal()">📊 Excel / PDF Export</button>
     </div>
   </div>
 
@@ -1769,6 +1843,34 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 </div>
 </div>
 
+<!-- ═══ MODAL: MONATS-EXPORT (Prüfliste) ═══ -->
+<div class="overlay hidden" id="modal-review-export">
+<div class="modal" style="max-width:480px">
+  <div class="mh"><h3>📊 Monats-Export</h3><button class="mclose" onclick="closeM('modal-review-export')">✕</button></div>
+  <div class="mbody">
+    <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px">Nur <strong>freigegebene</strong> Fahrten werden in die Excel-Vorlage geschrieben (KTS: A14–E41 · RE: A11–G40). Die App-Datenbank bleibt die Quelle der Wahrheit.</p>
+    <div class="fr"><label>Kunde</label>
+      <select id="export-cust-id"></select>
+    </div>
+    <div class="fr"><label>Monat</label>
+      <input type="month" id="export-month"/>
+    </div>
+    <div class="fr"><label>Format</label>
+      <select id="export-format">
+        <option value="excel">Excel (.xlsx) – Vorlage befüllen</option>
+        <option value="pdf">PDF – Druckansicht</option>
+        <option value="both">Beides</option>
+      </select>
+    </div>
+    <div id="export-preview" style="font-size:11px;color:var(--text3);margin-top:10px;line-height:1.5"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-review-export')">Abbrechen</button>
+    <button class="btn btn-primary" onclick="runReviewExport()">Export starten</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ MODAL: GOOGLE MAPS IN-APP ═══ -->
 <div class="overlay hidden" id="modal-maps">
 <div class="modal modal-maps">
@@ -2143,6 +2245,25 @@ let contactSort=localStorage.getItem('tp_contact_sort')||'name';
 let gcSelected=new Set();
 let dispatchRideId=null;
 let pendingDispatchAfterDriver=null;
+let reviewFilter={module:'all',status:'pending',month:'',search:''};
+let reviewSelected=new Set();
+
+// Excel-Bereiche laut Lastenheft (Vorlagen)
+const KTS_ROW_START=14,KTS_ROW_END=41,KTS_COLS='A:E';
+const RE_ROW_START=11,RE_ROW_END=40,RE_COLS='A:G';
+const TRIP_DB_NAME='taxipro_dispatch_v7';
+const REVIEW_FLAG_LABELS={
+  missing_date:'Kein Datum',
+  missing_km:'Km fehlen',
+  missing_amount:'Betrag fehlt (RE)',
+  missing_route:'Strecke unvollständig',
+  duplicate_trip:'Doppelte Fahrt',
+  gcal_changed:'Kalender geändert',
+  uncertain_name:'Name unsicher',
+  no_customer:'Kein Kunde zugeordnet',
+  type_conflict:'KTS/RE passt nicht zum Kunden',
+  missing_zuzahlung:'Zuzahlung NB/BF fehlt',
+};
 
 function save(){
   localStorage.setItem('tp_c',JSON.stringify(customers));
@@ -2152,6 +2273,7 @@ function save(){
   localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
   localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
   localStorage.setItem('tp_driver_shifts',JSON.stringify(driverShifts));
+  persistRidesToIdb();
   scheduleCloudSave();
 }
 
@@ -2199,6 +2321,7 @@ function importBackup(input){
 
 function checkDataMigration(){
   migrateKtsReData();
+  migrateReviewData();
   drivers.forEach(d=>ensureDriverAccess(d));
   if(rides.length||customers.length) return;
   setTimeout(()=>{
@@ -2334,6 +2457,7 @@ function switchView(v){
   if(v==='today') renderToday();
   if(v==='gcontacts') renderGCView();
   if(v==='drivers') renderDrivers();
+  if(v==='review') renderReviewView();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2986,6 +3110,7 @@ function showRideDetail(id){
         <span class="rd-badge ${vis}">${rideTypeLabel(r)}</span>
         ${r.serieType?`<span class="badge serie">🔁 ${r.serieType}</span>`:''}
         ${r.reminder?`<span class="badge remind">🔔 ${r.reminderMin}min</span>`:''}
+        ${isReviewableRide(r)?`<span class="badge ${r.reviewStatus==='approved'?'befreit':r.reviewStatus==='exported'?'serie':'remind'}">${r.reviewStatus==='approved'?'✅ Freigegeben':r.reviewStatus==='exported'?'📤 Exportiert':r.reviewStatus==='rejected'?'✕ Abgelehnt':'⏳ Prüfung offen'}</span>`:''}
       </div>
       <div class="rd-time">${r.time} Uhr</div>
       <div class="rd-date">${fmtDateDE(r.date)}</div>
@@ -3002,10 +3127,12 @@ function showRideDetail(id){
     ${r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Google Kalender</div><div class="drow-val" style="color:var(--green2)">✅ Aus Google importiert</div></div></div>`:''}
     ${r.source==='google'&&!r.googleEventId?`<div class="drow"><div class="drow-icon">📅</div><div><div class="drow-lbl">Quelle</div><div class="drow-val">Importiert aus Google</div></div></div>`:''}
     ${buildExcelDetailHtml(r)}
+    ${isReviewableRide(r)&&(r.reviewFlags||[]).length?`<div class="drow"><div class="drow-icon">⚠️</div><div><div class="drow-lbl">Prüfhinweise</div><div class="drow-val">${(r.reviewFlags||[]).map(f=>REVIEW_FLAG_LABELS[f]||f).join(' · ')}</div></div></div>`:''}
   `;
   document.getElementById('mrd-footer').innerHTML=`
     <button class="btn btn-danger btn-sm" onclick="deleteRide('${id}')">🗑️ Löschen</button>
     <button class="btn btn-secondary btn-sm" onclick="editRide('${id}')">✏️</button>
+    ${isReviewableRide(r)&&r.reviewStatus!=='approved'?`<button class="btn btn-sm btn-green" onclick="approveRide('${id}');showRideDetail('${id}')">✅ Freigeben</button>`:''}
     ${isExcelRide(r)?`<button class="btn btn-sm btn-blue" onclick="syncRideToExcel('${id}')">${r.excelSynced?'🔄 Excel':'📊 Excel'}</button>`:''}
     <button class="btn btn-sm" style="background:var(--gold3);color:var(--gold);border:1px solid rgba(245,166,35,.3)" onclick="closeM('modal-ride-detail');openDriverPicker('${id}')">🚀 Fahrer</button>
     <button class="btn btn-wa btn-sm" onclick="shareRideWAById('${id}')">📱</button>
@@ -3345,18 +3472,29 @@ async function saveRide(andDispatch=false){
   let dispatchId=null;
   if(editRideId){
     const i=rides.findIndex(r=>r.id===editRideId);
-    if(i!==-1){rides[i]={...rides[i],...base};dispatchId=editRideId;}
+    if(i!==-1){
+      const prev=rides[i];
+      rides[i]={...prev,...base};
+      if(prev.reviewStatus==='approved'||prev.reviewStatus==='exported') rides[i].reviewStatus='pending';
+      ensureReviewMeta(rides[i]);
+      refreshRideReview(rides[i]);
+      dispatchId=editRideId;
+    }
     toast('Fahrt aktualisiert');
   } else if(serie){
     if(andDispatch){toast('Serienfahrt: bitte einzelne Fahrt zuweisen','warn');return;}
     const arr=genSerie(base);
     if(!arr.length) return;
+    arr.forEach(r=>{r.reviewStatus='pending';ensureReviewMeta(r);refreshRideReview(r);});
     rides.push(...arr);
-    toast(`${arr.length} Serienfahrten eingetragen`);
+    toast(`${arr.length} Serienfahrten eingetragen – bitte in Prüfliste freigeben`);
   } else {
     dispatchId=uid();
-    rides.push({...base,id:dispatchId});
-    toast('Fahrt eingetragen');
+    const nr={...base,id:dispatchId,reviewStatus:'pending',source:'manual'};
+    ensureReviewMeta(nr);
+    refreshRideReview(nr);
+    rides.push(nr);
+    toast('Fahrt eingetragen – bitte in Prüfliste prüfen');
   }
   save();
   closeM('modal-ride');renderCalendar();renderToday();updateCounts();renderMiniCal();
@@ -4316,11 +4454,25 @@ function syncFromGoogle(rawEvents){
     const linkedId=raw.extendedProperties?.private?.taxiproRideId;
     let ride=linkedId?rides.find(r=>r.id===linkedId):rides.find(r=>r.googleEventId===ev.id);
     const rideData=parseGCalToRide(raw,ev);
+    const snapshot=buildGcalSnapshot(raw,ev,rideData);
     if(ride){
+      const prevSnap=ride.gcalSnapshot;
+      const wasApproved=ride.reviewStatus==='approved'||ride.reviewStatus==='exported';
       Object.assign(ride,rideData,{id:ride.id,googleEventId:ev.id,source:'google'});
+      ride.gcalSnapshot=snapshot;
+      ensureReviewMeta(ride);
+      if(wasApproved&&gcalSnapshotChanged(prevSnap,snapshot)){
+        ride.reviewStatus='pending';
+        ride._gcalChanged=true;
+      }
+      else if(!ride.reviewStatus||ride.reviewStatus==='rejected') ride.reviewStatus='pending';
+      refreshRideReview(ride);
       updated++;
     }else{
-      rides.push({...rideData,id:uid()});
+      const nr={...rideData,id:uid(),source:'google',googleEventId:ev.id,gcalSnapshot:snapshot,reviewStatus:'pending'};
+      ensureReviewMeta(nr);
+      refreshRideReview(nr);
+      rides.push(nr);
       imported++;
     }
   }
@@ -5558,7 +5710,9 @@ function updateStatusBar(){
   const cloud=document.getElementById('status-cloud');
   const ridesEl=document.getElementById('status-rides');
   const custEl=document.getElementById('status-cust');
+  const reviewEl=document.getElementById('status-review');
   const today=rides.filter(r=>r.date===fmtD(new Date())).length;
+  const pendingReview=countReviewPending();
   if(gcal){
     gcal.className='status-pill'+(gcalConnected?' ok':'');
     gcal.textContent=gcalConnected?'📅 Google Kalender verbunden':'📅 Kalender nicht verbunden';
@@ -5569,17 +5723,26 @@ function updateStatusBar(){
     cloud.textContent=gdrvOk?'☁️ Google Drive Sync aktiv':gcalConnected?'☁️ Drive Sync einrichten':'☁️ Google verbinden';
   }
   if(ridesEl) ridesEl.textContent='🚗 Heute: '+today+' Fahrten';
+  if(reviewEl){
+    reviewEl.className='status-pill'+(pendingReview>0?' warn':' ok');
+    reviewEl.textContent='🔍 Prüfung: '+pendingReview;
+  }
   if(custEl) custEl.textContent='👥 '+customers.length+' Kunden';
 }
 
 function updateCounts(){
   const todayN=rides.filter(r=>r.date===fmtD(new Date())).length;
+  const pendingN=countReviewPending();
   document.getElementById('nb-cust').textContent=customers.length;
   document.getElementById('nb-today').textContent=todayN;
   document.getElementById('nb-gc').textContent=gcContacts.length;
   document.getElementById('nb-drivers').textContent=drivers.length;
+  const nbReview=document.getElementById('nb-review');
+  if(nbReview) nbReview.textContent=pendingN;
   const mobToday=document.getElementById('mob-nb-today');
   if(mobToday){mobToday.textContent=todayN;mobToday.style.display=todayN>0?'flex':'none';}
+  const mobReview=document.getElementById('mob-nb-review');
+  if(mobReview){mobReview.textContent=pendingN;mobReview.style.display=pendingN>0?'flex':'none';}
   const mobDrv=document.getElementById('mob-nb-drivers');
   if(mobDrv){mobDrv.textContent=drivers.length;mobDrv.style.display=drivers.length>0?'flex':'none';}
   const gcBtn=document.getElementById('gc-sync-btn');
@@ -5946,15 +6109,17 @@ async function writeRideToExcelCloud(ride,cust){
   if(!fileInfo) throw new Error('NO_HANDLE');
   const buf=await downloadMsFile(fileInfo.driveId,fileInfo.itemId);
   const wb=XLSX.read(buf,{type:'array',cellDates:true});
-  const sheetName=findKtsSheet(wb,ride.date);
+  const isRe=customerExcelType(cust)==='rechn';
+  const sheetName=isRe?findReSheet(wb,ride.date):findKtsSheet(wb,ride.date);
   if(!sheetName) throw new Error('NO_SHEET');
   const ws=wb.Sheets[sheetName];
-  let row=findTripRow(ws,ride.date);
-  if(!row){row=nextTripRow(ws);if(!row) throw new Error('NO_ROW');setCell(ws,'A'+row,nextTripNr(ws));}
-  applyTripToSheet(ws,row,ride,cust);
+  let row=isRe?findReTripRow(ws,ride.date):findTripRow(ws,ride.date);
+  if(!row){row=isRe?nextReTripRow(ws):nextTripRow(ws);if(!row) throw new Error('NO_ROW');setCell(ws,'A'+row,isRe?nextReTripNr(ws):nextTripNr(ws));}
+  if(isRe) applyReTripToSheet(ws,row,ride,cust);
+  else applyTripToSheet(ws,row,ride,cust);
   const out=XLSX.write(wb,{bookType:'xlsx',type:'array',cellDates:true});
   await uploadMsFile(fileInfo.driveId,fileInfo.itemId,out);
-  return{sheetName,row,fileName:fileInfo.name};
+  return{sheetName,row,fileName:fileInfo.name,module:isRe?'re':'kts'};
 }
 
 function buildCloudPayload(){
@@ -6579,7 +6744,7 @@ function findKtsSheet(wb,dateStr){
 }
 
 function findTripRow(ws,dateStr){
-  for(let row=14;row<=43;row++){
+  for(let row=KTS_ROW_START;row<=KTS_ROW_END;row++){
     const ds=cellToDateStr(ws['B'+row]?.v);
     if(ds===dateStr) return row;
   }
@@ -6587,20 +6752,20 @@ function findTripRow(ws,dateStr){
 }
 
 function nextTripRow(ws){
-  let lastUsed=13;
-  for(let row=14;row<=43;row++){
+  let lastUsed=KTS_ROW_START-1;
+  for(let row=KTS_ROW_START;row<=KTS_ROW_END;row++){
     const a=ws['A'+row]?.v, b=ws['B'+row]?.v;
     if(a!=null||b!=null) lastUsed=row;
   }
-  for(let row=14;row<=43;row++){
+  for(let row=KTS_ROW_START;row<=KTS_ROW_END;row++){
     if(!ws['B'+row]?.v&&!ws['A'+row]?.v) return row;
   }
-  return lastUsed<43?lastUsed+1:null;
+  return lastUsed<KTS_ROW_END?lastUsed+1:null;
 }
 
 function nextTripNr(ws){
   let max=0;
-  for(let row=14;row<=43;row++){
+  for(let row=KTS_ROW_START;row<=KTS_ROW_END;row++){
     const v=parseInt(ws['A'+row]?.v,10);
     if(!isNaN(v)&&v>max) max=v;
   }
@@ -6667,26 +6832,33 @@ async function writeRideToExcelWorkbook(ride,cust){
   if(!handle) throw new Error('NO_HANDLE');
   const buf=await (await handle.getFile()).arrayBuffer();
   const wb=XLSX.read(buf,{type:'array',cellDates:true});
-  const sheetName=findKtsSheet(wb,ride.date);
+  const isRe=customerExcelType(cust)==='rechn';
+  const sheetName=isRe?findReSheet(wb,ride.date):findKtsSheet(wb,ride.date);
   if(!sheetName) throw new Error('NO_SHEET');
   const ws=wb.Sheets[sheetName];
-  let row=findTripRow(ws,ride.date);
+  let row=isRe?findReTripRow(ws,ride.date):findTripRow(ws,ride.date);
   if(!row){
-    row=nextTripRow(ws);
+    row=isRe?nextReTripRow(ws):nextTripRow(ws);
     if(!row) throw new Error('NO_ROW');
-    setCell(ws,'A'+row,nextTripNr(ws));
+    setCell(ws,'A'+row,isRe?nextReTripNr(ws):nextTripNr(ws));
   }
-  applyTripToSheet(ws,row,ride,cust);
+  if(isRe) applyReTripToSheet(ws,row,ride,cust);
+  else applyTripToSheet(ws,row,ride,cust);
   const out=XLSX.write(wb,{bookType:'xlsx',type:'array',cellDates:true});
   const writable=await handle.createWritable();
   await writable.write(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   await writable.close();
-  return{sheetName,row};
+  return{sheetName,row,module:isRe?'re':'kts'};
 }
 
 async function syncRideToExcel(rideId){
   const r=rides.find(x=>x.id===rideId);
   if(!r||!isExcelRide(r)){toast('Nur KTS/Rechnungsfahrten mit Kunde','warn');return;}
+  if(r.reviewStatus!=='approved'&&r.reviewStatus!=='exported'){
+    toast('Erst in der Prüfliste freigeben, dann Excel-Export','warn');
+    switchView('review');
+    return;
+  }
   const cust=customers.find(c=>c.id===r.customerId);
   if(!cust){toast('Kunde nicht gefunden','warn');return;}
   if(!rideMatchesCustomerExcel(cust,r)){
@@ -8018,6 +8190,451 @@ function purgeDemoData(){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// PRÜFLISTE · VALIDIERUNG · INDEXEDDB · EXPORT
+// Google Kalender → DB → Erkennung → Prüfliste → Freigabe → Excel/PDF
+// ═══════════════════════════════════════════════════════════════
+function rideExportModule(r){
+  if(!r) return null;
+  if(r.type==='rechn') return 're';
+  if(r.type==='krank') return 'kts';
+  return null;
+}
+function isReviewableRide(r){return rideExportModule(r)!=null;}
+
+function ensureReviewMeta(r){
+  if(!r||!isReviewableRide(r)) return;
+  if(!r.reviewStatus) r.reviewStatus='pending';
+  if(!Array.isArray(r.reviewFlags)) r.reviewFlags=[];
+}
+
+function buildGcalSnapshot(raw,ev,rideData){
+  return{
+    summary:(raw.summary||'').trim(),
+    date:ev?.date||rideData?.date||'',
+    time:ev?.isAllDay?'09:00':(ev?.time||rideData?.time||''),
+    from:rideData?.from||'',
+    to:rideData?.to||'',
+    googleUpdated:raw.updated||'',
+  };
+}
+function gcalSnapshotChanged(a,b){
+  if(!a||!b) return false;
+  return a.summary!==b.summary||a.date!==b.date||a.time!==b.time||a.from!==b.from||a.to!==b.to||(b.googleUpdated&&a.googleUpdated!==b.googleUpdated);
+}
+
+function nameMatchScore(nameA,nameB){
+  const norm=s=>(s||'').toLowerCase().replace(/[^a-zäöüß0-9\s]/g,'').replace(/\s+/g,' ').trim();
+  const a=norm(nameA),b=norm(nameB);
+  if(!a||!b) return 0;
+  if(a===b) return 100;
+  if(a.includes(b)||b.includes(a)) return 80;
+  const pa=new Set(a.split(' ')),pb=new Set(b.split(' '));
+  let hit=0;pa.forEach(w=>{if(pb.has(w)) hit++;});
+  return Math.round(hit/Math.max(pa.size,pb.size,1)*70);
+}
+
+function computeReviewFlags(ride){
+  const flags=[];
+  if(!isReviewableRide(ride)) return flags;
+  if(!ride.date) flags.push('missing_date');
+  if(!ride.from||!ride.to) flags.push('missing_route');
+  const km=parseInt(ride.km,10);
+  if(!km||km<=0) flags.push('missing_km');
+  if(ride.type==='rechn'){
+    const amt=parseFloat(String(ride.amount||ride.betrag||'').replace(',','.'));
+    if(!amt||amt<=0) flags.push('missing_amount');
+  }
+  if(ride.type==='krank'){
+    const zz=ride.zuzahlung||customers.find(c=>c.id===ride.customerId)?.zuzahlungStatus;
+    if(!zz) flags.push('missing_zuzahlung');
+  }
+  if(!ride.customerId){
+    flags.push('no_customer');
+    if(ride.customerName||ride.source==='google') flags.push('uncertain_name');
+  }else{
+    const cust=customers.find(c=>c.id===ride.customerId);
+    if(cust&&!rideMatchesCustomerExcel(cust,ride)) flags.push('type_conflict');
+    if(ride.customerName&&cust){
+      const full=`${cust.fname} ${cust.lname}`;
+      if(nameMatchScore(full,ride.customerName)<50) flags.push('uncertain_name');
+    }
+  }
+  const dupes=rides.filter(r=>r.id!==ride.id&&r.date===ride.date&&r.time===ride.time&&(
+    (ride.customerId&&r.customerId===ride.customerId)||(ride.googleEventId&&r.googleEventId===ride.googleEventId)||(ride.from===r.from&&ride.to===r.to)
+  ));
+  if(dupes.length) flags.push('duplicate_trip');
+  if(ride._gcalChanged) flags.push('gcal_changed');
+  if(ride.gcalSnapshot&&ride.source==='google'&&ride._prevGcalCheck){
+    if(gcalSnapshotChanged(ride._prevGcalCheck,ride.gcalSnapshot)) flags.push('gcal_changed');
+  }
+  return [...new Set(flags)];
+}
+
+function refreshRideReview(ride){
+  if(!ride||!isReviewableRide(ride)) return;
+  ride._prevGcalCheck=ride.gcalSnapshot?{...ride.gcalSnapshot}:null;
+  ride.reviewFlags=computeReviewFlags(ride);
+  if(ride.reviewStatus==='approved'&&ride.reviewFlags.length) ride.reviewStatus='pending';
+}
+
+function refreshAllRideReviews(){
+  rides.forEach(r=>{ensureReviewMeta(r);if(isReviewableRide(r)) refreshRideReview(r);});
+  save();updateCounts();renderReviewView();
+  toast('Alle KTS/RE-Fahrten geprüft','ok');
+}
+
+function countReviewPending(){
+  return rides.filter(r=>isReviewableRide(r)&&(r.reviewStatus==='pending'||!r.reviewStatus)).length;
+}
+
+function migrateReviewData(){
+  let changed=false;
+  rides.forEach(r=>{
+    if(!isReviewableRide(r)) return;
+    if(!r.reviewStatus){
+      r.reviewStatus=(r.excelSynced||r.source==='manual')?'approved':'pending';
+      changed=true;
+    }
+    ensureReviewMeta(r);
+    const flags=computeReviewFlags(r);
+    if(JSON.stringify(r.reviewFlags)!==JSON.stringify(flags)){r.reviewFlags=flags;changed=true;}
+  });
+  if(changed) save();
+}
+
+function persistRidesToIdb(){
+  if(!window.indexedDB) return;
+  try{
+    const req=indexedDB.open(TRIP_DB_NAME,1);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('rides')) db.createObjectStore('rides',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'key'});
+    };
+    req.onsuccess=e=>{
+      const db=e.target.result;
+      const tx=db.transaction(['rides','meta'],'readwrite');
+      const store=tx.objectStore('rides');
+      store.clear();
+      rides.forEach(r=>store.put(r));
+      tx.objectStore('meta').put({key:'updated',value:Date.now(),count:rides.length});
+    };
+  }catch(e){console.warn('IDB persist',e);}
+}
+
+async function loadRidesFromIdb(){
+  if(!window.indexedDB) return false;
+  return new Promise(res=>{
+    try{
+      const req=indexedDB.open(TRIP_DB_NAME,1);
+      req.onupgradeneeded=e=>{
+        const db=e.target.result;
+        if(!db.objectStoreNames.contains('rides')) db.createObjectStore('rides',{keyPath:'id'});
+        if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'key'});
+      };
+      req.onsuccess=e=>{
+        const db=e.target.result;
+        if(!db.objectStoreNames.contains('rides')){res(false);return;}
+        const tx=db.transaction('rides','readonly');
+        const all=[];
+        tx.objectStore('rides').openCursor().onsuccess=ev=>{
+          const c=ev.target.result;
+          if(c){all.push(c.value);c.continue();}
+          else{
+            if(all.length>rides.length){rides=all;migrateReviewData();save();res(true);}
+            else res(false);
+          }
+        };
+        tx.onerror=()=>res(false);
+      };
+      req.onerror=()=>res(false);
+    }catch(e){res(false);}
+  });
+}
+
+function reviewRideLabel(r){
+  const cust=customers.find(c=>c.id===r.customerId);
+  if(cust) return `${cust.lname} ${cust.fname}`;
+  return r.customerName||r.to?.split(',')[0]||'Unbekannt';
+}
+
+function filterReviewRides(){
+  const q=(reviewFilter.search||'').trim().toLowerCase();
+  return rides.filter(r=>{
+    if(!isReviewableRide(r)) return false;
+    const mod=rideExportModule(r);
+    if(reviewFilter.module==='kts'&&mod!=='kts') return false;
+    if(reviewFilter.module==='re'&&mod!=='re') return false;
+    if(reviewFilter.month&&(!r.date||!r.date.startsWith(reviewFilter.month))) return false;
+    const st=reviewFilter.status||'pending';
+    if(st==='pending'&&(r.reviewStatus!=='pending'&&r.reviewStatus)) return false;
+    if(st==='approved'&&r.reviewStatus!=='approved') return false;
+    if(st==='exported'&&r.reviewStatus!=='exported') return false;
+    if(st==='flagged'&&!(r.reviewFlags&&r.reviewFlags.length)) return false;
+    if(q){
+      const blob=(reviewRideLabel(r)+' '+(r.from||'')+' '+(r.to||'')+' '+(r.note||'')).toLowerCase();
+      if(!blob.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
+}
+
+function renderReviewView(){
+  const list=document.getElementById('review-list');
+  const stats=document.getElementById('review-stats');
+  if(!list) return;
+  if(!reviewFilter.month){
+    const m=document.getElementById('review-filter-month');
+    if(m&&!m.value){const n=new Date();m.value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;reviewFilter.month=m.value;}
+  }
+  const items=filterReviewRides();
+  const allKtsRe=rides.filter(isReviewableRide);
+  const pending=allKtsRe.filter(r=>r.reviewStatus==='pending'||!r.reviewStatus).length;
+  const flagged=allKtsRe.filter(r=>r.reviewFlags&&r.reviewFlags.length).length;
+  const approved=allKtsRe.filter(r=>r.reviewStatus==='approved').length;
+  if(stats){
+    stats.innerHTML=[
+      ['pending',`⏳ ${pending} offen`],
+      ['flagged',`⚠️ ${flagged} mit Hinweisen`],
+      ['approved',`✅ ${approved} freigegeben`],
+    ].map(([k,lbl])=>`<span class="review-stat ${k}${reviewFilter.status===k?' on':''}" onclick="reviewFilter.status='${k}';document.getElementById('review-filter-status').value='${k}';renderReviewView()">${lbl}</span>`).join('');
+  }
+  if(!items.length){
+    list.innerHTML=`<div class="empty"><div class="ei">✅</div><p>Keine Fahrten in dieser Ansicht.</p><p class="empty-hint">Google Kalender synchronisieren oder Filter anpassen.</p></div>`;
+    return;
+  }
+  list.innerHTML=items.map(r=>{
+    const mod=rideExportModule(r);
+    const flags=(r.reviewFlags||[]).map(f=>`<span class="review-flag${f==='uncertain_name'||f==='gcal_changed'?' info':''}">${REVIEW_FLAG_LABELS[f]||f}</span>`).join('');
+    const st=r.reviewStatus||'pending';
+    const sel=reviewSelected.has(r.id)?'checked':'';
+    return `<div class="review-card ${st}${flags?' flagged':''}">
+      <input type="checkbox" ${sel} onchange="toggleReviewSelect('${r.id}',this.checked)"/>
+      <div class="review-main">
+        <div class="review-top">
+          <span class="review-name">${escAttr(reviewRideLabel(r))}</span>
+          <span class="rd-badge ${mod==='re'?'rechn':'krank'}">${mod==='re'?'RE':'KTS'}</span>
+          <span class="badge ${st==='approved'?'befreit':st==='exported'?'serie':'remind'}">${st==='approved'?'Freigegeben':st==='exported'?'Exportiert':st==='rejected'?'Abgelehnt':'Offen'}</span>
+        </div>
+        <div class="review-meta">${r.date||'?'} · ${r.time||'?'} · ${escAttr((r.from||'').slice(0,40))} → ${escAttr((r.to||'').slice(0,40))}${r.km?` · ${r.km} km`:''}</div>
+        ${flags?`<div class="review-flags">${flags}</div>`:''}
+      </div>
+      <div class="review-actions">
+        <button class="review-act" onclick="showRideDetail('${r.id}')">✏️</button>
+        <button class="review-act ok" onclick="approveRide('${r.id}')">✅</button>
+        <button class="review-act no" onclick="rejectRide('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleReviewSelect(id,on){if(on) reviewSelected.add(id);else reviewSelected.delete(id);}
+function reviewSelectAll(on){
+  filterReviewRides().forEach(r=>{if(on) reviewSelected.add(r.id);else reviewSelected.delete(r.id);});
+  renderReviewView();
+}
+function approveRide(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  refreshRideReview(r);
+  if(r.reviewFlags&&r.reviewFlags.length&&!confirm('Fahrt hat Hinweise:\n'+r.reviewFlags.map(f=>REVIEW_FLAG_LABELS[f]).join('\n')+'\n\nTrotzdem freigeben?')) return;
+  r.reviewStatus='approved';r.reviewedAt=Date.now();r._gcalChanged=false;save();updateCounts();renderReviewView();
+  toast('Fahrt freigegeben','ok');
+}
+function rejectRide(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  r.reviewStatus='rejected';save();updateCounts();renderReviewView();
+  toast('Fahrt abgelehnt','warn');
+}
+function approveSelectedRides(){
+  const ids=[...reviewSelected];
+  if(!ids.length){toast('Keine Fahrten gewählt','warn');return;}
+  let n=0;
+  ids.forEach(id=>{const r=rides.find(x=>x.id===id);if(r&&isReviewableRide(r)){r.reviewStatus='approved';r.reviewedAt=Date.now();n++;}});
+  reviewSelected.clear();save();updateCounts();renderReviewView();
+  toast(n+' Fahrten freigegeben','ok');
+}
+function rejectSelectedRides(){
+  [...reviewSelected].forEach(id=>{const r=rides.find(x=>x.id===id);if(r) r.reviewStatus='rejected';});
+  reviewSelected.clear();save();updateCounts();renderReviewView();
+  toast('Auswahl abgelehnt','warn');
+}
+
+// ── RE Excel (A11:G40) ──
+function findReSheet(wb,dateStr){return findKtsSheet(wb,dateStr);}
+function findReTripRow(ws,dateStr){
+  for(let row=RE_ROW_START;row<=RE_ROW_END;row++){
+    const ds=cellToDateStr(ws['B'+row]?.v);
+    if(ds===dateStr) return row;
+  }
+  return null;
+}
+function nextReTripRow(ws){
+  let lastUsed=RE_ROW_START-1;
+  for(let row=RE_ROW_START;row<=RE_ROW_END;row++){
+    if(ws['A'+row]?.v!=null||ws['B'+row]?.v) lastUsed=row;
+  }
+  for(let row=RE_ROW_START;row<=RE_ROW_END;row++){
+    if(!ws['B'+row]?.v&&!ws['A'+row]?.v) return row;
+  }
+  return lastUsed<RE_ROW_END?lastUsed+1:null;
+}
+function nextReTripNr(ws){
+  let max=0;
+  for(let row=RE_ROW_START;row<=RE_ROW_END;row++){
+    const v=parseInt(ws['A'+row]?.v,10);
+    if(!isNaN(v)&&v>max) max=v;
+  }
+  return max+1;
+}
+function applyReTripToSheet(ws,row,ride,cust){
+  const dir=ride.excelDir||'hin-rueck';
+  setCell(ws,'B'+row,new Date(ride.date+'T12:00:00'));
+  if(!ws['C'+row]?.v) setCell(ws,'C'+row,ride.from||'"');
+  const dest=ride.to||cust?.excelDest||'';
+  if(!ws['D'+row]?.v&&dest) setCell(ws,'D'+row,dest);
+  const km=parseInt(ride.km||cust?.excelKm,10);
+  if(km&&!ws['E'+row]?.v) setCell(ws,'E'+row,km);
+  const amt=ride.amount||ride.betrag;
+  if(amt&&!ws['F'+row]?.v) setCell(ws,'F'+row,amt);
+  setCell(ws,'G'+row,excelDirLabel(dir));
+}
+
+function getApprovedRidesForExport(custId,yearMonth){
+  return rides.filter(r=>{
+    if(r.customerId!==custId||r.reviewStatus!=='approved') return false;
+    if(yearMonth&&(!r.date||!r.date.startsWith(yearMonth))) return false;
+    const cust=customers.find(c=>c.id===custId);
+    return cust&&rideMatchesCustomerExcel(cust,r);
+  }).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
+}
+
+function fillKtsExportSheet(ws,tripList,cust){
+  let row=KTS_ROW_START,nr=1;
+  tripList.forEach(ride=>{
+    if(row>KTS_ROW_END) return;
+    setCell(ws,'A'+row,nr++);
+    applyTripToSheet(ws,row,ride,cust);
+    setCell(ws,'B'+row,new Date(ride.date+'T12:00:00'));
+    row++;
+  });
+}
+function fillReExportSheet(ws,tripList,cust){
+  let row=RE_ROW_START,nr=1;
+  tripList.forEach(ride=>{
+    if(row>RE_ROW_END) return;
+    setCell(ws,'A'+row,nr++);
+    applyReTripToSheet(ws,row,ride,cust);
+    row++;
+  });
+}
+
+async function exportApprovedMonthToWorkbook(cust,yearMonth,wb){
+  const isRe=customerExcelType(cust)==='rechn';
+  const sheetName=(isRe?findReSheet:findKtsSheet)(wb,`${yearMonth}-01`);
+  if(!sheetName) throw new Error('NO_SHEET');
+  const ws=wb.Sheets[sheetName];
+  const trips=getApprovedRidesForExport(cust.id,yearMonth);
+  if(!trips.length) throw new Error('NO_TRIPS');
+  if(isRe) fillReExportSheet(ws,trips,cust);
+  else fillKtsExportSheet(ws,trips,cust);
+  return{sheetName,count:trips.length,module:isRe?'re':'kts'};
+}
+
+function downloadWorkbook(wb,fileName){
+  const out=XLSX.write(wb,{bookType:'xlsx',type:'array',cellDates:true});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  a.download=fileName;
+  a.click();
+}
+
+function exportReviewPdf(cust,yearMonth){
+  const trips=getApprovedRidesForExport(cust.id,yearMonth);
+  if(!trips.length){toast('Keine freigegebenen Fahrten','warn');return;}
+  const isRe=customerExcelType(cust)==='rechn';
+  const modLabel=isRe?'Rechnungsfahrten (RE)':'Krankenfahrten (KTS)';
+  const rows=trips.map((r,i)=>`<tr><td>${i+1}</td><td>${r.date}</td><td>${r.time||''}</td><td>${escAttr(r.from||'')}</td><td>${escAttr(r.to||'')}</td><td>${r.km||''}</td>${isRe?`<td>${r.amount||r.betrag||''}</td>`:''}<td>${escAttr(excelDirLabel(r.excelDir||'hin-rueck'))}</td></tr>`).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>${escAttr(cust.lname+' '+cust.fname)} ${yearMonth}</title>
+<style>body{font-family:Arial,sans-serif;padding:24px;font-size:12px}h1{font-size:16px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f0f0}</style></head>
+<body><h1>Taxi Meckenheim – ${modLabel}</h1><p><strong>${escAttr(cust.lname+' '+cust.fname)}</strong> · ${yearMonth}</p>
+<table><thead><tr><th>Nr</th><th>Datum</th><th>Zeit</th><th>Von</th><th>Nach</th><th>km</th>${isRe?'<th>Betrag</th>':''}<th>Hin/Rück</th></tr></thead><tbody>${rows}</tbody></table>
+<p style="margin-top:20px;font-size:10px;color:#666">Erstellt mit TaxiPro Dispatch · ${new Date().toLocaleString('de-DE')}</p></body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+function openReviewExportModal(){
+  const sel=document.getElementById('export-cust-id');
+  const excelCusts=customers.filter(c=>c.type==='krank'||c.type==='re'||c.excelFileName);
+  sel.innerHTML=excelCusts.map(c=>`<option value="${c.id}">${c.lname} ${c.fname} (${customerExcelType(c)==='rechn'?'RE':'KTS'})</option>`).join('');
+  const m=document.getElementById('export-month');
+  if(m) m.value=reviewFilter.month||document.getElementById('review-filter-month')?.value||'';
+  updateExportPreview();
+  openM('modal-review-export');
+}
+function updateExportPreview(){
+  const custId=document.getElementById('export-cust-id')?.value;
+  const ym=document.getElementById('export-month')?.value;
+  const el=document.getElementById('export-preview');
+  if(!el||!custId||!ym){if(el) el.textContent='';return;}
+  const n=getApprovedRidesForExport(custId,ym).length;
+  const cust=customers.find(c=>c.id===custId);
+  const mod=customerExcelType(cust)==='rechn'?`RE A${RE_ROW_START}:G${RE_ROW_END}`:`KTS A${KTS_ROW_START}:E${KTS_ROW_END}`;
+  el.textContent=`${n} freigegebene Fahrt(en) · Bereich ${mod}`;
+}
+document.addEventListener('change',e=>{
+  if(e.target&&(e.target.id==='export-cust-id'||e.target.id==='export-month')) updateExportPreview();
+});
+
+async function runReviewExport(){
+  const custId=document.getElementById('export-cust-id')?.value;
+  const ym=document.getElementById('export-month')?.value;
+  const fmt=document.getElementById('export-format')?.value||'excel';
+  const cust=customers.find(c=>c.id===custId);
+  if(!cust||!ym){toast('Kunde und Monat wählen','warn');return;}
+  const trips=getApprovedRidesForExport(custId,ym);
+  if(!trips.length){toast('Keine freigegebenen Fahrten in diesem Monat','warn');return;}
+  try{
+    if(fmt==='pdf'||fmt==='both') exportReviewPdf(cust,ym);
+    if(fmt==='excel'||fmt==='both'){
+      let wb=null,fileName=`${cust.lname} ${cust.fname} ${ym.slice(0,4)}.xlsx`;
+      if(customerHasExcelAccess(cust)&&excelSupported()){
+        try{
+          const handle=await resolveCustomerExcelHandle(cust,ym+'-01');
+          if(handle){
+            const buf=await (await handle.getFile()).arrayBuffer();
+            wb=XLSX.read(buf,{type:'array',cellDates:true});
+            const info=await exportApprovedMonthToWorkbook(cust,ym,wb);
+            const out=XLSX.write(wb,{bookType:'xlsx',type:'array',cellDates:true});
+            const wr=await handle.createWritable();
+            await wr.write(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+            await wr.close();
+            toast(`✅ Excel: ${info.count} Fahrten → ${info.sheetName}`,'ok');
+          }
+        }catch(e){console.warn('Excel linked export',e);}
+      }
+      if(!wb){
+        wb=XLSX.utils.book_new();
+        const isRe=customerExcelType(cust)==='rechn';
+        const ws={};
+        if(isRe) fillReExportSheet(ws,trips,cust);
+        else fillKtsExportSheet(ws,trips,cust);
+        const monthName=DE_MONTHS[parseInt(ym.slice(5),10)-1]||ym;
+        XLSX.utils.book_append_sheet(wb,ws,monthName);
+        downloadWorkbook(wb,fileName);
+        toast(`✅ Excel heruntergeladen (${trips.length} Fahrten)`,'ok');
+      }
+    }
+    trips.forEach(r=>{r.reviewStatus='exported';r.exportedAt=Date.now();});
+    save();updateCounts();renderReviewView();
+    closeM('modal-review-export');
+  }catch(e){
+    toast('Export fehlgeschlagen: '+(e.message||e),'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // TERMIN-SCAN IMPORT (PDF / Foto + OCR)
 // ═══════════════════════════════════════════════════════════════
 let scanImportRows=[];
@@ -8194,8 +8811,10 @@ function importScanAppointments(){
       note:(r.label?'Scan: '+r.label:'').trim(),serie:false,reminder:false,reminderMin:'30',
       serieType:'',km:estKm(from,defaultTo),localUpdated:Date.now(),source:'scan-import',
       excelDir:(type==='krank'||type==='rechn')?'hin-rueck':undefined,
+      reviewStatus:'pending',
     });
   });
+  rides.forEach(r=>{if(r.source==='scan-import'&&isReviewableRide(r)){ensureReviewMeta(r);refreshRideReview(r);}});
   save();
   closeM('modal-scan-import');
   renderCalendar();renderToday();updateCounts();renderMiniCal();
@@ -8226,6 +8845,7 @@ initTheme();
 updateCloudUI();
 if(!initAppMode()){
   try{localStorage.setItem('tp_app_role','dispatch');}catch(e){}
+  loadRidesFromIdb().finally(()=>{
   setContactViewMode(contactViewMode);
   setContactSort(contactSort);
   checkDataMigration();
@@ -8238,6 +8858,7 @@ if(!initAppMode()){
   setTimeout(()=>autoPurgeDemoOnLoad(),4000);
   updateMapsKeyStatus();
   setInterval(()=>{if(gcalConnected&&gcalSyncEnabled&&!gcalFetching) fullGCalSync();},300000);
+  });
 }
 </script>
 </body>
