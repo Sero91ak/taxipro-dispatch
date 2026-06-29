@@ -23,6 +23,7 @@ Professionelles Dispositions-System – **zwei getrennte Apps**, kostenlos, ohne
 
 ## Zentrale – Funktionen
 
+- **Serienfahrten-System:** Dashboard, Serienauftrag, Prüfliste vor Freigabe, Monatslisten, Unterschriftszettel (KTS/RE getrennt), Listenimport
 - Kalender (Plan / Woche / Monat), Heute-Ansicht, Kundenkatalog
 - Kranken-, Rechnungs-, Privat- und Serienfahrten
 - **Adresssuche kostenlos** (OpenStreetMap / Photon – 0 €)

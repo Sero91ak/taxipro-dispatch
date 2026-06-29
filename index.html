@@ -1017,6 +1017,7 @@ html.driver-standalone .drv-install-card{display:none}
 html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,html.driver-boot #pwa-install-banner{display:none!important}
 .mob-week-agenda{display:none}
 </style>
+<link rel="stylesheet" href="series-system.css"/>
 </head>
 <body>
 <div id="app">
@@ -1092,6 +1093,12 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-sec">Navigation</div>
   <div class="nav-item active" data-view="calendar" onclick="switchView('calendar')"><span class="nav-icon">📅</span> Kalender</div>
   <div class="nav-item" data-view="today" onclick="switchView('today')"><span class="nav-icon">🚗</span> Heute <span class="nav-badge" id="nb-today">0</span></div>
+  <div class="nav-item" data-view="dashboard" onclick="switchView('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" data-view="series-orders" onclick="switchView('series-orders')"><span class="nav-icon">🔁</span> Serienfahrten</div>
+  <div class="nav-item" data-view="series-preview" onclick="switchView('series-preview')"><span class="nav-icon">🔍</span> Serien-Prüfliste</div>
+  <div class="nav-item" data-view="monthly-list" onclick="switchView('monthly-list')"><span class="nav-icon">📅</span> Monatslisten</div>
+  <div class="nav-item" data-view="signatures" onclick="switchView('signatures')"><span class="nav-icon">✍️</span> Unterschriftszettel</div>
+  <div class="nav-item" data-view="series-import" onclick="switchView('series-import')"><span class="nav-icon">📋</span> Listenimport</div>
   <div class="nav-item" data-view="review" onclick="switchView('review')"><span class="nav-icon">🔍</span> Prüfliste <span class="nav-badge" id="nb-review">0</span></div>
   <div class="nav-item" data-view="customers" onclick="switchView('customers')"><span class="nav-icon">👥</span> Kunden <span class="nav-badge" id="nb-cust">0</span></div>
   <div class="nav-item gc-item" data-view="gcontacts" id="nav-gc" onclick="switchView('gcontacts')"><span class="nav-icon">🔵</span> Google Kontakte <span class="nav-badge" id="nb-gc">0</span></div>
@@ -1191,9 +1198,17 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     </div>
   </div>
 
+  <!-- SERIENFAHRTEN-SYSTEM -->
+  <div class="view" id="view-dashboard"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-dashboard-body"></div></div>
+  <div class="view" id="view-series-orders"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-series-orders-body"></div></div>
+  <div class="view" id="view-series-preview"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-preview-body"></div></div>
+  <div class="view" id="view-series-import"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-import-body"></div></div>
+  <div class="view" id="view-monthly-list"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-monthly-body"></div></div>
+  <div class="view" id="view-signatures"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-signatures-body"></div></div>
+
   <!-- PRÜFLISTE / FAHRTEVERWALTUNG -->
   <div class="view" id="view-review">
-    <div class="review-pipeline"><strong>Google Kalender</strong> → <strong>Datenbank</strong> → automatische Erkennung → <strong>Prüfliste</strong> → Freigabe → Excel/PDF-Export · Excel nur Vorlage, nicht Hauptdatenbank</div>
+    <div class="review-pipeline"><strong>Serienauftrag</strong> → <strong>Vorschau/Prüfliste</strong> → <strong>Freigabe</strong> → Monatsliste → Unterschriftszettel · optional Google Kalender · Excel nur Vorlage</div>
     <div class="review-toolbar">
       <h2>🔍 Prüfliste</h2>
       <div class="review-filters">
@@ -1648,7 +1663,8 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
           <span class="excel-file-name" id="c-excel-name">–</span>
         </div>
         <div class="fr2 fr" style="margin-top:12px">
-          <div><label>Standard km</label><input type="number" id="c-excel-km" placeholder="z.B. 13" min="1" max="999"/></div>
+          <div><label>Standard km (KTS)</label><input type="number" id="c-excel-km" placeholder="z.B. 28" min="1" max="999"/></div>
+          <div><label>Standard Preis € (RE)</label><input type="number" id="c-excel-price" placeholder="z.B. 22" min="0" step="0.01"/></div>
           <div><label>Standard Ziel (Fahrstrecke)</label><input type="text" id="c-excel-dest" placeholder="z.B. UKB Bonn"/></div>
         </div>
         <div class="fr" style="margin-top:8px;display:none" id="c-excel-type-wrap">
@@ -2284,8 +2300,11 @@ function saveDriverChat(){
 
 function exportBackup(){
   const data={
-    version:1,exported:new Date().toISOString(),
+    version:2,exported:new Date().toISOString(),
     customers,rides,gcContacts,drivers,driverDocs,driverChat,
+    recurringOrders:JSON.parse(localStorage.getItem('tp_ro')||'[]'),
+    seriesPreviews:JSON.parse(localStorage.getItem('tp_sp')||'[]'),
+    monthlySummaries:JSON.parse(localStorage.getItem('tp_ms')||'[]'),
     settings:{gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark'}
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -2309,6 +2328,10 @@ function importBackup(input){
       drivers=data.drivers||[];
       driverDocs=data.driverDocs||[];
       driverChat=data.driverChat||[];
+      if(data.recurringOrders) localStorage.setItem('tp_ro',JSON.stringify(data.recurringOrders));
+      if(data.seriesPreviews) localStorage.setItem('tp_sp',JSON.stringify(data.seriesPreviews));
+      if(data.monthlySummaries) localStorage.setItem('tp_ms',JSON.stringify(data.monthlySummaries));
+      if(typeof ssLoad==='function') ssLoad();
       if(data.settings?.gcalCalendarId) gcalCalendarId=data.settings.gcalCalendarId;
       save();
       renderCalendar();renderToday();renderCustomers();renderDrivers();renderMiniCal();updateCounts();
@@ -2458,6 +2481,7 @@ function switchView(v){
   if(v==='gcontacts') renderGCView();
   if(v==='drivers') renderDrivers();
   if(v==='review') renderReviewView();
+  if(typeof ssOnView==='function') ssOnView(v);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3823,6 +3847,7 @@ function saveCustomer(){
     stammHosp:document.getElementById('c-hosp').value.trim(),
     note:document.getElementById('c-note').value.trim(),
     excelKm:document.getElementById('c-excel-km').value.trim(),
+    excelPrice:document.getElementById('c-excel-price')?.value.trim()||'',
     excelDest:document.getElementById('c-excel-dest').value.trim(),
     excelType:customerExcelType({type:document.querySelector('input[name="ct"]:checked').value}),
     source:'app',
@@ -6679,6 +6704,7 @@ function updateCustomerExcelUI(c){
     nameEl.style.color='var(--text3)';
   }
   document.getElementById('c-excel-km').value=c?.excelKm||'';
+  const priceEl=document.getElementById('c-excel-price');if(priceEl) priceEl.value=c?.excelPrice||'';
   document.getElementById('c-excel-dest').value=c?.excelDest||'';
 }
 
@@ -8861,5 +8887,6 @@ if(!initAppMode()){
   });
 }
 </script>
+<script src="series-system.js"></script>
 </body>
 </html>
