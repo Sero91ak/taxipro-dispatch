@@ -226,16 +226,28 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .archive-card{border:1px solid var(--border);background:var(--bg2);border-radius:var(--r);padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
 .archive-title{font-weight:800;font-size:12px;margin-bottom:3px}
 .archive-meta{font-size:10px;color:var(--text2);line-height:1.45}
-.assistant-box{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);padding:10px;margin-top:12px}
-.assistant-log{display:flex;flex-direction:column;gap:7px;max-height:190px;overflow-y:auto;margin-bottom:10px}
+.assistant-page{height:100%;display:flex;flex-direction:column;background:var(--bg)}
+.assistant-head{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.assistant-title{min-width:0}
+.assistant-title strong{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.assistant-title span{display:block;font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.assistant-chip-row{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg)}
+.assistant-chip{flex:0 0 auto;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;white-space:nowrap}
+.assistant-work{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 14px}
+.assistant-log{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;margin-bottom:10px}
 .assistant-msg{padding:8px 10px;border-radius:12px;font-size:11px;line-height:1.45;background:var(--bg3);border:1px solid var(--border)}
 .assistant-msg.user{align-self:flex-end;background:var(--gold3);border-color:rgba(245,166,35,.35)}
 .assistant-msg.sys{align-self:flex-start}
-.assistant-input-row{display:flex;gap:6px}
-.assistant-input-row input{flex:1;min-width:0;padding:11px 12px;border-radius:var(--r2);background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:13px}
+.assistant-input-row{display:flex;gap:7px;align-items:center;border-top:1px solid var(--border);padding-top:10px}
+.assistant-input-row input{flex:1;min-width:0;padding:13px 14px;border-radius:var(--r2);background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:14px}
 @media(max-width:640px){
   .archive-card{grid-template-columns:1fr}
   .archive-card .tb-btn{width:100%}
+  .assistant-head{padding:12px}
+  .assistant-title strong{font-size:15px}
+  .assistant-work{padding:10px 12px}
+  .assistant-input-row{gap:5px}
+  .assistant-input-row input{font-size:16px;padding:13px 12px}
 }
 
 .nav-sec{padding:12px 12px 3px;font-size:9px;font-weight:700;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase}
@@ -1249,10 +1261,14 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <div id="search-results"></div>
   </div>
   <div id="topbar-btns">
+    <button class="tb-btn" onclick="goViewBack()" title="Zurück">‹</button>
+    <button class="tb-btn" onclick="goViewHome()" title="Startseite">⌂</button>
+    <button class="tb-btn" onclick="goViewForward()" title="Vorwärts">›</button>
     <button class="tb-btn gc" id="gc-sync-btn" onclick="initiateGoogleSync()">🔵 Kontakte</button>
     <button class="tb-btn gc" id="gcal-sync-btn" onclick="initiateGCalSync()">📅 Kalender</button>
     <button class="tb-btn" onclick="openMapsApp()" title="Google Maps in der App">🗺️ Maps</button>
     <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel">🌙</button>
+    <button class="tb-btn" onclick="switchView('assistant')" title="Live-Assistent">🤖 Assistent</button>
     <button class="tb-btn" onclick="openScanImportModal()" title="Terminplan scannen">📷 Scan</button>
     <button class="tb-btn" onclick="openExcelArchiveModal()" title="Excel/ZIP Archiv">📦 Excel</button>
     <button class="tb-btn primary" onclick="openRideModal()">＋ Fahrt</button>
@@ -1267,7 +1283,11 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <span class="status-pill" id="status-cust">👥 0 Kunden</span>
 </div>
 <div id="mobile-quick-bar" aria-label="Schnellzugriff">
+  <button type="button" class="mob-qbtn" onclick="goViewBack()">‹ Zurück</button>
+  <button type="button" class="mob-qbtn" onclick="goViewHome()">⌂ Start</button>
+  <button type="button" class="mob-qbtn" onclick="goViewForward()">› Vor</button>
   <button type="button" class="mob-qbtn primary" onclick="openRideModal()">＋ Fahrt</button>
+  <button type="button" class="mob-qbtn" onclick="switchView('assistant')">🤖 Assistent</button>
   <button type="button" class="mob-qbtn" onclick="switchView('today')">🚗 Heute</button>
   <button type="button" class="mob-qbtn" onclick="switchView('drivers')">👨‍✈️ Fahrer</button>
   <button type="button" class="mob-qbtn gc" onclick="initiateGCalSync()">📅 Sync</button>
@@ -1288,6 +1308,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <button type="button" class="mob-nav-item" data-view="series-orders" onclick="switchView('series-orders')"><span class="mob-nav-icon">🔁</span><span class="mob-nav-lbl">Serien</span></button>
   <button type="button" class="mob-nav-item" data-view="monthly-list" onclick="switchView('monthly-list')"><span class="mob-nav-icon">📅</span><span class="mob-nav-lbl">Monat</span></button>
   <button type="button" class="mob-nav-item" data-view="review" onclick="switchView('review')"><span class="mob-nav-icon">🔍</span><span class="mob-nav-lbl">Prüfung</span><span class="mob-nav-badge" id="mob-nb-review">0</span></button>
+  <button type="button" class="mob-nav-item" data-view="assistant" onclick="switchView('assistant')"><span class="mob-nav-icon">🤖</span><span class="mob-nav-lbl">Assistent</span></button>
   <button type="button" class="mob-nav-fab" onclick="switchView('series-orders')" aria-label="Serienauftrag">＋</button>
   <button type="button" class="mob-nav-item" data-view="customers" onclick="switchView('customers')"><span class="mob-nav-icon">👥</span><span class="mob-nav-lbl">Kunden</span></button>
 </nav>
@@ -1318,6 +1339,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-sec">Disposition</div>
   <div class="nav-item" data-view="calendar" onclick="switchView('calendar')"><span class="nav-icon">📅</span> Kalender</div>
   <div class="nav-item" data-view="today" onclick="switchView('today')"><span class="nav-icon">🚗</span> Heute <span class="nav-badge" id="nb-today">0</span></div>
+  <div class="nav-item" data-view="assistant" onclick="switchView('assistant')"><span class="nav-icon">🤖</span> Live-Assistent</div>
   <div class="nav-item" data-view="review" onclick="switchView('review')"><span class="nav-icon">🔍</span> Prüfliste <span class="nav-badge" id="nb-review">0</span></div>
   <div class="nav-item" data-view="customers" onclick="switchView('customers')"><span class="nav-icon">👥</span> Kunden <span class="nav-badge" id="nb-cust">0</span></div>
   <div class="nav-item gc-item" data-view="gcontacts" id="nav-gc" onclick="switchView('gcontacts')"><span class="nav-icon">🔵</span> Google Kontakte <span class="nav-badge" id="nb-gc">0</span></div>
@@ -1335,7 +1357,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-sec">App</div>
   <div class="nav-item" id="nav-install-app" onclick="installPwa()"><span class="nav-icon">📲</span> Als App installieren</div>
   <div class="nav-sec">Import</div>
-  <div class="nav-item" onclick="openExcelArchiveModal()"><span class="nav-icon">📦</span> Excel-Archiv & Assistent</div>
+  <div class="nav-item" onclick="openExcelArchiveModal()"><span class="nav-icon">📦</span> Excel-Archiv</div>
   <div class="nav-item" onclick="openScanImportModal()"><span class="nav-icon">📷</span> Termin-Scan (PDF/Foto)</div>
   <div class="nav-sec">Daten</div>
   <div class="nav-item" onclick="exportBackup()"><span class="nav-icon">💾</span> Backup speichern</div>
@@ -1429,6 +1451,32 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="view" id="view-signatures"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-signatures-body"></div></div>
   <div class="view" id="view-templates"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-templates-body"></div></div>
   <div class="view" id="view-settings"><div style="flex:1;overflow-y:auto;padding:14px" id="ss-settings-body"></div></div>
+
+  <!-- LIVE-ASSISTENT -->
+  <div class="view" id="view-assistant">
+    <div class="assistant-page">
+      <div class="assistant-head">
+        <div class="assistant-title">
+          <strong>🤖 TaxiPro Live-Assistent</strong>
+          <span>Fahrten, Ausfälle, Zuzahlungen und Monatskorrekturen per Text steuern</span>
+        </div>
+        <button class="tb-btn" onclick="goViewHome()">Start</button>
+      </div>
+      <div class="assistant-chip-row">
+        <button class="assistant-chip" onclick="prefillAssistant('Müller ist heute hin und zurück gefahren, 10 Euro bezahlt')">Hin/Rück + Zuzahlung</button>
+        <button class="assistant-chip" onclick="prefillAssistant('Yilmaz ist gestern nicht gefahren, krank')">Ausfall rückwirkend</button>
+        <button class="assistant-chip" onclick="prefillAssistant('Zeig mir offene Prüfungen für diesen Monat')">Prüfungen zeigen</button>
+        <button class="assistant-chip" onclick="prefillAssistant('Öffne Monatsabschluss')">Monatsabschluss</button>
+      </div>
+      <div class="assistant-work">
+        <div class="assistant-log" id="assistant-log"></div>
+        <div class="assistant-input-row">
+          <input type="text" id="assistant-input" placeholder="Schreib deinen Auftrag: Kunde, Datum, Hin/Rück, Zuzahlung, Ausfall…" onkeydown="if(event.key==='Enter')runAssistantCommand()"/>
+          <button class="tb-btn primary" onclick="runAssistantCommand()">Senden</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- PRÜFLISTE / FAHRTEVERWALTUNG -->
   <div class="view" id="view-review">
@@ -2111,7 +2159,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 <!-- ═══ MODAL: EXCEL ARCHIV + ASSISTENT ═══ -->
 <div class="overlay hidden" id="modal-excel-archive">
 <div class="modal" style="max-width:760px">
-  <div class="mh"><h3>📦 Excel-Archiv & Live-Assistent</h3><button class="mclose" onclick="closeM('modal-excel-archive')">✕</button></div>
+  <div class="mh"><h3>📦 Excel-Archiv</h3><button class="mclose" onclick="closeM('modal-excel-archive')">✕</button></div>
   <div class="mbody">
     <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">Mehrere Excel-Dateien oder eine ZIP-Datei ablegen. Die App liest Dateinamen, Tabellenblätter und Überschriften aus, sortiert nach Kunde/Monat und verknüpft die Vorschläge mit Google-Kalender-Fahrten.</p>
     <label class="archive-drop" id="excel-archive-drop" for="excel-archive-input">
@@ -2121,14 +2169,6 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <input type="file" id="excel-archive-input" accept=".xlsx,.xls,.csv,.zip" multiple style="display:none" onchange="handleExcelArchiveInput(this.files)"/>
     </label>
     <div id="excel-archive-progress" class="scan-progress hidden"></div>
-    <div class="assistant-box">
-      <div style="font-weight:800;font-size:13px;margin-bottom:8px">🤝 Live-Korrektur-Assistent</div>
-      <div class="assistant-log" id="assistant-log"></div>
-      <div class="assistant-input-row">
-        <input type="text" id="assistant-input" placeholder="z.B. Müller ist heute hin und zurück gefahren, 10 Euro bezahlt" onkeydown="if(event.key==='Enter')runAssistantCommand()"/>
-        <button class="tb-btn primary" onclick="runAssistantCommand()">Senden</button>
-      </div>
-    </div>
     <div class="archive-grid" id="excel-archive-list"></div>
   </div>
   <div class="mfooter">
@@ -2542,6 +2582,8 @@ let seriePickEditGroupId=null;
 let seriePickTemplate=null;
 const SERIE_TYP_LABELS={dialyse:'💧 Dialyse',chemo:'🏥 Chemotherapie',strahlen:'☢️ Strahlentherapie',aufbau:'💪 Aufbautraining',kontrolle:'🩺 Kontrolltermin',sonstige:'Sonstige'};
 let view='dashboard', calV='day';
+let viewBackStack=[];
+let viewForwardStack=[];
 let curDate=new Date();
 let miniDate=new Date();
 let custFilter='all', calTypeF='all', calSerieF=null;
@@ -2825,10 +2867,17 @@ function migrateKtsReData(){
   });
   if(changed) save();
 }
-function switchView(v){
+function switchView(v,opts={}){
+  const target=document.getElementById('view-'+v);
+  if(!target){toast('Ansicht nicht gefunden: '+v,'warn');return;}
+  if(!opts.skipHistory&&view&&view!==v){
+    viewBackStack.push(view);
+    if(viewBackStack.length>30) viewBackStack=viewBackStack.slice(-30);
+    viewForwardStack=[];
+  }
   view=v;
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
+  target.classList.add('active');
   document.querySelectorAll('.nav-item[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
   document.querySelectorAll('.mob-nav-item[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
   closeMobileDrawer();
@@ -2839,7 +2888,26 @@ function switchView(v){
   if(v==='gcontacts') renderGCView();
   if(v==='drivers') renderDrivers();
   if(v==='review') renderReviewView();
+  if(v==='assistant') renderAssistantLog();
   if(typeof ssOnView==='function') ssOnView(v);
+}
+
+function goViewBack(){
+  const prev=viewBackStack.pop();
+  if(!prev){switchView('dashboard');return;}
+  viewForwardStack.push(view);
+  switchView(prev,{skipHistory:true});
+}
+function goViewForward(){
+  const next=viewForwardStack.pop();
+  if(!next) return;
+  viewBackStack.push(view);
+  switchView(next,{skipHistory:true});
+}
+function goViewHome(){
+  if(view!=='dashboard') viewBackStack.push(view);
+  viewForwardStack=[];
+  switchView('dashboard',{skipHistory:true});
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -9256,7 +9324,6 @@ async function runReviewExport(){
 // ═══════════════════════════════════════════════════════════════
 function openExcelArchiveModal(){
   renderExcelArchive();
-  renderAssistantLog();
   openM('modal-excel-archive');
 }
 
@@ -9425,6 +9492,13 @@ function renderAssistantLog(){
   el.scrollTop=el.scrollHeight;
 }
 
+function prefillAssistant(text){
+  const inp=document.getElementById('assistant-input');
+  if(!inp) return;
+  inp.value=text;
+  inp.focus();
+}
+
 function assistantFindCustomer(text){
   const t=(text||'').toLowerCase();
   const hits=customers.map(c=>({c,score:Math.max(nameMatchScore(t,`${c.fname} ${c.lname}`),nameMatchScore(t,`${c.lname} ${c.fname}`))})).filter(x=>x.score>=35).sort((a,b)=>b.score-a.score);
@@ -9449,12 +9523,25 @@ function runAssistantCommand(){
   if(!text) return;
   if(inp) inp.value='';
   assistantHistory.push({role:'user',text,at:Date.now()});
+  const lower=text.toLowerCase();
+  if(/monatsabschluss|abschluss|rechnung|unterschrift/.test(lower)&&!/gefahren|nicht gefahren|ausfall/.test(lower)){
+    assistantHistory.push({role:'sys',text:'Ich öffne den Monatsabschluss. Dort sind freigegebene KTS/RE-Fahrten pro Kunde zusammengefasst.',at:Date.now()});
+    save();renderAssistantLog();openReviewExportModal();return;
+  }
+  if(/prüfung|prüfliste|offene/.test(lower)&&!/gefahren|nicht gefahren|ausfall/.test(lower)){
+    reviewFilter.status=/alle/.test(lower)?'all':'pending';
+    assistantHistory.push({role:'sys',text:'Ich öffne die Prüfliste und zeige die passenden Fahrten.',at:Date.now()});
+    save();switchView('review');renderAssistantLog();return;
+  }
   const c=assistantFindCustomer(text);
   if(!c){
     assistantHistory.push({role:'sys',text:'Ich konnte den Kunden nicht eindeutig finden. Bitte Name genauer schreiben oder Kunden zuerst anlegen.',at:Date.now()});
     save();renderAssistantLog();return;
   }
-  const lower=text.toLowerCase();
+  if(/kunde|kundenakte|profil|öffne/.test(lower)&&!/gefahren|nicht gefahren|ausfall/.test(lower)){
+    assistantHistory.push({role:'sys',text:`Ich öffne die Kundenakte von ${c.lname} ${c.fname}.`,at:Date.now()});
+    save();renderAssistantLog();openCustDetail(c.id);return;
+  }
   const date=assistantDate(text);
   const isCancel=/nicht gefahren|ausfall|ausgefallen|storno|storniert/.test(lower);
   const dir=/nur rück|rückfahrt/.test(lower)&&!/hin/.test(lower)?'rueck':/nur hin|hinfahrt/.test(lower)&&!/rück/.test(lower)?'hin':'hin-rueck';
