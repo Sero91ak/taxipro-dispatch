@@ -729,8 +729,8 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .review-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .review-flag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
 .review-flag.info{background:var(--yellow-bg);color:var(--yellow2);border:1px solid var(--yellow-border)}
-.review-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
-.review-act{padding:6px 10px;border-radius:var(--r2);font-size:10px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);white-space:nowrap}
+.review-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:stretch}
+.review-act{min-width:36px;padding:6px 9px;border-radius:var(--r2);font-size:10px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);white-space:nowrap;line-height:1.1}
 .review-act.ok{background:var(--green-bg);color:var(--green2);border-color:var(--green-border)}
 .review-act.no{background:var(--red-bg);color:var(--red2);border-color:var(--red-border)}
 .review-batch{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
@@ -739,6 +739,7 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 @media(max-width:640px){
   .review-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .review-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}
+  .review-act{min-height:34px;flex:1 0 42px;padding:7px 8px}
 }
 .dp-actions{display:flex;gap:6px;flex-shrink:0}
 .dp-act-btn{padding:8px 12px;border-radius:var(--r2);font-size:11px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);color:var(--text);white-space:nowrap}
@@ -2457,7 +2458,8 @@ let gcalToken=localStorage.getItem('tp_gcal_token')||null;
 let gcalConnected=!!gcalToken;
 let gcalShow=localStorage.getItem('tp_gcal_show')!=='false';
 let gcalSyncEnabled=localStorage.getItem('tp_gcal_sync')!=='false';
-let gcalWriteEnabled=localStorage.getItem('tp_gcal_write')==='true';
+let gcalWriteEnabled=false;
+localStorage.setItem('tp_gcal_write','false');
 let gcalImportAll=localStorage.getItem('tp_gcal_import_all')!=='false';
 let gcalCalendarId=localStorage.getItem('tp_gcal_cal')||'primary';
 let gdrvFileId=localStorage.getItem('tp_gdrv_file_id')||'';
@@ -2498,6 +2500,7 @@ const REVIEW_FLAG_LABELS={
   no_customer:'Kein Kunde zugeordnet',
   type_conflict:'KTS/RE passt nicht zum Kunden',
   missing_zuzahlung:'Zuzahlung NB/BF fehlt',
+  missing_cancel_reason:'Ausfallgrund fehlt',
 };
 
 function save(){
@@ -3438,6 +3441,8 @@ function showRideDetail(id){
     ${r.km?`<div class="drow"><div class="drow-icon">📏</div><div><div class="drow-lbl">Distanz</div><div class="drow-val">ca. ${r.km} km</div></div></div>`:''}
     ${r.amount?`<div class="drow"><div class="drow-icon">💶</div><div><div class="drow-lbl">Rechnungsbetrag</div><div class="drow-val">${Number(r.amount).toFixed(2)} €</div></div></div>`:''}
     ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${zuzahlLabel(r.zuzahlung)}</div></div></div>`:''}
+    ${r.type==='krank'&&r.copayPaidAmount?`<div class="drow"><div class="drow-icon">💶</div><div><div class="drow-lbl">Zuzahlung bezahlt</div><div class="drow-val">${Number(r.copayPaidAmount).toFixed(2)} €</div></div></div>`:''}
+    ${r.tripStatus==='cancelled'?`<div class="drow"><div class="drow-icon">⛔</div><div><div class="drow-lbl">Nicht gefahren / Ausfall</div><div class="drow-val">${r.cancelReason||'Grund fehlt'}</div></div></div>`:''}
     ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
     ${r.dispatchedTo?(()=>{const d=drivers.find(x=>x.id===r.dispatchedTo);const pb=dispatchPaymentBadge(r);return d?`<div class="drow"><div class="drow-icon">🚀</div><div><div class="drow-lbl">Fahrer</div><div class="drow-val" style="color:var(--green2)">✅ ${d.fname} ${d.lname} · ${r.dispatchMode==='app'?'📱 App':'📲 WhatsApp'}</div>${pb?`<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">${pb}</div>`:''}</div></div>`:'';})():''}
     ${dispatchDriverMessagesHtml(r)}
@@ -4344,7 +4349,7 @@ function renderGCalModal(){
     hideGCalError();
   } else {
     document.getElementById('gcal-status-text').innerHTML=`<strong>✅ Google Kalender verbunden</strong><br>
-       ${gcalWriteEnabled?'🔓 Import + Schreiben aktiv':'🔒 Nur Import: Google → App (12 Monate zurück + 18 Monate voraus)'}<br>
+       🔒 Nur Import: offizieller Google Kalender → App. Die App schreibt niemals zurück in Google.<br>
        <span style="color:var(--text3)">${syncedRides} verknüpft · ${gcalEvents.length} Termine geladen · Auto-Sync alle 2 Min.</span>`;
   }
   document.getElementById('gcal-connect-btn').style.display=connected?'none':'inline-flex';
@@ -4356,15 +4361,15 @@ function renderGCalModal(){
   document.getElementById('gcal-cal-select-wrap').style.display=connected?'block':'none';
   document.getElementById('gcal-import-toggle').style.display=connected?'flex':'none';
   document.getElementById('gcal-show-toggle').style.display=connected?'flex':'none';
-  document.getElementById('gcal-write-toggle').style.display=connected?'flex':'none';
-  document.getElementById('gcal-safe-mode').style.display=connected&&!gcalWriteEnabled?'block':'none';
+  document.getElementById('gcal-write-toggle').style.display='none';
+  document.getElementById('gcal-safe-mode').style.display=connected?'block':'none';
   document.getElementById('gcal-sync-stats').style.display=connected?'block':'none';
   document.getElementById('gcal-sync').checked=gcalSyncEnabled;
   document.getElementById('gcal-import-all').checked=gcalImportAll;
   document.getElementById('gcal-show').checked=gcalShow;
   const writeEl=document.getElementById('gcal-write');
   if(writeEl) writeEl.checked=gcalWriteEnabled;
-  document.getElementById('gcal-restore-btn').style.display=(connected&&gcalWriteEnabled)?'inline-flex':'none';
+  document.getElementById('gcal-restore-btn').style.display='none';
   if(connected){
     const stats=document.getElementById('gcal-sync-stats');
     stats.innerHTML=`Letzter Sync: <strong>${gcalLastSyncStats.imported}</strong> neu · <strong>${gcalLastSyncStats.updated}</strong> aktualisiert · <strong>${gcalLastSyncStats.deleted}</strong> gelöscht<br>Kalender: <strong>${gcalCalendars.find(c=>c.id===gcalCalendarId)?.summary||gcalCalendarId}</strong>`;
@@ -4396,7 +4401,7 @@ function renderGCalCalendarSelect(){
 }
 
 function getGoogleScopes(){
-  const base=gcalWriteEnabled?SCOPE_GCAL_FULL:SCOPE_GCAL_IMPORT;
+  const base=SCOPE_GCAL_IMPORT;
   return(gdrvSyncEnabled||gdrvFileId)?base+' '+SCOPE_DRIVE_FILE:base;
 }
 function canWriteToGoogle(){return gcalWriteEnabled&&gcalConnected&&!!gcalToken;}
@@ -4434,24 +4439,11 @@ function startGCalOAuth(){
 }
 
 function toggleGCalWrite(){
-  const wantWrite=document.getElementById('gcal-write').checked;
-  if(wantWrite){
-    if(!confirm('App → Google Schreiben freigeben?\n\nDie App darf dann Termine in Google anlegen/ändern/löschen.\n\nNur aktivieren wenn du das wirklich willst.')){
-      document.getElementById('gcal-write').checked=false;
-      return;
-    }
-    gcalWriteEnabled=true;
-    localStorage.setItem('tp_gcal_write','true');
-    toast('Schreib-Freigabe aktiv – bitte Google neu autorisieren…');
-    googleTokenClient=null;
-    startGCalOAuth();
-  }else{
-    gcalWriteEnabled=false;
-    localStorage.setItem('tp_gcal_write','false');
-    toast('Testmodus: nur Google → App','ok');
-    googleTokenClient=null;
-    startGCalOAuth();
-  }
+  gcalWriteEnabled=false;
+  localStorage.setItem('tp_gcal_write','false');
+  const el=document.getElementById('gcal-write');
+  if(el) el.checked=false;
+  toast('Google Kalender bleibt schreibgeschützt: nur Import in die App','ok');
   renderGCalModal();
 }
 
@@ -4576,7 +4568,7 @@ function parseGCalToRide(raw,ev){
   const from=parseFromDescription(ev.description)||dispatch.from||'';
   const to=dispatch.to||loc||ev.title;
   const resolvedColorId=colorId||(type==='rechn'?'5':type==='krank'?'11':type==='normal'?'9':null);
-  return{
+  const ride={
     type,
     customerId:dispatch.customerId,
     customerName:dispatch.customerName,
@@ -4589,6 +4581,8 @@ function parseGCalToRide(raw,ev){
     reminderMin:'30',serieType:'',km:estKm(from,to),
     googleEventId:ev.id,googleUpdated:raw.updated,source:'google',
   };
+  if(cust) applyCustomerRouteDefaults(cust,ride);
+  return ride;
 }
 
 function rideToGCalEvent(ride){
@@ -8618,6 +8612,7 @@ function computeReviewFlags(ride){
     const zz=ride.zuzahlung||customers.find(c=>c.id===ride.customerId)?.zuzahlungStatus;
     if(!zz) flags.push('missing_zuzahlung');
   }
+  if(ride.tripStatus==='cancelled'&&!String(ride.cancelReason||'').trim()) flags.push('missing_cancel_reason');
   if(!ride.customerId){
     flags.push('no_customer');
     if(ride.customerName||ride.source==='google') flags.push('uncertain_name');
@@ -8749,6 +8744,59 @@ function filterReviewRides(){
   }).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
 }
 
+function commitReviewRide(r,msg){
+  if(!r) return;
+  if(r.customerId){
+    const cust=customers.find(c=>c.id===r.customerId);
+    if(cust) applyCustomerRouteDefaults(cust,r);
+  }
+  r.localUpdated=Date.now();
+  if(r.reviewStatus==='approved') r.reviewStatus='pending';
+  ensureReviewMeta(r);
+  refreshRideReview(r);
+  save();updateCounts();renderReviewView();
+  if(document.getElementById('modal-ride-detail')&&!document.getElementById('modal-ride-detail').classList.contains('hidden')) showRideDetail(r.id);
+  if(msg) toast(msg,'ok');
+}
+
+function quickSetRideDir(id,dir){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  r.excelDir=dir;
+  r.tripStatus='driven';
+  r.cancelReason='';
+  commitReviewRide(r,excelDirLabel(dir)+' gespeichert');
+}
+
+function quickSetRideCopay(id,status,amount=0){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  if(r.type!=='krank'){toast('Zuzahlung gilt nur für Krankenfahrten','warn');return;}
+  r.zuzahlung=status==='BF'?'BF':'NB';
+  if(amount){
+    r.copayPaidAmount=amount;
+    r.copayPaidAt=Date.now();
+  }else if(status==='BF'){
+    r.copayPaidAmount=0;
+    r.copayPaidAt=null;
+  }
+  commitReviewRide(r,amount?`${amount} € Zuzahlung gespeichert`:zuzahlShort(r.zuzahlung)+' gespeichert');
+}
+
+function markRideCancelled(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  const reason=prompt('Warum ist die Fahrt ausgefallen / nicht gefahren?',r.cancelReason||'');
+  if(reason===null) return;
+  r.tripStatus='cancelled';
+  r.cancelReason=reason.trim();
+  commitReviewRide(r,r.cancelReason?'Ausfall gespeichert':'Ausfall ohne Grund markiert');
+}
+
+function restoreRideDriven(id){
+  const r=rides.find(x=>x.id===id);if(!r) return;
+  r.tripStatus='driven';
+  r.cancelReason='';
+  commitReviewRide(r,'Fahrt wieder als gefahren markiert');
+}
+
 function renderReviewView(){
   const list=document.getElementById('review-list');
   const stats=document.getElementById('review-stats');
@@ -8778,6 +8826,9 @@ function renderReviewView(){
     const flags=(r.reviewFlags||[]).map(f=>`<span class="review-flag${f==='uncertain_name'||f==='gcal_changed'?' info':''}">${REVIEW_FLAG_LABELS[f]||f}</span>`).join('');
     const st=r.reviewStatus||'pending';
     const sel=reviewSelected.has(r.id)?'checked':'';
+    const dir=r.excelDir||'hin-rueck';
+    const cancelInfo=r.tripStatus==='cancelled'?`<span class="review-flag">Ausfall${r.cancelReason?': '+escAttr(r.cancelReason):''}</span>`:'';
+    const copayInfo=r.type==='krank'&&r.copayPaidAmount?` · ${Number(r.copayPaidAmount).toFixed(2)} € ZZ`:r.type==='krank'?` · ${zuzahlShort(r.zuzahlung||'NB')}`:'';
     return `<div class="review-card ${st}${flags?' flagged':''}">
       <input type="checkbox" ${sel} onchange="toggleReviewSelect('${r.id}',this.checked)"/>
       <div class="review-main">
@@ -8786,10 +8837,18 @@ function renderReviewView(){
           <span class="rd-badge ${mod==='re'?'rechn':'krank'}">${mod==='re'?'RE':'KTS'}</span>
           <span class="badge ${st==='approved'?'befreit':st==='exported'?'serie':'remind'}">${st==='approved'?'Freigegeben':st==='exported'?'Exportiert':st==='rejected'?'Abgelehnt':'Offen'}</span>
         </div>
-        <div class="review-meta">${r.date||'?'} · ${r.time||'?'} · ${escAttr((r.from||'').slice(0,40))} → ${escAttr((r.to||'').slice(0,40))}${r.km?` · ${r.km} km`:''}</div>
-        ${flags?`<div class="review-flags">${flags}</div>`:''}
+        <div class="review-meta">${r.date||'?'} · ${r.time||'?'} · ${escAttr((r.from||'').slice(0,40))} → ${escAttr((r.to||'').slice(0,40))}${r.km?` · ${r.km} km`:''} · ${excelDirLabel(dir)}${copayInfo}</div>
+        ${flags||cancelInfo?`<div class="review-flags">${flags}${cancelInfo}</div>`:''}
       </div>
       <div class="review-actions">
+        <button class="review-act ${dir==='hin-rueck'?'ok':''}" title="Hin und Rück" onclick="quickSetRideDir('${r.id}','hin-rueck')">↔</button>
+        <button class="review-act ${dir==='hin'?'ok':''}" title="Nur Hinfahrt" onclick="quickSetRideDir('${r.id}','hin')">→</button>
+        <button class="review-act ${dir==='rueck'?'ok':''}" title="Nur Rückfahrt" onclick="quickSetRideDir('${r.id}','rueck')">←</button>
+        ${r.type==='krank'?`<button class="review-act" title="5 Euro Zuzahlung" onclick="quickSetRideCopay('${r.id}','NB',5)">5€</button>
+        <button class="review-act" title="10 Euro Zuzahlung" onclick="quickSetRideCopay('${r.id}','NB',10)">10€</button>
+        <button class="review-act" title="Befreit" onclick="quickSetRideCopay('${r.id}','BF',0)">BF</button>`:''}
+        <button class="review-act no" title="Nicht gefahren / Ausfall" onclick="markRideCancelled('${r.id}')">Ausfall</button>
+        ${r.tripStatus==='cancelled'?`<button class="review-act ok" title="Wieder gefahren" onclick="restoreRideDriven('${r.id}')">Gefahren</button>`:''}
         <button class="review-act" onclick="showRideDetail('${r.id}')">✏️</button>
         <button class="review-act ok" onclick="approveRide('${r.id}')">✅</button>
         <button class="review-act no" onclick="rejectRide('${r.id}')">✕</button>
