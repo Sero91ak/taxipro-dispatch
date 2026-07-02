@@ -83,6 +83,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -219,6 +220,23 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .scan-table tr.suspect td{background:rgba(232,68,68,.08)}
 .scan-table input[type="time"],.scan-table input[type="date"],.scan-table input[type="text"]{width:100%;padding:6px 8px;font-size:12px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text)}
 .scan-warn{font-size:11px;color:var(--red2);padding:8px 10px;background:var(--red-bg);border-radius:var(--r2);margin:8px 0;line-height:1.5}
+.archive-drop{border:2px dashed var(--border2);border-radius:var(--r);padding:18px;text-align:center;background:var(--bg3);cursor:pointer;transition:.15s}
+.archive-drop:hover,.archive-drop.drag{border-color:var(--gold);background:var(--gold3)}
+.archive-grid{display:grid;gap:8px;margin-top:12px}
+.archive-card{border:1px solid var(--border);background:var(--bg2);border-radius:var(--r);padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.archive-title{font-weight:800;font-size:12px;margin-bottom:3px}
+.archive-meta{font-size:10px;color:var(--text2);line-height:1.45}
+.assistant-box{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);padding:10px;margin-top:12px}
+.assistant-log{display:flex;flex-direction:column;gap:7px;max-height:190px;overflow-y:auto;margin-bottom:10px}
+.assistant-msg{padding:8px 10px;border-radius:12px;font-size:11px;line-height:1.45;background:var(--bg3);border:1px solid var(--border)}
+.assistant-msg.user{align-self:flex-end;background:var(--gold3);border-color:rgba(245,166,35,.35)}
+.assistant-msg.sys{align-self:flex-start}
+.assistant-input-row{display:flex;gap:6px}
+.assistant-input-row input{flex:1;min-width:0;padding:11px 12px;border-radius:var(--r2);background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:13px}
+@media(max-width:640px){
+  .archive-card{grid-template-columns:1fr}
+  .archive-card .tb-btn{width:100%}
+}
 
 .nav-sec{padding:12px 12px 3px;font-size:9px;font-weight:700;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase}
 .nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;border-radius:7px;margin:1px 5px;font-size:12px;font-weight:500;color:var(--text2);transition:.12s}
@@ -1236,6 +1254,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     <button class="tb-btn" onclick="openMapsApp()" title="Google Maps in der App">🗺️ Maps</button>
     <button class="tb-btn" id="theme-btn" onclick="toggleTheme()" title="Hell/Dunkel">🌙</button>
     <button class="tb-btn" onclick="openScanImportModal()" title="Terminplan scannen">📷 Scan</button>
+    <button class="tb-btn" onclick="openExcelArchiveModal()" title="Excel/ZIP Archiv">📦 Excel</button>
     <button class="tb-btn primary" onclick="openRideModal()">＋ Fahrt</button>
     <button class="tb-btn" onclick="openCustomerModal()">👤 Kunde</button>
   </div>
@@ -1316,6 +1335,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
   <div class="nav-sec">App</div>
   <div class="nav-item" id="nav-install-app" onclick="installPwa()"><span class="nav-icon">📲</span> Als App installieren</div>
   <div class="nav-sec">Import</div>
+  <div class="nav-item" onclick="openExcelArchiveModal()"><span class="nav-icon">📦</span> Excel-Archiv & Assistent</div>
   <div class="nav-item" onclick="openScanImportModal()"><span class="nav-icon">📷</span> Termin-Scan (PDF/Foto)</div>
   <div class="nav-sec">Daten</div>
   <div class="nav-item" onclick="exportBackup()"><span class="nav-icon">💾</span> Backup speichern</div>
@@ -2088,6 +2108,36 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 </div>
 </div>
 
+<!-- ═══ MODAL: EXCEL ARCHIV + ASSISTENT ═══ -->
+<div class="overlay hidden" id="modal-excel-archive">
+<div class="modal" style="max-width:760px">
+  <div class="mh"><h3>📦 Excel-Archiv & Live-Assistent</h3><button class="mclose" onclick="closeM('modal-excel-archive')">✕</button></div>
+  <div class="mbody">
+    <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">Mehrere Excel-Dateien oder eine ZIP-Datei ablegen. Die App liest Dateinamen, Tabellenblätter und Überschriften aus, sortiert nach Kunde/Monat und verknüpft die Vorschläge mit Google-Kalender-Fahrten.</p>
+    <label class="archive-drop" id="excel-archive-drop" for="excel-archive-input">
+      <div style="font-size:30px;margin-bottom:6px">📦</div>
+      <div style="font-weight:800">Excel-Dateien oder ZIP hier ablegen</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">.xlsx, .xls, .csv oder .zip · mehrere Dateien gleichzeitig</div>
+      <input type="file" id="excel-archive-input" accept=".xlsx,.xls,.csv,.zip" multiple style="display:none" onchange="handleExcelArchiveInput(this.files)"/>
+    </label>
+    <div id="excel-archive-progress" class="scan-progress hidden"></div>
+    <div class="assistant-box">
+      <div style="font-weight:800;font-size:13px;margin-bottom:8px">🤝 Live-Korrektur-Assistent</div>
+      <div class="assistant-log" id="assistant-log"></div>
+      <div class="assistant-input-row">
+        <input type="text" id="assistant-input" placeholder="z.B. Müller ist heute hin und zurück gefahren, 10 Euro bezahlt" onkeydown="if(event.key==='Enter')runAssistantCommand()"/>
+        <button class="tb-btn primary" onclick="runAssistantCommand()">Senden</button>
+      </div>
+    </div>
+    <div class="archive-grid" id="excel-archive-list"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-secondary" onclick="closeM('modal-excel-archive')">Schließen</button>
+    <button class="btn btn-primary" onclick="syncArchiveWithCalendar()">📅 Mit Kalender abgleichen</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ MODAL: MONATS-EXPORT (Prüfliste) ═══ -->
 <div class="overlay hidden" id="modal-review-export">
 <div class="modal" style="max-width:720px">
@@ -2462,6 +2512,8 @@ let drivers=JSON.parse(localStorage.getItem('tp_d')||'[]');
 let driverDocs=JSON.parse(localStorage.getItem('tp_driver_docs')||'[]');
 let driverChat=JSON.parse(localStorage.getItem('tp_driver_chat')||'[]');
 let driverShifts=JSON.parse(localStorage.getItem('tp_driver_shifts')||'[]');
+let excelArchive=JSON.parse(localStorage.getItem('tp_excel_archive')||'[]');
+let assistantHistory=JSON.parse(localStorage.getItem('tp_assistant_history')||'[]');
 let currentDriverId=localStorage.getItem('tp_driver_session')||sessionStorage.getItem('tp_driver_session')||null;
 let driverPollTimer=null;
 let driverKnownRideIds=new Set();
@@ -2527,6 +2579,8 @@ function save(){
   localStorage.setItem('tp_driver_docs',JSON.stringify(driverDocs));
   localStorage.setItem('tp_driver_chat',JSON.stringify(driverChat));
   localStorage.setItem('tp_driver_shifts',JSON.stringify(driverShifts));
+  localStorage.setItem('tp_excel_archive',JSON.stringify(excelArchive));
+  localStorage.setItem('tp_assistant_history',JSON.stringify(assistantHistory));
   persistRidesToIdb();
   scheduleCloudSave();
 }
@@ -2538,8 +2592,8 @@ function saveDriverChat(){
 
 function exportBackup(){
   const data={
-    version:2,exported:new Date().toISOString(),
-    customers,rides,gcContacts,drivers,driverDocs,driverChat,
+    version:3,exported:new Date().toISOString(),
+    customers,rides,gcContacts,drivers,driverDocs,driverChat,excelArchive,assistantHistory,
     recurringOrders:JSON.parse(localStorage.getItem('tp_ro')||'[]'),
     seriesPreviews:JSON.parse(localStorage.getItem('tp_sp')||'[]'),
     monthlySummaries:JSON.parse(localStorage.getItem('tp_ms')||'[]'),
@@ -2568,6 +2622,8 @@ function importBackup(input){
       drivers=data.drivers||[];
       driverDocs=data.driverDocs||[];
       driverChat=data.driverChat||[];
+      excelArchive=data.excelArchive||[];
+      assistantHistory=data.assistantHistory||[];
       if(data.recurringOrders) localStorage.setItem('tp_ro',JSON.stringify(data.recurringOrders));
       if(data.seriesPreviews) localStorage.setItem('tp_sp',JSON.stringify(data.seriesPreviews));
       if(data.monthlySummaries) localStorage.setItem('tp_ms',JSON.stringify(data.monthlySummaries));
@@ -6503,7 +6559,7 @@ async function writeRideToExcelCloud(ride,cust){
 
 function buildCloudPayload(){
   const pubUrl=localStorage.getItem('tp_gdrv_public_url')||localStorage.getItem('tp_public_sync_url')||'';
-  return{version:6,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,
+  return{version:7,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,excelArchive,assistantHistory,
     settings:{
       gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark',
       sync:{gdrvFileId:gdrvFileId||localStorage.getItem('tp_gdrv_file_id')||'',gdrvPublicUrl:pubUrl,gdrvSyncEnabled:!!gdrvSyncEnabled}
@@ -6576,6 +6632,8 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
     if(Array.isArray(data.driverDocs)) driverDocs=data.driverDocs;
     if(data.driverChat?.length) driverChat=data.driverChat;
     if(Array.isArray(data.driverShifts)) driverShifts=data.driverShifts;
+    if(Array.isArray(data.excelArchive)) excelArchive=data.excelArchive;
+    if(Array.isArray(data.assistantHistory)) assistantHistory=data.assistantHistory;
     if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
   }else{
     if(!data?.rides&&!data?.customers&&!data?.driverDocs) return false;
@@ -6586,6 +6644,8 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
     if(Array.isArray(data.driverDocs)&&data.driverDocs.length) driverDocs=data.driverDocs;
     if(data.driverChat?.length) driverChat=data.driverChat;
     if(Array.isArray(data.driverShifts)) driverShifts=data.driverShifts;
+    if(Array.isArray(data.excelArchive)) excelArchive=data.excelArchive;
+    if(Array.isArray(data.assistantHistory)) assistantHistory=data.assistantHistory;
   }
   reapplyDriverBootAuth();
   saveLocalOnly();
@@ -9192,6 +9252,235 @@ async function runReviewExport(){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// EXCEL/ZIP ARCHIV + LIVE-ASSISTENT
+// ═══════════════════════════════════════════════════════════════
+function openExcelArchiveModal(){
+  renderExcelArchive();
+  renderAssistantLog();
+  openM('modal-excel-archive');
+}
+
+function setArchiveProgress(msg){
+  const el=document.getElementById('excel-archive-progress');
+  if(!el) return;
+  el.textContent=msg||'';
+  el.classList.toggle('hidden',!msg);
+}
+
+function archiveMonthFromText(text){
+  const t=(text||'').toLowerCase();
+  const m=DE_MONTHS.findIndex(x=>t.includes(x.toLowerCase()));
+  const y=(t.match(/\b(20\d{2})\b/)||[])[1]||String(new Date().getFullYear());
+  if(m>=0) return `${y}-${String(m+1).padStart(2,'0')}`;
+  const iso=t.match(/\b(20\d{2})[-_. ](0?[1-9]|1[0-2])\b/);
+  if(iso) return `${iso[1]}-${String(parseInt(iso[2],10)).padStart(2,'0')}`;
+  return '';
+}
+
+function archiveTypeFromText(text,headers=[]){
+  const blob=[text,...headers].filter(Boolean).join(' ').toLowerCase();
+  if(isRechnungsfahrtText(blob)||/rechnung|rechnungsfahrt|preis|betrag|pauschal/.test(blob)) return 'rechn';
+  if(/kts|kranken|dialyse|chemo|verordnung|genehmigung|zuzahlung|patient/.test(blob)) return 'krank';
+  return 'normal';
+}
+
+function archiveNameFromFile(name){
+  const base=(name||'').replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
+  return base.replace(/\b(krankenfahrten?|rechnungsfahrten?|rechnungskunden|rechnung|kts|re|dialyse|chemo|januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|20\d{2}|teil\s*\d+)\b/gi,' ').replace(/\s+/g,' ').trim();
+}
+
+function scoreCustomerNameGuess(name,c){
+  const full=`${c.fname} ${c.lname}`.trim();
+  return nameMatchScore(full,name);
+}
+
+function bestArchiveCustomerMatch(name){
+  if(!name) return null;
+  const hits=customers.map(c=>({c,score:scoreCustomerNameGuess(name,c)})).filter(x=>x.score>=45).sort((a,b)=>b.score-a.score);
+  return hits[0]||null;
+}
+
+async function handleExcelArchiveInput(fileList){
+  const files=[...(fileList||[])];
+  if(!files.length) return;
+  setArchiveProgress('Dateien werden gelesen…');
+  let imported=0;
+  try{
+    for(const file of files){
+      const lower=file.name.toLowerCase();
+      if(lower.endsWith('.zip')){
+        if(!window.JSZip){toast('ZIP-Bibliothek lädt noch – bitte erneut versuchen','warn');continue;}
+        const zip=await JSZip.loadAsync(await file.arrayBuffer());
+        const entries=Object.values(zip.files).filter(e=>!e.dir&&/\.(xlsx|xls|csv)$/i.test(e.name));
+        for(const entry of entries){
+          const blob=await entry.async('arraybuffer');
+          await importArchiveWorkbook(entry.name,blob);
+          imported++;
+        }
+      }else if(/\.(xlsx|xls|csv)$/i.test(lower)){
+        await importArchiveWorkbook(file.name,await file.arrayBuffer());
+        imported++;
+      }
+    }
+    save();renderExcelArchive();renderAssistantLog();
+    setArchiveProgress('');
+    toast(`${imported} Excel-Datei(en) im Archiv erfasst`,'ok');
+    if(googleDriveSyncReady()) uploadGoogleDriveSync(false);
+  }catch(e){
+    setArchiveProgress('');
+    toast('Archiv-Import fehlgeschlagen: '+(e.message||e),'err');
+  }
+}
+
+async function importArchiveWorkbook(fileName,arrayBuffer){
+  const wb=XLSX.read(arrayBuffer,{type:'array',cellDates:true});
+  const first=wb.SheetNames[0]||'';
+  const ws=wb.Sheets[first];
+  const rows=ws?XLSX.utils.sheet_to_json(ws,{header:1,blankrows:false,defval:''}).slice(0,8):[];
+  const headers=(rows.find(r=>r.filter(Boolean).length>=2)||[]).map(String).slice(0,12);
+  const text=[fileName,first,headers.join(' ')].join(' ');
+  const customerGuess=archiveNameFromFile(fileName);
+  const match=bestArchiveCustomerMatch(customerGuess);
+  const item={
+    id:uid(),fileName,uploadedAt:new Date().toISOString(),
+    sheets:wb.SheetNames,
+    month:archiveMonthFromText(text),
+    type:archiveTypeFromText(text,headers),
+    customerGuess,
+    customerId:match&&match.score>=80?match.c.id:'',
+    matchScore:match?.score||0,
+    status:match&&match.score>=80?'zugeordnet':'prüfen',
+    headers,
+    rowsPreview:rows.slice(0,4),
+  };
+  excelArchive.unshift(item);
+  if(excelArchive.length>250) excelArchive=excelArchive.slice(0,250);
+}
+
+function renderExcelArchive(){
+  const el=document.getElementById('excel-archive-list');
+  if(!el) return;
+  if(!excelArchive.length){
+    el.innerHTML='<div class="empty" style="padding:16px"><p>Noch keine Excel-Dateien im Archiv. ZIP oder mehrere Tabellen oben ablegen.</p></div>';
+    return;
+  }
+  el.innerHTML=excelArchive.map(a=>{
+    const c=customers.find(x=>x.id===a.customerId);
+    const type=a.type==='rechn'?'RE':a.type==='krank'?'KTS':'Fahrt';
+    const who=c?`${c.lname} ${c.fname}`:(a.customerGuess||'Kunde prüfen');
+    const warn=a.status==='prüfen'?' · Zuordnung prüfen':'';
+    return`<div class="archive-card">
+      <div>
+        <div class="archive-title">${escAttr(who)} <span class="rd-badge ${a.type==='rechn'?'rechn':'krank'}">${type}</span></div>
+        <div class="archive-meta">${escAttr(a.fileName)} · ${a.month||'Monat offen'} · ${a.sheets.length} Blatt/Blätter${warn}<br>Spalten: ${escAttr((a.headers||[]).slice(0,6).join(', ')||'nicht erkannt')}</div>
+      </div>
+      <button class="tb-btn" onclick="assignArchiveCustomer('${a.id}')">${c?'Ändern':'Zuordnen'}</button>
+    </div>`;
+  }).join('');
+}
+
+function assignArchiveCustomer(id){
+  const a=excelArchive.find(x=>x.id===id);if(!a) return;
+  const name=prompt('Welchem Kunden gehört diese Datei? Name eingeben:',a.customerGuess||'');
+  if(name===null) return;
+  const hit=bestArchiveCustomerMatch(name);
+  if(hit&&hit.score>=55){
+    a.customerId=hit.c.id;
+    a.customerGuess=name;
+    a.matchScore=hit.score;
+    a.status=hit.score>=80?'zugeordnet':'prüfen';
+    toast(`Vorschlag: ${hit.c.fname} ${hit.c.lname}`,'ok');
+  }else{
+    const parts=name.trim().split(/\s+/);
+    if(parts.length>=2&&confirm(`Neuen Kunden "${name}" aus Archiv anlegen?`)){
+      const c={id:uid(),fname:parts.slice(0,-1).join(' '),lname:parts[parts.length-1],phone:'',addr:'',type:a.type==='rechn'?'re':'krank',stammHosp:'',note:'Aus Excel-Archiv vorgeschlagen',zuzahlungStatus:'NB'};
+      customers.push(c);
+      a.customerId=c.id;a.customerGuess=name;a.status='zugeordnet';a.matchScore=100;
+    }else a.customerGuess=name;
+  }
+  save();renderExcelArchive();updateCounts();
+}
+
+function syncArchiveWithCalendar(){
+  let linked=0,check=0;
+  excelArchive.forEach(a=>{
+    const c=customers.find(x=>x.id===a.customerId);
+    if(!c){check++;return;}
+    rides.filter(r=>r.source==='google'&&r.customerId===c.id&&(!a.month||r.date?.startsWith(a.month))).forEach(r=>{
+      if(a.type==='rechn'||a.type==='krank') r.type=a.type;
+      applyCustomerRouteDefaults(c,r);
+      ensureReviewMeta(r);refreshRideReview(r);
+      linked++;
+    });
+  });
+  save();renderReviewView();updateCounts();
+  toast(`${linked} Kalender-Fahrt(en) mit Archivdaten abgeglichen${check?` · ${check} Dateien prüfen`:''}`,'ok');
+}
+
+function renderAssistantLog(){
+  const el=document.getElementById('assistant-log');
+  if(!el) return;
+  const items=assistantHistory.slice(-30);
+  el.innerHTML=items.length?items.map(m=>`<div class="assistant-msg ${m.role==='user'?'user':'sys'}">${escAttr(m.text)}</div>`).join(''):'<div class="assistant-msg sys">Schreib z.B.: „Müller ist heute hin und zurück gefahren, 10 Euro bezahlt“ oder „Yilmaz gestern nicht gefahren, krank“.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+
+function assistantFindCustomer(text){
+  const t=(text||'').toLowerCase();
+  const hits=customers.map(c=>({c,score:Math.max(nameMatchScore(t,`${c.fname} ${c.lname}`),nameMatchScore(t,`${c.lname} ${c.fname}`))})).filter(x=>x.score>=35).sort((a,b)=>b.score-a.score);
+  return hits[0]?.c||null;
+}
+
+function assistantDate(text){
+  const t=(text||'').toLowerCase();
+  const d=new Date();
+  if(/gestern/.test(t)) d.setDate(d.getDate()-1);
+  if(/morgen/.test(t)) d.setDate(d.getDate()+1);
+  const de=t.match(/(\d{1,2})\.(\d{1,2})\.(20\d{2})/);
+  if(de) return `${de[3]}-${de[2].padStart(2,'0')}-${de[1].padStart(2,'0')}`;
+  const iso=t.match(/(20\d{2})-(\d{1,2})-(\d{1,2})/);
+  if(iso) return `${iso[1]}-${iso[2].padStart(2,'0')}-${iso[3].padStart(2,'0')}`;
+  return fmtD(d);
+}
+
+function runAssistantCommand(){
+  const inp=document.getElementById('assistant-input');
+  const text=(inp?.value||'').trim();
+  if(!text) return;
+  if(inp) inp.value='';
+  assistantHistory.push({role:'user',text,at:Date.now()});
+  const c=assistantFindCustomer(text);
+  if(!c){
+    assistantHistory.push({role:'sys',text:'Ich konnte den Kunden nicht eindeutig finden. Bitte Name genauer schreiben oder Kunden zuerst anlegen.',at:Date.now()});
+    save();renderAssistantLog();return;
+  }
+  const lower=text.toLowerCase();
+  const date=assistantDate(text);
+  const isCancel=/nicht gefahren|ausfall|ausgefallen|storno|storniert/.test(lower);
+  const dir=/nur rück|rückfahrt/.test(lower)&&!/hin/.test(lower)?'rueck':/nur hin|hinfahrt/.test(lower)&&!/rück/.test(lower)?'hin':'hin-rueck';
+  const amount=(lower.match(/(\d+(?:[,.]\d+)?)\s*(?:€|euro)/)||[])[1];
+  const type=/rechnung|rechnungsfahrt|\bre\b/.test(lower)?'rechn':/krank|kts|chemo|dialyse|verordnung/.test(lower)?'krank':defaultRideTypeForCustomer(c);
+  let r=rides.find(x=>x.customerId===c.id&&x.date===date&&isReviewableRide(x));
+  if(!r){
+    r={id:uid(),customerId:c.id,customerName:`${c.fname} ${c.lname}`,date,time:'09:00',from:customerBaseAddress(c),to:c.stammHosp||'',type,source:'assistant',reviewStatus:'pending',excelDir:dir,localUpdated:Date.now()};
+    applyCustomerRouteDefaults(c,r);
+    rides.push(r);
+  }
+  r.type=type;r.excelDir=dir;r.localUpdated=Date.now();r.reviewStatus='pending';
+  if(isCancel){r.tripStatus='cancelled';r.cancelReason=text;}
+  else{r.tripStatus='driven';r.cancelReason='';}
+  if(type==='krank'){
+    r.zuzahlung=/befreit|\bbf\b/.test(lower)?'BF':'NB';
+    if(amount){r.copayPaidAmount=parseFloat(amount.replace(',','.'));r.copayPaidAt=Date.now();}
+  }
+  applyCustomerRouteDefaults(c,r);
+  ensureReviewMeta(r);refreshRideReview(r);
+  assistantHistory.push({role:'sys',text:`Erledigt: ${c.lname} ${c.fname} · ${fmtDateDE(date)} · ${isCancel?'nicht gefahren':excelDirLabel(dir)}${amount?` · ${amount} €`:''}. Zur Prüfung eingetragen.`,at:Date.now()});
+  save();renderAssistantLog();renderReviewView();renderToday();updateCounts();
+  if(googleDriveSyncReady()) uploadGoogleDriveSync(false);
+}
+
+// ═══════════════════════════════════════════════════════════════
 // TERMIN-SCAN IMPORT (PDF / Foto + OCR)
 // ═══════════════════════════════════════════════════════════════
 let scanImportRows=[];
@@ -9387,6 +9676,19 @@ function importScanAppointments(){
       e.preventDefault();z.classList.remove('drag');
       const f=e.dataTransfer?.files?.[0];
       if(f){const inp=document.getElementById('scan-file-input');if(inp){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;handleScanFileUpload(inp);}}
+    });
+  });
+})();
+
+(function initExcelArchiveDropZone(){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const z=document.getElementById('excel-archive-drop');
+    if(!z) return;
+    z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag');});
+    z.addEventListener('dragleave',()=>z.classList.remove('drag'));
+    z.addEventListener('drop',e=>{
+      e.preventDefault();z.classList.remove('drag');
+      handleExcelArchiveInput(e.dataTransfer?.files||[]);
     });
   });
 })();
