@@ -774,6 +774,16 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .shift-overview-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:12px;line-height:1.55}
 .shift-overview-item strong{display:block;font-size:13px;color:var(--text);margin-bottom:4px}
 .shift-live{color:var(--green2);font-weight:700}
+.route-manager{display:grid;gap:10px;margin-bottom:12px}
+.route-list{display:grid;gap:7px}
+.route-card{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg3)}
+.route-card strong{display:block;font-size:13px;margin-bottom:3px}
+.route-card span{font-size:11px;color:var(--text2);line-height:1.45}
+.route-card button{width:32px;height:32px;border-radius:8px;background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)}
+@media(max-width:700px){
+  .route-card{padding:9px 10px;border-radius:12px}
+  .route-card strong{font-size:13px}
+}
 #driver-topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + var(--safe-top));background:#0c2238;border-bottom:1px solid #1e3a5f;flex-shrink:0}
 .drv-brand{font-size:22px;flex-shrink:0}
 .drv-user{flex:1;min-width:0}
@@ -1763,6 +1773,19 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
         </div>
         <div class="fr"><label>Standard Ziel / Strecke</label><input type="text" id="c-excel-dest" placeholder="z.B. UKB Bonn"/></div>
         <div class="fr"><label>Rechnungsempfänger (RE)</label><input type="text" id="c-invoice-recipient" placeholder="Optional, falls abweichend"/></div>
+        <div class="fsec" style="margin-top:14px">Automatische Strecken</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px">
+          Pro Kunde feste Ziele mit Kilometer oder Preis speichern. Bei jeder neuen Fahrt wird die passende Strecke automatisch übernommen, bis sie hier geändert wird.
+        </p>
+        <div class="route-manager">
+          <div class="fr3 fr">
+            <div><label>Ziel</label><input type="text" id="c-route-target" placeholder="UKB Bonn / Tagespflege"/></div>
+            <div><label>km einfach</label><input type="number" id="c-route-km" min="0" step="0.1" placeholder="28"/></div>
+            <div><label>Preis einfach €</label><input type="number" id="c-route-price" min="0" step="0.01" placeholder="25"/></div>
+          </div>
+          <button type="button" class="btn btn-sm btn-blue" onclick="addCustomerRouteFromForm()">＋ Strecke speichern</button>
+          <div class="route-list" id="c-route-list"></div>
+        </div>
         <div class="fr2 fr">
           <div><label class="ss-check-label"><input type="checkbox" id="c-kts-present"/> KTS vorhanden</label></div>
           <div><label class="ss-check-label"><input type="checkbox" id="c-approval-present"/> Genehmigung vorhanden</label></div>
@@ -2441,6 +2464,7 @@ let gdrvFileId=localStorage.getItem('tp_gdrv_file_id')||'';
 let gdrvSyncEnabled=localStorage.getItem('tp_gdrv_sync')==='1';
 const TAXI_KEYWORDS=['fahrt','fahrten','taxi','kranken','krankenfahrt','dialyse','chemo','chemotherapie','strahlen','strahlentherapie','transport','abholung','klinik','krankenhaus','charité','charite','patient','termin','kt ','kts','rollstuhl'];
 let editRideId=null, editCustId=null, editDriverId=null;
+let editCustomerRoutes=[];
 let seriePickMonth=new Date();
 let seriePickDates=new Set();
 let seriePickContext='ride';
@@ -2581,6 +2605,66 @@ function defaultRideTypeForCustomer(c){
   if(c.type==='re') return 'rechn';
   if(c.type==='privat') return 'privat';
   return 'krank';
+}
+
+function normalizeRouteText(value){
+  return String(value||'').toLowerCase().replace(/\s+/g,' ').replace(/[.,;]+$/g,'').trim();
+}
+function customerBaseAddress(c){
+  return [c?.street,c?.plz,c?.city].filter(Boolean).join(', ');
+}
+function ensureCustomerRoutes(c){
+  const routes=Array.isArray(c?.routes)?[...c.routes]:[];
+  const target=(c?.excelDest||c?.stammHosp||'').trim();
+  if(target&&!routes.some(r=>normalizeRouteText(r.target)===normalizeRouteText(target))){
+    routes.push({id:uid(),target,km:c?.excelKm||'',price:c?.excelPrice||'',createdAt:Date.now()});
+  }
+  return routes;
+}
+function findCustomerRoute(c,to){
+  const target=normalizeRouteText(to);
+  if(!c||!target) return null;
+  return ensureCustomerRoutes(c).find(r=>{
+    const rt=normalizeRouteText(r.target);
+    return rt&&(target.includes(rt)||rt.includes(target));
+  })||null;
+}
+function addOrUpdateCustomerRoute(c,to,km,price){
+  if(!c||!customers.some(x=>x.id===c.id)||!to) return null;
+  const i=customers.findIndex(x=>x.id===c.id);
+  const routes=ensureCustomerRoutes(customers[i]);
+  const key=normalizeRouteText(to);
+  let route=routes.find(r=>normalizeRouteText(r.target)===key);
+  if(route){
+    if(km) route.km=String(km);
+    if(price) route.price=String(price);
+    route.updatedAt=Date.now();
+  }else{
+    route={id:uid(),target:to,km:km?String(km):'',price:price?String(price):'',createdAt:Date.now()};
+    routes.push(route);
+  }
+  customers[i].routes=routes;
+  return route;
+}
+function applyCustomerRouteDefaults(c,base){
+  if(!c) return base;
+  const route=findCustomerRoute(c,base.to);
+  const simple=base.excelDir==='hin-rueck'?2:1;
+  if(route){
+    if(base.type==='krank'&&route.km) base.km=Number(route.km)*simple;
+    if(base.type==='rechn'&&route.price) base.amount=Number(route.price)*simple;
+    base.routeId=route.id;
+    base.routeTarget=route.target;
+  }else{
+    const km=base.km||estKm(base.from,base.to);
+    const price=base.amount||0;
+    if(base.type==='krank'&&km) addOrUpdateCustomerRoute(c,base.to,km,'');
+    if(base.type==='rechn'&&price) addOrUpdateCustomerRoute(c,base.to,'',price);
+  }
+  if(base.type==='krank'&&c.zuzahlungStatus) base.zuzahlung=normalizeZuzahlung(c.zuzahlungStatus);
+  if(base.type==='krank'&&!base.km) base.km=Number(c.excelKm||0)*simple||estKm(base.from,base.to);
+  if(base.type==='rechn'&&!base.amount) base.amount=Number(c.excelPrice||0)*simple||0;
+  return base;
 }
 
 // Google-Kalender-Farben → Fahrttyp (exakt wie im Google Kalender)
@@ -3241,6 +3325,8 @@ function openCustDetail(id){
   const priceEl=document.getElementById('c-excel-price');if(priceEl) priceEl.value=c.excelPrice||'';
   document.getElementById('c-excel-dest').value=c.excelDest||'';
   const invEl=document.getElementById('c-invoice-recipient');if(invEl) invEl.value=c.invoiceRecipient||'';
+  editCustomerRoutes=ensureCustomerRoutes(c);
+  renderCustomerRoutes();
   const ktsEl=document.getElementById('c-kts-present');if(ktsEl) ktsEl.checked=!!c.ktsPresent;
   const appEl=document.getElementById('c-approval-present');if(appEl) appEl.checked=!!c.approvalPresent;
   const rkEl=document.getElementById('c-ride-kind');if(rkEl) rkEl.value=c.rideKind||'dialyse';
@@ -3348,7 +3434,9 @@ function showRideDetail(id){
     <div class="drow"><div class="drow-icon">👤</div><div><div class="drow-lbl">Kunde</div><div class="drow-val">${name}</div></div></div>
     <div class="drow"><div class="drow-icon">📍</div><div><div class="drow-lbl">Abholung</div><div class="drow-val">${from}</div></div></div>
     <div class="drow"><div class="drow-icon">🎯</div><div><div class="drow-lbl">Ziel</div><div class="drow-val">${r.to||'–'}</div></div></div>
+    ${r.routeTarget?`<div class="drow"><div class="drow-icon">🔁</div><div><div class="drow-lbl">Automatische Strecke</div><div class="drow-val">${r.routeTarget}</div></div></div>`:''}
     ${r.km?`<div class="drow"><div class="drow-icon">📏</div><div><div class="drow-lbl">Distanz</div><div class="drow-val">ca. ${r.km} km</div></div></div>`:''}
+    ${r.amount?`<div class="drow"><div class="drow-icon">💶</div><div><div class="drow-lbl">Rechnungsbetrag</div><div class="drow-val">${Number(r.amount).toFixed(2)} €</div></div></div>`:''}
     ${r.type==='krank'?`<div class="drow"><div class="drow-icon">💊</div><div><div class="drow-lbl">Zuzahlung</div><div class="drow-val">${zuzahlLabel(r.zuzahlung)}</div></div></div>`:''}
     ${r.note?`<div class="drow"><div class="drow-icon">📝</div><div><div class="drow-lbl">Notiz</div><div class="drow-val">${r.note}</div></div></div>`:''}
     ${r.dispatchedTo?(()=>{const d=drivers.find(x=>x.id===r.dispatchedTo);const pb=dispatchPaymentBadge(r);return d?`<div class="drow"><div class="drow-icon">🚀</div><div><div class="drow-lbl">Fahrer</div><div class="drow-val" style="color:var(--green2)">✅ ${d.fname} ${d.lname} · ${r.dispatchMode==='app'?'📱 App':'📲 WhatsApp'}</div>${pb?`<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">${pb}</div>`:''}</div></div>`:'';})():''}
@@ -3430,7 +3518,9 @@ function openRideForCust(id){
   document.getElementById('r-cust-search').value=c.fname+' '+c.lname;
   document.getElementById('r-cust-id').value=id;
   document.getElementById('r-from').value=[c.street,c.plz,c.city].filter(Boolean).join(', ');
-  if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
+  const routes=ensureCustomerRoutes(c);
+  if(routes[0]?.target) document.getElementById('r-to').value=routes[0].target;
+  else if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
   document.getElementById(`rt-${defaultRideTypeForCustomer(c)}`).checked=true;
   if(c.zuzahlungStatus) document.getElementById('r-zuzahl').value=normalizeZuzahlung(c.zuzahlungStatus);
   onRTChange();
@@ -3662,6 +3752,7 @@ function saveCustSeriePlan(){
     serieType,km:estKm(from,to),localUpdated:Date.now(),
     excelDir:(type==='krank'||type==='rechn')?'hin-rueck':undefined,
   };
+  applyCustomerRouteDefaults(c,base);
   dates.forEach(date=>rides.push({...base,id:uid(),date,serieGroupId:groupId}));
   save();toast(`${dates.length} Serienfahrten eingetragen`);
   document.getElementById('cs-serie-dates').value='';
@@ -3688,7 +3779,7 @@ async function saveRide(andDispatch=false){
   const to=document.getElementById('r-to').value.trim();
   const serie=document.getElementById('r-serie').checked;
   const reminder=document.getElementById('r-reminder').checked;
-  const base={
+  let base={
     type,customerId:custId||null,date,time,from,to,
     verordnung:type==='krank'?document.getElementById('r-verord').value:'',
     zuzahlung:type==='krank'?normalizeZuzahlung(document.getElementById('r-zuzahl').value):'',
@@ -3699,6 +3790,7 @@ async function saveRide(andDispatch=false){
     km:estKm(from,to),localUpdated:Date.now(),
     excelDir:(type==='krank'||type==='rechn')?'hin-rueck':undefined,
   };
+  if(cust&&customers.find(c=>c.id===custId)) base=applyCustomerRouteDefaults(cust,base);
   let dispatchId=null;
   if(editRideId){
     const i=rides.findIndex(r=>r.id===editRideId);
@@ -4009,12 +4101,51 @@ function openCustomerModal(){
   document.getElementById('c-delete-btn').style.display='none';
   onCTChange();
   updateCustomerExcelUI(null);
+  editCustomerRoutes=[];
+  renderCustomerRoutes();
   document.getElementById('c-doc-search').value='';
   document.getElementById('c-doc-title').value='';
   updateCustModalSub(null);
   switchCustTab('stamm');
   renderCustDocs();
   openM('modal-customer');
+}
+
+function renderCustomerRoutes(){
+  const el=document.getElementById('c-route-list');
+  if(!el) return;
+  if(!editCustomerRoutes.length){
+    el.innerHTML='<div class="empty" style="height:auto;min-height:0;padding:12px;font-size:12px">Noch keine Zusatzstrecken gespeichert.</div>';
+    return;
+  }
+  el.innerHTML=editCustomerRoutes.map(r=>`
+    <div class="route-card">
+      <div><strong>${escAttr(r.target||'Ziel')}</strong><span>${r.km?`${escAttr(r.km)} km einfach`:''}${r.km&&r.price?' · ':''}${r.price?`${Number(r.price).toFixed(2)} € einfach`:''}</span></div>
+      <button type="button" onclick="removeCustomerRoute('${r.id}')" title="Strecke löschen">🗑️</button>
+    </div>
+  `).join('');
+}
+function addCustomerRouteFromForm(){
+  const target=document.getElementById('c-route-target').value.trim();
+  const km=document.getElementById('c-route-km').value.trim();
+  const price=document.getElementById('c-route-price').value.trim();
+  if(!target){toast('Ziel der Strecke fehlt','warn');return;}
+  const existing=editCustomerRoutes.find(r=>normalizeRouteText(r.target)===normalizeRouteText(target));
+  if(existing){
+    existing.km=km||existing.km||'';
+    existing.price=price||existing.price||'';
+    existing.updatedAt=Date.now();
+  }else{
+    editCustomerRoutes.push({id:uid(),target,km,price,createdAt:Date.now()});
+  }
+  document.getElementById('c-route-target').value='';
+  document.getElementById('c-route-km').value='';
+  document.getElementById('c-route-price').value='';
+  renderCustomerRoutes();
+}
+function removeCustomerRoute(id){
+  editCustomerRoutes=editCustomerRoutes.filter(r=>r.id!==id);
+  renderCustomerRoutes();
 }
 
 function onCTChange(){
@@ -4059,6 +4190,7 @@ function saveCustomer(){
     ktsPresent:!!document.getElementById('c-kts-present')?.checked,
     approvalPresent:!!document.getElementById('c-approval-present')?.checked,
     rideKind:document.getElementById('c-ride-kind')?.value||'dialyse',
+    routes:[...editCustomerRoutes],
     excelType:customerExcelType({type:document.querySelector('input[name="ct"]:checked').value}),
     source:'app',
   };
@@ -5359,7 +5491,9 @@ function selRCust(id){
   document.getElementById('r-cust-id').value=id;
   document.getElementById('r-cust-ac').classList.remove('show');
   document.getElementById('r-from').value=[c.street,c.plz,c.city].filter(Boolean).join(', ');
-  if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
+  const routes=ensureCustomerRoutes(c);
+  if(routes[0]?.target) document.getElementById('r-to').value=routes[0].target;
+  else if(c.stammHosp) document.getElementById('r-to').value=c.stammHosp;
   const rt=defaultRideTypeForCustomer(c);
   const el=document.getElementById(`rt-${rt}`);if(el) el.checked=true;
   if(c.zuzahlungStatus) document.getElementById('r-zuzahl').value=normalizeZuzahlung(c.zuzahlungStatus);
