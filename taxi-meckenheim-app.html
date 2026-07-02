@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaxiPro Dispatch - Taxi Meckenheim GmbH</title>
+  <meta name="theme-color" content="#123c35" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f2ed;
+      --panel: #ffffff;
+      --panel-soft: #fbfaf7;
+      --text: #18241f;
+      --muted: #65706b;
+      --border: #d8d3c8;
+      --primary: #123c35;
+      --primary-2: #1f6b5f;
+      --gold: #b08a3c;
+      --red: #b42318;
+      --yellow: #b7791f;
+      --blue: #1d4ed8;
+      --green: #166534;
+      --orange: #c2410c;
+      --gray: #6b7280;
+      --shadow: 0 12px 28px rgba(28, 37, 33, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+    }
+
+    .sidebar {
+      background: #0f2e29;
+      color: white;
+      padding: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .brand {
+      padding: 10px 8px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      margin-bottom: 14px;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      display: block;
+      color: #d9e5df;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      width: 100%;
+      color: #eef7f3;
+      background: transparent;
+      border: 1px solid transparent;
+      text-align: left;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 750;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.14);
+    }
+
+    .content {
+      min-width: 0;
+      padding: 18px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .search {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 14px;
+      background: white;
+      color: var(--text);
+      box-shadow: 0 4px 14px rgba(31, 41, 51, 0.04);
+    }
+
+    .session {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    .session-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .session.connected .session-dot { background: var(--green); }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      padding: 11px 13px;
+      font-weight: 800;
+    }
+
+    .btn.secondary {
+      background: #e9eee9;
+      color: var(--primary);
+    }
+
+    .btn.warn {
+      background: var(--orange);
+    }
+
+    .btn.danger {
+      background: var(--red);
+    }
+
+    .page-title {
+      margin: 6px 0 16px;
+    }
+
+    h1 {
+      font-size: clamp(26px, 4vw, 40px);
+      line-height: 1.12;
+      margin: 0;
+      color: var(--primary);
+      letter-spacing: 0;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin: 8px 0 0;
+      max-width: 850px;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid.cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .metric {
+      display: grid;
+      gap: 6px;
+    }
+
+    .metric strong {
+      font-size: 30px;
+      color: var(--primary);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 22px;
+    }
+
+    h3 {
+      margin: 18px 0 10px;
+      font-size: 17px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 11px 12px;
+      min-height: 44px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .toggle-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .toggle {
+      border: 1px solid var(--border);
+      background: var(--panel-soft);
+      border-radius: 8px;
+      padding: 13px;
+      font-weight: 900;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .toggle.active {
+      color: white;
+      background: var(--primary-2);
+      border-color: var(--primary-2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #e8f0ed;
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 900;
+      color: white;
+      margin: 2px;
+    }
+
+    .tag.red { background: var(--red); }
+    .tag.yellow { background: var(--yellow); }
+    .tag.blue { background: var(--blue); }
+    .tag.green { background: var(--green); }
+    .tag.orange { background: var(--orange); }
+    .tag.gray { background: var(--gray); }
+
+    .dropzone {
+      border: 2px dashed #9fb4ab;
+      background: #f7fbf8;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .dropzone.drag {
+      border-color: var(--primary-2);
+      background: #e8f0ed;
+    }
+
+    .notice {
+      border: 1px solid #fed7aa;
+      background: #fff7ed;
+      color: #7c2d12;
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 750;
+    }
+
+    .ok {
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+      color: #14532d;
+    }
+
+    .empty {
+      color: var(--muted);
+      background: var(--panel-soft);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .mobile-cards { display: none; }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 12px;
+      }
+
+      .brand {
+        padding: 6px 4px 10px;
+        margin-bottom: 10px;
+      }
+
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .nav button {
+        text-align: center;
+        padding: 10px 7px;
+        min-height: 46px;
+        font-size: 13px;
+      }
+
+      .content {
+        padding: 12px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .session {
+        justify-content: space-between;
+      }
+
+      .grid.cols-2,
+      .grid.cols-3,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .desktop-table {
+        display: none;
+      }
+
+      .mobile-cards {
+        display: grid;
+        gap: 10px;
+      }
+
+      .row-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .row-card strong {
+        color: var(--primary);
+      }
+    }
+
+    @media print {
+      body { background: white; }
+      .sidebar, .topbar, .actions, .no-print { display: none !important; }
+      .app { display: block; }
+      .content { padding: 0; }
+      .view { display: none !important; }
+      .view.printing { display: block !important; }
+      .card { box-shadow: none; border-color: #999; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>TaxiPro Dispatch</strong>
+        <span>Taxi Meckenheim GmbH</span>
+      </div>
+      <nav class="nav" id="nav">
+        <button class="active" data-view="dashboard">Dashboard</button>
+        <button data-view="customers">Kunden</button>
+        <button data-view="ride">Fahrt heute</button>
+        <button data-view="calendar">Kalender</button>
+        <button data-view="month">Monatsliste</button>
+        <button data-view="import">Excel-Import</button>
+        <button data-view="exports">Export</button>
+        <button data-view="data">Daten</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <input id="globalSearch" class="search" type="search" placeholder="Kunde, Ziel, Adresse, Genehmigung oder Eigenanteil suchen" />
+        <div class="session" id="sessionBox">
+          <span class="session-dot"></span>
+          <strong id="sessionText">Google nicht verbunden</strong>
+          <button class="btn secondary" id="connectBtn" type="button">Verbinden</button>
+        </div>
+      </div>
+
+      <section class="view active" id="dashboard">
+        <div class="page-title">
+          <h1>Arbeitsübersicht</h1>
+          <p class="sub">Sofort sehen, was heute gefahren wurde, welche Kunden offen sind und was für Monatsabschluss oder Import geprüft werden muss.</p>
+        </div>
+        <div class="grid cols-3" id="metrics"></div>
+        <div class="grid cols-2" style="margin-top:14px">
+          <div class="card">
+            <div class="section-title">
+              <h2>Heutige Fahrten</h2>
+              <button class="btn secondary" data-go="ride" type="button">Fahrt eintragen</button>
+            </div>
+            <div id="todayRides"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">
+              <h2>Offene Prüfungen</h2>
+              <button class="btn secondary" data-go="import" type="button">Import prüfen</button>
+            </div>
+            <div id="warnings"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="customers">
+        <div class="page-title">
+          <h1>Kunden</h1>
+          <p class="sub">Kundenprofile für Krankenfahrten, Rechnungsfahrten und Serienkunden.</p>
+        </div>
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Kunde anlegen</h2>
+            <form id="customerForm">
+              <div class="form-grid">
+                <label>Name<input name="name" required placeholder="z. B. Hermann Müller" /></label>
+                <label>Kundentyp
+                  <select name="type">
+                    <option>Krankenfahrt</option>
+                    <option>Rechnungsfahrt</option>
+                    <option>Privat / Allgemein</option>
+                    <option>Serienkunde</option>
+                  </select>
+                </label>
+                <label>Adresse<input name="address" placeholder="Abholadresse" /></label>
+                <label>Ziel / Krankenhaus<input name="target" placeholder="z. B. UKB Bonn" /></label>
+                <label>Kilometer einfache Strecke<input name="km" type="number" min="0" step="0.1" placeholder="28" /></label>
+                <label>Preis einfache Fahrt<input name="price" type="number" min="0" step="0.01" placeholder="25" /></label>
+                <label>Eigenanteil
+                  <select name="copay">
+                    <option>offen</option>
+                    <option>bezahlt</option>
+                    <option>befreit</option>
+                    <option>entfällt</option>
+                    <option>unklar</option>
+                  </select>
+                </label>
+                <label>Genehmigung gültig bis<input name="permitUntil" type="date" /></label>
+              </div>
+              <label style="margin-top:12px">Notizen<textarea name="notes"></textarea></label>
+              <div class="actions">
+                <button class="btn" type="submit">Kunde speichern</button>
+              </div>
+            </form>
+          </div>
+          <div class="card">
+            <div class="section-title">
+              <h2>Kundenliste</h2>
+              <button class="btn secondary" id="seedBtn" type="button">Testdaten</button>
+            </div>
+            <div id="customerList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="ride">
+        <div class="page-title">
+          <h1>Fahrt heute eintragen</h1>
+          <p class="sub">Kunde wählen, Hin- und Rückfahrt markieren, speichern. Die Monatsliste wird automatisch fortgeschrieben.</p>
+        </div>
+        <div class="card">
+          <form id="rideForm">
+            <div class="form-grid">
+              <label>Kunde<select name="customerId" id="rideCustomer" required></select></label>
+              <label>Datum<input name="date" id="rideDate" type="date" required /></label>
+              <label>Ziel<input name="target" id="rideTarget" /></label>
+              <label>Kilometer / Preis<input name="value" id="rideValue" /></label>
+            </div>
+            <h3>Fahrt markieren</h3>
+            <div class="toggle-row">
+              <button class="toggle" id="outboundToggle" type="button">Hinfahrt</button>
+              <button class="toggle" id="returnToggle" type="button">Rückfahrt</button>
+            </div>
+            <label style="margin-top:12px">Bemerkung<textarea name="note" placeholder="optional"></textarea></label>
+            <div class="actions">
+              <button class="btn" type="submit">Fahrt speichern</button>
+              <button class="btn secondary" type="button" id="resetRideBtn">Zurücksetzen</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="view" id="calendar">
+        <div class="page-title">
+          <h1>Kalender / Serienfahrten</h1>
+          <p class="sub">Wiederkehrende Fahrten für feste Wochentage erzeugen und automatisch in die Monatsliste übernehmen.</p>
+        </div>
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Serie erstellen</h2>
+            <form id="seriesForm">
+              <div class="form-grid">
+                <label>Kunde<select name="customerId" id="seriesCustomer" required></select></label>
+                <label>Von<input name="from" type="date" required /></label>
+                <label>Bis<input name="to" type="date" required /></label>
+                <label>Status
+                  <select name="status">
+                    <option>gefahren</option>
+                    <option>Entwurf</option>
+                    <option>geplant</option>
+                  </select>
+                </label>
+              </div>
+              <h3>Wochentage</h3>
+              <div class="toggle-row" style="grid-template-columns:repeat(7,minmax(0,1fr))" id="weekdayToggles">
+                <button class="toggle" type="button" data-day="1">Mo</button>
+                <button class="toggle" type="button" data-day="2">Di</button>
+                <button class="toggle" type="button" data-day="3">Mi</button>
+                <button class="toggle" type="button" data-day="4">Do</button>
+                <button class="toggle" type="button" data-day="5">Fr</button>
+                <button class="toggle" type="button" data-day="6">Sa</button>
+                <button class="toggle" type="button" data-day="0">So</button>
+              </div>
+              <h3>Fahrtart pro Tag</h3>
+              <div class="toggle-row">
+                <button class="toggle active" id="seriesOutbound" type="button">Hinfahrt</button>
+                <button class="toggle active" id="seriesReturn" type="button">Rückfahrt</button>
+              </div>
+              <div class="actions">
+                <button class="btn" type="submit">Serienfahrten speichern</button>
+                <button class="btn secondary" id="workdaysBtn" type="button">Mo-Fr wählen</button>
+                <button class="btn secondary" id="dialysisBtn" type="button">Mo/Mi/Fr wählen</button>
+              </div>
+            </form>
+          </div>
+          <div class="card">
+            <h2>Kalender-Vorschau</h2>
+            <div id="seriesPreview" class="empty">Kunde und Zeitraum wählen.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="month">
+        <div class="page-title">
+          <h1>Monatsliste</h1>
+          <p class="sub">Automatische interne Tabelle für Fahrten, Kilometer, Preise und Monatsabschluss.</p>
+        </div>
+        <div class="card">
+          <div class="form-grid">
+            <label>Kunde<select id="monthCustomer"></select></label>
+            <label>Monat<input id="monthFilter" type="month" /></label>
+          </div>
+          <div class="actions">
+            <button class="btn secondary" id="refreshMonthBtn" type="button">Aktualisieren</button>
+            <button class="btn" id="exportCsvBtn" type="button">Excel/CSV exportieren</button>
+            <button class="btn secondary" id="printMonthBtn" type="button">PDF drucken</button>
+          </div>
+          <div id="monthSummary" style="margin-top:14px"></div>
+          <div id="monthTable" style="margin-top:14px"></div>
+        </div>
+      </section>
+
+      <section class="view" id="import">
+        <div class="page-title">
+          <h1>Excel-Import & Tabellen</h1>
+          <p class="sub">Excel, CSV und Monatslisten hochladen, Kunden erkennen, Fahrten prüfen und erst nach Bestätigung übernehmen.</p>
+        </div>
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Dateien hochladen</h2>
+            <div class="dropzone" id="dropzone">
+              <strong>Excel/CSV hier ablegen</strong>
+              <p>.xlsx, .xls und .csv werden angenommen. Excel braucht Internetzugriff für die XLSX-Bibliothek.</p>
+              <input id="fileInput" type="file" multiple accept=".xlsx,.xls,.csv" />
+            </div>
+            <div class="notice" style="margin-top:12px">
+              Importierte Daten werden nicht sofort übernommen. Erst Vorschau prüfen, Kunde zuordnen, dann speichern.
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">
+              <h2>Import-Vorschau</h2>
+              <button class="btn" id="approveImportBtn" type="button">Geprüfte übernehmen</button>
+            </div>
+            <div id="importPreview"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="exports">
+        <div class="page-title">
+          <h1>Unterschrift & Rechnung</h1>
+          <p class="sub">Aus der Monatsliste komprimierte Nachweise, Unterschriftszettel und Rechnungstabellen erstellen.</p>
+        </div>
+        <div class="card">
+          <div class="form-grid">
+            <label>Kunde<select id="exportCustomer"></select></label>
+            <label>Monat<input id="exportMonth" type="month" /></label>
+            <label>Ausgabe
+              <select id="exportType">
+                <option value="signature">Unterschriftszettel Krankenfahrt</option>
+                <option value="invoice">Rechnungstabelle Rechnungsfahrt</option>
+              </select>
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn" id="buildExportBtn" type="button">Vorschau erstellen</button>
+            <button class="btn secondary" id="printExportBtn" type="button">PDF drucken</button>
+            <button class="btn secondary" id="shareExportBtn" type="button">Teilen</button>
+          </div>
+          <div id="exportPreview" style="margin-top:14px"></div>
+        </div>
+      </section>
+
+      <section class="view" id="data">
+        <div class="page-title">
+          <h1>Daten & Backup</h1>
+          <p class="sub">Lokale App-Daten sichern, wiederherstellen oder vollständig leeren. Später wird dieser Bereich mit der echten Cloud-Datenbank verbunden.</p>
+        </div>
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Backup erstellen</h2>
+            <p class="sub">Exportiert Kunden, Fahrten, Importprotokolle und Sitzungsstatus als JSON-Datei.</p>
+            <div class="actions">
+              <button class="btn" id="backupBtn" type="button">Backup herunterladen</button>
+              <button class="btn secondary" id="csvAllBtn" type="button">Alle Fahrten als CSV</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Backup wiederherstellen</h2>
+            <p class="sub">Importiert ein vorher gespeichertes TaxiPro-Backup. Bestehende lokale Daten werden ersetzt.</p>
+            <input id="restoreInput" type="file" accept=".json,application/json" />
+            <div class="actions">
+              <button class="btn warn" id="clearDataBtn" type="button">Lokale Daten leeren</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>Aktueller Speicherstand</h2>
+          <div id="storageStatus"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const storeKey = "taxipro-dispatch-v1";
+    const sessionKey = "taxipro-google-session";
+    const todayIso = () => new Date().toISOString().slice(0, 10);
+    const monthIso = () => new Date().toISOString().slice(0, 7);
+
+    const state = loadState();
+    let rideFlags = { outbound: true, returnTrip: true };
+    let seriesFlags = { outbound: true, returnTrip: true };
+    let selectedWeekdays = new Set([1, 3, 5]);
+    let importRows = [];
+
+    function loadState() {
+      const saved = localStorage.getItem(storeKey);
+      if (saved) return JSON.parse(saved);
+      return { customers: [], rides: [], imports: [] };
+    }
+
+    function saveState() {
+      localStorage.setItem(storeKey, JSON.stringify(state));
+      renderAll();
+    }
+
+    function uid(prefix) {
+      return prefix + "-" + Math.random().toString(36).slice(2, 10) + "-" + Date.now().toString(36);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      }[ch]));
+    }
+
+    function money(value) {
+      const num = Number(value || 0);
+      return num.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+    }
+
+    function getCustomer(id) {
+      return state.customers.find(c => c.id === id);
+    }
+
+    function typeTag(type) {
+      if (type === "Krankenfahrt") return '<span class="tag red">Krankenfahrt</span>';
+      if (type === "Rechnungsfahrt") return '<span class="tag yellow">Rechnungsfahrt</span>';
+      if (type === "Serienkunde") return '<span class="tag blue">Serie</span>';
+      return '<span class="tag gray">Allgemein</span>';
+    }
+
+    document.querySelectorAll("[data-view]").forEach(btn => {
+      btn.addEventListener("click", () => showView(btn.dataset.view));
+    });
+
+    document.querySelectorAll("[data-go]").forEach(btn => {
+      btn.addEventListener("click", () => showView(btn.dataset.go));
+    });
+
+    function showView(id) {
+      if (!document.getElementById(id)) id = "dashboard";
+      document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
+      document.querySelectorAll("[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view === id));
+      if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+      renderAll();
+    }
+
+    window.addEventListener("hashchange", () => showView(location.hash.slice(1) || "dashboard"));
+
+    document.getElementById("connectBtn").addEventListener("click", () => {
+      localStorage.setItem(sessionKey, JSON.stringify({ connected: true, at: new Date().toISOString() }));
+      renderSession();
+    });
+
+    function renderSession() {
+      const connected = JSON.parse(localStorage.getItem(sessionKey) || "null")?.connected;
+      const box = document.getElementById("sessionBox");
+      box.classList.toggle("connected", !!connected);
+      document.getElementById("sessionText").textContent = connected ? "Google verbunden" : "Google nicht verbunden";
+      document.getElementById("connectBtn").textContent = connected ? "Verbunden" : "Verbinden";
+    }
+
+    document.getElementById("customerForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+      state.customers.push({
+        id: uid("cus"),
+        name: data.name.trim(),
+        type: data.type,
+        address: data.address.trim(),
+        target: data.target.trim(),
+        km: Number(data.km || 0),
+        price: Number(data.price || 0),
+        copay: data.copay,
+        permitUntil: data.permitUntil,
+        notes: data.notes.trim()
+      });
+      event.currentTarget.reset();
+      saveState();
+    });
+
+    document.getElementById("seedBtn").addEventListener("click", () => {
+      if (!state.customers.some(c => c.name === "Hermann Müller")) {
+        state.customers.push({
+          id: uid("cus"),
+          name: "Hermann Müller",
+          type: "Krankenfahrt",
+          address: "Adresse A",
+          target: "UKB Bonn",
+          km: 28,
+          price: 0,
+          copay: "befreit",
+          permitUntil: "2026-07-31",
+          notes: "Dialyse / Serienfahrt"
+        });
+      }
+      if (!state.customers.some(c => c.name === "Fatma Yilmaz")) {
+        state.customers.push({
+          id: uid("cus"),
+          name: "Fatma Yilmaz",
+          type: "Rechnungsfahrt",
+          address: "Adresse A",
+          target: "Tagespflege Bonn",
+          km: 0,
+          price: 25,
+          copay: "entfällt",
+          permitUntil: "",
+          notes: "Rechnungskunde"
+        });
+      }
+      saveState();
+    });
+
+    document.getElementById("rideDate").value = todayIso();
+    document.getElementById("monthFilter").value = monthIso();
+    document.getElementById("exportMonth").value = monthIso();
+    document.querySelector('#seriesForm [name="from"]').value = todayIso();
+    document.querySelector('#seriesForm [name="to"]').value = todayIso();
+
+    document.getElementById("rideCustomer").addEventListener("change", fillRideDefaults);
+    document.getElementById("outboundToggle").addEventListener("click", () => {
+      rideFlags.outbound = !rideFlags.outbound;
+      renderRideToggles();
+    });
+    document.getElementById("returnToggle").addEventListener("click", () => {
+      rideFlags.returnTrip = !rideFlags.returnTrip;
+      renderRideToggles();
+    });
+    document.getElementById("resetRideBtn").addEventListener("click", () => {
+      rideFlags = { outbound: true, returnTrip: true };
+      document.getElementById("rideDate").value = todayIso();
+      fillRideDefaults();
+      renderRideToggles();
+    });
+
+    document.getElementById("rideForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const customer = getCustomer(data.customerId);
+      if (!customer || (!rideFlags.outbound && !rideFlags.returnTrip)) return;
+      const simpleRides = Number(rideFlags.outbound) + Number(rideFlags.returnTrip);
+      const km = customer.type === "Krankenfahrt" ? Number(customer.km || 0) * simpleRides : 0;
+      const price = customer.type === "Rechnungsfahrt" ? Number(customer.price || 0) * simpleRides : 0;
+      state.rides.push({
+        id: uid("ride"),
+        customerId: customer.id,
+        date: data.date,
+        target: data.target || customer.target,
+        outbound: rideFlags.outbound,
+        returnTrip: rideFlags.returnTrip,
+        simpleRides,
+        km,
+        price,
+        type: customer.type,
+        status: "gefahren",
+        note: data.note || "",
+        source: "manuell"
+      });
+      event.currentTarget.reset();
+      document.getElementById("rideDate").value = todayIso();
+      rideFlags = { outbound: true, returnTrip: true };
+      saveState();
+      showView("month");
+    });
+
+    document.querySelectorAll("#weekdayToggles [data-day]").forEach(button => {
+      button.addEventListener("click", () => {
+        const day = Number(button.dataset.day);
+        if (selectedWeekdays.has(day)) selectedWeekdays.delete(day);
+        else selectedWeekdays.add(day);
+        renderWeekdayToggles();
+        renderSeriesPreview();
+      });
+    });
+
+    document.getElementById("seriesOutbound").addEventListener("click", () => {
+      seriesFlags.outbound = !seriesFlags.outbound;
+      renderSeriesToggles();
+      renderSeriesPreview();
+    });
+
+    document.getElementById("seriesReturn").addEventListener("click", () => {
+      seriesFlags.returnTrip = !seriesFlags.returnTrip;
+      renderSeriesToggles();
+      renderSeriesPreview();
+    });
+
+    document.getElementById("workdaysBtn").addEventListener("click", () => {
+      selectedWeekdays = new Set([1, 2, 3, 4, 5]);
+      renderWeekdayToggles();
+      renderSeriesPreview();
+    });
+
+    document.getElementById("dialysisBtn").addEventListener("click", () => {
+      selectedWeekdays = new Set([1, 3, 5]);
+      renderWeekdayToggles();
+      renderSeriesPreview();
+    });
+
+    document.getElementById("seriesForm").addEventListener("input", renderSeriesPreview);
+    document.getElementById("seriesForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const customer = getCustomer(data.customerId);
+      if (!customer || (!seriesFlags.outbound && !seriesFlags.returnTrip)) return;
+      buildSeriesDates(data.from, data.to).forEach(date => {
+        const simpleRides = Number(seriesFlags.outbound) + Number(seriesFlags.returnTrip);
+        const exists = state.rides.some(r => r.customerId === customer.id && r.date === date && r.outbound === seriesFlags.outbound && r.returnTrip === seriesFlags.returnTrip);
+        if (exists) return;
+        state.rides.push({
+          id: uid("ride"),
+          customerId: customer.id,
+          date,
+          target: customer.target,
+          outbound: seriesFlags.outbound,
+          returnTrip: seriesFlags.returnTrip,
+          simpleRides,
+          km: customer.type === "Krankenfahrt" ? Number(customer.km || 0) * simpleRides : 0,
+          price: customer.type === "Rechnungsfahrt" ? Number(customer.price || 0) * simpleRides : 0,
+          type: customer.type,
+          status: data.status,
+          note: "Serienfahrt",
+          source: "serie"
+        });
+      });
+      saveState();
+      showView("month");
+    });
+
+    document.getElementById("refreshMonthBtn").addEventListener("click", renderMonth);
+    document.getElementById("exportCsvBtn").addEventListener("click", exportCurrentCsv);
+    document.getElementById("printMonthBtn").addEventListener("click", () => printView("month"));
+    document.getElementById("buildExportBtn").addEventListener("click", renderExportPreview);
+    document.getElementById("printExportBtn").addEventListener("click", () => printView("exports"));
+    document.getElementById("shareExportBtn").addEventListener("click", shareExport);
+    document.getElementById("backupBtn").addEventListener("click", downloadBackup);
+    document.getElementById("csvAllBtn").addEventListener("click", () => downloadCsv(state.rides, "taxipro-alle-fahrten.csv"));
+    document.getElementById("restoreInput").addEventListener("change", restoreBackup);
+    document.getElementById("clearDataBtn").addEventListener("click", clearLocalData);
+
+    document.getElementById("globalSearch").addEventListener("input", renderAll);
+
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    fileInput.addEventListener("change", event => handleFiles(event.target.files));
+    ["dragenter", "dragover"].forEach(name => dropzone.addEventListener(name, event => {
+      event.preventDefault();
+      dropzone.classList.add("drag");
+    }));
+    ["dragleave", "drop"].forEach(name => dropzone.addEventListener(name, event => {
+      event.preventDefault();
+      dropzone.classList.remove("drag");
+    }));
+    dropzone.addEventListener("drop", event => handleFiles(event.dataTransfer.files));
+    document.getElementById("approveImportBtn").addEventListener("click", approveImport);
+
+    async function handleFiles(files) {
+      for (const file of files) {
+        const rows = await readFileRows(file);
+        rows.forEach(row => importRows.push(normalizeImportRow(row, file.name)));
+      }
+      renderImportPreview();
+    }
+
+    function readFileRows(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = event => {
+          try {
+            if (file.name.toLowerCase().endsWith(".csv")) {
+              resolve(parseCsv(event.target.result));
+              return;
+            }
+            if (!window.XLSX) {
+              alert("XLSX-Bibliothek konnte nicht geladen werden. CSV funktioniert trotzdem.");
+              resolve([]);
+              return;
+            }
+            const workbook = XLSX.read(event.target.result, { type: "array" });
+            const rows = [];
+            workbook.SheetNames.forEach(sheetName => {
+              const sheetRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+              sheetRows.forEach(row => rows.push({ ...row, Tabellenblatt: sheetName }));
+            });
+            resolve(rows);
+          } catch (error) {
+            alert("Importfehler: " + error.message);
+            resolve([]);
+          }
+        };
+        if (file.name.toLowerCase().endsWith(".csv")) reader.readAsText(file);
+        else reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function parseCsv(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      const headers = splitCsvLine(lines.shift() || "");
+      return lines.map(line => {
+        const values = splitCsvLine(line);
+        return Object.fromEntries(headers.map((h, i) => [h, values[i] || ""]));
+      });
+    }
+
+    function splitCsvLine(line) {
+      return line.split(/;|,/).map(value => value.trim().replace(/^"|"$/g, ""));
+    }
+
+    function normalizeImportRow(row, fileName) {
+      const lower = Object.fromEntries(Object.entries(row).map(([k, v]) => [k.toLowerCase(), v]));
+      const pick = names => names.map(n => lower[n.toLowerCase()]).find(v => v !== undefined && v !== "");
+      const fileGuess = guessFromFileName(fileName);
+      const name = pick(["kunde", "kundenname", "patient", "name"]) || fileGuess.name || "";
+      const date = normalizeDate(pick(["datum", "date", "fahrtdatum"])) || todayIso();
+      const target = pick(["ziel", "krankenhaus", "zieladresse", "fahrtziel"]) || fileGuess.target || "";
+      const outbound = parseBool(pick(["hin", "hinfahrt", "h"]));
+      const returnTrip = parseBool(pick(["rück", "rueck", "rückfahrt", "zurück", "zurueck"]));
+      const type = pick(["fahrtart", "typ"]) || fileGuess.type || "Krankenfahrt";
+      const km = Number(String(pick(["km", "kilometer"]) || "").replace(",", ".")) || 0;
+      const price = Number(String(pick(["preis", "betrag", "gesamtpreis"]) || "").replace(",", ".")) || 0;
+      const matched = findCustomerByName(name);
+      return {
+        id: uid("imp"),
+        fileName,
+        name,
+        date,
+        type: type.includes("Rechnung") ? "Rechnungsfahrt" : "Krankenfahrt",
+        target,
+        outbound: outbound || (!outbound && !returnTrip),
+        returnTrip,
+        km,
+        price,
+        note: pick(["bemerkung", "notiz", "notizen"]) || "",
+        matchedCustomerId: matched?.id || "",
+        status: matched ? "zugeordnet" : "prüfen"
+      };
+    }
+
+    function normalizeDate(value) {
+      if (!value) return "";
+      if (value instanceof Date) return value.toISOString().slice(0, 10);
+      if (typeof value === "number") {
+        const date = new Date(Math.round((value - 25569) * 86400 * 1000));
+        return date.toISOString().slice(0, 10);
+      }
+      const str = String(value).trim();
+      const de = str.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+      if (de) return `${de[3]}-${de[2].padStart(2, "0")}-${de[1].padStart(2, "0")}`;
+      const iso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (iso) return `${iso[1]}-${iso[2].padStart(2, "0")}-${iso[3].padStart(2, "0")}`;
+      return "";
+    }
+
+    function parseBool(value) {
+      const str = String(value ?? "").toLowerCase();
+      return ["ja", "j", "x", "1", "true", "hin", "rück", "rueck"].includes(str);
+    }
+
+    function guessFromFileName(name) {
+      const base = name.replace(/\.(xlsx|xls|csv)$/i, "").replace(/[_-]/g, " ");
+      const type = /rechnung/i.test(base) ? "Rechnungsfahrt" : /krank|dialyse|chemo|reha/i.test(base) ? "Krankenfahrt" : "";
+      const clean = base.replace(/\b(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|20\d{2}|rechnungskunden|krankenfahrten|fahrten|rechnung|dialyse|teil|rückfahrten|rueckfahrten)\b/gi, "").trim();
+      return { name: clean, type };
+    }
+
+    function findCustomerByName(name) {
+      const n = String(name || "").toLowerCase().trim();
+      if (!n) return null;
+      return state.customers.find(c => c.name.toLowerCase() === n)
+        || state.customers.find(c => c.name.toLowerCase().includes(n) || n.includes(c.name.toLowerCase().split(" ")[0]));
+    }
+
+    function approveImport() {
+      importRows.forEach(row => {
+        let customer = getCustomer(row.matchedCustomerId);
+        if (!customer) {
+          customer = {
+            id: uid("cus"),
+            name: row.name || "Import Kunde",
+            type: row.type,
+            address: "",
+            target: row.target,
+            km: row.km,
+            price: row.price,
+            copay: "unklar",
+            permitUntil: "",
+            notes: "Aus Excel importiert"
+          };
+          state.customers.push(customer);
+        }
+        const simpleRides = Number(row.outbound) + Number(row.returnTrip);
+        const exists = state.rides.some(r => r.customerId === customer.id && r.date === row.date && r.target === row.target && r.outbound === row.outbound && r.returnTrip === row.returnTrip);
+        if (!exists) {
+          state.rides.push({
+            id: uid("ride"),
+            customerId: customer.id,
+            date: row.date,
+            target: row.target || customer.target,
+            outbound: row.outbound,
+            returnTrip: row.returnTrip,
+            simpleRides,
+            km: row.type === "Krankenfahrt" ? (row.km || customer.km || 0) * simpleRides : 0,
+            price: row.type === "Rechnungsfahrt" ? (row.price || customer.price || 0) * simpleRides : 0,
+            type: row.type,
+            status: "gefahren",
+            note: row.note,
+            source: "import"
+          });
+        }
+      });
+      state.imports.push({ id: uid("import"), at: new Date().toISOString(), count: importRows.length });
+      importRows = [];
+      saveState();
+      showView("month");
+    }
+
+    function renderAll() {
+      renderSession();
+      renderMetrics();
+      renderCustomers();
+      renderSelects();
+      renderRideToggles();
+      renderWeekdayToggles();
+      renderSeriesToggles();
+      renderSeriesPreview();
+      fillRideDefaults();
+      renderTodayRides();
+      renderWarnings();
+      renderMonth();
+      renderImportPreview();
+      renderExportPreview(false);
+      renderStorageStatus();
+    }
+
+    function renderMetrics() {
+      const today = todayIso();
+      const month = monthIso();
+      const monthRides = state.rides.filter(r => r.date.startsWith(month));
+      const html = [
+        ["Kunden", state.customers.length],
+        ["Fahrten heute", state.rides.filter(r => r.date === today).length],
+        ["Einfache Fahrten im Monat", monthRides.reduce((sum, r) => sum + Number(r.simpleRides || 0), 0)]
+      ].map(([label, value]) => `<div class="card metric"><span>${label}</span><strong>${value}</strong></div>`).join("");
+      document.getElementById("metrics").innerHTML = html;
+    }
+
+    function renderCustomers() {
+      const q = document.getElementById("globalSearch").value.toLowerCase();
+      const customers = state.customers.filter(c => !q || [c.name, c.address, c.target, c.type, c.copay].join(" ").toLowerCase().includes(q));
+      if (!customers.length) {
+        document.getElementById("customerList").innerHTML = '<div class="empty">Noch keine Kunden vorhanden.</div>';
+        return;
+      }
+      document.getElementById("customerList").innerHTML = customers.map(c => `
+        <div class="row-card">
+          <strong>${escapeHtml(c.name)}</strong>
+          <div>${typeTag(c.type)} <span class="tag ${c.copay === "offen" || c.copay === "unklar" ? "orange" : "green"}">${escapeHtml(c.copay)}</span></div>
+          <div>${escapeHtml(c.address || "keine Adresse")} → ${escapeHtml(c.target || "kein Ziel")}</div>
+          <div>${c.type === "Krankenfahrt" ? escapeHtml(c.km || 0) + " km" : money(c.price || 0)}</div>
+          <div class="actions"><button class="btn secondary" type="button" onclick="selectCustomerForRide('${c.id}')">Fahrt eintragen</button></div>
+        </div>
+      `).join("");
+    }
+
+    window.selectCustomerForRide = id => {
+      showView("ride");
+      document.getElementById("rideCustomer").value = id;
+      fillRideDefaults();
+    };
+
+    function renderSelects() {
+      const options = state.customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)} - ${escapeHtml(c.type)}</option>`).join("");
+      ["rideCustomer", "seriesCustomer", "monthCustomer", "exportCustomer"].forEach(id => {
+        const select = document.getElementById(id);
+        const current = select.value;
+        select.innerHTML = options || '<option value="">Bitte zuerst Kunde anlegen</option>';
+        if ([...select.options].some(o => o.value === current)) select.value = current;
+      });
+    }
+
+    function fillRideDefaults() {
+      const customer = getCustomer(document.getElementById("rideCustomer").value);
+      if (!customer) return;
+      document.getElementById("rideTarget").value = customer.target || "";
+      document.getElementById("rideValue").value = customer.type === "Krankenfahrt" ? `${customer.km || 0} km einfache Strecke` : `${money(customer.price || 0)} einfache Fahrt`;
+    }
+
+    function renderRideToggles() {
+      document.getElementById("outboundToggle").classList.toggle("active", rideFlags.outbound);
+      document.getElementById("returnToggle").classList.toggle("active", rideFlags.returnTrip);
+    }
+
+    function renderWeekdayToggles() {
+      document.querySelectorAll("#weekdayToggles [data-day]").forEach(button => {
+        button.classList.toggle("active", selectedWeekdays.has(Number(button.dataset.day)));
+      });
+    }
+
+    function renderSeriesToggles() {
+      document.getElementById("seriesOutbound").classList.toggle("active", seriesFlags.outbound);
+      document.getElementById("seriesReturn").classList.toggle("active", seriesFlags.returnTrip);
+    }
+
+    function buildSeriesDates(from, to) {
+      if (!from || !to || !selectedWeekdays.size) return [];
+      const start = new Date(from + "T12:00:00");
+      const end = new Date(to + "T12:00:00");
+      if (end < start) return [];
+      const dates = [];
+      for (const day = new Date(start); day <= end; day.setDate(day.getDate() + 1)) {
+        if (selectedWeekdays.has(day.getDay())) dates.push(day.toISOString().slice(0, 10));
+      }
+      return dates;
+    }
+
+    function renderSeriesPreview() {
+      const form = document.getElementById("seriesForm");
+      if (!form) return;
+      const data = Object.fromEntries(new FormData(form).entries());
+      const customer = getCustomer(data.customerId);
+      const dates = buildSeriesDates(data.from, data.to);
+      const target = document.getElementById("seriesPreview");
+      if (!customer || !dates.length) {
+        target.className = "empty";
+        target.innerHTML = "Kunde, Zeitraum und Wochentage wählen.";
+        return;
+      }
+      target.className = "";
+      target.innerHTML = `
+        <div class="notice ok">${dates.length} Fahrtage werden für ${escapeHtml(customer.name)} erzeugt.</div>
+        <div class="mobile-cards" style="display:grid;margin-top:10px">
+          ${dates.slice(0, 20).map(date => `<div class="row-card"><strong>${date}</strong><div>Hin: ${seriesFlags.outbound ? "ja" : "nein"} · Rück: ${seriesFlags.returnTrip ? "ja" : "nein"}</div><div>${escapeHtml(customer.target || "")}</div></div>`).join("")}
+        </div>
+        ${dates.length > 20 ? `<p class="sub">Weitere ${dates.length - 20} Tage werden ebenfalls gespeichert.</p>` : ""}
+      `;
+    }
+
+    function renderTodayRides() {
+      const rows = state.rides.filter(r => r.date === todayIso());
+      document.getElementById("todayRides").innerHTML = rows.length ? renderRideCards(rows) : '<div class="empty">Heute noch keine Fahrten gespeichert.</div>';
+    }
+
+    function renderWarnings() {
+      const warnings = [];
+      state.customers.filter(c => c.copay === "offen" || c.copay === "unklar").forEach(c => warnings.push(`${c.name}: Eigenanteil ${c.copay}`));
+      state.customers.filter(c => c.type === "Krankenfahrt" && !c.km).forEach(c => warnings.push(`${c.name}: Kilometer fehlen`));
+      state.customers.filter(c => c.type === "Rechnungsfahrt" && !c.price).forEach(c => warnings.push(`${c.name}: Preis fehlt`));
+      if (importRows.length) warnings.push(`${importRows.length} Import-Zeilen warten auf Prüfung`);
+      document.getElementById("warnings").innerHTML = warnings.length ? warnings.map(w => `<div class="notice">${escapeHtml(w)}</div>`).join("") : '<div class="notice ok">Keine offenen Pflichtprüfungen.</div>';
+    }
+
+    function currentMonthRows(customerId, month) {
+      return state.rides.filter(r => (!customerId || r.customerId === customerId) && (!month || r.date.startsWith(month))).sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function renderMonth() {
+      const customerId = document.getElementById("monthCustomer").value;
+      const month = document.getElementById("monthFilter").value || monthIso();
+      const rows = currentMonthRows(customerId, month);
+      const simple = rows.reduce((sum, r) => sum + Number(r.simpleRides || 0), 0);
+      const km = rows.reduce((sum, r) => sum + Number(r.km || 0), 0);
+      const price = rows.reduce((sum, r) => sum + Number(r.price || 0), 0);
+      document.getElementById("monthSummary").innerHTML = `
+        <div class="grid cols-3">
+          <div class="card metric"><span>Fahrtage</span><strong>${new Set(rows.map(r => r.date)).size}</strong></div>
+          <div class="card metric"><span>Einfache Fahrten</span><strong>${simple}</strong></div>
+          <div class="card metric"><span>${price ? "Gesamtbetrag" : "Gesamtkilometer"}</span><strong>${price ? money(price) : km + " km"}</strong></div>
+        </div>`;
+      document.getElementById("monthTable").innerHTML = rows.length ? renderRideTable(rows) : '<div class="empty">Keine Fahrten für diese Auswahl.</div>';
+    }
+
+    function renderRideTable(rows) {
+      const body = rows.map(r => {
+        const c = getCustomer(r.customerId) || {};
+        return `<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(c.name || "")}</td><td>${typeTag(r.type)}</td><td>${r.outbound ? "ja" : "nein"}</td><td>${r.returnTrip ? "ja" : "nein"}</td><td>${escapeHtml(r.target)}</td><td>${r.km ? r.km + " km" : money(r.price)}</td><td>${escapeHtml(r.status)}</td></tr>`;
+      }).join("");
+      return `<table class="desktop-table"><thead><tr><th>Datum</th><th>Kunde</th><th>Fahrtart</th><th>Hin</th><th>Rück</th><th>Ziel</th><th>km / Preis</th><th>Status</th></tr></thead><tbody>${body}</tbody></table><div class="mobile-cards">${renderRideCards(rows)}</div>`;
+    }
+
+    function renderRideCards(rows) {
+      return rows.map(r => {
+        const c = getCustomer(r.customerId) || {};
+        return `<div class="row-card"><strong>${escapeHtml(r.date)} · ${escapeHtml(c.name || "")}</strong><div>${typeTag(r.type)} <span class="tag green">${escapeHtml(r.status)}</span></div><div>Hin: ${r.outbound ? "ja" : "nein"} · Rück: ${r.returnTrip ? "ja" : "nein"}</div><div>${escapeHtml(r.target)} · ${r.km ? r.km + " km" : money(r.price)}</div></div>`;
+      }).join("");
+    }
+
+    function renderImportPreview() {
+      if (!importRows.length) {
+        document.getElementById("importPreview").innerHTML = '<div class="empty">Noch keine Datei hochgeladen.</div>';
+        return;
+      }
+      document.getElementById("importPreview").innerHTML = `
+        <div class="notice">${importRows.length} Zeilen erkannt. Bitte prüfen und dann übernehmen.</div>
+        ${renderImportTable(importRows)}`;
+    }
+
+    function renderImportTable(rows) {
+      const body = rows.slice(0, 80).map(row => `
+        <tr>
+          <td>${escapeHtml(row.date)}</td>
+          <td>${escapeHtml(row.name || "Neuer Kunde")}</td>
+          <td>${typeTag(row.type)}</td>
+          <td>${row.outbound ? "ja" : "nein"}</td>
+          <td>${row.returnTrip ? "ja" : "nein"}</td>
+          <td>${escapeHtml(row.target)}</td>
+          <td>${row.km ? row.km + " km" : money(row.price)}</td>
+          <td>${escapeHtml(row.status)}</td>
+        </tr>`).join("");
+      return `<table class="desktop-table"><thead><tr><th>Datum</th><th>Kunde</th><th>Fahrtart</th><th>Hin</th><th>Rück</th><th>Ziel</th><th>km / Preis</th><th>Status</th></tr></thead><tbody>${body}</tbody></table><div class="mobile-cards">${rows.map(r => `<div class="row-card"><strong>${escapeHtml(r.date)} · ${escapeHtml(r.name || "Neuer Kunde")}</strong><div>${typeTag(r.type)} <span class="tag orange">${escapeHtml(r.status)}</span></div><div>${escapeHtml(r.target)} · Hin ${r.outbound ? "ja" : "nein"} · Rück ${r.returnTrip ? "ja" : "nein"}</div></div>`).join("")}</div>`;
+    }
+
+    function exportCurrentCsv() {
+      const customerId = document.getElementById("monthCustomer").value;
+      const month = document.getElementById("monthFilter").value || monthIso();
+      const rows = currentMonthRows(customerId, month);
+      downloadCsv(rows, `taxipro-monatsliste-${month}.csv`);
+    }
+
+    function downloadCsv(rows, fileName) {
+      const header = ["Datum", "Kunde", "Fahrtart", "Hin", "Rueck", "Ziel", "Einfache Fahrten", "Kilometer", "Preis", "Status", "Bemerkung"];
+      const lines = rows.map(r => {
+        const c = getCustomer(r.customerId) || {};
+        return [r.date, c.name || "", r.type, r.outbound ? "ja" : "nein", r.returnTrip ? "ja" : "nein", r.target, r.simpleRides, r.km, r.price, r.status, r.note].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";");
+      });
+      const blob = new Blob([[header.join(";"), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderExportPreview(update = true) {
+      const target = document.getElementById("exportPreview");
+      if (!target) return;
+      const customerId = document.getElementById("exportCustomer").value;
+      const month = document.getElementById("exportMonth").value || monthIso();
+      const type = document.getElementById("exportType").value;
+      const customer = getCustomer(customerId);
+      const rows = currentMonthRows(customerId, month);
+      if (!update && !target.innerHTML) return;
+      if (!customer || !rows.length) {
+        target.innerHTML = '<div class="empty">Bitte Kunde und Monat mit Fahrten auswählen.</div>';
+        return;
+      }
+      const simple = rows.reduce((sum, r) => sum + Number(r.simpleRides || 0), 0);
+      const km = rows.reduce((sum, r) => sum + Number(r.km || 0), 0);
+      const price = rows.reduce((sum, r) => sum + Number(r.price || 0), 0);
+      target.innerHTML = `
+        <div class="card">
+          <h2>${type === "signature" ? "Unterschriftszettel" : "Rechnungstabelle"} · ${escapeHtml(customer.name)}</h2>
+          <p><strong>Monat:</strong> ${escapeHtml(month)} · <strong>Ziel:</strong> ${escapeHtml(customer.target || "")}</p>
+          <p><strong>Einfache Fahrten:</strong> ${simple} · <strong>${type === "signature" ? "Gesamtkilometer" : "Gesamtbetrag"}:</strong> ${type === "signature" ? km + " km" : money(price)}</p>
+          ${renderRideTable(rows)}
+          ${type === "signature" ? '<p style="margin-top:30px"><strong>Unterschrift Patient:</strong> ________________________________</p>' : ""}
+        </div>`;
+    }
+
+    function printView(id) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("printing"));
+      document.getElementById(id).classList.add("printing");
+      window.print();
+      document.getElementById(id).classList.remove("printing");
+    }
+
+    async function shareExport() {
+      const text = document.getElementById("exportPreview").innerText.trim();
+      if (navigator.share && text) {
+        await navigator.share({ title: "TaxiPro Export", text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        alert("Vorschau wurde in die Zwischenablage kopiert.");
+      }
+    }
+
+    function downloadBackup() {
+      const backup = {
+        app: "TaxiPro Dispatch",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        data: state,
+        session: JSON.parse(localStorage.getItem(sessionKey) || "null")
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `taxipro-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function restoreBackup(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const backup = JSON.parse(reader.result);
+          if (!backup?.data?.customers || !backup?.data?.rides) throw new Error("Ungültige Backup-Datei");
+          localStorage.setItem(storeKey, JSON.stringify(backup.data));
+          if (backup.session) localStorage.setItem(sessionKey, JSON.stringify(backup.session));
+          Object.assign(state, backup.data);
+          renderAll();
+          alert("Backup wurde wiederhergestellt.");
+        } catch (error) {
+          alert("Backup konnte nicht gelesen werden: " + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearLocalData() {
+      if (!confirm("Lokale Kunden, Fahrten und Importe wirklich löschen?")) return;
+      localStorage.removeItem(storeKey);
+      state.customers = [];
+      state.rides = [];
+      state.imports = [];
+      importRows = [];
+      renderAll();
+    }
+
+    function renderStorageStatus() {
+      const el = document.getElementById("storageStatus");
+      if (!el) return;
+      const bytes = new Blob([localStorage.getItem(storeKey) || ""]).size;
+      const session = JSON.parse(localStorage.getItem(sessionKey) || "null");
+      el.innerHTML = `
+        <div class="grid cols-3">
+          <div class="card metric"><span>Kunden</span><strong>${state.customers.length}</strong></div>
+          <div class="card metric"><span>Fahrten</span><strong>${state.rides.length}</strong></div>
+          <div class="card metric"><span>Speicher</span><strong>${Math.ceil(bytes / 1024)} KB</strong></div>
+        </div>
+        <p class="sub">Google-Status: ${session?.connected ? "verbunden und lokal gemerkt" : "nicht verbunden"}</p>
+      `;
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
+
+    renderAll();
+    showView(location.hash.slice(1) || "dashboard");
+  </script>
+</body>
+</html>
