@@ -61,6 +61,19 @@
 .ss-status.approved{background:rgba(34,197,94,.15);color:#22c55e}
 .ss-status.active{background:rgba(59,130,246,.15);color:#3b82f6}
 .ss-check-label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);min-height:38px}
+.ss-ops-hero{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.ss-hero-main{min-height:42px;flex-shrink:0}
+.ss-ops-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.ss-ops-steps button{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:left;display:grid;gap:4px;cursor:pointer}
+.ss-ops-steps b{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--gold);color:#111;font-size:12px}
+.ss-ops-steps span{font-size:14px;font-weight:900;color:var(--text)}
+.ss-ops-steps small{font-size:11px;color:var(--text2);line-height:1.35}
+.ss-ops-actions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.ss-ops-actions .tb-btn{justify-content:center}
+.ss-close-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ss-close-grid button{padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card2);text-align:left;cursor:pointer}
+.ss-close-grid strong{display:block;font-size:13px;margin-bottom:4px;color:var(--text)}
+.ss-close-grid span{font-size:11px;color:var(--text2);line-height:1.4}
 @media(max-width:700px){
   .ss-hero{
     padding:18px 18px;
@@ -72,8 +85,27 @@
     border-color:rgba(148,163,184,.22);
     box-shadow:0 10px 26px rgba(0,0,0,.14);
   }
+  .ss-ops-hero{display:grid;grid-template-columns:1fr;gap:12px}
+  .ss-hero-main{width:100%;justify-content:center;min-height:46px}
   .ss-hero h2{font-size:23px;line-height:1.15;margin-bottom:8px;letter-spacing:-.2px}
   .ss-hero p{font-size:13px;line-height:1.45;color:#b8c5d5}
+  .ss-ops-steps{
+    grid-template-columns:1fr;
+    gap:7px;
+    margin:0 0 10px;
+  }
+  .ss-ops-steps button{
+    grid-template-columns:30px 1fr;
+    grid-template-rows:auto auto;
+    gap:1px 10px;
+    padding:10px 12px;
+    border-radius:14px;
+    background:linear-gradient(180deg,rgba(25,38,55,.96),rgba(19,31,47,.98));
+    border-color:rgba(148,163,184,.16);
+  }
+  .ss-ops-steps b{grid-row:1/span 2;width:28px;height:28px}
+  .ss-ops-steps span{font-size:14px;line-height:1.1}
+  .ss-ops-steps small{font-size:11px;color:#9fb0c2}
   .ss-workflow{
     margin:6px 0 10px;
     padding:9px 10px;
@@ -88,6 +120,8 @@
     gap:8px;
     margin:10px 0 12px;
   }
+  .ss-ops-actions{grid-template-columns:1fr 1fr}
+  .ss-ops-actions .tb-btn{min-height:42px}
   .ss-quick .tb-btn{
     min-height:46px;
     justify-content:center;
@@ -128,6 +162,10 @@
     border-color:rgba(148,163,184,.16);
   }
   .ss-panel h3{font-size:18px;margin-bottom:8px}
+  .ss-close-grid{grid-template-columns:1fr;gap:7px}
+  .ss-close-grid button{padding:10px 12px;border-radius:13px}
+  .ss-close-grid strong{font-size:13px}
+  .ss-close-grid span{font-size:11px}
   .ss-empty{
     min-height:64px;
     padding:14px 12px;

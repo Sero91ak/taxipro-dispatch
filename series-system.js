@@ -313,20 +313,47 @@ function ssRenderDashboard(){
   const warnings=ssDashboardWarnings(),month=new Date().toISOString().slice(0,7);
   const pendingPreviews=seriesPreviews.filter(p=>p.status==='preview').length;
   const openReview=(typeof rides!=='undefined'?rides.filter(r=>r.reviewStatus==='pending'||!r.reviewStatus).length:0);
-  el.innerHTML=`${ssWorkflowHtml()}
-    <div class="ss-hero"><h2>📊 Serienfahrten-Zentrale</h2><p>Professionelles System für Krankenfahrten, Rechnungsfahrten, Monatslisten und Unterschriftszettel</p></div>
-    <div class="ss-quick"><button class="tb-btn primary" type="button" onclick="ssSwitchView('series-orders')">＋ Serienauftrag</button>
+  const ktsMonth=monthlySummaries.filter(s=>s.month===month&&ssIsKts(s.orderType)).length;
+  const reMonth=monthlySummaries.filter(s=>s.month===month&&ssIsRe(s.orderType)).length;
+  const signatures=monthlySummaries.filter(s=>s.month===month).length;
+  el.innerHTML=`<div class="ss-hero ss-ops-hero">
+      <div>
+        <h2>Taxi-Abrechnung & Kontrolle</h2>
+        <p>Fahrt eintragen, Hin/Rück bestätigen, Krankenfahrten und Rechnungsfahrten prüfen, Serien automatisch erzeugen und am Monatsende Unterschrift oder Rechnung erstellen.</p>
+      </div>
+      <button class="tb-btn primary ss-hero-main" type="button" onclick="openRideModal()">＋ Fahrt jetzt</button>
+    </div>
+    <div class="ss-ops-steps">
+      <button type="button" onclick="openRideModal()"><b>1</b><span>Fahrt</span><small>Hin/Rück · KTS/RE · Zuzahlung</small></button>
+      <button type="button" onclick="ssSwitchView('series-import')"><b>2</b><span>Import</span><small>Scan · Liste · Termine zuordnen</small></button>
+      <button type="button" onclick="ssSwitchView('review')"><b>3</b><span>Prüfung</span><small>${openReview} offene Fahrten</small></button>
+      <button type="button" onclick="ssSwitchView('monthly-list')"><b>4</b><span>Monat</span><small>KTS ${ktsMonth} · RE ${reMonth}</small></button>
+      <button type="button" onclick="ssSwitchView('signatures')"><b>5</b><span>Abschluss</span><small>Unterschrift · Rechnung</small></button>
+    </div>
+    <div class="ss-quick ss-ops-actions">
+      <button class="tb-btn primary" type="button" onclick="openRideModal()">＋ Einzelfahrt</button>
+      <button class="tb-btn" type="button" onclick="ssSwitchView('series-orders')">🔁 Serienfahrt</button>
+      <button class="tb-btn" type="button" onclick="openScanImportModal()">📷 Scan/Drop-in</button>
       <button class="tb-btn" type="button" onclick="ssSwitchView('series-import')">📋 Listenimport</button>
-      <button class="tb-btn" type="button" onclick="ssSwitchView('series-preview')">🔍 Prüfliste (${pendingPreviews})</button></div>
+      <button class="tb-btn" type="button" onclick="ssSwitchView('review')">✅ Prüfen (${openReview})</button>
+      <button class="tb-btn" type="button" onclick="openReviewExportModal()">📄 Rechnung/PDF</button>
+    </div>
     <div class="ss-grid">
       <div class="ss-stat warn" onclick="ssSwitchView('series-preview')"><b>${pendingPreviews}</b><span>Offene Vorschauen</span></div>
       <div class="ss-stat" onclick="ssSwitchView('review')"><b>${openReview}</b><span>Fahrten prüfen</span></div>
-      <div class="ss-stat kts" onclick="ssSwitchView('kts-module')"><b>${monthlySummaries.filter(s=>s.month===month&&ssIsKts(s.orderType)).length}</b><span>KTS Monat</span></div>
-      <div class="ss-stat re" onclick="ssSwitchView('re-module')"><b>${monthlySummaries.filter(s=>s.month===month&&ssIsRe(s.orderType)).length}</b><span>RE Monat</span></div>
-      <div class="ss-stat ok" onclick="ssSwitchView('signatures')"><b>${monthlySummaries.filter(s=>s.month===month).length}</b><span>Unterschriften</span></div>
+      <div class="ss-stat kts" onclick="ssSwitchView('kts-module')"><b>${ktsMonth}</b><span>Krankenfahrten</span></div>
+      <div class="ss-stat re" onclick="ssSwitchView('re-module')"><b>${reMonth}</b><span>Rechnungsfahrten</span></div>
+      <div class="ss-stat ok" onclick="ssSwitchView('signatures')"><b>${signatures}</b><span>Abschlusslisten</span></div>
       <div class="ss-stat err"><b>${warnings.filter(x=>x.level==='err').length}</b><span>Fehler</span></div>
     </div>
-    <div class="ss-panel"><h3>⚠️ Kontrollliste</h3>${warnings.length?`<div class="ss-warn-list">${warnings.slice(0,15).map((w,i)=>`<div class="ss-warn-item ${w.level==='err'?'err':''}" data-warn="${i}">${w.text}</div>`).join('')}</div>`:'<div class="ss-empty">✅ Keine offenen Punkte</div>'}</div>`;
+    <div class="ss-panel ss-month-close"><h3>Monatsabschluss</h3>
+      <div class="ss-close-grid">
+        <button type="button" onclick="ssSwitchView('review')"><strong>Fahrten kontrollieren</strong><span>fehlende km/Preis/Ziel sofort finden</span></button>
+        <button type="button" onclick="ssSwitchView('monthly-list')"><strong>Monatslisten öffnen</strong><span>KTS und RE automatisch summieren</span></button>
+        <button type="button" onclick="ssSwitchView('signatures')"><strong>Unterschrift/Rechnung</strong><span>PDF/Export aus geprüften Fahrten</span></button>
+      </div>
+    </div>
+    <div class="ss-panel"><h3>Kontrollliste</h3>${warnings.length?`<div class="ss-warn-list">${warnings.slice(0,15).map((w,i)=>`<div class="ss-warn-item ${w.level==='err'?'err':''}" data-warn="${i}">${w.text}</div>`).join('')}</div>`:'<div class="ss-empty">✅ Keine offenen Punkte</div>'}</div>`;
   el.querySelectorAll('[data-warn]').forEach(node=>{const w=warnings[parseInt(node.dataset.warn,10)];if(w?.action) node.onclick=w.action;});
 }
 function ssFillOrderFromCustomer(){
