@@ -736,10 +736,20 @@ html.dispatch-boot #pwa-install-banner{border-color:rgba(245,166,35,.45);backgro
 .review-batch{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
 .review-pipeline{font-size:10px;color:var(--text3);padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border);line-height:1.6;flex-shrink:0}
 .review-pipeline strong{color:var(--gold)}
+.monthly-close-list{display:grid;gap:8px;margin-top:12px}
+.monthly-close-card{border:1px solid var(--border);background:var(--bg2);border-radius:var(--r);padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.monthly-close-card.warn{border-left:3px solid var(--yellow)}
+.monthly-close-title{font-weight:800;font-size:13px;margin-bottom:4px}
+.monthly-close-meta{font-size:10px;color:var(--text2);line-height:1.45}
+.monthly-close-actions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}
+.monthly-close-actions .tb-btn{padding:7px 9px;font-size:10px}
 @media(max-width:640px){
   .review-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .review-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}
   .review-act{min-height:34px;flex:1 0 42px;padding:7px 8px}
+  .monthly-close-card{grid-template-columns:1fr}
+  .monthly-close-actions{justify-content:stretch}
+  .monthly-close-actions .tb-btn{flex:1 1 120px}
 }
 .dp-actions{display:flex;gap:6px;flex-shrink:0}
 .dp-act-btn{padding:8px 12px;border-radius:var(--r2);font-size:11px;font-weight:700;border:1px solid var(--border2);background:var(--bg4);color:var(--text);white-space:nowrap}
@@ -2080,10 +2090,16 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 
 <!-- ═══ MODAL: MONATS-EXPORT (Prüfliste) ═══ -->
 <div class="overlay hidden" id="modal-review-export">
-<div class="modal" style="max-width:480px">
-  <div class="mh"><h3>📊 Monats-Export</h3><button class="mclose" onclick="closeM('modal-review-export')">✕</button></div>
+<div class="modal" style="max-width:720px">
+  <div class="mh"><h3>📊 Monatsabschluss</h3><button class="mclose" onclick="closeM('modal-review-export')">✕</button></div>
   <div class="mbody">
-    <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px">Nur <strong>freigegebene</strong> Fahrten werden in die Excel-Vorlage geschrieben (KTS: A14–E41 · RE: A11–G40). Die App-Datenbank bleibt die Quelle der Wahrheit.</p>
+    <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px">Nur <strong>freigegebene</strong> Fahrten werden zusammengefasst. KTS erzeugt einen Unterschriftszettel, RE erzeugt einen Rechnungsvordruck. Die App-Datenbank bleibt die Quelle der Wahrheit.</p>
+    <div class="fr"><label>Monat für automatischen Abschluss</label>
+      <input type="month" id="export-close-month" onchange="document.getElementById('export-month').value=this.value;updateExportPreview();renderMonthlyCloseList()"/>
+    </div>
+    <div id="monthly-close-list" class="monthly-close-list"></div>
+    <div style="height:1px;background:var(--border);margin:16px 0"></div>
+    <p style="font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:10px">Einzel-Export für eine bestimmte Kundenakte oder Excel-Vorlage:</p>
     <div class="fr"><label>Kunde</label>
       <select id="export-cust-id"></select>
     </div>
@@ -8937,6 +8953,108 @@ function getApprovedRidesForExport(custId,yearMonth){
   }).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
 }
 
+function rideSimpleTripCount(r){
+  if(r.tripStatus==='cancelled') return 0;
+  const dir=r.excelDir||'hin-rueck';
+  return dir==='hin-rueck'?2:1;
+}
+
+function rideMoneyValue(r){
+  const raw=r.amount||r.betrag||r.price||0;
+  return parseFloat(String(raw).replace(',','.'))||0;
+}
+
+function summarizeMonthTrips(cust,trips,yearMonth){
+  const module=customerExcelType(cust)==='rechn'?'re':'kts';
+  const driven=trips.filter(r=>r.tripStatus!=='cancelled');
+  const cancelled=trips.length-driven.length;
+  const simple=trips.reduce((sum,r)=>sum+rideSimpleTripCount(r),0);
+  const km=trips.reduce((sum,r)=>sum+(parseInt(r.km,10)||0)*rideSimpleTripCount(r),0);
+  const amount=trips.reduce((sum,r)=>sum+rideMoneyValue(r)*rideSimpleTripCount(r),0);
+  const copay=trips.reduce((sum,r)=>sum+(parseFloat(r.copayPaidAmount)||0),0);
+  return{cust,trips,yearMonth,module,days:new Set(trips.map(r=>r.date)).size,driven:driven.length,cancelled,simple,km,amount,copay};
+}
+
+function getMonthlyCloseGroups(yearMonth){
+  const map=new Map();
+  rides.forEach(r=>{
+    if(!isReviewableRide(r)||r.reviewStatus!=='approved'||!r.customerId) return;
+    if(yearMonth&&(!r.date||!r.date.startsWith(yearMonth))) return;
+    const cust=customers.find(c=>c.id===r.customerId);
+    if(!cust||!rideMatchesCustomerExcel(cust,r)) return;
+    if(!map.has(cust.id)) map.set(cust.id,{cust,trips:[]});
+    map.get(cust.id).trips.push(r);
+  });
+  return[...map.values()].map(g=>summarizeMonthTrips(g.cust,g.trips.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')),yearMonth))
+    .sort((a,b)=>a.cust.lname.localeCompare(b.cust.lname)||a.cust.fname.localeCompare(b.cust.fname));
+}
+
+function renderMonthlyCloseList(){
+  const ym=document.getElementById('export-close-month')?.value||document.getElementById('export-month')?.value||reviewFilter.month||'';
+  const el=document.getElementById('monthly-close-list');
+  if(!el) return;
+  if(!ym){el.innerHTML='<div class="empty" style="padding:14px"><p>Monat wählen, dann werden alle freigegebenen Kunden automatisch zusammengefasst.</p></div>';return;}
+  const groups=getMonthlyCloseGroups(ym);
+  if(!groups.length){el.innerHTML='<div class="empty" style="padding:14px"><p>Keine freigegebenen KTS/RE-Fahrten für diesen Monat.</p></div>';return;}
+  el.innerHTML=groups.map(g=>{
+    const name=`${g.cust.lname} ${g.cust.fname}`.trim();
+    const main=g.module==='re'
+      ?`${g.days} Fahrtage · ${g.simple} einfache Fahrten · ${g.amount.toFixed(2)} €`
+      :`${g.days} Fahrtage · ${g.simple} einfache Fahrten · ${g.km} km${g.copay?` · ${g.copay.toFixed(2)} € Zuzahlung`:''}`;
+    const warn=g.cancelled?` · ${g.cancelled} Ausfall`:'';
+    return`<div class="monthly-close-card${g.cancelled?' warn':''}">
+      <div>
+        <div class="monthly-close-title">${escAttr(name)} <span class="rd-badge ${g.module==='re'?'rechn':'krank'}">${g.module==='re'?'RE':'KTS'}</span></div>
+        <div class="monthly-close-meta">${ym} · ${main}${warn}</div>
+      </div>
+      <div class="monthly-close-actions">
+        <button class="tb-btn primary" onclick="openMonthlyCloseDoc('${g.cust.id}','${ym}','${g.module}')">${g.module==='re'?'Rechnung':'Unterschrift'}</button>
+        <button class="tb-btn" onclick="document.getElementById('export-cust-id').value='${g.cust.id}';document.getElementById('export-month').value='${ym}';updateExportPreview()">Einzel</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function monthlyCloseRowsHtml(group){
+  return group.trips.map((r,i)=>{
+    const simple=rideSimpleTripCount(r);
+    const status=r.tripStatus==='cancelled'?`Ausfall${r.cancelReason?' - '+escAttr(r.cancelReason):''}`:'gefahren';
+    const money=group.module==='re'?`<td>${(rideMoneyValue(r)*simple).toFixed(2)} €</td>`:'';
+    const zz=group.module==='kts'?`<td>${r.copayPaidAmount?Number(r.copayPaidAmount).toFixed(2)+' €':zuzahlShort(r.zuzahlung||group.cust.zuzahlungStatus||'NB')}</td>`:'';
+    return`<tr><td>${i+1}</td><td>${fmtDateDE(r.date)}</td><td>${escAttr(excelDirLabel(r.excelDir||'hin-rueck'))}</td><td>${simple}</td><td>${escAttr(r.to||'')}</td><td>${r.km||''}</td>${money}${zz}<td>${status}</td></tr>`;
+  }).join('');
+}
+
+function openMonthlyCloseDoc(custId,yearMonth,module){
+  const cust=customers.find(c=>c.id===custId);
+  if(!cust){toast('Kunde nicht gefunden','err');return;}
+  const trips=getApprovedRidesForExport(custId,yearMonth);
+  if(!trips.length){toast('Keine freigegebenen Fahrten','warn');return;}
+  const group=summarizeMonthTrips(cust,trips,yearMonth);
+  const isRe=module==='re';
+  const title=isRe?'Rechnungsvordruck':'Unterschriftszettel';
+  const head=isRe
+    ?'<th>Nr</th><th>Datum</th><th>Hin/Rück</th><th>Fahrten</th><th>Ziel</th><th>km</th><th>Betrag</th><th>Status</th>'
+    :'<th>Nr</th><th>Datum</th><th>Hin/Rück</th><th>Fahrten</th><th>Ziel</th><th>km</th><th>Zuzahlung/BF</th><th>Status</th>';
+  const summary=isRe
+    ?`<strong>${group.simple}</strong> einfache Fahrten · <strong>${group.amount.toFixed(2)} €</strong> Rechnungsbetrag`
+    :`<strong>${group.simple}</strong> einfache Fahrten · <strong>${group.km} km</strong> Gesamtstrecke${group.copay?` · <strong>${group.copay.toFixed(2)} €</strong> Zuzahlung`:''}`;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>${escAttr(title+' '+cust.lname+' '+cust.fname+' '+yearMonth)}</title>
+<style>body{font-family:Arial,sans-serif;padding:24px;font-size:12px;color:#111}h1{font-size:19px;margin:0 0 6px}h2{font-size:14px;margin:18px 0 8px}.meta{line-height:1.7;margin:10px 0 16px}.box{border:1px solid #aaa;padding:10px;margin:10px 0 16px}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #bbb;padding:6px 7px;text-align:left;vertical-align:top}th{background:#eee}.sign{height:78px;border-bottom:1px solid #111;margin-top:34px;width:45%}.muted{color:#666;font-size:10px}</style></head>
+<body><h1>Taxi Meckenheim GmbH - ${title}</h1>
+<div class="meta"><strong>Kunde:</strong> ${escAttr(cust.lname+' '+cust.fname)}<br><strong>Monat:</strong> ${yearMonth}<br><strong>Adresse:</strong> ${escAttr(cust.addr||'')}<br><strong>Ziel/Strecke:</strong> ${escAttr(cust.stammHosp||cust.excelDest||'')}</div>
+<div class="box">${summary}${group.cancelled?` · <strong>${group.cancelled}</strong> Ausfall/Abbruch`:''}</div>
+<table><thead><tr>${head}</tr></thead><tbody>${monthlyCloseRowsHtml(group)}</tbody></table>
+${isRe?`<h2>Rechnungshinweis</h2><p>Rechnungsempfänger: ${escAttr(cust.invoiceRecipient||cust.lname+' '+cust.fname)}</p>`:`<h2>Unterschrift</h2><div class="sign"></div><p>Datum / Unterschrift Patient oder berechtigte Person</p>`}
+<p class="muted">Erstellt mit TaxiPro Dispatch · ${new Date().toLocaleString('de-DE')} · Grundlage: freigegebene interne Monatsliste</p>
+</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+  trips.forEach(r=>{r.reviewStatus='exported';r.exportedAt=Date.now();});
+  save();updateCounts();renderReviewView();renderMonthlyCloseList();
+}
+
 function fillKtsExportSheet(ws,tripList,cust){
   let row=KTS_ROW_START,nr=1;
   tripList.forEach(ride=>{
@@ -8999,7 +9117,10 @@ function openReviewExportModal(){
   sel.innerHTML=excelCusts.map(c=>`<option value="${c.id}">${c.lname} ${c.fname} (${customerExcelType(c)==='rechn'?'RE':'KTS'})</option>`).join('');
   const m=document.getElementById('export-month');
   if(m) m.value=reviewFilter.month||document.getElementById('review-filter-month')?.value||'';
+  const cm=document.getElementById('export-close-month');
+  if(cm) cm.value=m?.value||reviewFilter.month||'';
   updateExportPreview();
+  renderMonthlyCloseList();
   openM('modal-review-export');
 }
 function updateExportPreview(){
@@ -9013,7 +9134,14 @@ function updateExportPreview(){
   el.textContent=`${n} freigegebene Fahrt(en) · Bereich ${mod}`;
 }
 document.addEventListener('change',e=>{
-  if(e.target&&(e.target.id==='export-cust-id'||e.target.id==='export-month')) updateExportPreview();
+  if(e.target&&(e.target.id==='export-cust-id'||e.target.id==='export-month')){
+    updateExportPreview();
+    if(e.target.id==='export-month'){
+      const cm=document.getElementById('export-close-month');
+      if(cm) cm.value=e.target.value;
+      renderMonthlyCloseList();
+    }
+  }
 });
 
 async function runReviewExport(){
