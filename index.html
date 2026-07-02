@@ -1097,6 +1097,97 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     background:linear-gradient(135deg,#ffbd35,#f59f1f);
     box-shadow:0 10px 24px rgba(245,166,35,.42);
   }
+  html.is-mobile .review-pipeline{
+    padding:7px 12px;
+    font-size:11px;
+    line-height:1.45;
+    color:#aab8c9;
+    white-space:normal;
+  }
+  html.is-mobile .review-toolbar{
+    padding:12px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+    background:#162436;
+  }
+  html.is-mobile .review-toolbar h2{
+    font-size:22px;
+    line-height:1.15;
+    min-width:0;
+    margin:0;
+  }
+  html.is-mobile .review-filters{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    width:100%;
+  }
+  html.is-mobile .review-filters select,
+  html.is-mobile .review-filters input{
+    max-width:none;
+    width:100%;
+    min-width:0;
+    height:46px;
+    padding:10px 12px;
+    border-radius:11px;
+    font-size:15px;
+    background:#223247;
+    border-color:rgba(148,163,184,.22);
+    color:#f3f7fb;
+  }
+  html.is-mobile .review-filters input[type="month"]{
+    grid-column:1;
+    font-size:16px;
+    text-align:center;
+  }
+  html.is-mobile .review-filters input[type="text"]{
+    grid-column:2;
+  }
+  html.is-mobile .review-toolbar>.tb-btn{
+    min-height:42px;
+    justify-content:center;
+  }
+  html.is-mobile .review-stats{
+    padding:10px 12px;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    background:#121f30;
+  }
+  html.is-mobile .review-stat{
+    min-width:0;
+    padding:9px 8px;
+    text-align:center;
+    border-radius:16px;
+    font-size:12px;
+    white-space:normal;
+    line-height:1.25;
+    background:linear-gradient(180deg,#1d2d42,#17263a);
+  }
+  html.is-mobile .review-body{
+    padding:10px 12px calc(8px + var(--mob-nav-h) + var(--safe-bottom));
+  }
+  html.is-mobile .review-body .empty{
+    height:auto;
+    min-height:180px;
+    justify-content:flex-start;
+    padding:34px 18px 18px;
+    border:1px solid rgba(148,163,184,.12);
+    border-radius:18px;
+    background:linear-gradient(180deg,rgba(25,38,55,.55),rgba(18,29,44,.35));
+  }
+  html.is-mobile .empty .ei{
+    font-size:48px;
+    margin-bottom:8px;
+  }
+  html.is-mobile .empty p{
+    font-size:15px;
+    line-height:1.45;
+  }
+  html.is-mobile .empty .empty-hint{
+    font-size:12px;
+  }
 }
 </style>
 <link rel="stylesheet" href="series-system.css"/>
