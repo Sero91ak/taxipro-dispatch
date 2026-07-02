@@ -1016,6 +1016,88 @@ html.driver-mode .overlay{z-index:6100!important}
 html.driver-standalone .drv-install-card{display:none}
 html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,html.driver-boot #pwa-install-banner{display:none!important}
 .mob-week-agenda{display:none}
+
+/* Mobile dispatcher polish */
+@media(max-width:700px){
+  :root{--mob-nav-h:56px}
+  html.is-mobile #app{padding-bottom:0}
+  html.is-mobile #topbar{
+    min-height:50px;
+    padding:7px 12px;
+    padding-top:calc(7px + var(--safe-top));
+    background:linear-gradient(180deg,#1c2a3a 0%,#142132 100%);
+    box-shadow:0 8px 24px rgba(0,0,0,.16);
+  }
+  html.is-mobile #status-bar{
+    padding:5px 12px;
+    gap:6px;
+    background:#111d2c;
+    border-bottom-color:rgba(148,163,184,.12);
+  }
+  html.is-mobile .status-pill{
+    padding:5px 10px;
+    font-size:10px;
+    border-radius:16px;
+    background:linear-gradient(180deg,var(--bg3),var(--bg2));
+  }
+  html.is-mobile .mob-menu-btn{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:linear-gradient(180deg,var(--bg3),var(--bg2));
+    border-color:rgba(148,163,184,.22);
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
+  }
+  html.is-mobile .logo,
+  html.is-mobile .logo em{font-size:14px}
+  html.is-mobile #mobile-quick-bar{
+    padding:7px 12px;
+    gap:6px;
+    background:linear-gradient(180deg,#172536,#142132);
+    border-bottom-color:rgba(148,163,184,.12);
+  }
+  html.is-mobile .mob-qbtn{
+    min-height:34px;
+    padding:7px 12px;
+    border-radius:18px;
+    font-size:11px;
+    font-weight:800;
+    background:linear-gradient(180deg,var(--bg3),var(--bg2));
+    border-color:rgba(148,163,184,.22);
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+  }
+  html.is-mobile .toolbar{padding:7px 12px}
+  html.is-mobile .stats-bar{padding:6px 12px}
+  html.is-mobile .tr-card{padding:12px;margin-bottom:8px;border-radius:14px}
+  html.is-mobile #view-today>div:last-child{padding:8px 12px calc(8px + var(--mob-nav-h) + var(--safe-bottom))!important}
+  html.is-mobile #view-drivers>div:last-child{padding-bottom:calc(8px + var(--mob-nav-h) + var(--safe-bottom))!important}
+  html.is-mobile #mobile-bottom-nav{
+    height:calc(var(--mob-nav-h) + var(--safe-bottom));
+    padding:4px 10px var(--safe-bottom);
+    background:linear-gradient(180deg,rgba(22,34,49,.94),#172536);
+    border-top-color:rgba(148,163,184,.18);
+    box-shadow:0 -10px 26px rgba(0,0,0,.3);
+    backdrop-filter:blur(16px);
+  }
+  html.is-mobile .mob-nav-item{
+    min-height:48px;
+    padding:4px;
+    gap:1px;
+    border-radius:12px;
+    color:#91a3b8;
+    font-weight:700;
+  }
+  html.is-mobile .mob-nav-item.active{background:rgba(245,166,35,.08)}
+  html.is-mobile .mob-nav-icon{font-size:19px}
+  html.is-mobile .mob-nav-fab{
+    width:48px;
+    height:48px;
+    margin-top:-16px;
+    border-color:#172536;
+    background:linear-gradient(135deg,#ffbd35,#f59f1f);
+    box-shadow:0 10px 24px rgba(245,166,35,.42);
+  }
+}
 </style>
 <link rel="stylesheet" href="series-system.css"/>
 </head>
