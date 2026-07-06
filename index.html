@@ -1,125 +1,78 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TaxiPro Dispatch – Index & Dateistruktur</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxiPro Dispatch – Next.js Migration</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     :root {
       --primary: #123c35;
       --primary-dark: #08231f;
       --primary-soft: #e7f0ec;
       --gold: #b08a3c;
-      --gold-dark: #7c5a19;
-      --gold-soft: #fff7e1;
       --bg: #f4f1ea;
       --paper: #fffdf8;
       --text: #1f2933;
-      --muted: #64748b;
       --border: #ded6c8;
       --red: #b42318;
-      --yellow: #b7791f;
-      --blue: #1d4ed8;
       --green: #166534;
-      --shadow: 0 12px 32px rgba(31, 41, 51, 0.065);
-      --radius: 24px;
+      --blue: #1d4ed8;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    html { scroll-behavior: smooth; }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: linear-gradient(135deg, #fff9e8 0, var(--bg) 38%, #eee7da 100%);
       color: var(--text);
-      line-height: 1.7;
+      line-height: 1.6;
     }
 
-    .container {
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 32px 16px 90px;
-    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 16px 60px; }
 
     header {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      border-radius: 30px;
-      padding: 42px 34px;
-      box-shadow: 0 26px 65px rgba(18, 60, 53, 0.28);
-      margin-bottom: 24px;
-      position: relative;
-      overflow: hidden;
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 50px rgba(18, 60, 53, 0.2);
     }
 
-    header::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 85% 10%, rgba(255,255,255,0.16), transparent 26%),
-                  radial-gradient(circle at 12% 90%, rgba(176,138,60,0.24), transparent 30%);
-      pointer-events: none;
-    }
+    header h1 { font-size: 36px; margin-bottom: 10px; }
+    header p { opacity: 0.95; line-height: 1.6; }
 
-    header > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 42px;
-      line-height: 1.09;
-      letter-spacing: -0.05em;
-    }
-
-    header p {
-      margin-top: 18px;
-      max-width: 980px;
-      color: #e8efec;
-      font-size: 18px;
-    }
-
-    nav.topbar {
+    nav {
       position: sticky;
       top: 0;
-      z-index: 10;
-      margin: 14px 0 20px;
-      background: rgba(255,253,248,0.95);
+      background: rgba(255,253,248,0.98);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 10px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      flex-wrap: wrap;
+      z-index: 100;
+      backdrop-filter: blur(8px);
     }
 
-    nav.topbar a {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 999px;
-      border: 1px solid #d6ccb9;
-      background: #fff;
+    nav button {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
       color: var(--primary);
-      text-decoration: none;
-      font-weight: 850;
-      font-size: 13px;
       cursor: pointer;
-      transition: all 0.2s;
+      font-weight: bold;
+      font-size: 12px;
       white-space: nowrap;
+      transition: all 0.2s;
     }
 
-    nav.topbar a:hover {
+    nav button:hover {
       background: var(--primary);
       color: white;
       border-color: var(--primary);
@@ -128,571 +81,872 @@
     section {
       background: var(--paper);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      margin: 20px 0;
-      box-shadow: var(--shadow);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 16px 0;
+      box-shadow: 0 4px 12px rgba(31, 41, 51, 0.06);
     }
 
     h2 {
-      margin: 0 0 14px;
       color: var(--primary);
-      font-size: 26px;
-      line-height: 1.25;
-      letter-spacing: -0.025em;
+      font-size: 28px;
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--gold);
+      padding-bottom: 10px;
     }
 
-    h3 {
-      margin: 24px 0 10px;
-      color: #253343;
-      font-size: 20px;
-      line-height: 1.3;
+    h3 { color: #253343; font-size: 18px; margin: 20px 0 10px; font-weight: 700; }
+
+    .code-block {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 14px;
+      margin: 12px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      position: relative;
     }
 
-    h4 {
-      margin: 18px 0 8px;
-      color: var(--primary-dark);
-      font-size: 17px;
-    }
-
-    p {
-      margin: 10px 0;
-    }
-
-    ul, ol {
-      margin: 10px 0 10px 22px;
-      padding: 0;
-    }
-
-    li {
-      margin: 5px 0;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin: 16px 0;
-    }
-
-    .card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
-    }
-
-    .card strong {
+    .code-block .label {
       color: var(--primary);
-      font-size: 16px;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      color: white;
-      font-size: 12px;
       font-weight: bold;
-      margin: 3px 4px 3px 0;
-      white-space: nowrap;
+      margin-bottom: 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .tag.ready {
-      background: var(--green);
-    }
-
-    .tag.soon {
-      background: var(--blue);
-    }
-
-    .tag.folder {
-      background: var(--primary);
-    }
-
-    code {
-      background: #f3f4f6;
+    .code-block code {
+      display: block;
+      white-space: pre-wrap;
+      word-break: break-word;
       color: #111827;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-    }
-
-    pre {
-      background: #f3f4f6;
-      color: #111827;
-      border-radius: 12px;
-      padding: 16px;
-      overflow-x: auto;
-      border: 1px solid #e5e7eb;
       line-height: 1.5;
-      font-size: 13px;
-      margin: 10px 0;
     }
 
-    .file-tree {
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      overflow-x: auto;
-      line-height: 1.6;
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      transition: all 0.2s;
     }
 
-    .note {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-left: 4px solid var(--blue);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-weight: 500;
-      color: #1e3a8a;
-    }
+    .copy-btn:hover { background: var(--primary-dark); }
 
-    .important {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      border-left: 4px solid var(--yellow);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-weight: 500;
-      color: #7c2d12;
-    }
+    .note { background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid var(--blue); padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 13px; }
+    .warning { background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid var(--red); padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 13px; color: #7f1d1d; }
+    .success { background: #ecfdf5; border: 1px solid #bbf7d0; border-left: 4px solid var(--green); padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 13px; color: #14532d; }
 
-    .success {
-      background: #ecfdf5;
-      border: 1px solid #bbf7d0;
-      border-left: 4px solid var(--green);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-weight: 500;
-      color: #14532d;
-    }
+    ol, ul { margin-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; }
 
-    .warning {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-left: 4px solid var(--red);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-weight: 500;
-      color: #7f1d1d;
-    }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+    th { background: var(--primary-soft); color: var(--primary); font-weight: bold; }
+    
+    .footer { text-align: center; color: #64748b; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0;
-      overflow: hidden;
-      border-radius: 15px;
-      border: 1px solid var(--border);
-      background: #fff;
-    }
-
-    th, td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: top;
-    }
-
-    th {
-      background: var(--primary-soft);
-      color: var(--primary);
-      font-weight: 900;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .footer {
-      text-align: center;
-      color: var(--muted);
-      margin-top: 40px;
-      font-size: 14px;
-      padding: 16px;
-      border-top: 1px solid var(--border);
-    }
-
-    .checklist {
-      columns: 2;
-      column-gap: 34px;
-    }
-
-    .checklist li {
-      break-inside: avoid;
-    }
-
-    @media (max-width: 820px) {
-      .container {
-        padding: 18px 12px 55px;
-      }
-
-      header {
-        padding: 28px 20px;
-        border-radius: 20px;
-      }
-
-      header h1 {
-        font-size: 28px;
-      }
-
-      section {
-        padding: 20px;
-        border-radius: 19px;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .checklist {
-        columns: 1;
-      }
-
-      table {
-        font-size: 14px;
-      }
-
-      th, td {
-        padding: 10px;
-      }
-
-      nav.topbar {
-        flex-direction: column;
-      }
-
-      nav.topbar a {
-        width: 100%;
-        text-align: center;
-      }
+    @media (max-width: 768px) {
+      header h1 { font-size: 24px; }
+      section { padding: 16px; }
+      h2 { font-size: 20px; }
+      .code-block { font-size: 12px; }
+      nav { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>🚖 TaxiPro Dispatch – Komplette Index & Dateistruktur</h1>
-      <p>
-        Ultimativer Programmierauftrag: KTS/RE Komplettsystem mit Google Kalender, Excel-Import,
-        Monatsnachweise, Rechnungen. Next.js + Prisma + PostgreSQL + Cloudflare Pages.
-      </p>
-      <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-        <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: bold;">Stand: 06.07.2026</span>
-        <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: bold;">Version: 1.0</span>
-        <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: bold;">Next.js 14 + Prisma</span>
-      </div>
+      <h1>🚖 TaxiPro Dispatch – Next.js Migration</h1>
+      <p>Komplettes Setup mit allen Dateien. Kopiere den Code, pushe, fertig! 🚀</p>
+      <p style="font-size: 13px; margin-top: 12px; opacity: 0.9;">Stand: 06.07.2026 | Next.js 14 + Prisma + PostgreSQL + Cloudflare Pages</p>
     </header>
 
-    <nav class="topbar">
-      <a href="#überblick">📊 Überblick</a>
-      <a href="#struktur">📂 Struktur</a>
-      <a href="#dateien">📋 Dateien</a>
-      <a href="#copy">🚀 Copy-Plan</a>
-      <a href="#setup">⚙️ Setup</a>
-      <a href="#checkliste">✅ Checkliste</a>
-      <button onclick="window.print()" style="cursor: pointer; background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 999px; font-weight: bold; font-size: 13px;">🖨️ Drucken</button>
+    <nav>
+      <button onclick="goTo('start')">🎯 START</button>
+      <button onclick="goTo('steps')">📋 SCHRITTE</button>
+      <button onclick="goTo('files')">📂 DATEIEN</button>
+      <button onclick="goTo('github')">🔗 GITHUB</button>
+      <button onclick="window.print()" style="margin-left: auto;">🖨️ DRUCK</button>
     </nav>
 
-    <!-- ÜBERBLICK -->
-    <section id="überblick">
-      <h2>📊 Überblick</h2>
-      <p>Dies ist die <strong>komplette Indexdatei</strong> für TaxiPro Dispatch. Sie enthält:</p>
-      <ul>
-        <li>✅ Alle Dateien, die du zum Kopieren brauchst</li>
-        <li>✅ Komplette Verzeichnis-Struktur</li>
-        <li>✅ Schritt-für-Schritt Copy-Plan</li>
-        <li>✅ Setup-Anleitung</li>
-        <li>✅ Pre-Launch Checkliste</li>
-      </ul>
-
+    <!-- START -->
+    <section id="start">
+      <h2>🎯 START – So geht's</h2>
+      
       <div class="success">
-        <strong>🎯 Start hier:</strong> Folge dem <strong>Copy-Plan</strong> (siehe unten), und du bist in ~30 Minuten fertig zum Deploy!
+        <strong>TL;DR:</strong> 3 Schritte = FERTIG!<br>
+        1. Terminal → cd ~/projects/taxipro-dispatch<br>
+        2. Alle Dateien unten kopieren (Copy-Buttons nutzen)<br>
+        3. git push origin test<br>
+        ✅ LIVE im Browser!
       </div>
-    </section>
 
-    <!-- VERZEICHNIS-STRUKTUR -->
-    <section id="struktur">
-      <h2>📂 Verzeichnis-Struktur</h2>
-      
-      <div class="file-tree">taxipro-dispatch/
-├── 📄 Configs (Root)
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── next.config.js
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── .env.example
-│   ├── .gitignore
-│   └── README.md
-│
-├── 📁 app/ (Next.js App Router)
-│   ├── layout.tsx
-│   ├── globals.css
-│   ├── (auth)/
-│   │   └── login/
-│   │       └── page.tsx
-│   ├── (dashboard)/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── customers/
-│   │   ├── trips/
-│   │   ├── import-google/
-│   │   ├── import-excel/
-│   │   ├── monthly/
-│   │   └── export/
-│   └── api/
-│       ├── auth/[...nextauth].ts
-│       ├── customers/
-│       ├── trips/
-│       ├── import/
-│       ├── monthly/
-│       ├── export/
-│       ├── whatsapp/
-│       ├── audit-log/
-│       └── dashboard/
-│
-├── 📁 components/
-│   ├── dashboard/
-│   ├── common/
-│   ├── forms/
-│   └── modals/
-│
-├── 📁 lib/
-│   ├── api-client.ts
-│   ├── auth.ts
-│   ├── google-calendar.ts
-│   ├── excel-parser.ts
-│   └── ...
-│
-├── 📁 types/
-│   ├── index.ts
-│   ├── api.ts
-│   └── database.ts
-│
-├── 📁 prisma/
-│   ├── schema.prisma
-│   └── migrations/
-│
-├── 📁 public/
-│   ├── favicon.ico
-│   └── logo.svg
-│
-├── 📁 .github/
-│   └── workflows/
-│       └── deploy.yml
-│
-└── 📁 docs/
-    ├── API-ENDPOINTS.md
-    ├── SETUP-GUIDE.md
-    └── MIGRATION-GUIDE.md</div>
-    </section>
-
-    <!-- DATEIEN -->
-    <section id="dateien">
-      <h2>📋 Alle Dateien</h2>
-
-      <h3>✅ Fertig zum Kopieren (von /mnt/user-data/outputs/)</h3>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Datei</th>
-            <th>Kopierort</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>package.json</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>next.config.js</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>tsconfig.json</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>tailwind.config.js</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>postcss.config.js</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>.env.example</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>.gitignore</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>README.md</code></td>
-            <td>root/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>prisma/schema.prisma</code></td>
-            <td>prisma/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>app/layout.tsx</code></td>
-            <td>app/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>app/globals.css</code></td>
-            <td>app/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>app/api/auth/[...nextauth].ts</code></td>
-            <td>app/api/auth/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>app/(auth)/login/page.tsx</code></td>
-            <td>app/(auth)/login/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>app/(dashboard)/layout.tsx</code></td>
-            <td>app/(dashboard)/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>app/(dashboard)/page.tsx</code></td>
-            <td>app/(dashboard)/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>.github/workflows/deploy.yml</code></td>
-            <td>.github/workflows/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>MIGRATION-GUIDE.md</code></td>
-            <td>docs/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>SETUP-GUIDE.md</code></td>
-            <td>docs/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-          <tr>
-            <td><code>API-ENDPOINTS.md</code></td>
-            <td>docs/</td>
-            <td><span class="tag ready">✅ READY</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>📝 Später auszufüllen (Skeleton-Struktur)</h3>
-      <p>Diese Dateien brauchst du NICHT jetzt zu kopieren. Die Struktur reicht aus, die werden später gefüllt.</p>
+      <h3>Was brauchst du?</h3>
       <ul>
-        <li><code>app/(dashboard)/customers/page.tsx</code> – Kundenliste</li>
-        <li><code>app/(dashboard)/trips/page.tsx</code> – Fahrt-Verwaltung</li>
-        <li><code>app/(dashboard)/import-google/page.tsx</code> – Google Import</li>
-        <li><code>app/(dashboard)/monthly/page.tsx</code> – Monatslisten</li>
-        <li><code>app/api/customers/route.ts</code> – Customers API</li>
-        <li><code>app/api/trips/route.ts</code> – Trips API</li>
-        <li>... (weitere API Routes)</li>
+        <li>✅ Git (installiert)</li>
+        <li>✅ Node.js 18+ (installiert)</li>
+        <li>✅ Supabase Account (kostenlos)</li>
+        <li>✅ GitHub Token (hast du)</li>
       </ul>
     </section>
 
-    <!-- COPY-PLAN -->
-    <section id="copy">
-      <h2>🚀 Copy-Plan (30 Min)</h2>
+    <!-- SCHRITTE -->
+    <section id="steps">
+      <h2>📋 Schritt-für-Schritt</h2>
 
-      <div class="success">
-        <strong>Schritt-für-Schritt:</strong> Folge dieser Anleitung und du bist fertig!
-      </div>
-
-      <h3>1️⃣ Alte Dateien löschen</h3>
-      <pre>cd ~/projects/taxipro-dispatch
+      <h3>1️⃣ Terminal: Alte Dateien löschen</h3>
+      <div class="code-block">
+        <div class="label">Terminal</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>cd ~/projects/taxipro-dispatch
 git rm -rf .
-git commit -m "Clear: Ready for Next.js rebuild"</pre>
+git commit -m "Clear: Ready for Next.js rebuild"</code>
+      </div>
 
-      <h3>2️⃣ Neue Dateien kopieren</h3>
+      <h3>2️⃣ Alle Dateien unten kopieren (mit Copy-Buttons!)</h3>
+      <p>Jede Datei mit dem "COPY"-Button kopieren und in den richtigen Ordner einfügen:</p>
       <ul>
-        <li>Downloade alle Dateien aus <code>/mnt/user-data/outputs/</code></li>
-        <li>Kopiere sie in dein <code>taxipro-dispatch/</code> Verzeichnis</li>
-        <li>Beachte die Ordner-Struktur! (<code>app/layout.tsx</code> geht in <code>app/</code>, nicht in root!)</li>
+        <li><code>package.json</code> → root/</li>
+        <li><code>app/layout.tsx</code> → app/</li>
+        <li><code>app/(auth)/login/page.tsx</code> → app/(auth)/login/</li>
+        <li>usw...</li>
       </ul>
 
-      <h3>3️⃣ Ordner-Struktur ggf. erstellen</h3>
-      <pre>mkdir -p app/{api,\(auth\),\(dashboard\)}/{customers,trips,import,export,monthly}
-mkdir -p components/{dashboard,common,forms,modals}
-mkdir -p lib types prisma docs public
-mkdir -p .github/workflows</pre>
+      <h3>3️⃣ Terminal: npm install</h3>
+      <div class="code-block">
+        <div class="label">Terminal</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>npm install</code>
+      </div>
 
-      <h3>4️⃣ package.json umbenennen</h3>
-      <pre>cp taxi-app-package.json package.json</pre>
+      <h3>4️⃣ Terminal: Umgebung einrichten</h3>
+      <div class="code-block">
+        <div class="label">Terminal</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>cp .env.example .env.local</code>
+      </div>
+      <p>Editiere <code>.env.local</code> und trage deine Supabase DATABASE_URL ein!</p>
 
-      <h3>5️⃣ npm install</h3>
-      <pre>npm install</pre>
+      <h3>5️⃣ Terminal: Datenbank & Test</h3>
+      <div class="code-block">
+        <div class="label">Terminal</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>npx prisma migrate dev --name init
+npm run dev</code>
+      </div>
+      <p>Browser: http://localhost:3000/login | Login: admin@example.com / admin123</p>
 
-      <h3>6️⃣ Umgebung einrichten</h3>
-      <pre>cp .env.example .env.local
-# Jetzt .env.local editieren:
-# DATABASE_URL = "postgresql://..."  (von Supabase)
-# NEXTAUTH_SECRET = "..." (openssl rand -base64 32)</pre>
-
-      <h3>7️⃣ Datenbank migrieren</h3>
-      <pre>npx prisma migrate dev --name init</pre>
-
-      <h3>8️⃣ Test starten</h3>
-      <pre>npm run dev
-# Öffne http://localhost:3000/login
-# Login: admin@example.com / admin123</pre>
-
-      <h3>9️⃣ Git pushen</h3>
-      <pre>git add .
-git commit -m "Feat: Complete Next.js rebuild"
+      <h3>6️⃣ Terminal: Git & Push zu test/</h3>
+      <div class="code-block">
+        <div class="label">Terminal</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>git add .
+git commit -m "feat: Complete Next.js rebuild with Auth, Dashboard, Prisma"
 git branch test
-git push origin test</pre>
+git push origin test</code>
+      </div>
 
-      <h3>🔟 Deployen & Freigeben</h3>
-      <p>Browser → <code>https://taxipro-dispatch.pages.dev/?branch=test</code> → Test → OK → Merge <code>test</code> zu <code>main</code> ✅</p>
+      <h3>7️⃣ Browser: Testen</h3>
+      <p>GitHub Actions läuft jetzt (2-3 Min). Dann teste im Browser:</p>
+      <p><code>https://taxipro-dispatch.pages.dev/?branch=test</code></p>
+
+      <h3>8️⃣ Wenn OK → Merge zu main</h3>
+      <div class="code-block">
+        <div class="label">Terminal ODER GitHub UI</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>git checkout main
+git merge test
+git push origin main</code>
+      </div>
+
+      <div class="success">
+        <strong>✅ FERTIG!</strong> Deine App ist jetzt LIVE auf Cloudflare Pages! 🚀
+      </div>
     </section>
 
-    <!-- SETUP -->
-    <section id="setup">
-      <h2>⚙️ Setup im Detail</h2>
+    <!-- DATEIEN ZUM KOPIEREN -->
+    <section id="files">
+      <h2>📂 Alle Dateien – Copy-Paste</h2>
 
-      <h3>Supabase PostgreSQL</h3>
-      <ol>
-        <li>Gehe zu <strong>https://supabase.com</strong></li>
-        <li>Neues Projekt erstellen</li>
-        <li>Database Connection URL kopieren</li>
-        <li>In <code>.env.local</code> als <code>DATABASE_URL</code> einfügen</li>
-      </ol>
+      <div class="warning">
+        <strong>⚠️ WICHTIG:</strong> Achte auf den Kopierort! Jede Datei muss im richtigen Ordner sein!
+      </div>
 
-      <h3>GitHub Secrets</h3>
-      <p>GitHub → Settings → Secrets & Variables → New Secret:</p>
+      <!-- package.json -->
+      <h3>package.json</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/ (taxipro-dispatch/)</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>{
+  "name": "taxi-dispatch-system",
+  "version": "1.0.0",
+  "description": "TaxiPro Dispatch – KTS/RE/Google Kalender",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@prisma/client": "^5.0.0",
+    "next-auth": "^4.24.0",
+    "lucide-react": "^latest",
+    "axios": "^1.6.0",
+    "googleapis": "^latest",
+    "xlsx": "^0.18.5",
+    "react-hot-toast": "^2.4.1",
+    "zustand": "^4.4.0",
+    "date-fns": "^2.30.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.2.0",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16",
+    "prisma": "^5.0.0"
+  }
+}</code>
+      </div>
+
+      <!-- .gitignore -->
+      <h3>.gitignore</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>node_modules
+.pnp
+.next
+out
+build
+dist
+.env
+.env.local
+.env.*.local
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+prisma/migrations/
+tmp/
+temp/</code>
+      </div>
+
+      <!-- .env.example -->
+      <h3>.env.example</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>DATABASE_URL="postgresql://user:password@host:5432/taxi_db"
+NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
+NEXTAUTH_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID="xxx.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="xxx"
+NODE_ENV="development"</code>
+      </div>
+
+      <!-- tsconfig.json -->
+      <h3>tsconfig.json</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/types/*": ["./types/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}</code>
+      </div>
+
+      <!-- next.config.js -->
+      <h3>next.config.js</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  images: { unoptimized: true },
+  experimental: { appDir: true }
+}
+
+module.exports = nextConfig</code>
+      </div>
+
+      <!-- tailwind.config.js -->
+      <h3>tailwind.config.js</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>export default {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: "#123c35",
+        gold: "#b08a3c",
+      },
+    },
+  },
+  plugins: [],
+}</code>
+      </div>
+
+      <!-- postcss.config.js -->
+      <h3>postcss.config.js</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}</code>
+      </div>
+
+      <!-- app/layout.tsx -->
+      <h3>app/layout.tsx</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>import type { Metadata } from 'next'
+import { Toaster } from 'react-hot-toast'
+import './globals.css'
+
+export const metadata: Metadata = {
+  title: 'TaxiPro Dispatch',
+  description: 'Ultimatives Taxi-System',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="de">
+      <body>
+        {children}
+        <Toaster position="top-center" />
+      </body>
+    </html>
+  )
+}</code>
+      </div>
+
+      <!-- app/globals.css -->
+      <h3>app/globals.css</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: linear-gradient(135deg, #fff9e8 0, #f4f1ea 38%, #eee7da 100%);
+  color: #1f2933;
+  line-height: 1.7;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f1ea;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b08a3c;
+  border-radius: 4px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #123c35;
+  box-shadow: 0 0 0 3px rgba(18, 60, 53, 0.1);
+}</code>
+      </div>
+
+      <!-- app/page.tsx -->
+      <h3>app/page.tsx</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>import { redirect } from 'next/navigation'
+
+export default function RootPage() {
+  redirect('/login')
+}</code>
+      </div>
+
+      <!-- app/(auth)/login/page.tsx -->
+      <h3>app/(auth)/login/page.tsx</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/(auth)/login/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>'use client'
+
+import { signIn } from 'next-auth/react'
+import { FormEvent, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        toast.error(result.error)
+      } else {
+        toast.success('Anmelden erfolgreich!')
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      toast.error('Anmeldung fehlgeschlagen')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f1ea] to-[#eee7da] flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-[#ded6c8] shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-[#123c35] text-center mb-2">TaxiPro Dispatch</h1>
+          <p className="text-center text-[#64748b] text-sm mb-8">Ultimatives Taxi-System</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-[#123c35] mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@example.com"
+                required
+                className="w-full px-4 py-2 border border-[#ded6c8] rounded-lg focus:outline-none focus:border-[#123c35]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#123c35] mb-2">Passwort</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="w-full px-4 py-2 border border-[#ded6c8] rounded-lg focus:outline-none focus:border-[#123c35]"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2 bg-[#123c35] text-white font-bold rounded-lg hover:bg-[#08231f] disabled:opacity-50"
+            >
+              {isLoading ? 'Anmeldung läuft...' : 'Anmelden'}
+            </button>
+          </form>
+
+          <div className="mt-8 p-4 bg-[#e7f0ec] rounded-lg">
+            <p className="text-xs font-semibold text-[#123c35]">Demo: admin@example.com / admin123</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}</code>
+      </div>
+
+      <!-- app/(dashboard)/layout.tsx -->
+      <h3>app/(dashboard)/layout.tsx</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/(dashboard)/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const session = await getServerSession()
+
+  if (!session) {
+    redirect('/login')
+  }
+
+  const navItems = [
+    { label: '📊 Dashboard', href: '/dashboard' },
+    { label: '👥 Kunden', href: '/dashboard/customers' },
+    { label: '🚗 Fahrten', href: '/dashboard/trips' },
+    { label: '📅 Google', href: '/dashboard/import-google' },
+    { label: '📄 Excel', href: '/dashboard/import-excel' },
+    { label: '📋 Monatsliste', href: '/dashboard/monthly' },
+  ]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f1ea] to-[#eee7da]">
+      <header className="bg-gradient-to-r from-[#123c35] to-[#08231f] text-white py-6 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4">
+          <h1 className="text-2xl font-bold">TaxiPro Dispatch</h1>
+          <p className="text-sm opacity-90">Angemeldet als: {session.user?.name}</p>
+        </div>
+      </header>
+
+      <nav className="bg-white border-b border-[#ded6c8] sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-1">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href}
+              className="px-4 py-3 text-sm font-semibold text-[#123c35] hover:bg-[#e7f0ec] whitespace-nowrap">
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {children}
+      </main>
+    </div>
+  )
+}</code>
+      </div>
+
+      <!-- app/(dashboard)/page.tsx -->
+      <h3>app/(dashboard)/page.tsx</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/(dashboard)/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>'use client'
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-[#123c35] to-[#08231f] text-white rounded-2xl p-8 shadow-lg">
+        <h2 className="text-3xl font-bold mb-2">Willkommen!</h2>
+        <p className="opacity-90">Neues TaxiPro System ist live!</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Kunden', value: '—', icon: '👥' },
+          { label: 'KTS Fahrten', value: '—', icon: '🚗' },
+          { label: 'RE Fahrten', value: '—', icon: '💰' },
+          { label: 'Offene Items', value: '—', icon: '⚠️' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white rounded-xl border border-[#ded6c8] p-4">
+            <div className="text-3xl mb-2">{stat.icon}</div>
+            <div className="text-[#64748b] text-sm font-semibold">{stat.label}</div>
+            <div className="text-2xl font-bold text-[#123c35]">{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-[#fff7e1] border border-[#b08a3c] rounded-xl p-6">
+        <h4 className="font-bold text-[#6b4e12] mb-2">ℹ️ System-Status</h4>
+        <p className="text-sm text-[#6b4e12]">Phase 1 Grundgerüst fertig! Phase 2 kommt bald!</p>
+      </div>
+    </div>
+  )
+}</code>
+      </div>
+
+      <!-- app/api/auth/[...nextauth].ts -->
+      <h3>app/api/auth/[...nextauth].ts</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: app/api/auth/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>import NextAuth, { type NextAuthOptions } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Passwort', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email und Passwort erforderlich')
+        }
+
+        if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
+          return {
+            id: '1',
+            email: 'admin@example.com',
+            name: 'Admin',
+          }
+        }
+
+        throw new Error('Ungültige Anmeldedaten')
+      },
+    }),
+  ],
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60,
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    async jwt({ token }) {
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub
+      }
+      return session
+    },
+  },
+}
+
+export default NextAuth(authOptions)</code>
+      </div>
+
+      <!-- prisma/schema.prisma -->
+      <h3>prisma/schema.prisma</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: prisma/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password_hash String
+  name          String
+  role          String
+  active        Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Customer {
+  id                  String    @id @default(cuid())
+  first_name          String
+  last_name           String
+  display_name        String
+  address             String?
+  phone               String?
+  pickup_address      String?
+  destination_name    String?
+  km_one_way          Float?
+  price_one_way       Float?
+  exemption_status    String?
+  active              Boolean   @default(true)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  trips               Trip[]
+
+  @@map("customers")
+}
+
+model Trip {
+  id                  String    @id @default(cuid())
+  customer_id         String
+  customer            Customer  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  trip_date           DateTime
+  trip_type           String
+  pickup_address      String
+  destination_address String
+  outbound            Boolean   @default(false)
+  return_trip         Boolean   @default(false)
+  status              String    @default("offen")
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  @@map("trips")
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  entity_type String
+  entity_id   String
+  action      String
+  old_value   String?
+  new_value   String?
+  created_at  DateTime  @default(now())
+
+  @@map("audit_logs")
+}</code>
+      </div>
+
+      <!-- .github/workflows/deploy.yml -->
+      <h3>.github/workflows/deploy.yml</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: .github/workflows/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code>name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main, test, dev]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - run: npm ci
+      
+      - run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy .next/server --project-name=taxipro-dispatch</code>
+      </div>
+
+      <!-- README.md -->
+      <h3>README.md</h3>
+      <div class="code-block">
+        <div class="label">Kopierort: root/</div>
+        <button class="copy-btn" onclick="copy(this)">📋 COPY</button>
+        <code"># TaxiPro Dispatch – Next.js System
+
+**Status:** 🚀 Phase 1 – Grundgerüst fertig
+
+## Setup
+
+\`\`\`bash
+npm install
+cp .env.example .env.local
+# Trage DATABASE_URL von Supabase ein
+npx prisma migrate dev --name init
+npm run dev
+\`\`\`
+
+Browser: http://localhost:3000/login  
+Demo: admin@example.com / admin123
+
+## Deployment
+
+\`\`\`bash
+git push origin test  # Test im Browser
+git push origin main  # Live auf Cloudflare
+\`\`\`
+
+---
+
+Stand: 06.07.2026 | Next.js + Prisma + Cloudflare Pages</code>
+      </div>
+    </section>
+
+    <!-- GITHUB SETUP -->
+    <section id="github">
+      <h2>🔗 GitHub Setup – GitHub Secrets</h2>
+
+      <p>GitHub → Settings → Secrets and variables → New Secret:</p>
+
       <table>
         <thead>
           <tr>
@@ -703,7 +957,7 @@ git push origin test</pre>
         <tbody>
           <tr>
             <td><code>DATABASE_URL</code></td>
-            <td>postgresql://user:pwd@host/db</td>
+            <td>postgresql://... (von Supabase)</td>
           </tr>
           <tr>
             <td><code>NEXTAUTH_SECRET</code></td>
@@ -720,124 +974,35 @@ git push origin test</pre>
         </tbody>
       </table>
 
-      <h3>Login-Daten (Demo)</h3>
-      <ul>
-        <li><strong>Email:</strong> admin@example.com</li>
-        <li><strong>Passwort:</strong> admin123</li>
-      </ul>
-    </section>
-
-    <!-- CHECKLISTE -->
-    <section id="checkliste">
-      <h2>✅ Pre-Launch Checkliste</h2>
-
-      <div class="checklist">
-        <ul>
-          <li>[ ] Alle Dateien aus outputs/ heruntergeladen</li>
-          <li>[ ] In taxipro-dispatch/ kopiert (mit richtiger Struktur)</li>
-          <li>[ ] <code>npm install</code> erfolgreich</li>
-          <li>[ ] <code>.env.local</code> mit Supabase URL</li>
-          <li>[ ] <code>NEXTAUTH_SECRET</code> generiert</li>
-          <li>[ ] <code>npx prisma migrate dev</code> erfolgreich</li>
-          <li>[ ] <code>npm run dev</code> läuft ohne Fehler</li>
-          <li>[ ] http://localhost:3000/login erreichbar</li>
-          <li>[ ] Login funktioniert (admin@example.com / admin123)</li>
-          <li>[ ] Dashboard wird angezeigt</li>
-          <li>[ ] GitHub Secrets alle gesetzt</li>
-          <li>[ ] <code>test/</code> Branch bei GitHub vorhanden</li>
-          <li>[ ] GitHub Actions ausgeführt</li>
-          <li>[ ] Cloudflare Pages deployt</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- NÄCHSTE SCHRITTE -->
-    <section>
-      <h2>🎯 Nächste Phasen (nach erfolgreichem Deploy)</h2>
-
-      <div class="grid">
-        <div class="card">
-          <strong>📅 Phase 2: Google Kalender API</strong><br>
-          <small>Google Calendar read-only Import mit Preview/Confirm</small>
-        </div>
-        <div class="card">
-          <strong>👥 Phase 3: Kundenverwaltung</strong><br>
-          <small>Customers API + CRUD Operationen</small>
-        </div>
-        <div class="card">
-          <strong>🚗 Phase 4: Trip-Erfassung</strong><br>
-          <small>Manuelle Fahrt-Erfassung + Monatslisten</small>
-        </div>
-        <div class="card">
-          <strong>📄 Phase 5: Excel-Import</strong><br>
-          <small>Excel-Dateien hochladen + verarbeiten</small>
-        </div>
-        <div class="card">
-          <strong>📑 Phase 6: PDF-Export</strong><br>
-          <small>Unterschriftszettel + Rechnungen generieren</small>
-        </div>
-        <div class="card">
-          <strong>💬 Phase 7: WhatsApp</strong><br>
-          <small>Fahrt-Vermittlung über WhatsApp</small>
-        </div>
-      </div>
-    </section>
-
-    <!-- WICHTIG -->
-    <section>
-      <h2>⚠️ Wichtig – Sicherheit</h2>
-
-      <div class="warning">
-        <strong>❌ Diese Dateien gehören NICHT ins Git:</strong>
-        <ul>
-          <li><code>.env.local</code> (Database URLs, Secrets)</li>
-          <li><code>node_modules/</code> (wird via npm install installiert)</li>
-          <li><code>.next/</code> (Build-Output)</li>
-          <li><code>.DS_Store</code> (macOS)</li>
-        </ul>
-        <p>✅ Dies ist schon in <code>.gitignore</code> konfiguriert!</p>
-      </div>
-
-      <div class="important">
-        <strong>🔐 GitHub Token:</strong><br>
-        Der GitHub Personal Access Token ist SENSIBEL. Niemals in Chat oder Code committen. Nur lokal in <code>.env.local</code> (nicht ins Git!)
-      </div>
-
       <div class="note">
-        <strong>💡 Tipp:</strong> Nutze GitHub Secrets für Production-Werte, .env.local nur lokal zum Testen.
+        <strong>💡 Tipp:</strong> Alle Secrets in GitHub UI setzen, dann ist alles automatisch verschlüsselt!
       </div>
-    </section>
-
-    <!-- FAQ -->
-    <section>
-      <h2>❓ FAQ</h2>
-
-      <h4>F: Wo finde ich all die Dateien zum Download?</h4>
-      <p><strong>A:</strong> In <code>/mnt/user-data/outputs/</code>. Alle Dateien sind dort bereit.</p>
-
-      <h4>F: Muss ich wirklich alle Dateien aus outputs/ kopieren?</h4>
-      <p><strong>A:</strong> Ja, alle aus der Tabelle oben (die mit ✅ READY). Die "Später" Dateien brauchst du NICHT jetzt.</p>
-
-      <h4>F: Kann ich direkt in main pushen oder in test/?</h4>
-      <p><strong>A:</strong> Immer erst in <code>test/</code> pushen. Du prüfst im Browser, dann mergen zu <code>main</code>.</p>
-
-      <h4>F: Wie lange dauert das Setup?</h4>
-      <p><strong>A:</strong> Ca. 30 Minuten: Download (5 min) + Kopieren (10 min) + npm install (10 min) + Test (5 min).</p>
-
-      <h4>F: Was wenn <code>npm install</code> Fehler hat?</h4>
-      <p><strong>A:</strong> Lösche <code>node_modules/</code> und <code>package-lock.json</code>, dann <code>npm install</code> erneut.</p>
-
-      <h4>F: Muss ich Google Kalender jetzt einrichten?</h4>
-      <p><strong>A:</strong> Nein. Das kommt in Phase 2. Jetzt reicht das Grundgerüst.</p>
     </section>
 
     <div class="footer">
-      <p>
-        TaxiPro Dispatch – Ultimativer Programmierauftrag<br>
-        Taxi Meckenheim • Google Kalender read-only • Excel-Allrounder<br>
-        Stand: 06.07.2026 | Version 1.0 | Next.js + Prisma + Cloudflare Pages
-      </p>
+      <p>🚖 TaxiPro Dispatch – Ultimativer Programmierauftrag</p>
+      <p>Stand: 06.07.2026 | Version 1.0 | Next.js + Prisma + Cloudflare Pages</p>
     </div>
   </div>
+
+  <script>
+    function goTo(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' })
+    }
+
+    function copy(button) {
+      const codeBlock = button.nextElementSibling
+      const text = codeBlock.innerText
+      navigator.clipboard.writeText(text).then(() => {
+        const original = button.innerText
+        button.innerText = '✅ KOPIERT!'
+        setTimeout(() => {
+          button.innerText = original
+        }, 2000)
+      }).catch(err => {
+        alert('Copy fehlgeschlagen. Bitte manuell kopieren.')
+      })
+    }
+  </script>
 </body>
 </html>
