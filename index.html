@@ -2554,6 +2554,8 @@ let driverChat=JSON.parse(localStorage.getItem('tp_driver_chat')||'[]');
 let driverShifts=JSON.parse(localStorage.getItem('tp_driver_shifts')||'[]');
 let excelArchive=JSON.parse(localStorage.getItem('tp_excel_archive')||'[]');
 let assistantHistory=JSON.parse(localStorage.getItem('tp_assistant_history')||'[]');
+let gcalRawEvents=JSON.parse(localStorage.getItem('tp_gcal_raw_events')||'[]');
+let importLogs=JSON.parse(localStorage.getItem('tp_import_logs')||'[]');
 let currentDriverId=localStorage.getItem('tp_driver_session')||sessionStorage.getItem('tp_driver_session')||null;
 let driverPollTimer=null;
 let driverKnownRideIds=new Set();
@@ -2611,6 +2613,7 @@ const REVIEW_FLAG_LABELS={
   type_conflict:'KTS/RE passt nicht zum Kunden',
   missing_zuzahlung:'Zuzahlung NB/BF fehlt',
   missing_cancel_reason:'Ausfallgrund fehlt',
+  gcal_cancelled:'Google-Termin storniert',
 };
 
 function save(){
@@ -2623,6 +2626,8 @@ function save(){
   localStorage.setItem('tp_driver_shifts',JSON.stringify(driverShifts));
   localStorage.setItem('tp_excel_archive',JSON.stringify(excelArchive));
   localStorage.setItem('tp_assistant_history',JSON.stringify(assistantHistory));
+  localStorage.setItem('tp_gcal_raw_events',JSON.stringify(gcalRawEvents));
+  localStorage.setItem('tp_import_logs',JSON.stringify(importLogs));
   persistRidesToIdb();
   scheduleCloudSave();
 }
@@ -2635,7 +2640,7 @@ function saveDriverChat(){
 function exportBackup(){
   const data={
     version:3,exported:new Date().toISOString(),
-    customers,rides,gcContacts,drivers,driverDocs,driverChat,excelArchive,assistantHistory,
+    customers,rides,gcContacts,drivers,driverDocs,driverChat,excelArchive,assistantHistory,gcalRawEvents,importLogs,
     recurringOrders:JSON.parse(localStorage.getItem('tp_ro')||'[]'),
     seriesPreviews:JSON.parse(localStorage.getItem('tp_sp')||'[]'),
     monthlySummaries:JSON.parse(localStorage.getItem('tp_ms')||'[]'),
@@ -2666,6 +2671,8 @@ function importBackup(input){
       driverChat=data.driverChat||[];
       excelArchive=data.excelArchive||[];
       assistantHistory=data.assistantHistory||[];
+      gcalRawEvents=data.gcalRawEvents||[];
+      importLogs=data.importLogs||[];
       if(data.recurringOrders) localStorage.setItem('tp_ro',JSON.stringify(data.recurringOrders));
       if(data.seriesPreviews) localStorage.setItem('tp_sp',JSON.stringify(data.seriesPreviews));
       if(data.monthlySummaries) localStorage.setItem('tp_ms',JSON.stringify(data.monthlySummaries));
@@ -4941,16 +4948,28 @@ async function autoPurgeDemoOnLoad(){
 
 function syncFromGoogle(rawEvents){
   if(!gcalSyncEnabled) return;
-  let imported=0,updated=0,deleted=0;
+  const importId=uid();
+  const startedAt=new Date().toISOString();
+  let imported=0,updated=0,deleted=0,conflicts=0,ignored=0;
   for(const raw of rawEvents){
+    upsertGcalRawEvent(importId,raw);
     if(raw.status==='cancelled'){
-      if(rides.some(r=>r.googleEventId===raw.id)){
-        rides=rides.filter(r=>r.googleEventId!==raw.id);
-        deleted++;
+      const linked=rides.filter(r=>r.googleEventId===raw.id);
+      linked.forEach(r=>{
+        r.gcalCancelled=true;
+        r._gcalChanged=true;
+        r.reviewStatus='pending';
+        r.cancelReason=r.cancelReason||'Google-Kalender-Termin wurde storniert/gelöscht - bitte prüfen';
+        ensureReviewMeta(r);
+        refreshRideReview(r);
+        conflicts++;
+      });
+      if(linked.length){
+        deleted+=linked.length;
       }
       continue;
     }
-    if(!shouldImportGCalEvent(raw)) continue;
+    if(!shouldImportGCalEvent(raw)){ignored++;continue;}
     const ev=normGCalEvent(raw);
     const linkedId=raw.extendedProperties?.private?.taxiproRideId;
     let ride=linkedId?rides.find(r=>r.id===linkedId):rides.find(r=>r.googleEventId===ev.id);
@@ -4965,6 +4984,7 @@ function syncFromGoogle(rawEvents){
       if(wasApproved&&gcalSnapshotChanged(prevSnap,snapshot)){
         ride.reviewStatus='pending';
         ride._gcalChanged=true;
+        conflicts++;
       }
       else if(!ride.reviewStatus||ride.reviewStatus==='rejected') ride.reviewStatus='pending';
       refreshRideReview(ride);
@@ -4977,8 +4997,37 @@ function syncFromGoogle(rawEvents){
       imported++;
     }
   }
+  importLogs.unshift({id:importId,source:'google-calendar',startedAt,finishedAt:new Date().toISOString(),calendarId:gcalCalendarId,total:rawEvents.length,imported,updated,cancelled:deleted,ignored,conflicts,status:'completed'});
+  if(importLogs.length>200) importLogs=importLogs.slice(0,200);
   gcalLastSyncStats={imported,updated,deleted};
-  if(imported||updated||deleted){save();updateCounts();}
+  save();updateCounts();
+}
+
+function upsertGcalRawEvent(importId,raw){
+  if(!raw?.id) return;
+  const record={
+    id:raw.id,
+    importId,
+    calendarId:raw._calId||gcalCalendarId,
+    googleEventId:raw.id,
+    icalUID:raw.iCalUID||raw.iCalUid||'',
+    etag:raw.etag||'',
+    summary:raw.summary||'',
+    description:raw.description||'',
+    location:raw.location||'',
+    startAt:raw.start?.dateTime||raw.start?.date||'',
+    endAt:raw.end?.dateTime||raw.end?.date||'',
+    googleCreatedAt:raw.created||'',
+    googleUpdatedAt:raw.updated||'',
+    googleStatus:raw.status||'',
+    rawJson:raw,
+    importStatus:raw.status==='cancelled'?'storniert im Kalender':shouldImportGCalEvent(raw)?'analysiert':'ignoriert',
+    importedAt:new Date().toISOString()
+  };
+  const i=gcalRawEvents.findIndex(x=>x.googleEventId===raw.id&&x.calendarId===record.calendarId);
+  if(i>=0) gcalRawEvents[i]={...gcalRawEvents[i],...record};
+  else gcalRawEvents.unshift(record);
+  if(gcalRawEvents.length>3000) gcalRawEvents=gcalRawEvents.slice(0,3000);
 }
 
 async function fetchGCalEventsForRange(timeMin,timeMax,calId){
@@ -5810,7 +5859,7 @@ function shareRideWA(){
   const to=document.getElementById('r-to').value;
   const links=buildMapsLinks(from,to);
   const txt=`🚖 TaxiPro Fahrtauftrag\n\n👤 Kunde: ${name}\n📅 Datum: ${date}\n⏰ Abfahrt: ${time} Uhr\n📍 Von: ${from||'–'}\n🎯 Nach: ${to||'–'}\n\n🗺️ Navigation:\n${links.route}`;
-  if(!nativeShare(txt,'Fahrtauftrag')) openWhatsAppUrl(`https://wa.me/?text=${encodeURIComponent(txt)}`);
+  shareWhatsAppWithPreview(txt);
 }
 
 function shareRideWAById(id){
@@ -5818,8 +5867,14 @@ function shareRideWAById(id){
   const c=customers.find(x=>x.id===r.customerId)||gcContacts.find(x=>x.id===r.customerId);
   const name=c?c.fname+' '+c.lname:'Unbekannt';
   const links=buildMapsLinks(r.from||'',r.to||'');
-  const txt=`🚖 TaxiPro Fahrtauftrag\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n💊 Zuzahlung: ${zuzahlLabel(r.zuzahlung)}`:''}${r.note?`\n📝 ${r.note}`:''}\n\n🗺️ Navigation:\n${links.route}`;
-  if(!nativeShare(txt,'Fahrtauftrag')) openWhatsAppUrl(`https://wa.me/?text=${encodeURIComponent(txt)}`);
+  const note=r.type==='krank'?'':(r.note?`\n📝 Hinweis: ${r.note}`:'');
+  const txt=`🚖 TaxiPro Fahrtauftrag\n👤 ${name}\n📅 ${r.date} ⏰ ${r.time} Uhr\n📍 ${r.from||'–'}\n🎯 ${r.to||'–'}${r.km?`\n📏 ca. ${r.km} km`:''}${r.type==='krank'?`\n🚑 Krankenfahrt: Ja\n💊 Eigenanteil: ${zuzahlShort(r.zuzahlung||'NB')}`:''}${note}\n\n🗺️ Navigation:\n${links.route}`;
+  shareWhatsAppWithPreview(txt);
+}
+
+function shareWhatsAppWithPreview(text){
+  if(!confirm('WhatsApp-Vorschau prüfen:\n\n'+text+'\n\nJetzt öffnen/senden vorbereiten?')) return;
+  if(!nativeShare(text,'Fahrtauftrag')) openWhatsAppUrl(`https://wa.me/?text=${encodeURIComponent(text)}`);
 }
 
 function shareCustomerWA(){
@@ -6627,7 +6682,7 @@ async function writeRideToExcelCloud(ride,cust){
 
 function buildCloudPayload(){
   const pubUrl=localStorage.getItem('tp_gdrv_public_url')||localStorage.getItem('tp_public_sync_url')||'';
-  return{version:7,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,excelArchive,assistantHistory,
+  return{version:8,exported:new Date().toISOString(),customers,rides,gcContacts,drivers,driverDocs,driverChat,driverShifts,excelArchive,assistantHistory,gcalRawEvents,importLogs,
     settings:{
       gcalCalendarId,gcalSyncEnabled,gcalImportAll,gcalShow,theme:localStorage.getItem('tp_theme')||'dark',
       sync:{gdrvFileId:gdrvFileId||localStorage.getItem('tp_gdrv_file_id')||'',gdrvPublicUrl:pubUrl,gdrvSyncEnabled:!!gdrvSyncEnabled}
@@ -6702,6 +6757,8 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
     if(Array.isArray(data.driverShifts)) driverShifts=data.driverShifts;
     if(Array.isArray(data.excelArchive)) excelArchive=data.excelArchive;
     if(Array.isArray(data.assistantHistory)) assistantHistory=data.assistantHistory;
+    if(Array.isArray(data.gcalRawEvents)) gcalRawEvents=data.gcalRawEvents;
+    if(Array.isArray(data.importLogs)) importLogs=data.importLogs;
     if(Array.isArray(data.drivers)&&data.drivers.length) drivers=data.drivers;
   }else{
     if(!data?.rides&&!data?.customers&&!data?.driverDocs) return false;
@@ -6714,6 +6771,8 @@ function applyCloudPayload(data,{force=false,driverMode=false}={}){
     if(Array.isArray(data.driverShifts)) driverShifts=data.driverShifts;
     if(Array.isArray(data.excelArchive)) excelArchive=data.excelArchive;
     if(Array.isArray(data.assistantHistory)) assistantHistory=data.assistantHistory;
+    if(Array.isArray(data.gcalRawEvents)) gcalRawEvents=data.gcalRawEvents;
+    if(Array.isArray(data.importLogs)) importLogs=data.importLogs;
   }
   reapplyDriverBootAuth();
   saveLocalOnly();
@@ -8772,6 +8831,7 @@ function computeReviewFlags(ride){
     (ride.customerId&&r.customerId===ride.customerId)||(ride.googleEventId&&r.googleEventId===ride.googleEventId)||(ride.from===r.from&&ride.to===r.to)
   ));
   if(dupes.length) flags.push('duplicate_trip');
+  if(ride.gcalCancelled) flags.push('gcal_cancelled');
   if(ride._gcalChanged) flags.push('gcal_changed');
   if(ride.gcalSnapshot&&ride.source==='google'&&ride._prevGcalCheck){
     if(gcalSnapshotChanged(ride._prevGcalCheck,ride.gcalSnapshot)) flags.push('gcal_changed');
