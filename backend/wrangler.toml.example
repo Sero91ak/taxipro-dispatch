@@ -1,0 +1,15 @@
+name = "taxipro-dispatch-v2-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Create D1 database: npx wrangler d1 create taxipro-dispatch-v2
+# Put real database_id from the output here.
+[[d1_databases]]
+binding = "DB"
+database_name = "taxipro-dispatch-v2"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[vars]
+# Must match the exact published GitHub Pages origin (no trailing slash).
+APP_ORIGIN = "https://sero91ak.github.io"
