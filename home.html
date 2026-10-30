@@ -24,6 +24,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circl
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .card.dispatch::before{background:linear-gradient(90deg,var(--gold),transparent)}
 .card.driver::before{background:linear-gradient(90deg,var(--teal),transparent)}
+.card.preview::before{background:linear-gradient(90deg,#ffe3a2,#dba353)}
+.card.preview .card-cta{background:rgba(245,166,35,.15);color:#f8d18e}
 .card:hover{border-color:rgba(255,255,255,.16);box-shadow:0 16px 40px rgba(0,0,0,.35)}
 .card-icon{font-size:32px;margin-bottom:10px}
 .card-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px}
@@ -53,6 +55,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circl
       <div class="card-title">Fahrer-App</div>
       <p class="card-desc">Nur deine Fahrten, Navigation, Team-Chat, Fahrschein, Schichtzeiten.</p>
       <span class="card-cta">Fahrer-App öffnen →</span>
+    </a>
+    <a class="card preview" href="v2/index.html">
+      <div class="card-icon">✨</div>
+      <div class="card-title">TaxiPro 2.1 – Neue Vorschau</div>
+      <p class="card-desc">Modernes Flotten-Dashboard, Tageskontrolle, Fahrer-Testansicht und interaktive Auftragsverwaltung. Nur Beispieldaten; die bisherigen Apps bleiben unberührt.</p>
+      <span class="card-cta">Neue Oberfläche testen →</span>
     </a>
   </div>
   <p class="foot"><strong>Tipp:</strong> Zentrale über <strong>dispatch.html</strong> installieren · Fahrer über <strong>driver.html</strong> – zwei getrennte Apps auf dem Home-Bildschirm.</p>
