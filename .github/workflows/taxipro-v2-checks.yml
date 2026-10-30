@@ -1,0 +1,33 @@
+name: TaxiPro 2.2 – Code & API Tests
+on:
+  push:
+    branches: [main, taxipro-full-v22-20261030]
+    paths:
+      - 'v2/**'
+      - 'backend/**'
+      - 'tests/**'
+      - '.github/workflows/taxipro-v2-checks.yml'
+  pull_request:
+    paths:
+      - 'v2/**'
+      - 'backend/**'
+      - 'tests/**'
+      - '.github/workflows/taxipro-v2-checks.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check backend/worker.js
+          node --check v2/app.js
+          node --check v2/sw.js
+      - name: Verify role isolation, recurring trips, shifts, pauses, GPS and account security
+        run: node --experimental-sqlite tests/api-integration.mjs
