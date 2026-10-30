@@ -13,7 +13,7 @@
 :root{--bg:#0a1628;--text:#f2f6fa;--muted:#8fa3bc;--gold:#f5a623;--teal:#14b8a6;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,rgba(245,166,35,.08),transparent 45%),radial-gradient(circle at 80% 100%,rgba(20,184,166,.08),transparent 40%),var(--bg);color:var(--text);min-height:100dvh;padding:28px 20px;padding-top:calc(28px + var(--safe-top));padding-bottom:calc(28px + var(--safe-bottom))}
-.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;min-height:calc(100dvh - 56px - var(--safe-top) - var(--safe-bottom));justify-content:center}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;min-height:calc(100dvh - 56px - var(--safe-top) - var(--safe-bottom));justify-content:center}
 .head{text-align:center;margin-bottom:32px}
 .head h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
 .head h1 em{color:var(--gold);font-style:normal}
@@ -41,9 +41,15 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circl
 <div class="wrap">
   <header class="head">
     <h1>TaxiPro <em>Meckenheim</em></h1>
-    <p>Internes System · Zentrale &amp; Fahrer · kostenlos · ohne API-Key</p>
+    <p>Ein System für Disposition, Fahrer, Schichten und Serienfahrten – ohne App-Store.</p>
   </header>
   <div class="cards">
+    <a class="card preview" href="v2/app.html">
+      <div class="card-icon">◈</div>
+      <div class="card-title">TaxiPro 2.2 · Neue Zentrale</div>
+      <p class="card-desc">Modernes Flottenmanagement: sichere Rollen, Fahrerzugänge, Aufträge, Serienfahrten, Pausen, GPS-Meldungen und Tageskontrolle. Anmeldung nach Einrichtung des kostenlosen Synchronisierungsdienstes.</p>
+      <span class="card-cta">Neues Command Center öffnen →</span>
+    </a>
     <a class="card dispatch" href="dispatch.html?source=home">
       <div class="card-icon">📋</div>
       <div class="card-title">Zentrale / Disponent</div>
@@ -58,12 +64,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circl
     </a>
     <a class="card preview" href="v2/index.html">
       <div class="card-icon">✨</div>
-      <div class="card-title">TaxiPro 2.1 – Neue Vorschau</div>
+      <div class="card-title">TaxiPro 2.2 – Interaktive Vorschau</div>
       <p class="card-desc">Modernes Flotten-Dashboard, Tageskontrolle, Fahrer-Testansicht und interaktive Auftragsverwaltung. Nur Beispieldaten; die bisherigen Apps bleiben unberührt.</p>
       <span class="card-cta">Neue Oberfläche testen →</span>
     </a>
   </div>
-  <p class="foot"><strong>Tipp:</strong> Zentrale über <strong>dispatch.html</strong> installieren · Fahrer über <strong>driver.html</strong> – zwei getrennte Apps auf dem Home-Bildschirm.</p>
+  <p class="foot"><strong>Bestandsdaten:</strong> Die bisherigen Links bleiben erreichbar, bis Fahrer-/Kundenmigration und Sicherheitsfreigabe erfolgt sind.<br><br><strong>Tipp:</strong> Zentrale über <strong>dispatch.html</strong> installieren · Fahrer über <strong>driver.html</strong> – zwei getrennte Apps auf dem Home-Bildschirm.</p>
 </div>
 </body>
 </html>
