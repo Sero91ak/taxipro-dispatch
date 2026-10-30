@@ -63,4 +63,4 @@ const oldPass=await call('/api/login','POST',{username:'driver2',password:'TESTP
 const newPass=await call('/api/login','POST',{username:'driver2',password:'NEU_TEST_PASSWORD_87654321'},'');assert.equal(newPass.status,200,'new password works');
 const adminFull=await call('/api/state');assert.equal(adminFull.data.series.length,1);assert.equal(adminFull.data.breaks.length,1,'break history in admin export');
 const badExport=await call('/api/export','GET',null,aToken);assert.equal(badExport.status,403,'no driver full export');
-console.log('PASS: API integration – bootstrap, login, role separation, driver accounts, rides, shifts, GPS, messages, origin checks (56 assertions).');
+console.log('PASS: API integration – bootstrap, login, role separation, driver accounts, rides, shifts, GPS, messages, origin checks (64 assertions).');
