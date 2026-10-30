@@ -11,4 +11,4 @@ Das neue Rollenportal läuft unter `/v2/app.html`; die interaktive Demonstration
 
 Aktueller Funktions- und Sicherheitsstatus: [docs/V22-STATUS.md](../docs/V22-STATUS.md). Cloudflare-Konfiguration: [Einrichtung](../docs/EINRICHTUNG.md).
 
-Für Tests: `node --experimental-sqlite tests/api-integration.mjs` (56 Assertions).
+Für Tests: `node --experimental-sqlite tests/api-integration.mjs` (64 Assertions).
