@@ -35,4 +35,4 @@ Cloudflare Workers + D1 Setup laut `docs/EINRICHTUNG.md` ausführen, Bootstrap-S
 
 ## Tests
 
-`node --experimental-sqlite tests/api-integration.mjs` – 56 Assertions bestanden (30.10.2026, SQLite Testadapter). JavaScript-Syntax geprüft. Keine Produktions-Backend-/Geräte-End-to-End-Verifikation. Tests sind keine Sicherheitszertifizierung.
+`node --experimental-sqlite tests/api-integration.mjs` – 64 Assertions bestanden (30.10.2026, SQLite Testadapter). JavaScript-Syntax geprüft. Keine Produktions-Backend-/Geräte-End-to-End-Verifikation. Tests sind keine Sicherheitszertifizierung.
