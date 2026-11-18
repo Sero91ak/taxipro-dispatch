@@ -6,6 +6,7 @@
  */
 import {handleCommunity,listReports,listSwaps,listFiles,listSignatures} from './community.js';
 import {fetchTimeSummary} from './time-summary.js';
+import {handleOps} from './ops.js';
 const encoder = new TextEncoder();
 const ID = () => crypto.randomUUID();
 const timestamp = () => new Date().toISOString();
@@ -332,6 +333,8 @@ export default {
       if(path==='/api/position'&&req.method==='POST')return respond(await updatePosition(req,env,u));
       if(path==='/api/messages'&&req.method==='POST')return respond(await sendMessage(req,env,u),201);
       if(path==='/api/time-summary'&&req.method==='GET')return respond(await fetchTimeSummary(env.DB,u,new URL(req.url).searchParams));
+      const operations=await handleOps(req,env,u,path);
+      if(operations)return respond(operations.data||operations,operations.status||200);
       const community=await handleCommunity(req,env,u,path);
       if(community){
         if(community.response){
