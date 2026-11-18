@@ -20,7 +20,7 @@ const validId=v=>/^[a-f0-9-]{36}$/i.test(v);
  * authoritative source); reporting never silently copies them into ledger.
  * A finished driver ride is "reported" until the dispatcher verifies it.
  */
-const JOURNEYS_SQL = \`
+const JOURNEYS_SQL = `
  SELECT l.id,l.customer_id,l.calendar_import_id,l.customer_route_id,
    l.service_date,l.pickup_time,l.pickup,l.destination,l.direction,
    l.billing_class,l.ride_status,l.operator_note,l.driver_id,
@@ -39,8 +39,8 @@ const JOURNEYS_SQL = \`
    r.assigned_at AS recorded_at,COALESCE(rv.reviewed_at,r.completed_at,r.assigned_at) AS updated_at,
    rv.reviewed_at,rv.reviewed_by,'dispatch' AS origin
  FROM rides r LEFT JOIN ride_reviews rv ON rv.ride_id=r.id
-\`;
-const JOURNEYS_CTE = \`WITH unified AS (\${JOURNEYS_SQL})\`;
+`;
+const JOURNEYS_CTE = `WITH unified AS (${JOURNEYS_SQL})`;
 
 async function parse(req){
   if(!(req.headers.get('content-type')||'').includes('application/json'))throw bad(415,'JSON erforderlich.');
