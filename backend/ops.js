@@ -61,9 +61,9 @@ async function customers(db,u,search){
        x.external_key AS customer_code, s.billing_class,s.prescription_status,s.approval_status,
        s.copayment_status,s.approval_valid_until,s.prescription_valid_until,s.phone,
        (SELECT COUNT(*) FROM journey_ledger l WHERE l.customer_id=c.id) AS journey_count
-       FROM customers c LEFT JOIN customer_source_links x ON x.customer_id=c.id AND x.source='master_sheet'
+       FROM customers c LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
        LEFT JOIN customer_case_status s ON s.customer_id=c.id
-       WHERE c.active=1 AND (?='' OR c.name LIKE ? OR x.external_key LIKE ?)
+       WHERE c.active=1 AND (?='' OR c.name LIKE ? OR EXISTS (SELECT 1 FROM customer_source_links y WHERE y.customer_id=c.id AND y.source='master_sheet' AND y.external_key LIKE ?))
        ORDER BY c.name,c.id LIMIT ?`;
   const like='%'+query.replace(/[%_]/g,'')+'%';
   const result=await db.prepare(q).bind(query,like,like,limit).all();
@@ -74,7 +74,7 @@ async function customerDetail(db,u,id,search){
   const customer=await db.prepare(`SELECT c.*,x.external_key AS customer_code,s.billing_class,s.prescription_status,
     s.approval_status,s.copayment_status,s.approval_valid_until,s.prescription_valid_until,
     s.phone,s.external_document_reference,s.review_note,s.reviewed_at,s.updated_at
-    FROM customers c LEFT JOIN customer_source_links x ON x.customer_id=c.id AND x.source='master_sheet'
+    FROM customers c LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
     LEFT JOIN customer_case_status s ON s.customer_id=c.id WHERE c.id=? AND c.active=1`).bind(id).first();
   if(!customer)throw bad(404,'Kunde nicht gefunden.');
   const routes=await db.prepare('SELECT * FROM customer_routes WHERE customer_id=? AND active=1 ORDER BY is_primary DESC,label LIMIT 60').bind(id).all();
@@ -252,7 +252,7 @@ async function ledgerList(db,u,search){
   if(!dt(from)||!dt(to)||from>to||id&&!validId(id))throw bad(400,'Filter ungültig.');
   const query=`SELECT l.*,c.name AS customer_name,x.external_key AS customer_code
     FROM journey_ledger l JOIN customers c ON c.id=l.customer_id
-    LEFT JOIN customer_source_links x ON x.customer_id=c.id AND x.source='master_sheet'
+    LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
     WHERE l.service_date BETWEEN ? AND ? AND (? IS NULL OR l.customer_id=?)
     ORDER BY l.service_date,l.pickup_time LIMIT 1800`;
   const r=await db.prepare(query).bind(from,to,id,id).all();
@@ -279,7 +279,7 @@ async function printData(db,u,search) {
   const from=search.get('from'),to=search.get('to');
   if(!dt(from)||!dt(to)||from>to)throw bad(400,'Zeitraum ungültig.');
   const c=await db.prepare(`SELECT c.id,c.name,x.external_key FROM customers c
-    LEFT JOIN customer_source_links x ON x.customer_id=c.id AND x.source='master_sheet'
+    LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
     WHERE c.id=? AND c.active=1`).bind(id).first();
   if(!c)throw bad(404,'Kunde nicht gefunden.');
   const q=await db.prepare(`SELECT * FROM journey_ledger WHERE customer_id=? AND service_date BETWEEN ? AND ?
