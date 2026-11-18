@@ -299,3 +299,14 @@ CREATE TABLE IF NOT EXISTS customer_import_conflicts (
   resolved_by TEXT REFERENCES users(id)
 );
 CREATE INDEX IF NOT EXISTS idx_customer_import_conflicts ON customer_import_conflicts(status,seen_at);
+
+
+-- TaxiPro integration: audited dispatcher review of ORIGINAL driver assignments.
+-- No copying existing ride rows into the manual journal.
+CREATE TABLE IF NOT EXISTS ride_reviews (
+ ride_id TEXT PRIMARY KEY REFERENCES rides(id) ON DELETE CASCADE,
+ review_note TEXT NOT NULL,
+ reviewed_at TEXT NOT NULL,
+ reviewed_by TEXT NOT NULL REFERENCES users(id)
+);
+CREATE INDEX IF NOT EXISTS idx_ride_reviews_reviewer ON ride_reviews(reviewed_by,reviewed_at);
