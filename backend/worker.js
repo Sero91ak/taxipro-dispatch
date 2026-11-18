@@ -231,12 +231,17 @@ async function addSeries(req,env,u){
  const weekdayArray=Array.isArray(d.weekdays)?[...new Set(d.weekdays.map(Number))]:[];
  const start=safeText(d.startDate,10),end=safeText(d.endDate,10),time=safeText(d.outboundTime,5),ret=safeText(d.returnTime,5)||null;
  const pickup=safeText(d.pickup,200),dest=safeText(d.destination,200),kind=safeText(d.kind,40);
+ const explicitBilling=d.billingClass||'unknown';
+ if(!['unknown','KTS','RE','private'].includes(explicitBilling))
+   throw err(400,'KTS, RE oder Privatfahrt für Serienvorlage ungültig.');
+ const seriesBilling=explicitBilling==='unknown'&&kind==='Rechnungsfahrt'?'RE':
+   explicitBilling==='unknown'&&kind==='Barfahrt'?'private':explicitBilling;
  if(!okDate(start)||!okDate(end)||end<start||Date.parse(end)-Date.parse(start)>366*86400000||!weekdayArray.length||weekdayArray.some(n=>!Number.isInteger(n)||n<0||n>6)||!okTime(time)||(ret&&!okTime(ret))||!pickup||!dest||!['Krankenfahrt','Rechnungsfahrt','Serienfahrt','Barfahrt'].includes(kind))throw err(400,'Serienfahrt unvollständig oder ungültig.');
  const driver=await env.DB.prepare("SELECT id FROM users WHERE id=? AND role='driver' AND active=1").bind(d.driverId).first();
  const customer=await env.DB.prepare('SELECT id FROM customers WHERE id=? AND active=1').bind(d.customerId).first();
  if(!driver||!customer)throw err(400,'Kunde oder Fahrer nicht gefunden.');
- const id=ID();await env.DB.prepare(`INSERT INTO recurring_orders(id,customer_id,driver_id,start_date,end_date,weekdays,outbound_time,return_time,pickup,destination,kind,signature_required,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`)
- .bind(id,d.customerId,d.driverId,start,end,weekdayArray.sort().join(','),time,ret,pickup,dest,kind,d.signatureRequired===true?1:0,timestamp()).run();
+ const id=ID();await env.DB.prepare(`INSERT INTO recurring_orders(id,customer_id,driver_id,start_date,end_date,weekdays,outbound_time,return_time,pickup,destination,kind,billing_class,signature_required,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+ .bind(id,d.customerId,d.driverId,start,end,weekdayArray.sort().join(','),time,ret,pickup,dest,kind,seriesBilling,d.signatureRequired===true?1:0,timestamp()).run();
  await audit(env.DB,u.id,'series.created',id);return {id};
 }
 async function generateSeries(req,env,u){
@@ -250,8 +255,8 @@ async function generateSeries(req,env,u){
   const date=new Date(n).toISOString().slice(0,10);if(date<series.start_date||date>series.end_date||!days.has(new Date(n).getUTCDay()))continue;
   for(const direction of series.return_time?['hin','rueck']:['hin']){
    const backward=direction==='rueck';const id=ID();
-   const result=await env.DB.prepare(`INSERT OR IGNORE INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,signature_required,status,assigned_at,recurring_order_id) VALUES(?,?,?,?,?,?,?,?,?,?,'assigned',?,?)`)
-    .bind(id,series.customer_id,series.driver_id,date,backward?series.return_time:series.outbound_time,backward?series.destination:series.pickup,backward?series.pickup:series.destination,series.kind,direction,series.signature_required,timestamp(),series.id).run();
+   const result=await env.DB.prepare(`INSERT OR IGNORE INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,billing_class,signature_required,status,assigned_at,recurring_order_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,'assigned',?,?)`)
+    .bind(id,series.customer_id,series.driver_id,date,backward?series.return_time:series.outbound_time,backward?series.destination:series.pickup,backward?series.pickup:series.destination,series.kind,direction,series.billing_class||'unknown',series.signature_required,timestamp(),series.id).run();
    if(result.meta?.changes)created++;else existing++;
   }
  }
