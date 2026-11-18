@@ -83,3 +83,6 @@
 .center-contact-info{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;background:#143149;border:1px solid #355c70;border-radius:12px;font-size:12px;color:#bcd7e6}
 .center-contact-info b{color:#eaddb7}
 .center-contact-match{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;background:#224054;border:1px solid #3d6376;color:#b8d7e4;font-size:11px;margin:3px}
+
+.center-import-warning{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#48351e;border:1px solid #9b7942;border-radius:10px;padding:10px 14px;font-size:12px;color:#ffe2b5}
+.center-import-warning b{font-size:12px}
