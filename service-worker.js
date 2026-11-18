@@ -1,9 +1,10 @@
-const CACHE = 'taxipro-dispatch-v30';const ASSETS = [
+const CACHE = 'taxipro-dispatch-v31';const ASSETS = [
   './',
   './index.html',
   './home.html',
   './dispatch.html',
   './driver.html',
+  './traffic.html',
   './manifest.json',
   './manifest-driver.json',
   './series-system.css',
