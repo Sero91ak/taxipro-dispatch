@@ -1546,6 +1546,8 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <p class="drv-login-sub">Deine Fahrten, Navigation &amp; Team-Chat.<br>PIN von der Zentrale eingeben.</p>
       <input type="tel" class="drv-pin-input" id="driver-pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="PIN" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')driverLoginByPin()"/>
       <button type="button" class="drv-login-btn" id="driver-login-btn" onclick="driverLoginByPin().catch(e=>{console.error(e);toast('Anmeldung fehlgeschlagen – bitte erneut versuchen','err');})">Anmelden</button>
+      <a href="./traffic.html" class="drv-login-btn" style="display:block;text-decoration:none;text-align:center;box-sizing:border-box;width:100%;background:transparent;border:1px solid #14b8a6;color:#5eead4;margin-top:12px">🗺️ Verkehrskarte ohne PIN öffnen</a>
+      <p style="font-size:11px;color:#94b8d4;margin-top:8px;line-height:1.5">Die öffentliche Verkehrskarte ist frei zugänglich. Für zugewiesene Fahrten und Team-Chat brauchst du einen persönlichen Fahrerzugang der Zentrale.</p>
       <p id="driver-login-error" style="display:none;font-size:12px;color:#f87171;margin-top:12px;line-height:1.5;padding:10px;background:rgba(248,113,113,.1);border-radius:10px"></p>
       <div class="drv-install-card" id="driver-install-inline">
         <strong>📲 Fahrer-App installieren (iPhone)</strong>
