@@ -60,7 +60,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     '<div class="center-overview-grid"><section class="center-panel"><div class="center-panel-head"><b>Fahrtenjournal · '+esc(d.date)+'</b>'+
     iconBtn('refresh-home','↻ Neu laden')+'</div>'+
     (list?rows(['Kunde / Strecke','Zeit','Abrechnung','Status','Fahrer'],[list]):
-      empty('Noch keine bestätigten Fahrten im neuen Journal. Kalendertermine werden erst nach sicherer Zuordnung übernommen.'))+
+      empty('Keine Fahreraufträge oder manuellen Fahrten im gewählten Tagesjournal. Kalendertermine bleiben getrennt.'))+
     '<div class="center-panel-foot">'+iconBtn('open-ledger','Monatsjournal öffnen')+
     iconBtn('open-calendar','Kalender prüfen')+'</div></section>'+
     '<section class="center-panel"><div class="center-panel-head"><b>Quellverbindungen</b><span class="center-muted">Serverstand</span></div>'+
@@ -109,7 +109,8 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     text(x.pickup||'Startort nicht dokumentiert')+' → '+text(x.destination||'Ziel nicht dokumentiert')+'</small>'+pill(x.billing_class)+'</div>').join('');
   const journeys=ls.map(x=>'<tr>'+td(text(x.service_date))+
     td(text(x.pickup_time))+td(text(x.pickup)+' → '+text(x.destination))+
-    td(text(x.direction))+td(pill(x.billing_class))+td(pill(x.ride_status))+'</tr>');
+    td(text(x.direction))+td(pill(x.billing_class))+td(pill(x.ride_status))+
+    td(pill(x.origin,x.origin==='dispatch'?'Fahrerauftrag':'Manuell'))+'</tr>');
   return head('Kundenakte · '+text(c.customer_code||'ohne K-Nummer'),
       text(c.name)+' · Eine Akte, mehrere Behandlungsziele, getrennte Fahrtarten',
       iconBtn('back-customers','Zurück')+iconBtn('lookup-contact','Google Kontakte prüfen')+
@@ -139,7 +140,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     '<div class="center-filters"><label>Von<input id="center-detail-from" type="date" value="'+esc(periodFrom)+'"></label>'+
     '<label>Bis<input id="center-detail-to" type="date" value="'+esc(periodTo)+'"></label>'+
     iconBtn('refresh-customer','Fahrten anzeigen')+iconBtn('new-ledger-for-customer','Fahrt hinzufügen')+'</div>'+
-    (journeys.length?rows(['Datum','Abholung','Start → Ziel','Richtung','KTS / RE','Status'],journeys):empty('Noch keine Journalfahrten im ausgewählten Zeitraum.'))+
+    (journeys.length?rows(['Datum','Abholung','Start → Ziel','Richtung','KTS / RE','Status','Quelle'],journeys):empty('Noch keine Journalfahrten im ausgewählten Zeitraum.'))+
     '</div></div>';
  }
  function conflictsView() {
@@ -185,16 +186,18 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     td(text(x.service_date)+' · '+text(x.pickup_time))+
     td(text(x.pickup)+' → '+text(x.destination))+
     td(pill(x.billing_class))+td(pill(x.ride_status))+
+    td(pill(x.origin,x.origin==='dispatch'?'Fahrerauftrag':'Manuell'))+
     td('<div class="center-row-actions">'+
-      (x.ride_status==='planned'?iconBtn('ledger-reported','Gefahren melden','data-id="'+esc(x.id)+'"'):'')+
+      (x.origin==='manual'&&x.ride_status==='planned'?iconBtn('ledger-reported','Gefahren melden','data-id="'+esc(x.id)+'"'):'')+
       (x.ride_status==='reported'?iconBtn('ledger-confirm','Prüfen / bestätigen','data-id="'+esc(x.id)+'"'):'')+
+      (x.origin==='dispatch'&&x.ride_status==='planned'?'<span class="center-muted">Fahrer bestätigt Fahrt</span>':'')+
       '</div>')+'</tr>');
   return head('Fahrtenjournal','Hin- und Rückfahrten, nach Kunde/Zeitraum gruppiert · kein automatisches „Gefahren“')+
     '<div class="center-shell"><div class="center-panel"><div class="center-filters"><label>Von<input type="date" id="center-ledger-from" value="'+esc(periodFrom)+'"></label>'+
     '<label>Bis<input type="date" id="center-ledger-to" value="'+esc(periodTo)+'"></label>'+
     iconBtn('load-ledger','Zeitraum anzeigen')+'</div>'+
     '<div class="center-panel-head"><b>Fahrten</b><span class="center-muted">'+n(data.length)+' Einträge</span></div>'+
-    (journeys.length?rows(['Kunde','Datum & Zeit','Strecke','Abrechnung','Bearbeitung','Aktion'],journeys):
+    (journeys.length?rows(['Kunde','Datum & Zeit','Strecke','Abrechnung','Bearbeitung','Quelle','Aktion'],journeys):
       empty('Für diesen Zeitraum liegen noch keine Fahrten im neuen Journal vor.'))+'</div>'+
     '<div class="center-panel center-space"><div class="center-panel-head"><b>Manuelle Fahrt nachtragen</b></div>'+
     '<form id="center-ledger-form" class="center-form">'+
