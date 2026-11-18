@@ -108,7 +108,7 @@ export function displayPrefs(input) {
     selectedCustomerId:null,periodFrom:null,periodTo:null,calendarState:'review'};
   const allowed={
     density:['compact','comfortable'],nav:['expanded','collapsed'],
-    lastPage:['home','dispatch','series','daily','rides','customers','drivers','shifts','worktime','traffic','chat','files','swaps','signatures','cases','case-detail','calendar','ledger','import-review'],
+    lastPage:['home','dispatch','series','daily','rides','customers','drivers','shifts','worktime','traffic','chat','files','swaps','signatures','cases','case-detail','calendar','ledger','import-review','integrations'],
     dateFilter:['today','week','month']
   };
   for(const [key,choices] of Object.entries(allowed))if(input[key]!==undefined){
