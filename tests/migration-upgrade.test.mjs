@@ -10,7 +10,7 @@ assert.ok(cut>5000,'Previous v2.3 schema section exists');
 // Reconstruct the prior schema without the newly introduced billing column.
 // This fixture is synthesized from the same repository to prevent drift.
 const oldSchema=full.slice(0,cut).replace(
- /\n billing_class TEXT NOT NULL DEFAULT 'unknown' CHECK\(billing_class IN \('KTS','RE','private','unknown'\)\),/,
+ /\n billing_class TEXT NOT NULL DEFAULT 'unknown' CHECK\(billing_class IN \('KTS','RE','private','unknown'\)\),/g,
  ''
 );
 test('v2.3 migration keeps original customer IDs, assigned trips, driver accounts and shift data',()=>{
@@ -18,6 +18,7 @@ test('v2.3 migration keeps original customer IDs, assigned trips, driver account
  db.exec('PRAGMA foreign_keys=ON;'+oldSchema);
  const columnsBefore=db.prepare('PRAGMA table_info(rides)').all().map(r=>r.name);
  assert.ok(!columnsBefore.includes('billing_class'),'Pre-upgrade ride schema has no billing_class');
+ assert.ok(!db.prepare('PRAGMA table_info(recurring_orders)').all().some(r=>r.name==='billing_class'),'Legacy series schema has no billing_class');
  const admin='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',driver='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
  const patient='cccccccc-cccc-4ccc-8ccc-cccccccccccc',ride='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  const now='2026-11-18T08:00:00.000Z';
@@ -39,6 +40,7 @@ test('v2.3 migration keeps original customer IDs, assigned trips, driver account
  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM users").get().n,2);
  db.prepare("UPDATE rides SET billing_class='KTS' WHERE id=?").run(ride);
  assert.equal(db.prepare('SELECT billing_class FROM rides WHERE id=?').get(ride).billing_class,'KTS');
+ assert.ok(db.prepare('PRAGMA table_info(recurring_orders)').all().some(r=>r.name==='billing_class'),'Serienfahrten behalten neue KTS/RE-Spalte');
  for(const table of ['ride_reviews','journey_ledger','calendar_imports','customer_routes','customer_case_status','user_display_settings']){
    assert.equal(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").get(table).name,table);
  }
