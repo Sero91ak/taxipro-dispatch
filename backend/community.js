@@ -49,7 +49,7 @@ async function createReport(req,env,u) {
   if(lat<47||lat>55.2||lng<5.5||lng>15.6)throw error(400,'Standort außerhalb des Einsatzgebietes.');
   const description=text(body.description,500),road=text(body.road,45);
   if(description.length<5)throw error(400,'Bitte die Verkehrslage genauer beschreiben.');
-  if(/\\b(blitzer|radar|lasermessung|geschwindigkeitskontrolle|polizeikontrolle|messwagen|speedcam)\\b/i.test(description+' '+road))
+  if(/\b(blitzer|radar|lasermessung|geschwindigkeitskontrolle|polizeikontrolle|messwagen|speedcam)\b/i.test(description+' '+road))
     throw error(400,'Meldungen über Geschwindigkeitskontrollen werden nicht als Fahrerwarnung verbreitet.');
   const accuracy=body.accuracy==null?null:coord(body.accuracy,10000,'GPS-Genauigkeit');
   if(accuracy!==null&&accuracy<0)throw error(400,'GPS-Genauigkeit ungültig.');
