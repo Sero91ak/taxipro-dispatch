@@ -14,7 +14,7 @@ const ops=createOperations({
   rerender:async()=>{await refresh();render();}
 });
 const office=createDispatchCenter({
-  request,esc,toast,getUser:()=>me,getState:()=>db,refreshMain:page=>render(page)
+  request,esc,toast,getUser:()=>me,getState:()=>db,refreshMain:page=>{render(page);if(me?.role==='admin')office.openPage(page);}
 });
 const APIOK=/^https:\/\/[^/]+/.test(apiBase);
 const now = () => new Date();
