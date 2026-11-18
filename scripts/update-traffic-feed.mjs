@@ -4,6 +4,7 @@
  * Veröffentlicht nur amtliche, öffentliche Verkehrsvorfälle (keine Blitzer).
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const BASE = 'https://verkehr.autobahn.de/o/autobahn';
 const ROADS = ['A61','A565','A555','A59','A4','A3'];
@@ -106,7 +107,7 @@ export async function buildFeed({ fetchGroup=fetchRoad, previous=oldFeed(), now=
     events:[...unique.values()].sort((a,b)=>a.autobahn.localeCompare(b.autobahn) || a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title))
   };
 }
-if (process.argv[1] && import.meta.url === new URL('file://'+process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     const feed=await buildFeed();
     writeFileSync(FILE,JSON.stringify(feed,null,2)+'\n','utf8');
