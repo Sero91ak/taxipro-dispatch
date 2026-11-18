@@ -1601,6 +1601,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
           <button type="button" data-filter="warning" aria-pressed="false">⚠️ Gefahren</button>
           <button type="button" data-filter="closure" aria-pressed="false">⛔ Sperrungen</button>
           <button type="button" data-filter="roadworks" aria-pressed="false">🚧 Baustellen</button>
+          <button type="button" data-filter="planned" aria-pressed="false">🗓️ Geplant</button>
         </div>
         <div class="drv-section-title" id="tp-traffic-count">Amtliche Meldungen</div>
         <div id="tp-traffic-list" class="tp-traffic-list" aria-live="polite"></div>
@@ -1609,11 +1610,11 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       </div>
       <div id="driver-team-panel" class="hidden">
         <div class="drv-section-title">Team-Radio</div>
-        <p style="font-size:13px;color:#94b8d4;margin-bottom:14px;line-height:1.5">Stau, Unfall, Blitzer – alle Fahrer informieren sich hier.</p>
+        <p style="font-size:13px;color:#94b8d4;margin-bottom:14px;line-height:1.5">Stau, Unfall oder Straßensperrung an die Fahrer und die Zentrale melden.</p>
         <div class="drv-team-quick">
           <button type="button" onclick="postDriverChatQuick('traffic')">🚧 Stau</button>
           <button type="button" onclick="postDriverChatQuick('accident')">💥 Unfall</button>
-          <button type="button" onclick="postDriverChatQuick('blitzer')">📸 Blitzer</button>
+          <button type="button" onclick="postDriverChatQuick('closure')">⛔ Sperrung</button>
         </div>
         <div id="driver-chat-list"></div>
         <div class="drv-chat-input-row">
@@ -8388,7 +8389,7 @@ function acceptDriverRide(rideId){
 }
 
 function postDriverChatQuick(type){
-  const labels={traffic:'🚧 Stau gemeldet',accident:'💥 Unfall gemeldet',blitzer:'📸 Blitzer gemeldet'};
+  const labels={traffic:'🚧 Stau gemeldet',accident:'💥 Unfall gemeldet',closure:'⛔ Sperrung gemeldet'};
   addDriverChatMessage(type,labels[type]||'');
 }
 
@@ -8412,11 +8413,11 @@ function renderDriverChat(){
   const el=document.getElementById('driver-chat-list');
   if(!el) return;
   const msgs=[...driverChat].sort((a,b)=>a.timestamp-b.timestamp).slice(-80);
-  if(!msgs.length){el.innerHTML='<p style="font-size:13px;color:#64748b;text-align:center;padding:24px">Noch keine Team-Nachrichten.<br>Stau, Unfall oder Blitzer melden!</p>';return;}
+  if(!msgs.length){el.innerHTML='<p style="font-size:13px;color:#64748b;text-align:center;padding:24px">Noch keine Team-Nachrichten.<br>Stau, Unfall oder Sperrung melden!</p>';return;}
   el.innerHTML=msgs.map(m=>{
     const t=new Date(m.timestamp).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
-    const typeLabels={traffic:'Stau',accident:'Unfall',blitzer:'Blitzer',general:'Info'};
-    return`<div class="drv-chat-msg ${m.type||'general'}"><div class="drv-chat-head">${m.driverName||'Fahrer'} · ${typeLabels[m.type]||'Info'} · ${t}</div><div class="drv-chat-text">${m.text}</div></div>`;
+    const typeLabels={traffic:'Stau',accident:'Unfall',closure:'Sperrung',blitzer:'Altmeldung',general:'Info'};
+    return`<div class="drv-chat-msg ${['traffic','accident','closure','general'].includes(m.type)?m.type:'general'}"><div class="drv-chat-head">${escAttr(m.driverName||'Fahrer')} · ${typeLabels[m.type]||'Info'} · ${t}</div><div class="drv-chat-text">${escAttr(m.text||'')}</div></div>`;
   }).join('');
   el.scrollTop=el.scrollHeight;
 }
