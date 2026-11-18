@@ -64,3 +64,106 @@ const newPass=await call('/api/login','POST',{username:'driver2',password:'NEU_T
 const adminFull=await call('/api/state');assert.equal(adminFull.data.series.length,1);assert.equal(adminFull.data.breaks.length,1,'break history in admin export');
 const badExport=await call('/api/export','GET',null,aToken);assert.equal(badExport.status,403,'no driver full export');
 console.log('PASS: API integration – bootstrap, login, role separation, driver accounts, rides, shifts, GPS, messages, origin checks (64 assertions).');
+
+// Version 2.3: secure staff-community operations and evidence access tests.
+const staffReport=await call('/api/traffic-reports','POST',
+ {category:'jam',road:'A565',description:'Stau vor der Anschlussstelle',
+ latitude:50.654,longitude:7.035,accuracy:18},aToken);
+assert.equal(staffReport.status,201,'Fahrer darf eigene Verkehrsmeldung erstellen');
+const allReports=await call('/api/traffic-reports','GET',null,bLogin.data.token);
+assert.equal(allReports.status,200);
+assert.equal(allReports.data.reports.length,1);
+assert.equal(allReports.data.reports[0].road,'A565');
+assert.equal(allReports.data.reports[0].reporter_id,userA.data.id);
+const prohibited=await call('/api/traffic-reports','POST',
+ {category:'hazard',description:'Blitzer an der Straße',latitude:50.62,longitude:7.03},aToken);
+assert.equal(prohibited.status,400,'Keine Blitzerwarnungen für fahrende Mitarbeiter');
+const resolveNotOwn=await call('/api/traffic-reports/'+staffReport.data.id,'PATCH',{action:'resolve'},bLogin.data.token);
+assert.equal(resolveNotOwn.status,403);
+const resolved=await call('/api/traffic-reports/'+staffReport.data.id,'PATCH',{action:'resolve'},aToken);
+assert.equal(resolved.status,200);
+assert.equal((await call('/api/traffic-reports')).data.reports.length,0,'Aufgelöste Meldungen verschwinden');
+
+const swapRide=await call('/api/rides','POST',{customerId:cust.data.id,driverId:userA.data.id,date:'2026-11-19',time:'12:00',pickup:'Meckenheim',destination:'Bonn',kind:'Rechnungsfahrt',direction:'hin'});
+assert.equal(swapRide.status,201);
+const swapReq=await call('/api/swaps','POST',{rideId:swapRide.data.id,targetDriverId:userB.data.id,reason:'Dienstplan kurzfristig geändert'},aToken);
+assert.equal(swapReq.status,201,'Fahrer darf eine Tauschanfrage stellen');
+assert.equal((await call('/api/swaps','GET',null,bLogin.data.token)).data.swaps.length,1);
+assert.equal((await call('/api/swaps/'+swapReq.data.id,'PATCH',{action:'approve'},token)).status,409,'Zentrale darf ohne Annahme nicht tauschen');
+assert.equal((await call('/api/swaps/'+swapReq.data.id,'PATCH',{action:'accept'},aToken)).status,403,'Anfragender darf nicht selbst annehmen');
+assert.equal((await call('/api/swaps/'+swapReq.data.id,'PATCH',{action:'accept'},bLogin.data.token)).status,200);
+assert.equal((await call('/api/swaps/'+swapReq.data.id,'PATCH',{action:'approve'},token)).status,200);
+const swapped=await call('/api/state','GET',null,bLogin.data.token);
+assert.ok(swapped.data.rides.some(x=>x.id===swapRide.data.id),'Neue Fahrerzuordnung ist verbindlich');
+const former=await call('/api/state','GET',null,aToken);
+assert.ok(!former.data.rides.some(x=>x.id===swapRide.data.id),'Fahrt beim alten Fahrer nicht mehr sichtbar');
+
+// Optional private object storage: refuse when not provisioned. No public Drive links.
+const withoutStorage=await call('/api/attachments','GET');
+assert.equal(withoutStorage.data.storageReady,false);
+const objects=new Map();
+env.ATTACHMENTS={
+ async put(key,buffer){objects.set(key,Buffer.from(buffer));},
+ async get(key){const bytes=objects.get(key);return bytes?{body:new Blob([bytes])}:null},
+ async delete(key){objects.delete(key)}
+};
+async function binaryCall(path,mime,buf,extraHeaders={},t=aToken){
+ const resp=await worker.fetch(new Request('https://taxipro.test'+path,{
+  method:'POST',headers:{Origin:env.APP_ORIGIN,Authorization:'Bearer '+t,'Content-Type':mime,...extraHeaders},
+  body:Buffer.from(buf)
+ }),env);
+ let data=await resp.json();return {status:resp.status,data};
+}
+const pdf=Buffer.from('%PDF-1.4\n1 0 obj<<>>\n%%EOF','utf8');
+const file=await binaryCall('/api/attachments','application/pdf',pdf,
+ {'x-taxipro-recipient':userB.data.id,'x-taxipro-filename':encodeURIComponent('Schichtplan-Test.pdf'),'x-taxipro-note':'Nur Testbeleg'});
+assert.equal(file.status,201,'Geschützter PDF-Upload');
+const filesB=await call('/api/attachments','GET',null,bLogin.data.token);
+assert.equal(filesB.data.attachments.length,1);
+assert.equal(filesB.data.attachments[0].owner_id,userA.data.id);
+assert.equal(filesB.data.attachments[0].recipient_id,userB.data.id);
+let down=await worker.fetch(new Request('https://taxipro.test/api/attachments/'+file.data.id,{
+ headers:{Origin:env.APP_ORIGIN,Authorization:'Bearer '+bLogin.data.token}
+}),env);
+assert.equal(down.status,200,'Empfänger darf Datei öffnen');
+assert.equal(down.headers.get('Access-Control-Allow-Origin'),env.APP_ORIGIN,'Binäre Antwort mit CORS');
+assert.equal(await down.text(),pdf.toString());
+const unauthorizedFile=await worker.fetch(new Request('https://taxipro.test/api/attachments/'+file.data.id,{
+ headers:{Origin:env.APP_ORIGIN,Authorization:'Bearer '+token}
+}),env);
+assert.equal(unauthorizedFile.status,403,'Auch Admin sieht fremde Privatdateien nicht automatisch');
+
+const signRide=await call('/api/rides','POST',{customerId:cust.data.id,driverId:userA.data.id,date:'2026-10-30',time:'13:00',
+ pickup:'Meckenheim',destination:'Bonn',kind:'Rechnungsfahrt',direction:'rueck'});
+assert.equal(signRide.status,201);
+const tinyPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAOaNXwAAAABJRU5ErkJggg==','base64');
+const signed=await binaryCall('/api/signatures','image/png',tinyPng,{
+ 'x-taxipro-signer':'Testperson','x-taxipro-confirm':'yes','x-taxipro-ride-ids':JSON.stringify([rA.data.id,signRide.data.id])
+});
+assert.equal(signed.status,201,'Eine Unterschrift für zwei Fahrten desselben Tages');
+assert.equal(signed.data.rideIds.length,2);
+const signatures=(await call('/api/signatures','GET',null,aToken)).data.signatures;
+assert.equal(signatures.length,1);
+const duplicateSignature=await binaryCall('/api/signatures','image/png',tinyPng,{
+ 'x-taxipro-signer':'Testperson','x-taxipro-confirm':'yes','x-taxipro-ride-ids':JSON.stringify([rA.data.id])
+});
+assert.equal(duplicateSignature.status,409,'Keine doppelte Unterschrift');
+const otherSig=await worker.fetch(new Request('https://taxipro.test/api/signatures/'+signed.data.id+'/file',{
+ headers:{Origin:env.APP_ORIGIN,Authorization:'Bearer '+bLogin.data.token}
+}),env);
+assert.equal(otherSig.status,403,'Kollegen können fremde Patientensignaturen nicht lesen');
+const adminSig=await worker.fetch(new Request('https://taxipro.test/api/signatures/'+signed.data.id+'/file',{
+ headers:{Origin:env.APP_ORIGIN,Authorization:'Bearer '+token}
+}),env);
+assert.equal(adminSig.status,200,'Zentrale kann Nachweis kontrollieren');
+assert.equal(adminSig.headers.get('Access-Control-Allow-Origin'),env.APP_ORIGIN);
+
+const time=await call('/api/time-summary?period=day&date=2026-10-30','GET',null,aToken);
+assert.equal(time.status,200,'Rollenbezogene Zeitauswertung über API');
+assert.equal(time.data.period,'day');
+assert.ok(Array.isArray(time.data.byDriver));
+const deniedTime=await call('/api/time-summary?period=year&date=2026-01-01&driverId=unknown','GET',null,aToken);
+assert.equal(deniedTime.status,200,'Fahrerfilter wird serverseitig auf eigenes Konto überschrieben');
+
+console.log('PASS: TaxiPro Community 2.3 – Meldungen, private Fahrerkommunikation, Tauschanfragen, Upload-Zugriff, Tagesübersicht und Kunden-Unterschrift (synthetische Daten).');
+
