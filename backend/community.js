@@ -175,7 +175,8 @@ async function fileUpload(req,env,u) {
   if(!target)throw error(404,'Empfänger unbekannt.');
   const filename=decodeName(req),mime=fileMime(req),data=await rawContent(req);
   if(!byteSignature(data,mime))throw error(415,'Dateityp und Dateiinhalte stimmen nicht überein.');
-  const id=ID(),key='staff/'+id,created=NOW(),note=text(req.headers.get('x-taxipro-note'),240);
+  let note='';try{note=text(decodeURIComponent(req.headers.get('x-taxipro-note')||''),240)}catch{throw error(400,'Dateibeschreibung ungültig.')}
+  const id=ID(),key='staff/'+id,created=NOW();
   await store.put(key,data,{httpMetadata:{contentType:mime},customMetadata:{owner:u.id,recipient}});
   try {
     await env.DB.prepare('INSERT INTO attachments(id,owner_id,recipient_id,filename,mime_type,bytes,object_key,note,created_at) VALUES(?,?,?,?,?,?,?,?,?)')
