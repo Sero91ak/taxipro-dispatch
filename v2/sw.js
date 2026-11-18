@@ -1,5 +1,5 @@
 // Static shell only; NEVER cache authenticated API responses or patient data.
-const VERSION='taxipro-v2-shell-20261118-v24';
+const VERSION='taxipro-v2-shell-20261118-v24-integrated';
 const ASSETS=['./','./index.html','./app.html','./app.css','./app.js','./community-ui.js','./community.css','./master-dashboard.js','./master-dashboard.css','./config.js','./manifest.webmanifest','./manifest-demo.webmanifest','./icons/favicon.svg','../icon-192.png','../icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>Promise.allSettled(ASSETS.map(x=>c.add(x)))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('taxipro-v2-shell-')&&k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
