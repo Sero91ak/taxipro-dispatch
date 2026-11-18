@@ -126,3 +126,15 @@ CREATE TABLE IF NOT EXISTS customer_source_evidence (
   PRIMARY KEY(source,external_key)
 );
 CREATE INDEX IF NOT EXISTS idx_customer_source_evidence ON customer_source_evidence(customer_id,source);
+
+CREATE TABLE IF NOT EXISTS customer_import_conflicts (
+  source TEXT NOT NULL DEFAULT 'master_sheet',
+  external_key TEXT PRIMARY KEY,
+  proposed_name TEXT NOT NULL,
+  candidate_customer_ids TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'review' CHECK(status IN ('review','linked','separate')),
+  seen_at TEXT NOT NULL,
+  resolved_at TEXT,
+  resolved_by TEXT REFERENCES users(id)
+);
+CREATE INDEX IF NOT EXISTS idx_customer_import_conflicts ON customer_import_conflicts(status,seen_at);
