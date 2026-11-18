@@ -32,9 +32,9 @@ const badFix=await call('/api/shifts/'+shiftStart.data.id,'PATCH',{startedAt:'20
 const adminState=await call('/api/state');assert.equal(adminState.data.adjustments.length,1,'revision history present');assert.equal(adminState.data.adjustments[0].previous_start,adminState.data.shifts[0].original_started_at,'original preserved');assert.equal(adminState.status,200);assert.equal(adminState.data.positions.length,0,'positions removed at shift end');
 const group=await call('/api/messages','POST',{body:'Hallo Team',recipientId:null},aToken);assert.equal(group.status,201);
 const secret=await call('/api/messages','POST',{body:'Nur an Zentrale',recipientId:admin.data.user.id},aToken);assert.equal(secret.status,201);
-const blockedPrivate=await call('/api/messages','POST',{body:'Nicht an Kollegen',recipientId:userB.data.id},aToken);assert.equal(blockedPrivate.status,403);
+const blockedPrivate=await call('/api/messages','POST',{body:'Nicht an Kollegen',recipientId:userB.data.id},aToken);assert.equal(blockedPrivate.status,201,'Fahrer dürfen Kollegen private Nachrichten schicken');
 const bLogin=await call('/api/login','POST',{username:'driver2',password:'TESTPASSWORT_5678'},'');assert.equal(bLogin.status,200);
-const bState=await call('/api/state','GET',null,bLogin.data.token);assert.equal(bState.data.messages.length,1,'driver B sees group but not private admin');
+const bState=await call('/api/state','GET',null,bLogin.data.token);assert.equal(bState.data.messages.length,2,'Fahrer B sieht Gruppenchat und eigene direkte Nachricht, nicht private Admin-Nachrichten');
 const adminState2=await call('/api/state');assert.equal(adminState2.data.messages.length,2,'admin sees group and private');
 const wrongOrigin=await call('/api/state','GET',null,token,'https://evil.example');assert.equal(wrongOrigin.status,403,'CORS origin restriction');
 
