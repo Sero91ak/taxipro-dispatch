@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS recurring_orders (
  start_date TEXT NOT NULL,end_date TEXT NOT NULL,weekdays TEXT NOT NULL,
  outbound_time TEXT NOT NULL,return_time TEXT,
  pickup TEXT NOT NULL,destination TEXT NOT NULL,kind TEXT NOT NULL,
+ billing_class TEXT NOT NULL DEFAULT 'unknown' CHECK(billing_class IN ('KTS','RE','private','unknown')),
  signature_required INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1,
  created_at TEXT NOT NULL
 );
