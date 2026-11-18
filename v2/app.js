@@ -1,5 +1,6 @@
 import {createOperations} from './community-ui.js';
 import {createDispatchCenter} from './master-dashboard.js';
+import {activeShiftDurations} from './live-worktime.js';
 /* TaxiPro Dispatch 2.0 – production shell (Cloudflare Worker API required)
  * All authorization is enforced on the server. This UI deliberately does not
  * pretend to protect driver data by hiding menu items.
@@ -289,7 +290,8 @@ function driverHome(){
  const tasks=all.filter(x=>x.ride_date===day).slice().sort((a,b)=>a.ride_time.localeCompare(b.ride_time));
  const upcoming=all.filter(x=>x.ride_date>day&&x.status!=='cancelled'&&x.status!=='done')
     .slice().sort((a,b)=>a.ride_date.localeCompare(b.ride_date)||a.ride_time.localeCompare(b.ride_time)).slice(0,3);
- const running=activeShift(),openBreak=(db.breaks||[]).some(x=>running&&x.shift_id===running.id&&!x.ended_at);
+ const running=activeShift(),time=activeShiftDurations(running,db.breaks||[]);
+ const openBreak=time.paused;
  const open=tasks.filter(x=>x.status==='assigned'||x.status==='accepted').length;
  const complete=tasks.filter(x=>x.status==='done').length;
  const lastMessage=(db.messages||[]).slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];
@@ -315,7 +317,7 @@ function driverHome(){
     smallCard('Fahrten heute',String(tasks.length),'Zugewiesene Aufträge')+
     smallCard('Noch offen',String(open),'Annehmen oder abschließen')+
     smallCard('Gemeldet gefahren',String(complete),'Prüfung durch Zentrale separat')+
-    '<div class="driver-kpi"><small>Schichtdauer</small><strong id="driverLiveShift">'+(running?duration(Date.now()-Date.parse(running.started_at)):'00:00:00')+'</strong><span>Inklusive Pausen</span></div>'+
+    '<div class="driver-kpi"><small>Arbeitszeit netto</small><strong id="driverLiveNet">'+duration(time.netMs)+'</strong><span id="driverLiveBreak">Pause: '+duration(time.breakMs)+'</span></div>'+
   '</div>'+
   '<div class="driver-quick-actions">'+
    '<button class="btn gold" type="button" data-page="shifts">◷ Schicht & Pause</button>'+
@@ -361,7 +363,7 @@ function daily(){
   return heading+bar+stats+alerts+'<div class="day-list">'+content+'</div>'+notice('Die Zuordnung erfolgt über Kunden-ID und Datum. Eine fehlende Rückfahrt beweist nicht, dass sie vertraglich vorgesehen war. Digitale KTS-Signaturen werden erst nach abgesicherter Einführung als „erfasst“ ausgewiesen.');
 }
 
-function shifts(){const current=activeShift(),all=db.shifts||[],uid=me.role==='driver'?me.id:null,millis=sHours(uid,7),breaks=db.breaks||[],openBreak=breaks.find(b=>current&&b.shift_id===current.id&&!b.ended_at);return title(me.role==='admin'?'Schichtkarten':'Meine Schicht','Bruttoarbeitszeit, echte Pausenbuchungen und Änderungsprotokoll')+'<div class="op-actions" style="margin:0 0 15px"><button type="button" class="btn" data-page="worktime">▦ Tages-, Monats- und Jahresauswertung</button></div>'+(me.role==='driver'?'<div class="driver-panel"><div class="shift-summary"><h2>Aktuelle Schicht</h2><strong id="liveShift" class="mono">'+duration(current?Date.now()-Date.parse(current.started_at):0)+'</strong><p class="small">'+(current?'Begonnen: '+fmt(current.started_at):'Keine aktive Schicht')+'</p><div class="actions"><button class="btn '+(current?'red':'gold')+'" data-shift="'+(current?'end':'start')+'">'+(current?'■ Schicht beenden':'▶ Schicht beginnen')+'</button><button class="btn" data-break="'+(openBreak?'end':'start')+'" '+(!current?'disabled':'')+'>'+(openBreak?'▶ Pause beenden':'Ⅱ Pause beginnen')+'</button><button class="btn" id="gpsBtn" data-gps="toggle" '+(!current?'disabled':'')+'>'+(watch===null?'⌖ GPS freigeben':'◉ GPS beenden')+'</button>'+
+function shifts(){const current=activeShift(),all=db.shifts||[],uid=me.role==='driver'?me.id:null,millis=sHours(uid,7),breaks=db.breaks||[],openBreak=breaks.find(b=>current&&b.shift_id===current.id&&!b.ended_at),live=activeShiftDurations(current,breaks);return title(me.role==='admin'?'Schichtkarten':'Meine Schicht','Bruttoarbeitszeit, echte Pausenbuchungen und Änderungsprotokoll')+'<div class="op-actions" style="margin:0 0 15px"><button type="button" class="btn" data-page="worktime">▦ Tages-, Monats- und Jahresauswertung</button></div>'+(me.role==='driver'?'<div class="driver-panel"><div class="shift-summary"><h2>Aktuelle Schicht</h2><strong id="liveShift" class="mono">'+duration(current?Date.now()-Date.parse(current.started_at):0)+'</strong><p class="small">Nettoarbeitszeit: <b id="liveShiftNet" class="mono">'+duration(live.netMs)+'</b> · Pausen: <b id="liveShiftBreak" class="mono">'+duration(live.breakMs)+'</b></p><p class="small">'+(current?'Begonnen: '+fmt(current.started_at):'Keine aktive Schicht')+'</p><div class="actions"><button class="btn '+(current?'red':'gold')+'" data-shift="'+(current?'end':'start')+'">'+(current?'■ Schicht beenden':'▶ Schicht beginnen')+'</button><button class="btn" data-break="'+(openBreak?'end':'start')+'" '+(!current?'disabled':'')+'>'+(openBreak?'▶ Pause beenden':'Ⅱ Pause beginnen')+'</button><button class="btn" id="gpsBtn" data-gps="toggle" '+(!current?'disabled':'')+'>'+(watch===null?'⌖ GPS freigeben':'◉ GPS beenden')+'</button>'+
 '<button class="btn" type="button" data-gps="revoke">Letzte GPS-Position löschen</button></div>'+
 '<p class="small">Ortung nur nach Freigabe während der Schicht und bei geöffneter App. Widerruf entfernt den gespeicherten Standort auch nach einem App-Neustart.</p></div></div>':'')+
  '<div class="stats section-gap"><div class="stat"><small>Schichten im Verlauf</small><strong>'+all.length+'</strong><span>Vorhandene Einträge</span></div><div class="stat"><small>Letzte 7 Tage</small><strong>'+duration(millis).slice(0,5)+'</strong><span>Bruttozeit</span></div><div class="stat"><small>Aktive Schichten</small><strong>'+all.filter(s=>!s.ended_at).length+'</strong><span>Zurzeit laufend</span></div><div class="stat"><small>Bericht</small><strong style="font-size:16px">PDF</strong><span>Über Drucken</span></div></div>'+card('Arbeitszeitnachweis',table(['Fahrer','Beginn','Ende','Bruttodauer'],all.map(x=>row([esc(x.driver_name||me.displayName),fmt(x.started_at),fmt(x.ended_at),x.ended_at?duration(Date.parse(x.ended_at)-Date.parse(x.started_at)):'Laufend']))),'<button class="btn" onclick="window.print()">Drucken / PDF</button>')+card('Erfasste Pausen',table(['Fahrer-ID','Beginn','Ende','Dauer'],breaks.slice(0,120).map(b=>row([esc(b.driver_id.slice(0,8)),fmt(b.started_at),fmt(b.ended_at),b.ended_at?duration(Date.parse(b.ended_at)-Date.parse(b.started_at)):'Läuft'])))) + notice('Arbeitszeit wird als Brutto-Schichtzeit angezeigt; die tatsächlich erfassten Pausen stehen separat darunter. Für rechtlich korrekte Nettozeiten und Sonderfälle ist eine Abnahme erforderlich. Admin-Korrekturen brauchen eine Begründung.')+(me.role==='admin'?shiftCorrectionPanel():'')}
@@ -477,7 +479,18 @@ document.addEventListener('submit',e=>{if(e.target.id==='newRideForm'){e.prevent
  if(e.target.id==='customerForm'){e.preventDefault();transaction('/api/customers','POST',{name:$('cname').value.trim(),pickup:$('cpickup').value.trim(),destination:$('cdest').value.trim(),kind:$('ckind').value,signatureRequired:$('csign').checked},'customers')}
  if(e.target.id==='correctionForm'){e.preventDefault();const id=$('correctionShift').value;const a=new Date($('correctFrom').value),b=new Date($('correctTo').value);if(!Number.isFinite(+a)||!Number.isFinite(+b)||b<=a){toast('Bitte gültige Uhrzeiten angeben.');return}if(!confirm('Diese nachträgliche Schichtänderung mit Begründung dauerhaft protokollieren?'))return;transaction('/api/shifts/'+id,'PATCH',{startedAt:a.toISOString(),endedAt:b.toISOString(),reason:$('correctReason').value.trim()},'shifts')}
  if(e.target.id==='chatForm'){e.preventDefault();transaction('/api/messages','POST',{recipientId:$('recipient').value||null,body:$('msgBody').value.trim()},'chat')}});
-setInterval(()=>{if(me&&db){const current=activeShift();const elapsed=duration(current?Date.now()-Date.parse(current.started_at):0);for(const id of ['liveShift','driverLiveShift']){const el=$(id);if(el)el.textContent=elapsed;}}$('clock').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'})},1000);
+setInterval(()=>{
+ if(me&&db){
+  const live=activeShiftDurations(activeShift(),db.breaks||[]);
+  for(const [id,value] of [
+   ['liveShift',duration(live.grossMs)],['liveShiftNet',duration(live.netMs)],
+   ['liveShiftBreak',duration(live.breakMs)],['driverLiveNet',duration(live.netMs)],
+   ['driverLiveBreak','Pause: '+duration(live.breakMs)]
+  ]){const el=$(id);if(el)el.textContent=value}
+ }
+ const clock=$('clock');
+ if(clock)clock.textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'});
+},1000);
 window.addEventListener('pagehide',stopGPS);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 if(auth&&APIOK)init();else loginView();
