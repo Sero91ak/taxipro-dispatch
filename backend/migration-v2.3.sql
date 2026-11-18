@@ -64,3 +64,11 @@ CREATE TABLE IF NOT EXISTS ride_signature_links (
  PRIMARY KEY(signature_id,ride_id)
 );
 CREATE INDEX IF NOT EXISTS idx_signatures_customer ON ride_signatures(customer_id,created_at);
+
+CREATE TABLE IF NOT EXISTS attachment_pins (
+ user_id TEXT NOT NULL REFERENCES users(id),
+ attachment_id TEXT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
+ pinned_at TEXT NOT NULL,
+ PRIMARY KEY(user_id,attachment_id)
+);
+CREATE INDEX IF NOT EXISTS idx_attachment_pin_order ON attachment_pins(user_id,pinned_at);
