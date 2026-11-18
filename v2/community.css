@@ -1,0 +1,54 @@
+/* TaxiPro 2.3 / Mitarbeitenden-Community – Nachtblau, Mattgold und Türkis */
+.op-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(290px,1fr);gap:17px;margin-bottom:17px}
+.op-mapcard{overflow:hidden}
+.op-map{height:clamp(310px,54dvh,600px);border-radius:14px;background:#102b3e;margin:14px;border:1px solid #31566b;overflow:hidden}
+.op-pin{min-width:36px;height:36px;border:2px solid #f0c884;border-radius:50%;background:#0b283f;display:grid;place-items:center;box-shadow:0 5px 19px #0009;font-size:19px}
+.op-select-pin{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#2a9c91;border:2px solid white;color:white;font-size:20px;box-shadow:0 0 0 8px #2a9c9144}
+.op-note,.op-caption{font-size:11px;line-height:1.6;color:#94b8cc;margin:12px 16px}
+.op-caption{margin:12px 16px 14px}
+.op-form{display:flex;flex-direction:column;gap:13px;padding:17px}
+.op-form label,.op-time-form label,.op-sign-label{font-size:12px;color:#aac4d5;display:flex;flex-direction:column;gap:7px}
+.op-form input,.op-form textarea,.op-form select,.op-time-form input,.op-time-form select,.op-sign-dialog input:not([type=checkbox]){
+ width:100%;padding:12px 13px;border:1px solid #3a5c74;background:#10273b;color:#e8f6fc;font:inherit;border-radius:11px}
+.op-form input:focus,.op-form textarea:focus,.op-form select:focus{outline:2px solid #68dcca;outline-offset:2px}
+.op-form textarea{resize:vertical;min-height:100px}
+.op-form input[type=file]{padding:12px;font-size:12px}
+.op-form button[type=submit]{padding:14px}
+.op-flex{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.op-flex small{color:#93b6c9}
+.op-muted{font-size:11px;color:#a8c7d4;overflow-wrap:anywhere;flex:1}
+.op-section{margin-top:17px}
+.op-inset{padding:17px}
+.op-list{padding:14px 16px 17px;display:grid;gap:10px}
+.op-message{background:#122e42;border:1px solid #2b4d66;border-radius:14px;padding:14px;line-height:1.5;overflow-wrap:anywhere}
+.op-message p{color:#cee3ee;font-size:13px;margin:7px 0 10px}
+.op-message small{font-size:11px;line-height:1.55;color:#90aebf;display:block}
+.op-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.op-actions button{min-height:38px;font-size:12px}
+.op-file{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #2d4c62;background:#10283a;border-radius:12px;padding:13px;overflow-wrap:anywhere}
+.op-file>div{min-width:0;flex:1}
+.op-file b{display:block;font-size:13px;line-height:1.5;color:#f5e6cb}
+.op-file small{display:block;font-size:11px;line-height:1.5;color:#93afc4;margin-top:3px}
+.op-file p{font-size:11px;line-height:1.5;color:#c2d5e2}
+.op-file button{white-space:normal;font-size:11px;min-height:38px}
+.op-time-form{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:16px;border-bottom:1px solid #2d4d61}
+.op-time-form label{flex:1;min-width:170px}
+.op-time-form button{min-height:43px}
+.op-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:17px}
+.op-kpis>div{padding:15px 12px;background:#142e41;border-radius:12px;border:1px solid #2e5368}
+.op-kpis small{display:block;font-size:11px;color:#97b3c3}
+.op-kpis strong{display:block;font-size:clamp(15px,1.8vw,24px);line-height:1.4;color:#f5d9a1;margin-top:6px;font-variant-numeric:tabular-nums}
+.op-sign-dialog{width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 30px);overflow:auto;border-radius:20px;border:1px solid #477087;background:#11283c;color:#f1f5f8;padding:20px;box-shadow:0 20px 70px #000b}
+.op-sign-dialog::backdrop{background:#020a14cd}
+.op-sign-head{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.op-sign-head h2{font-size:19px;margin:6px 0}
+.op-sign-dialog p{font-size:12px;color:#bcd1de;line-height:1.6}
+.op-sign-dialog .op-sign-trips{background:#0b1d2c;border:1px solid #37556a;border-radius:13px;padding:10px 14px;margin:13px 0}
+.op-sign-dialog .op-sign-trips p{margin:4px 0}
+.op-sign-label{margin:15px 0}
+.op-sign-label canvas{width:100%;max-width:600px;height:180px;background:white;border:2px solid #5f8195;border-radius:10px;touch-action:none;display:block}
+.op-sign-confirm{display:flex;align-items:flex-start;gap:12px;font-size:12px;line-height:1.55;color:#d3e7f3;margin:14px 0}
+.op-sign-confirm input{width:20px;height:20px;flex-shrink:0;accent-color:#27bc9e}
+@media(max-width:850px){.op-grid{grid-template-columns:1fr}.op-map{height:clamp(290px,48dvh,480px)}}
+@media(max-width:540px){.op-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.op-map{margin:10px;height:clamp(290px,43dvh,410px)}.op-file{flex-wrap:wrap}.op-file button{width:100%}}
+@media print{.op-form,.op-actions,.op-map,.op-sign-dialog,.op-caption{display:none!important}.op-kpis>div,.op-file{background:transparent!important;color:black!important}.op-kpis strong,.op-file b{color:black!important}}
