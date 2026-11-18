@@ -139,3 +139,18 @@ Beide Werte sind derzeit sicher auf `''` und `false`. In diesem Zustand öffnen 
 ## 9. Teststatus und Branch-Regel
 
 Der Umbau befindet sich ausschließlich auf `feature/taxipro-masterdata-dashboard-v24-20261118` in **Draft PR #10** (Basis: PR #9 für Community). Nicht nach `main` pushen oder PRs zusammenführen, bevor die komplette Integration und der Live-Abgleich freigegeben sind. Alle Tests verwenden **synthetische Daten**; Patientenakten, Google Drive, Kalender und echte Konten wurden nicht in das GitHub-Repository geschrieben.
+
+
+## 10. Weiterer Einbau: Serienfahrten, GPS-Widerruf, Nettozeit, interne Fahrtauswahl
+
+**Serienfahrten (KTS/RE):** Die vorhandene `recurring_orders`-Tabelle erhält `billing_class` mit `KTS`, `RE`, `private`, `unknown`. Neue Serienvorlagen geben diese Klasse an ihre erzeugten Hin- und Rückfahrten weiter. Bestehende Vorlagen bleiben auf `unknown`, sofern keine eindeutig bestätigte Abrechnungsklasse vorliegt. Doppelgenerierung ist weiterhin über den ursprünglichen eindeutigen Serien-/Tag-/Richtungs-Schlüssel verhindert. Nicht durch das Wort „Krankenfahrt“ automatisch KTS behaupten. Einzelaufträge und Serienfahrten erscheinen in derselben Kundenakte und demselben Journal.
+
+**Freiwillige GPS-Freigabe:** Der Fahrer kann seine zuletzt gespeicherte Position mit `DELETE /api/position` unmittelbar aus der Disposition entfernen – auch nach einem Neustart der PWA, ohne die Schicht zu beenden. Die API verwendet die authentifizierte Fahrer-ID, nicht eine frei gesendete Mitarbeiterkennung; andere Fahrer und die Zentrale können diese Fahrer-Widerrufsaktion nicht stellvertretend ausführen. Falls das Internet ausfällt, wird das ausdrücklich gemeldet: lokale Ortung wird gestoppt, der Server-Widerruf ist dann noch nicht bestätigt. Eine App kann bei geschlossenem Browser keine zuverlässige Dauer-GPS-Übermittlung versprechen.
+
+**Schicht & Pause:** `v2/live-worktime.js` berechnet sekündlich Bruttozeit, gebuchte Pausen und Nettoarbeitszeit. Es vereinigt gegebenenfalls überlappende Pausen, begrenzt Pausen auf die Schichtzeit und rechnet über Sommer-/Winterzeitwechsel mit absoluten Zeitstempeln. Die Werte sind eine aktuelle Anzeige; für Lohnabrechnung und Monat/Jahr bleibt die serverseitige `/api/time-summary` maßgeblich.
+
+**Interne Karte statt Sprung zur externen Navigation:** Der Button zu einem eigenen Fahrerauftrag öffnet die vorhandene TaxiPro-Verkehrskarte mit den zugehörigen Abhol- und Zielangaben. Der ausgewählte Auftrag wird ausschließlich im Speicher der angemeldeten Sitzung gehalten und beim Abmelden gelöscht. Es findet keine automatische Übergabe von Patientenadressen an Google Maps statt. **Die Verkehrskarte ist keine Turn-by-turn-Routennavigation**; ohne eigenen zulässigen Routingdienst werden keine erfundenen Routen oder Fahrzeiten gezeigt. Amtliche und interne Gefahren-/Staumeldungen bleiben in derselben Karte.
+
+**Kostenkontrolle:** Beim manuellen Google-Abgleich werden beide Quell-Checkpoints gesondert kontrolliert. Ein `both`-Aufruf darf die Mastertabelle nicht mehrfach in kurzer Folge erneut laden, bloß weil nur der Kalender bereits überprüft wurde. Dies ergänzt die vorhandenen Abruf- und Cachegrenzen; es ist keine Zusage für unbegrenzte kostenlose API-Nutzung.
+
+**Neue Tests:** End-to-End-Fahrerabschluss → Disponentenjournal → Unterschriftenzettel, Serien-KTS-Hin-/Rückfahrten, GPS-Widerruf, Arbeitszeit netto inkl. DST, fahrergebundene interne Fahrt-Karte und Quota-Drosselung. Die Entwicklung bleibt von der produktiven App getrennt.
