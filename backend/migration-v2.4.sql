@@ -114,3 +114,16 @@ CREATE TABLE IF NOT EXISTS user_display_settings (
   settings_json TEXT NOT NULL DEFAULT '{}',
   updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS customer_source_evidence (
+  source TEXT NOT NULL CHECK(source IN ('master_approval','master_prescription','master_copayment')),
+  external_key TEXT NOT NULL,
+  customer_id TEXT NOT NULL REFERENCES customers(id),
+  source_status TEXT NOT NULL DEFAULT '',
+  valid_from TEXT,
+  valid_until TEXT,
+  document_in_drive INTEGER NOT NULL DEFAULT 0,
+  observed_at TEXT NOT NULL,
+  PRIMARY KEY(source,external_key)
+);
+CREATE INDEX IF NOT EXISTS idx_customer_source_evidence ON customer_source_evidence(customer_id,source);
