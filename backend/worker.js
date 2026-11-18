@@ -4,7 +4,7 @@
  * Staging implementation: do not upload patient documents or use for live
  * healthcare operations before legal/security review and deployment tests.
  */
-import {handleCommunity} from './community.js';
+import {handleCommunity,listReports,listSwaps,listFiles,listSignatures} from './community.js';
 import {fetchTimeSummary} from './time-summary.js';
 const encoder = new TextEncoder();
 const ID = () => crypto.randomUUID();
@@ -284,6 +284,10 @@ async function state(db,u){
   else base.breaks=(await db.prepare('SELECT * FROM shift_breaks WHERE driver_id=? ORDER BY started_at DESC LIMIT 200').bind(u.id).all()).results;
   base.team=(await db.prepare('SELECT id,username,display_name,role FROM users WHERE active=1 ORDER BY display_name LIMIT 100').all()).results;
   base.messages=(await db.prepare(`SELECT m.*,u.display_name AS sender_name FROM messages m JOIN users u ON u.id=m.sender_id WHERE (m.recipient_id IS NULL OR m.sender_id=? OR m.recipient_id=?) ORDER BY m.created_at DESC LIMIT 100`).bind(u.id,u.id).all()).results.reverse();
+  base.trafficReports=await listReports(db);
+  base.swaps=await listSwaps(db,u);
+  base.attachments=await listFiles(db,u);
+  base.signatures=await listSignatures(db,u);
   return base;
 }
 export default {
