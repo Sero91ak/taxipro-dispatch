@@ -34,11 +34,12 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
  function dashboardMarkup(d) {
   if(!d)return empty('Das gemeinsame Fahrtenjournal wird geladen. Eine Google-Synchronisierung benötigt separate Firmen-OAuth-Freigaben.');
   const c=d.counts||{},all=(c.planned||0)+(c.reported||0)+(c.confirmed||0);
+  const schedule=d.calendarToday||[];
   const metrics=[
-   ['Heutige Fahrten',n(all),'calendar-days','daily'],
-   ['Gemeldet',n(c.reported),'route','ledger'],
-   ['Geprüft',n(c.confirmed),'check-circle-2','ledger'],
-   ['Ungeklärt',n(c.unmatched),'alert-circle','calendar'],
+   ['Kalendertermine heute',n(schedule.length),'calendar-days','calendar'],
+   ['Gefahren · gemeldet',n(c.reported),'route','ledger'],
+   ['Fahrten · geprüft',n(c.confirmed),'check-circle-2','ledger'],
+   ['Zuordnung offen',n(c.unmatched),'alert-circle','calendar'],
    ['Fahrer im Dienst',n(c.activeDrivers),'car','shifts']
   ];
   const cards=metrics.map(([name,value,icon,tab])=>
@@ -63,7 +64,15 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     '<section class="center-panel"><div class="center-panel-head"><b>Quellverbindungen</b><span class="center-muted">Serverstand</span></div>'+
     '<div class="center-source-list">'+sync+'</div>'+
     '<p class="center-caption">Die App zeigt nur bestätigte Synchronisierungen als aktuell. Beim Ausfall werden bestehende Daten nicht still überschrieben.</p>'+
-    '<div class="center-panel-foot">'+iconBtn('open-cases','Kundenakten öffnen')+'</div></section></div>';
+    '<div class="center-panel-foot">'+iconBtn('open-cases','Kundenakten öffnen')+
+    iconBtn('sync-google','Google-Daten jetzt prüfen')+'</div></section></div>'+
+    '<section class="center-panel center-space"><div class="center-panel-head"><b>Kalendertermine für heute</b>'+
+    '<span class="center-muted">'+n(schedule.length)+' Ereignisse · nicht automatisch gefahren</span></div>'+
+    (schedule.length?rows(['Kalendertermin','Kundenakte','Start','Zuordnung'],schedule.slice(0,45).map(x=>
+      '<tr>'+td('<b>'+text(x.event_title)+'</b>')+td(text(x.customer_name||'Noch nicht zugeordnet'))+
+      td(fmtDate(x.start_at))+td(pill(x.match_state))+'</tr>')):
+    empty('Noch keine Kalendereinträge im sicheren Datenabgleich. Dies ist kein Nachweis, dass keine Fahrten geplant sind.'))+
+    '<div class="center-panel-foot">'+iconBtn('open-calendar','Alle Zuordnungen prüfen')+'</div></section>';
  }
  function customersView() {
   const list=pageCache.customers?.customers||[];
@@ -272,6 +281,14 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   if(action==='density')return savePrefs({density:prefs.density==='compact'?'comfortable':'compact'});
   if(action==='sidebar')return savePrefs({nav:prefs.nav==='expanded'?'collapsed':'expanded'});
   if(action==='refresh-home')return loadDashboard();
+  if(action==='sync-google'){
+    const status=await request('/api/ops/sources');
+    if(!status.connections.calendarConfigured&&!status.connections.masterConfigured)
+      throw Error('Google-Quellen in Cloudflare noch nicht autorisiert. Ein ChatGPT-Kontozugriff reicht hierfür nicht.');
+    const data=await request('/api/ops/sync','POST',{which:'both'});
+    toast('Quellabgleich gestartet und geprüft.');
+    dashboardChecked=0;await loadDashboard();return data;
+  }
   if(action==='open-ledger'){refreshMain('ledger');return;}
   if(action==='open-calendar'){refreshMain('calendar');return;}
   if(action==='open-cases'||action==='back-customers'){refreshMain('cases');return;}
