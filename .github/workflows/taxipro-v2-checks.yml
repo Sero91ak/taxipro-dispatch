@@ -40,7 +40,7 @@ jobs:
       - name: Verify explicit driver GPS revocation and CORS permissions
         run: node --experimental-sqlite --test tests/position-revoke.test.mjs
       - name: Verify Berlin worktime calculation and DST rollover
-        run: node --test tests/time-summary.test.mjs
+        run: node --test tests/time-summary.test.mjs tests/live-worktime.test.mjs
       - name: Verify official traffic feed normalization and failure handling
         run: node --test tests/traffic-feed.test.mjs tests/traffic-ui.test.mjs tests/traffic-guest.test.mjs
       - name: Verify PWA cache freshness and offline fallback
