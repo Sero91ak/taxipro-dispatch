@@ -383,9 +383,20 @@ export async function handleOps(req,env,u,path){
     requireAdmin(u);
     const d=await parse(req),which=t(d.which,12)||'both';
     if(!['both','calendar','master'].includes(which))throw bad(400,'Quelle unbekannt.');
-    const state=await db.prepare("SELECT last_attempt_at FROM sync_checkpoints WHERE source=?").bind(which==='master'?'google_master':'google_calendar_taxi').first();
-    if(state?.last_attempt_at&&Date.now()-Date.parse(state.last_attempt_at)<4*60000)
-       throw bad(429,'Letzter Abgleich ist weniger als vier Minuten her.');
+    const sources=which==='both'?['google_master','google_calendar_taxi']:
+      [which==='master'?'google_master':'google_calendar_taxi'];
+    for(const source of sources){
+      const state=await db.prepare("SELECT last_attempt_at,status FROM sync_checkpoints WHERE source=?")
+        .bind(source).first();
+      const elapsed=state?.last_attempt_at?Date.now()-Date.parse(state.last_attempt_at):Infinity;
+      if(Number.isFinite(elapsed)&&elapsed<4*60000){
+        throw bad(429,source==='google_master'?
+          'Google-Mastertabelle wurde vor weniger als vier Minuten abgefragt.':
+          'Taxi-Kalender wurde vor weniger als vier Minuten abgefragt.');
+      }
+      if(state?.status==='running'&&Number.isFinite(elapsed)&&elapsed<10*60000)
+        throw bad(429,'Diese Google-Quelle wird bereits abgeglichen.');
+    }
     const result=await syncSources(db,env,which);
     await log(db,u,'sync.requested','',which);
     return {data:result};
