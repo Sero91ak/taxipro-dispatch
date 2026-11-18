@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS rides (
  ride_date TEXT NOT NULL, ride_time TEXT NOT NULL,
  pickup TEXT NOT NULL, destination TEXT NOT NULL,
  kind TEXT NOT NULL, direction TEXT NOT NULL CHECK(direction IN ('hin','rueck')),
+ billing_class TEXT NOT NULL DEFAULT 'unknown' CHECK(billing_class IN ('KTS','RE','private','unknown')),
  signature_required INTEGER NOT NULL DEFAULT 0,
  status TEXT NOT NULL DEFAULT 'assigned' CHECK(status IN ('assigned','accepted','done','cancelled')),
  assigned_at TEXT NOT NULL, accepted_at TEXT, completed_at TEXT
