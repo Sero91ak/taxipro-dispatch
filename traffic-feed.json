@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "source": "Autobahn GmbH des Bundes",
+  "generatedAt": null,
+  "region": "Meckenheim · Bonn · Rhein-Sieg · Köln",
+  "roads": [
+    "A61",
+    "A565",
+    "A555",
+    "A59",
+    "A4",
+    "A3"
+  ],
+  "intervals": "Geplanter Abruf alle 15 Minuten; GitHub Actions kann sich verzögern.",
+  "partial": true,
+  "failedGroups": [],
+  "staleGroups": [],
+  "events": []
+}

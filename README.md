@@ -38,16 +38,27 @@ Professionelles Dispositions-System – **zwei getrennte Apps**, kostenlos, ohne
 - Fahrschein-Unterschrift, Team-Chat, Schicht Start/Ende
 - Push + Sync alle ~45 Sek.
 
-## Integrierte Fahrer-Verkehrszentrale (Entwicklung)
+## Integrierte Fahrer-Verkehrszentrale
 
-Der Fahrerbereich erhält einen vierten Reiter **Verkehr**. Die Karte läuft direkt innerhalb der Fahrer-PWA (kein App-Wechsel).
+Der Reiter **Verkehr** erscheint direkt innerhalb der bestehenden Fahrer-PWA (keine zweite App und kein App-Wechsel).
 
-- MapLibre GL JS und OpenFreeMap: kostenfreie Kartengrundlage ohne API-Key.
-- Amtliche Autobahn-GmbH-Daten: Gefahren, Sperrungen und Baustellen für A61, A565, A555, A59, A4 und A3, räumlich auf den Raum Meckenheim/Bonn/Köln gefiltert.
-- 15-Minuten-Aktualisierung, 30-Minuten-Notcache, nur bei aktivem Fahrer-Reiter, kein kostenpflichtiger API-Fallback.
-- Filter, Meldungsliste, manuelle Aktualisierung und optionaler eigener GPS-Punkt ohne zentrale Standortübertragung.
-- **Wichtig:** Keine frei verfügbaren Blitzer.de-PRO-Daten, keine Radar- oder Polizeikontrollwarnungen und keine vollständige grün/gelb/rote Staufluss-Ebene. Amtliche Autobahnmeldungen sind nicht identisch mit vollständigem Echtzeit-Verkehrsfluss.
-- Testen mit Fahrer-Anmeldung in `driver.html`. Karten und Meldungen benötigen Internet. Der PWA-Shell-Cache garantiert keine Offline-Karten.
+- **Karte:** MapLibre GL JS mit OpenFreeMap (kein API-Schlüssel, keine nutzungsabhängigen Gebühren durch die App).
+- **Amtliche Ereignisse:** Gefahren, Straßensperrungen und Baustellen der Autobahn GmbH auf A61, A565, A555, A59, A4 und A3, gefiltert auf Meckenheim/Bonn/Rhein-Sieg/Köln.
+- **Zentraler Abruf:** GitHub Actions liest planmäßig alle 15 Minuten die offiziellen Daten und aktualisiert `traffic-feed.json`. GitHub Actions kann verspätet starten; die Quelle und ihr Datenalter werden angezeigt.
+- **Fahrer-Sync:** Bei geöffneter Verkehrsseite prüft die PWA alle fünf Minuten den gemeinsamen Datenstand, nicht die 18 externen Datenquellen je Fahrer.
+- **Fallback:** Wenn der zentrale Datenstand nicht erreichbar oder älter als 45 Minuten ist, versucht die App die offiziellen Quellen direkt (maximal vier gleichzeitige Abfragen, keine kostenpflichtige API). Falls auch dies scheitert, zeigt sie einen klaren Hinweis. Cache-Daten bis zwei Stunden werden ausdrücklich als **veraltet** gekennzeichnet.
+- **Kartenfunktionen:** zoomen, verschieben, Einträge auswählen, aktuellen Geräte-Standort einmalig mit Berechtigung anzeigen. Kein GPS-Tracking oder Versand des GPS an die Zentrale durch dieses Modul.
+- **Filter:** Alle aktuellen Meldungen, Gefahren, Sperrungen, Baustellen, geplante Maßnahmen sowie einzelne Autobahnen.
+- **Sicher:** Texte werden als Text dargestellt; kein HTML aus amtlichen Meldungen eingeschleust. Keine aktiven Blitzer-/Polizeikontrollwarnungen.
+- **Datengrundlage:** Nur amtliche Vorfall- und Baustellenmeldungen. **Keine** flächendeckende grün/gelb/rote Live-Verkehrsfluss-Ebene, keine verkehrsabhängige In-App-Routenberechnung und keine Blitzer.de-PRO-Integration.
+
+### Betriebs- und Kostenhinweise
+
+Die App führt **keine** Pay-per-use-Abfragen aus und aktiviert **keine** kostenpflichtigen Tarife. GitHub Pages, GitHub Actions und die Kartendienste sind aber externe Gratisangebote mit Nutzungsregeln, möglichen Service-Limits und ohne garantierte unbegrenzte Verfügbarkeit. Die kostenlose Nutzung ist kein SLA.
+
+**Monitoring:** GitHub → Actions → „TaxiPro – kostenlose Verkehrsdaten (Autobahn)“ kontrollieren. Falls der Workflow wegen fehlender Rechte oder Quellenausfall fehlschlägt, werden die Meldungen nicht als aktuell ausgegeben.
+
+**Tests:** `node --test tests/traffic-feed.test.mjs tests/traffic-ui.test.mjs` und `node --check traffic-module.js`. Mit iOS Safari/Android Chrome sowie echter Netzwerkverbindung zusätzlich die Karte und Behördenquellen prüfen.
 
 ## Kosten
 
