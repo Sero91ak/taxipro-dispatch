@@ -110,3 +110,32 @@ Vor Merge in `main`:
 ## 7. Noch nicht implementiert
 
 Automatische sichere Google-Drive-Aktenarchivierung, vollständiger Import aller historischen Monatsblätter/KTS-/RE-Preisregeln, echte Offline-Änderungswarteschlange, sichere Konfliktauflösung für parallele Änderungen an Geschäftsdatensätzen, Hintergrund-Web-Push über OneSignal/VAPID, native Dauer-GPS-Funktion und verifizierte direkte Kassen-PDF-Formulare. Diese Funktionen dürfen in der Oberfläche nicht als bereits produktiv bezeichnet werden.
+
+
+## 8. Verbindlicher Umbau der bereits bestehenden TaxiPro-PWAs (18.11.2026)
+
+**Keine neue Anwendung und keine neue Repository-Struktur:**
+Die ursprüngliche Disponenten-App bleibt mit `dispatch.html` und `manifest.json` (PWA-ID `./dispatch.html`) installierbar. Die ursprüngliche Fahrer-App bleibt mit `driver.html` und `manifest-driver.json` (PWA-ID `./driver.html`) installierbar. Beide behalten ihre Links, Namen und installierten Symbole. Das überarbeitete Rollenportal befindet sich innerhalb **desselben GitHub-Repositories** unter `v2/app.html`.
+
+**Freigabesperre:** Die beiden ursprünglichen Einstiegsseiten leiten nur dann auf `v2/app.html` weiter, wenn in `v2/config.js` **beides** absichtlich konfiguriert wurde:
+```js
+window.TAXIPRO_API_URL = 'https://DEIN-BEREITGESTELLTER-WORKER.workers.dev';
+window.TAXIPRO_ENABLE_UPGRADED_ENTRIES = true;
+```
+Beide Werte sind derzeit sicher auf `''` und `false`. In diesem Zustand öffnen die originalen installierten PWAs weiterhin ihre bisherigen Inhalte. Bestehende Fahrer-PINs und Link-Tokens werden **nicht** ungeprüft in das neue Authentifizierungssystem übernommen. Der Root-Service-Worker verwendet einen eigenen aktualisierten Cache und löscht keine separat benannten v2-App-Caches; Links mit PIN- oder Tokenparametern dürfen nicht in seinem Cache gespeichert werden. `install=1` erhält den bisherigen Installationsdialog.
+
+**Ein gemeinsamer Fahrten-Datenstand statt zwei separater Journale:** Die bestehenden zugewiesenen Aufträge bleiben in `rides` gespeichert, die manuell nachgetragenen Fahrten in `journey_ledger`. Die geschützten Disponenten-APIs projizieren beide Quellen **gemeinsam**, ohne vorhandene Fahreraufträge zu kopieren: `dashboard`, `customers/:id`, `ledger` und `signature-sheet` verwenden ein gemeinsames serverseitiges Abfragemodell. Ein Originalauftrag wird `planned`, nach tatsächlichem Fahrerabschluss `reported`, und erst nach separatem Disponenten-Prüfvermerk `confirmed`. Diese Vermerke stehen in `ride_reviews`, mit klarer Zuordnung zu genau einer ursprünglichen Fahrt. Bei manueller Nacherfassung werden identische bereits existierende Fahreraufträge zurückgewiesen.
+
+**Abrechnung:** `rides.billing_class` unterscheidet `KTS`, `RE`, `private` und `unknown`. Weder `Krankenfahrt` noch ein Google-Kalenderfarbwert ist automatisch eine geprüfte KTS-Genehmigung. Ein Disponent kann in der ursprünglichen Auftragsmaske eine Abrechnungsart bewusst auswählen. Die Patienten- und Genehmigungsakten bleiben gesondert prüfbar.
+
+**Dashboard- und Fahrer-Oberfläche:** Vorhandene Navigation wurde nach Disposition, Kunden/Abrechnung, Team/Zeiten und Kommunikation gebündelt. Fahrer erhalten eine kompakte Startseite mit eigenen Tagesfahrten, Schichtdauer, Pausenstatus, Verkehr und Nachrichten. Responsive Layout für Desktop, Smartphone, Tablet und Foldables, mit servergespeicherten Ansichtspräferenzen, ohne eine andere isolierte Anwendung anzulegen.
+
+**Geräteaktualisierung:** Die geöffnete Anwendung prüft serverseitig veränderte Zustände ungefähr alle 45 Sekunden und nach Wiederaufnahme der App. Sie beschädigt keine noch bearbeiteten Formulare durch blindes Neu-Rendern. Bei Verbindungsabbruch ist der letzte erfolgreiche Abgleich als alter Stand erkennbar. Die serverseitig geöffnete Fahrer-/Tageskontrolle nutzt eine eigene datumseingegrenzte Abfrage, weil der ältere kompakte `/api/state`-Snapshot nicht alle historischen oder an einem Tag sehr zahlreichen Aufträge umfasst. Offline-Erfassung/Quittierung und garantierte Synchronisierung im Betriebssystem-Hintergrund sind damit **noch nicht** umgesetzt.
+
+**Datenmigration / Freigabekontrolle:** Einmalig `backend/migration-v2.4.sql` auf bestehendem gesichertem v2.3-D1-System; enthält die neue, standardmäßig `unknown`-klassifizierte `billing_class`-Spalte und die Tabellen für Kundenakten, Journal, Einstellungen und Prüfvermerke. `tests/migration-upgrade.test.mjs` testet, dass übernommene Kunden-/Fahrer-/Schicht-/Fahrt-IDs und alte Auftragszustände unverändert bleiben. `tests/entrypoint-upgrade.test.mjs` prüft die ursprünglichen PWA-Identitäten, Aktivierungssperre und Unterdrückung der Alt-Token-Weitergabe. Bei fehlenden Cloudflare-Berechtigungen oder fehlender echter Datenmigration bleibt die Umschaltung **aus**.
+
+**Fehlende Voraussetzungen für „voll funktionsfähig“:** echtes Cloudflare Worker/D1-Deployment, Google Calendar/Sheets/Contacts OAuth, privater Dateispeicher und Backups, vollumfängliche Importprüfung historischer KTS/RE-Dokumente und Rechnungen, DSGVO-/Kassenvertragsprüfung, End-to-End-Tests auf mindestens zwei unterschiedlichen Benutzerkonten und Geräten, sichere Push-Zustellung bei geschlossener PWA. Ohne diese Punkte ist eine automatische Umstellung des Bestands nicht vertretbar.
+
+## 9. Teststatus und Branch-Regel
+
+Der Umbau befindet sich ausschließlich auf `feature/taxipro-masterdata-dashboard-v24-20261118` in **Draft PR #10** (Basis: PR #9 für Community). Nicht nach `main` pushen oder PRs zusammenführen, bevor die komplette Integration und der Live-Abgleich freigegeben sind. Alle Tests verwenden **synthetische Daten**; Patientenakten, Google Drive, Kalender und echte Konten wurden nicht in das GitHub-Repository geschrieben.
