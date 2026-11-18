@@ -10,6 +10,7 @@ const apiBase = String(window.TAXIPRO_API_URL || '').replace(/\/$/,'');
 let auth = sessionStorage.getItem('taxipro_v2_session') || '', me=null, db=null, page='home', map=null,watch=null,locationLast=0,poll=null, calendarDate=todaySafe(), rideFilter='all';
 function todaySafe(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 let dispatchCustomer=null,dispatchRoutes=[],dispatchCustomerSeq=0;
+let dayRideSnapshot=null,driverRideSnapshot=null,ridesLoadSeq=0;
 const ops=createOperations({
   request,toast,esc,fmt,getSession:()=>auth,getBase:()=>apiBase,getMe:()=>me,getDb:()=>db,
   rerender:async()=>{await refresh();render();}
@@ -55,6 +56,30 @@ async function init(){
   if(!poll)poll=setInterval(()=>{if(document.visibilityState==='visible'&&loggedIn())void syncLive();},45000);
  }catch(e){logout(false);$('loginError').textContent=e.message;}
 }
+function datePlusDays(iso,offset){
+ const [y,m,d]=iso.split('-').map(Number);
+ return new Date(Date.UTC(y,m-1,d+offset)).toISOString().slice(0,10);
+}
+async function loadDayRides(){
+ const day=calendarDate,seq=++ridesLoadSeq;
+ try{
+  const data=await request('/api/rides?date='+encodeURIComponent(day));
+  if(seq!==ridesLoadSeq||page!=='daily'||calendarDate!==day||!loggedIn())return;
+  dayRideSnapshot={...data,date:day};
+  if(!isEditingNow())$('pageView').innerHTML=daily();
+  if(data.truncated)toast('Mehr als 500 Tagesfahrten vorhanden. Bitte Bericht weiter eingrenzen.');
+ }catch(e){toast('Tagesfahrten konnten nicht vollständig geladen werden: '+e.message);}
+}
+async function loadDriverRides(){
+ const day=today(),seq=++ridesLoadSeq;
+ try{
+  const data=await request('/api/rides?from='+day+'&to='+datePlusDays(day,14));
+  if(seq!==ridesLoadSeq||page!=='home'||me?.role!=='driver'||!loggedIn())return;
+  driverRideSnapshot=data;
+  if(!isEditingNow())$('pageView').innerHTML=driverHome();
+  if(data.truncated)toast('Sehr viele Fahrten; bitte Disposition um eine Tagesaufteilung bitten.');
+ }catch(e){toast('Fahreraufträge konnten nicht vollständig aktualisiert werden: '+e.message);}
+}
 function isEditingNow(){
  const active=document.activeElement;
  return !!document.querySelector('dialog[open]') ||
@@ -88,9 +113,11 @@ async function syncLive(resume=false){
     unsavedUpdates=false;render();
    }
   }else if(!isEditingNow()&&me.role==='admin'&&office.eligible(page)){
-   // Calendar and customer files are read on a separate authenticated API.
-   // Refresh those cards without recreating the entire navigation or GPS map.
    await office.mount(page);
+  }else if(!isEditingNow()&&me.role==='admin'&&page==='daily'){
+   await loadDayRides();
+  }else if(!isEditingNow()&&me.role==='driver'&&page==='home'){
+   await loadDriverRides();
   }
  }catch(e){connectionInterrupted(e.message);}
  finally{syncBusy=false;}
@@ -151,7 +178,9 @@ function render(p){if(p){page=p;unsavedUpdates=false;}if(!loggedIn()||!db)return
 $('pageView').innerHTML=page==='chat'?html+ops.chatExtra(db):html;
 ops.mount(page).catch(e=>toast(e.message));
 if(me.role==='admin'&&office.eligible(page))office.mount(page).catch(e=>toast(e.message));
-if(page==='home'&&me.role==='admin')setTimeout(buildMap,30);if(page==='dispatch'){dispatchCustomer=null;dispatchRoutes=[];if($('rc')?.value)loadDispatchCustomer($('rc').value);}if(page==='series')bindSeries();if(page==='shifts'&&me.role==='admin')bindCorrection();if(page==='chat'){let el=$('messages');if(el)el.scrollTop=el.scrollHeight}}
+if(page==='home'&&me.role==='admin')setTimeout(buildMap,30);
+if(page==='daily'&&me.role==='admin')void loadDayRides();
+if(page==='home'&&me.role==='driver')void loadDriverRides();if(page==='dispatch'){dispatchCustomer=null;dispatchRoutes=[];if($('rc')?.value)loadDispatchCustomer($('rc').value);}if(page==='series')bindSeries();if(page==='shifts'&&me.role==='admin')bindCorrection();if(page==='chat'){let el=$('messages');if(el)el.scrollTop=el.scrollHeight}}
 function activeShift(uid=me.id){return (db.shifts||[]).find(s=>s.driver_id===uid&&!s.ended_at)}
 function sHours(uid,days){const recent=Date.now()-days*86400000;return (db.shifts||[]).filter(s=>(!uid||s.driver_id===uid)&&Date.parse(s.started_at)>=recent).reduce((sum,s)=>sum+(Date.parse(s.ended_at||new Date().toISOString())-Date.parse(s.started_at)),0)}
 function adminHome(){const drivers=db.drivers||[],rides=db.rides||[],active=(db.shifts||[]).filter(s=>!s.ended_at),positions=db.positions||[];return title('Heute im Blick','Disposition, Fahrzeuge und Fahrer in einer Oberfläche','<div class="actions"><button class="btn" id="backupExport">⇩ Export</button><button class="btn gold" data-page="dispatch">+ Auftrag anlegen</button></div>')+
@@ -249,7 +278,7 @@ function bindSeries(){const c=$('sc');if(!c)return;const fill=()=>{const cust=(d
 function customers(){const data=db.customers||[];return title('Kundenstamm','Zentrale Adressen und Unterschriftenregeln')+card('Neuen Kunden registrieren','<div class="card-body"><form id="customerForm" class="form-grid">'+field('Kundenname','cname')+field('Abholadresse','cpickup')+field('Standardziel','cdest')+'<div class="field"><label>Fahrtart</label><select id="ckind"><option>Krankenfahrt</option><option>Rechnungsfahrt</option><option>Serienfahrt</option><option>Barfahrt</option></select></div><div class="field wide"><label><input type="checkbox" id="csign" style="width:auto"> Unterschrift erforderlich</label></div><div class="field wide"><button class="btn gold">Kunde speichern</button></div></form></div>')+'<div class="section-gap">'+card('Registrierte Kunden',table(['Name','Abholadresse','Ziel','Fahrtart'],data.map(c=>row([esc(c.name),esc(c.pickup),esc(c.destination),esc(c.kind)]))))+'</div>'}
 function drivers(){return title('Fahrerverwaltung','Private Konten: Passwörter sind auch für Administratoren nicht auslesbar')+card('Fahrer anlegen','<div class="card-body"><form id="driverForm" class="form-grid">'+field('Vollständiger Anzeigename','dname')+field('Login-Name (a–z, 0–9, Punkt, - und _)','duser')+field('Temporäres Passwort (mind. 12 Zeichen)','dpass','password','','minlength="12"')+'<div class="field wide"><button class="btn gold">Fahrerzugang erstellen</button></div></form></div>')+'<div class="section-gap">'+card('Fahreraccounts',table(['Name','Login','Aktiv'],(db.drivers||[]).map(d=>row([esc(d.display_name),esc(d.username),'<span class="actions">'+(d.active?'Aktiv':'Gesperrt')+' <button class="btn" data-driver-reset="'+esc(d.id)+'">Passwort neu</button><button class="btn" data-driver-toggle="'+esc(d.id)+'" data-active="'+(d.active?'0':'1')+'">'+(d.active?'Sperren':'Aktivieren')+'</button></span>']))))+'</div>'+notice('Passwörter sind nie auslesbar. Administratoren können Zugänge sperren und ein neues Kennwort setzen. Aktive Schichten müssen vor einer Sperrung beendet werden.')}
 function driverHome(){
- const all=db.rides||[],day=today();
+ const all=driverRideSnapshot?.entries||db.rides||[],day=today();
  const tasks=all.filter(x=>x.ride_date===day).slice().sort((a,b)=>a.ride_time.localeCompare(b.ride_time));
  const upcoming=all.filter(x=>x.ride_date>day&&x.status!=='cancelled'&&x.status!=='done')
     .slice().sort((a,b)=>a.ride_date.localeCompare(b.ride_date)||a.ride_time.localeCompare(b.ride_time)).slice(0,3);
@@ -308,7 +337,8 @@ function driverHome(){
 }
 
 function daily(){
-  const all=db.rides||[],day=calendarDate,rs=all.filter(r=>r.ride_date===day),groups=new Map();
+  const all=dayRideSnapshot?.date===calendarDate?dayRideSnapshot.entries:(db.rides||[]);
+  const day=calendarDate,rs=all.filter(r=>r.ride_date===day),groups=new Map();
   rs.forEach(r=>{const key=r.customer_id;let g=groups.get(key);if(!g){g={customer:r.customer_name,hin:[],rueck:[]};groups.set(key,g)};g[r.direction==='rueck'?'rueck':'hin'].push(r)});
   const completed=rs.filter(r=>r.status==='done').length,open=rs.filter(r=>r.status!=='done'&&r.status!=='cancelled').length;
   const outstanding=rs.filter(r=>r.signature_required&&r.status==='done').length;
@@ -339,7 +369,15 @@ function chat(){return title('Messenger','Team, vertrauliche Direktnachrichten a
     '<button type="button" class="btn" data-operation="notify">🔔 Hinweise bei offener App erlauben</button></div>'+card('Teamkommunikation','<div id="messages" class="msg-panel">'+(db.messages||[]).map(m=>'<div class="message '+(m.sender_id===me.id?'mine':'')+'"><b>'+esc(m.sender_name)+'</b><br>'+esc(m.body)+'<small>'+fmt(m.created_at)+(m.recipient_id?' · Privat':' · Team')+'</small></div>').join('')+'</div><form id="chatForm" class="chat-form"><select id="recipient" class="btn" style="max-width:190px">'+opts([['','Team-Gruppe'],...(db.team||[]).filter(u=>u.id!==me.id).map(u=>[u.id,u.display_name])])+'</select><input id="msgBody" maxlength="1000" required placeholder="Nachricht …"><button class="btn gold">Senden</button></form>')}
 function stopGPS(){if(watch!==null&&navigator.geolocation)navigator.geolocation.clearWatch(watch);watch=null}
 function toggleGPS(){if(watch!==null){stopGPS();render('shifts');toast('GPS-Ortung beendet.');return}if(!activeShift()){toast('Erst eine Schicht starten.');return}if((db.breaks||[]).some(x=>!x.ended_at&&x.driver_id===me.id)){toast('Während einer Pause bleibt die GPS-Übertragung deaktiviert.');return}if(!navigator.geolocation){toast('GPS nicht verfügbar.');return}watch=navigator.geolocation.watchPosition(async pos=>{if(Date.now()-locationLast<45000||document.visibilityState!=='visible')return;locationLast=Date.now();try{await request('/api/position','POST',{latitude:pos.coords.latitude,longitude:pos.coords.longitude,accuracy:pos.coords.accuracy})}catch(e){toast(e.message)}},e=>{stopGPS();toast(e.code===1?'Standortberechtigung fehlt.':'Standort kann nicht ermittelt werden.')},{enableHighAccuracy:true,maximumAge:20000,timeout:20000});render('shifts');toast('GPS aktiviert – nur bei geöffneter App zuverlässig.')}
-async function transaction(path,method,payload,after){try{await request(path,method,payload);await refresh();render(after||page);toast('Gespeichert.')}catch(e){toast(e.message)}}
+async function transaction(path,method,payload,after){
+ try{
+  await request(path,method,payload);
+  if(path.startsWith('/api/rides')||path.startsWith('/api/series')){
+   dayRideSnapshot=null;driverRideSnapshot=null;
+  }
+  await refresh();render(after||page);toast('Gespeichert.');
+ }catch(e){toast(e.message)}
+}
 function securePasswordDialog(title,confirmTwice=false){
  return new Promise(resolve=>{
   const d=document.createElement('dialog');d.className='password-dialog';
