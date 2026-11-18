@@ -41,7 +41,7 @@ async function request(path,method='GET',payload){
 }
 function loggedIn(){return !!me&&!!auth}
 function loginView(){ $('loginScreen').classList.add('active');$('appScreen').classList.remove('active');$('setupNotice').textContent=APIOK?'Sichere API konfiguriert. Bitte mit deinem Konto anmelden.':'Der geschützte Backend-Dienst ist noch nicht eingerichtet. Die sichere Anmeldung ist daher absichtlich gesperrt. Die interaktive Design-Demo kannst du bereits öffnen.';$('loginForm').querySelector('button').disabled=!APIOK }
-function logout(remote=true){if(remote&&auth)request('/api/logout','POST',{}).catch(()=>{});auth='';me=null;db=null;sessionStorage.removeItem('taxipro_v2_session');stopGPS();clearInterval(poll);poll=null;loginView()}
+function logout(remote=true){ops.setTripFocus(null);if(remote&&auth)request('/api/logout','POST',{}).catch(()=>{});auth='';me=null;db=null;sessionStorage.removeItem('taxipro_v2_session');stopGPS();clearInterval(poll);poll=null;loginView()}
 async function signIn(){const username=$('user').value.trim(),password=$('password').value;$('loginError').textContent='';try{const a=await request('/api/login','POST',{username,password});auth=a.token;sessionStorage.setItem('taxipro_v2_session',auth);me=a.user;$('password').value='';await init()}catch(e){$('loginError').textContent=e.message;auth='';sessionStorage.removeItem('taxipro_v2_session')}}
 let syncBusy=false,unsavedUpdates=false;
 async function init(){
@@ -303,7 +303,7 @@ function driverHome(){
     '<div class="driver-trip-meta">'+esc(x.kind)+' · '+(x.direction==='rueck'?'Rückfahrt':'Hinfahrt')+
       (x.signature_required?' · Unterschrift erforderlich':'')+'</div>'+
     '<div class="driver-trip-actions">'+
-    '<button class="btn" type="button" data-nav="'+esc(x.id)+'">Route öffnen</button>'+
+    '<button class="btn" type="button" data-nav="'+esc(x.id)+'">Fahrt & Verkehr anzeigen</button>'+
     (x.status==='assigned'?'<button class="btn gold" type="button" data-ride="'+esc(x.id)+'" data-action="accept">Fahrt annehmen</button>':'')+
     (x.status==='accepted'?'<button class="btn green" type="button" data-ride="'+esc(x.id)+'" data-action="complete">Als gefahren melden</button>':'')+
     (x.signature_required?'<button class="btn" type="button" data-page="signatures">Unterschrift</button>':'')+
@@ -470,7 +470,14 @@ document.addEventListener('click',e=>{const find=e.target.closest('[data-find-cu
  const ureset=e.target.closest('[data-driver-reset]');if(ureset){securePasswordDialog('Neues Fahrer-Passwort setzen').then(pw=>{if(pw!==null&&confirm('Alte Sitzungen abmelden und Passwort ersetzen?'))transaction('/api/users/'+ureset.dataset.driverReset,'PATCH',{password:pw},'drivers')});return}
  const utoggle=e.target.closest('[data-driver-toggle]');if(utoggle){const active=utoggle.dataset.active==='1';if(!confirm('Fahreraccount '+(active?'reaktivieren':'sperren')+'?'))return;transaction('/api/users/'+utoggle.dataset.driverToggle,'PATCH',{active},'drivers');return}
  const gps=e.target.closest('[data-gps]');if(gps){if(gps.dataset.gps==='revoke')void revokeGPS();else toggleGPS();return}
- const back=e.target.closest('#backupExport');if(back){exportData();return}const navbtn=e.target.closest('[data-nav]');if(navbtn){const r=(db.rides||[]).find(x=>x.id===navbtn.dataset.nav);if(r)window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(r.destination),'_blank','noopener,noreferrer')}});
+ const back=e.target.closest('#backupExport');if(back){exportData();return}const navbtn=e.target.closest('[data-nav]');if(navbtn){
+  const selected=[...(driverRideSnapshot?.entries||[]),...(db.rides||[])]
+   .find(x=>x.id===navbtn.dataset.nav&&x.driver_id===me?.id);
+  if(!selected){toast('Dieser Auftrag ist nicht mehr zugeordnet. Bitte die Fahrten aktualisieren.');return;}
+  if(!ops.setTripFocus(selected)){toast('Nur eigene Fahrten dürfen angezeigt werden.');return;}
+  render('traffic');
+  return;
+ }});
 document.addEventListener('change',e=>{if(e.target.id==='dailyDate'){calendarDate=e.target.value;render('daily')}if(e.target.id==='rc'){dispatchCustomer=null;dispatchRoutes=[];loadDispatchCustomer(e.target.value)}
  if(e.target.id==='rcRoute'||e.target.id==='rdir')fillCustomer()});
 document.addEventListener('submit',e=>{if(e.target.id==='newRideForm'){e.preventDefault();transaction('/api/rides','POST',{customerId:$('rc').value,driverId:$('rd').value,kind:$('rk').value,billingClass:$('rclass').value,direction:$('rdir').value,pickup:$('rfrom').value.trim(),destination:$('rto').value.trim(),date:$('rdate').value,time:$('rtime').value,signatureRequired:$('rsig').checked},'rides')}
