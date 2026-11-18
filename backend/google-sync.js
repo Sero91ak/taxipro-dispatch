@@ -5,7 +5,7 @@
  * connector tokens. Calendar and Sheets may belong to DIFFERENT Google accounts.
  * No source edits, no patient documents, no notes or IDs sent to GitHub.
  */
-import {masterCustomers,matchCalendarCustomer,normalizedGoogleEvent,berlinServiceDate} from './reconcile.js';
+import {masterCustomers,matchCalendarCustomer,normalizedGoogleEvent,possibleExistingCustomers} from './reconcile.js';
 
 const fresh=()=>new Date().toISOString(),ID=()=>crypto.randomUUID();
 const fail=(code,m)=>Object.assign(new Error(m),{status:code});
@@ -86,6 +86,17 @@ export async function pullMaster(db,env) {
     let customerId=linked?.customer_id;
     const stamp=fresh();
     if(!customerId){
+      const legacy=await db.prepare("SELECT id,name FROM customers WHERE active=1 LIMIT 2500").all();
+      const candidates=possibleExistingCustomers(row.name,legacy.results||[]);
+      if(candidates.length){
+        await db.prepare(`INSERT INTO customer_import_conflicts(source,external_key,proposed_name,candidate_customer_ids,seen_at)
+          VALUES('master_sheet',?,?,? ,?)
+          ON CONFLICT(external_key) DO UPDATE SET proposed_name=excluded.proposed_name,
+            candidate_customer_ids=excluded.candidate_customer_ids,seen_at=excluded.seen_at`)
+          .bind(row.externalKey,row.name,JSON.stringify(candidates.map(c=>c.id)),stamp).run();
+        // Deliberately do not create a second customer or link on name alone.
+        continue;
+      }
       customerId=ID();
       await db.batch([
         db.prepare("INSERT INTO customers(id,name,pickup,destination,kind,created_at) VALUES(? ,?,'','','Rechnungsfahrt',?)")
