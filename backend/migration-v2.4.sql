@@ -172,3 +172,19 @@ CREATE TABLE IF NOT EXISTS customer_document_evidence (
   observed_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_customer_documents ON customer_document_evidence(customer_id,observed_at);
+
+-- TaxiPro integration connectors: no direct personal data is sent to OneSignal/Claude.
+CREATE TABLE IF NOT EXISTS taxi_push_subscriptions (
+  subscription_id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  confirmed_at TEXT NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_taxi_push_user ON taxi_push_subscriptions(user_id,enabled);
+
+CREATE TABLE IF NOT EXISTS integration_daily_limits (
+  provider TEXT NOT NULL,
+  day_utc TEXT NOT NULL,
+  requests_used INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY(provider,day_utc)
+);
