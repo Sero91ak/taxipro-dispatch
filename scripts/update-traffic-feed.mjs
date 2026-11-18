@@ -82,10 +82,13 @@ export async function buildFeed({ fetchGroup=fetchRoad, previous=oldFeed(), now=
   const staleGroups=[];
   const events=[];
   for(const outcome of output) {
-    if(outcome.ok) events.push(...outcome.events);
+    if(outcome.ok) events.push(...outcome.events.map(x=>({...x,observedAt:now.toISOString()})));
     else if(known.has(outcome.key)) {
-      events.push(...known.get(outcome.key));
-      staleGroups.push(outcome.key);
+      const recent=known.get(outcome.key).filter(x=>{
+        const seen=Date.parse(x.observedAt || previous.generatedAt);
+        return Number.isFinite(seen) && now.getTime()-seen <= MAX_PREVIOUS_AGE_MS;
+      });
+      if(recent.length){events.push(...recent);staleGroups.push(outcome.key);}
     }
   }
   const unique = new Map();
