@@ -9,6 +9,7 @@ on:
       - 'tests/google-sync.test.mjs'
       - 'tests/entrypoint-upgrade.test.mjs'
       - 'tests/migration-upgrade.test.mjs'
+      - 'tests/google-quota.test.mjs'
       - 'dispatch.html'
       - 'driver.html'
       - 'manifest.json'
@@ -26,6 +27,7 @@ on:
       - 'tests/google-sync.test.mjs'
       - 'tests/entrypoint-upgrade.test.mjs'
       - 'tests/migration-upgrade.test.mjs'
+      - 'tests/google-quota.test.mjs'
       - 'dispatch.html'
       - 'driver.html'
       - 'manifest.json'
@@ -55,4 +57,4 @@ jobs:
           node --check v2/sw.js
           node --check service-worker.js
       - name: Secure canonical customer matching, unified dashboard and print layouts
-        run: node --experimental-sqlite --test tests/reconcile.test.mjs tests/ops-dashboard.test.mjs tests/google-sync.test.mjs tests/entrypoint-upgrade.test.mjs tests/migration-upgrade.test.mjs
+        run: node --experimental-sqlite --test tests/reconcile.test.mjs tests/ops-dashboard.test.mjs tests/google-sync.test.mjs tests/entrypoint-upgrade.test.mjs tests/migration-upgrade.test.mjs tests/google-quota.test.mjs
