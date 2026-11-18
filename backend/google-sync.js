@@ -99,7 +99,7 @@ export async function pullMaster(db,env) {
       }
       customerId=ID();
       await db.batch([
-        db.prepare("INSERT INTO customers(id,name,pickup,destination,kind,created_at) VALUES(? ,?,'','','Rechnungsfahrt',?)")
+        db.prepare("INSERT INTO customers(id,name,pickup,destination,kind,created_at) VALUES(? ,?,'','','Krankenfahrt',?)")
           .bind(customerId,row.name,stamp),
         db.prepare("INSERT INTO customer_source_links(source,source_account,external_key,customer_id,first_seen_at,last_seen_at) VALUES('master_sheet','google_master',?,?,?,?)")
           .bind(row.externalKey,customerId,stamp,stamp),
