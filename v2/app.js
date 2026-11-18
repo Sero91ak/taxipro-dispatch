@@ -8,7 +8,7 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const apiBase = String(window.TAXIPRO_API_URL || '').replace(/\/$/,'');
 let auth = sessionStorage.getItem('taxipro_v2_session') || '', me=null, db=null, page='home', map=null,watch=null,locationLast=0,poll=null, calendarDate=todaySafe(), rideFilter='all';
-function todaySafe(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function todaySafe(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 let dispatchCustomer=null,dispatchRoutes=[],dispatchCustomerSeq=0;
 const ops=createOperations({
   request,toast,esc,fmt,getSession:()=>auth,getBase:()=>apiBase,getMe:()=>me,getDb:()=>db,
@@ -19,7 +19,7 @@ const office=createDispatchCenter({
 });
 const APIOK=/^https:\/\/[^/]+/.test(apiBase);
 const now = () => new Date();
-const today = () => {const d=now();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+const today = () => todaySafe();
 const fmt = d => d ? new Date(d).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'}) : '—';
 const duration = ms => {const n=Math.max(0,Math.floor(ms/1000));return [Math.floor(n/3600),Math.floor(n/60)%60,n%60].map(v=>String(v).padStart(2,'0')).join(':')};
 const statusText={assigned:'Zugewiesen',accepted:'Angenommen',done:'Abgeschlossen',cancelled:'Storniert'};
@@ -41,25 +41,71 @@ function loggedIn(){return !!me&&!!auth}
 function loginView(){ $('loginScreen').classList.add('active');$('appScreen').classList.remove('active');$('setupNotice').textContent=APIOK?'Sichere API konfiguriert. Bitte mit deinem Konto anmelden.':'Der geschützte Backend-Dienst ist noch nicht eingerichtet. Die sichere Anmeldung ist daher absichtlich gesperrt. Die interaktive Design-Demo kannst du bereits öffnen.';$('loginForm').querySelector('button').disabled=!APIOK }
 function logout(remote=true){if(remote&&auth)request('/api/logout','POST',{}).catch(()=>{});auth='';me=null;db=null;sessionStorage.removeItem('taxipro_v2_session');stopGPS();clearInterval(poll);poll=null;loginView()}
 async function signIn(){const username=$('user').value.trim(),password=$('password').value;$('loginError').textContent='';try{const a=await request('/api/login','POST',{username,password});auth=a.token;sessionStorage.setItem('taxipro_v2_session',auth);me=a.user;$('password').value='';await init()}catch(e){$('loginError').textContent=e.message;auth='';sessionStorage.removeItem('taxipro_v2_session')}}
-async function init(){try{me=await request('/api/me');await refresh();
-  await office.loadPrefs();if(me.role==='admin')page=office.getPrefs().lastPage;
+let syncBusy=false,unsavedUpdates=false;
+async function init(){
+ try{
+  me=await request('/api/me');
+  await refresh();
+  await office.loadPrefs();
+  page=office.getPrefs().lastPage||'home';
   $('loginScreen').classList.remove('active');$('appScreen').classList.add('active');
   $('sidebarName').textContent=me.displayName+' · '+me.username;
   $('roleLabel').textContent=me.role==='admin'?'DISPONENTENZENTRALE':'MEIN FAHRERBEREICH';
-  menu();render();
-  if(!poll)poll=setInterval(()=>{if(document.visibilityState==='visible'&&loggedIn())
-    refresh().then(()=>{if(!isEditingNow())render();}).catch(e=>$('syncLabel').textContent=e.message)},45000);
-}catch(e){logout(false);$('loginError').textContent=e.message}}
-function isEditingNow(){
- const el=document.activeElement;
- return !!document.querySelector('dialog[open]') || !!(el&&
-   (el.matches('input,textarea,select,[contenteditable="true"]')||el.closest('form')));
+  render();
+  if(!poll)poll=setInterval(()=>{if(document.visibilityState==='visible'&&loggedIn())void syncLive();},45000);
+ }catch(e){logout(false);$('loginError').textContent=e.message;}
 }
-window.addEventListener('online',()=>{if(loggedIn())refresh().then(()=>{if(!isEditingNow())render();}).catch(()=>{})});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn()){
- refresh().then(()=>{if(!isEditingNow())render();}).catch(()=>{});
-}});
-async function refresh(){const previous=db;db=await request('/api/state');if(me)ops.onRefresh(previous,db,me);$('syncLabel').textContent='Letzter Abgleich: '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});$('serverStatus').textContent='● VERBUNDEN'}
+function isEditingNow(){
+ const active=document.activeElement;
+ return !!document.querySelector('dialog[open]') ||
+   !!document.querySelector('#pageView form[data-dirty="true"]') ||
+   !!(active&&active.matches('input,textarea,select,[contenteditable="true"]')&&active.closest('#pageView'));
+}
+document.addEventListener('input',e=>{
+ const form=e.target.closest?.('#pageView form');
+ if(form)form.dataset.dirty='true';
+});
+function connectionInterrupted(message){
+ if(!loggedIn())return;
+ $('serverStatus').textContent='● VERBINDUNG UNTERBROCHEN';
+ $('serverStatus').setAttribute('data-connection','offline');
+ $('syncLabel').textContent='Letzter Stand – '+String(message||'Netzwerk prüfen').slice(0,80);
+}
+async function syncLive(){
+ if(syncBusy||!loggedIn())return;
+ syncBusy=true;
+ const previousState=JSON.stringify(db);
+ try{
+  await refresh();
+  const changed=previousState!==JSON.stringify(db);
+  if(changed||unsavedUpdates){
+   if(isEditingNow()){
+    unsavedUpdates=true;
+    $('syncLabel').textContent='Neuer Stand verfügbar · nach Speichern / Seitenwechsel';
+   }else{
+    unsavedUpdates=false;render();
+   }
+  }else if(!isEditingNow()&&me.role==='admin'&&office.eligible(page)){
+   // Calendar and customer files are read on a separate authenticated API.
+   // Refresh those cards without recreating the entire navigation or GPS map.
+   await office.mount(page);
+  }
+ }catch(e){connectionInterrupted(e.message);}
+ finally{syncBusy=false;}
+}
+window.addEventListener('online',()=>{if(loggedIn())void syncLive();});
+window.addEventListener('offline',()=>connectionInterrupted('Internetverbindung fehlt'));
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&loggedIn())void syncLive();
+});
+async function refresh(){
+ const previous=db;const current=await request('/api/state');
+ db=current;
+ if(me)ops.onRefresh(previous,db,me);
+ $('syncLabel').textContent='Synchronisiert: '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+ $('serverStatus').textContent='● VERBUNDEN';
+ $('serverStatus').setAttribute('data-connection','online');
+}
 function menu(){
  const admin=[
   ['disposition','DISPOSITION',[
