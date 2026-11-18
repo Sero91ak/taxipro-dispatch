@@ -30,6 +30,7 @@ jobs:
           node --check backend/community.js
           node --check backend/time-summary.js
           node --check v2/app.js
+          node --check v2/community-ui.js
           node --check v2/sw.js
           node --check traffic-module.js
           node --check service-worker.js
