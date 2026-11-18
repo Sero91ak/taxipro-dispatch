@@ -154,3 +154,8 @@ CREATE INDEX IF NOT EXISTS idx_ride_reviews_reviewer ON ride_reviews(reviewed_by
 -- explicitly selected without assuming every Krankenfahrt is KTS.
 ALTER TABLE rides ADD COLUMN billing_class TEXT NOT NULL DEFAULT 'unknown'
   CHECK(billing_class IN ('KTS','RE','private','unknown'));
+
+-- Explicit billing on recurring templates, without retrospectively guessing
+-- that a medical appointment is a health-insurance-approved KTS ride.
+ALTER TABLE recurring_orders ADD COLUMN billing_class TEXT NOT NULL DEFAULT 'unknown'
+  CHECK(billing_class IN ('KTS','RE','private','unknown'));
