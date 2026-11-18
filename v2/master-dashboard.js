@@ -192,7 +192,12 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
    document.body.classList.toggle('center-nav-collapsed',prefs.nav==='collapsed');
  }
  async function loadPrefs() {
-  try{const v=await request('/api/ui-settings');prefs=v.settings;revision=v.revision;applyPrefs();}
+  try{const v=await request('/api/ui-settings');prefs=v.settings;revision=v.revision;
+    selectedCustomer=prefs.selectedCustomerId||null;
+    periodFrom=prefs.periodFrom||periodFrom;periodTo=prefs.periodTo||periodTo;
+    calendarState=prefs.calendarState||'review';
+    if(!selectedCustomer&&prefs.lastPage==='case-detail')prefs.lastPage='cases';
+    applyPrefs();}
   catch(e){console.warn('Anzeigeeinstellungen nicht geladen',e.message);}
   return prefs;
  }
@@ -302,14 +307,17 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   if(action==='refresh-customers'||action==='search-customers'){
     customersQuery=$('center-customer-search')?.value||'';return loadCustomers();
   }
-  if(action==='open-customer'){selectedCustomer=el.dataset.id;refreshMain('case-detail');return;}
+  if(action==='open-customer'){selectedCustomer=el.dataset.id;
+    await savePrefs({selectedCustomerId:selectedCustomer,lastPage:'case-detail'});
+    refreshMain('case-detail');return;}
   if(action==='refresh-customer'){
     periodFrom=$('center-detail-from')?.value||periodFrom;periodTo=$('center-detail-to')?.value||periodTo;
-    return loadCustomer();
+    await savePrefs({periodFrom,periodTo});return loadCustomer();
   }
   if(action==='new-ledger-for-customer'){refreshMain('ledger');return;}
   if(action==='print-customer')return printCustomer();
-  if(action==='refresh-calendar'){calendarState=$('center-calendar-state')?.value||'review';return loadCalendar();}
+  if(action==='refresh-calendar'){calendarState=$('center-calendar-state')?.value||'review';
+    await savePrefs({calendarState});return loadCalendar();}
   if(action==='link-calendar'||action==='ignore-calendar'){
     const customerId=$('center-select-'+el.dataset.id)?.value||null;
     if(action==='link-calendar'&&!customerId)throw Error('Kundenakte auswählen.');
@@ -319,7 +327,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   }
   if(action==='load-ledger'){
     periodFrom=$('center-ledger-from')?.value||periodFrom;periodTo=$('center-ledger-to')?.value||periodTo;
-    return loadLedger();
+    await savePrefs({periodFrom,periodTo});return loadLedger();
   }
   if(action==='ledger-reported'||action==='ledger-confirm'){
     const isConfirmed=action==='ledger-confirm';
