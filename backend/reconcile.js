@@ -97,7 +97,8 @@ export function berlinServiceDate(iso) {
 }
 export function displayPrefs(input) {
   if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Einstellungen ungültig.');
-  const result={density:'compact',nav:'expanded',lastPage:'home',dateFilter:'today'};
+  const result={density:'compact',nav:'expanded',lastPage:'home',dateFilter:'today',
+    selectedCustomerId:null,periodFrom:null,periodTo:null,calendarState:'review'};
   const allowed={
     density:['compact','comfortable'],nav:['expanded','collapsed'],
     lastPage:['home','dispatch','series','daily','rides','customers','drivers','shifts','worktime','traffic','chat','files','swaps','signatures','cases','case-detail','calendar','ledger'],
@@ -106,6 +107,23 @@ export function displayPrefs(input) {
   for(const [key,choices] of Object.entries(allowed))if(input[key]!==undefined){
     if(!choices.includes(input[key]))throw Error('Einstellung '+key+' ungültig.');
     result[key]=input[key];
+  }
+  if(input.selectedCustomerId!==undefined&&input.selectedCustomerId!==null){
+    if(typeof input.selectedCustomerId!=='string'||!/^[a-f0-9-]{36}$/i.test(input.selectedCustomerId))
+      throw Error('Ausgewählter Kunde ungültig.');
+    result.selectedCustomerId=input.selectedCustomerId;
+  }
+  for(const key of ['periodFrom','periodTo']){
+    if(input[key]!==undefined&&input[key]!==null){
+      if(typeof input[key]!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(input[key]))
+        throw Error('Zeitraum-Einstellung ungültig.');
+      result[key]=input[key];
+    }
+  }
+  if(input.calendarState!==undefined){
+    if(!['review','matched','ignored','all'].includes(input.calendarState))
+      throw Error('Kalenderfilter ungültig.');
+    result.calendarState=input.calendarState;
   }
   return result;
 }
