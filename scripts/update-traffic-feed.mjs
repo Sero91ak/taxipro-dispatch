@@ -39,6 +39,7 @@ function normalize(item,road,kind,index) {
   const id = clean(item.identifier || `${road}:${kind}:${index}:${coords.join(':')}`,160);
   return { id:road+':'+kind+':'+id, autobahn:road, kind, coords, title, detail, future:item.future===true };
 }
+export { normalize as normalizeIncident, coord as parseIncidentCoord };
 function oldFeed() {
   try { return existsSync(FILE) ? JSON.parse(readFileSync(FILE, 'utf8')) : null; }
   catch { return null; }
