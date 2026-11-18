@@ -1,4 +1,4 @@
-const CACHE = 'taxipro-dispatch-v31';const ASSETS = [
+const CACHE = 'taxipro-dispatch-v32-safety';const ASSETS = [
   './',
   './index.html',
   './home.html',
@@ -27,7 +27,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k.startsWith('taxipro-dispatch-') && k !== CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -63,6 +63,15 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+  // Never cache URLs containing legacy authentication tokens or patient links.
+  // A cache key containing a PIN/token would preserve sensitive URL metadata.
+  if (url.searchParams.has('t') || url.searchParams.has('token') ||
+      url.searchParams.has('p') || url.searchParams.has('pin') ||
+      url.searchParams.has('boot') || url.searchParams.has('gd') ||
+      url.searchParams.has('sy') || url.searchParams.has('pu')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
 
   // Der öffentliche Verkehrsfeed und die beiden Moduldaten dürfen nie
   // dauerhaft aus einem alten Precache beantwortet werden.
