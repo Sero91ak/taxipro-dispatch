@@ -413,9 +413,12 @@ async function exportData(){
   toast('Verschlüsseltes Backup gespeichert. Passphrase sicher aufbewahren!');
  }catch(e){toast(e.message)}
 }
-$('loginForm').addEventListener('submit',e=>{e.preventDefault();signIn()});$('refreshBtn').onclick=()=>refresh().then(render).catch(e=>toast(e.message));$('logoutBtn').onclick=()=>logout();$('mobileMenu').onclick=()=>$('appNav').classList.toggle('open');
+$('loginForm').addEventListener('submit',e=>{e.preventDefault();signIn()});$('refreshBtn').onclick=()=>refresh().then(render).catch(e=>toast(e.message));$('logoutBtn').onclick=()=>logout();$('mobileMenu').onclick=()=>{
+ const opened=$('appNav').classList.toggle('open');
+ $('mobileMenu').setAttribute('aria-expanded',String(opened));
+};
 document.addEventListener('click',e=>{const find=e.target.closest('[data-find-customer]');if(find){find.disabled=true;findDispatchCustomer().catch(err=>toast(err.message)).finally(()=>find.disabled=false);return}
- const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me)office.openPage(nav.dataset.page);$('appNav').classList.remove('open');return}
+ const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me)office.openPage(nav.dataset.page);$('appNav').classList.remove('open');$('mobileMenu').setAttribute('aria-expanded','false');return}
  const todayButton=e.target.closest('[data-today]');if(todayButton){calendarDate=today();render('daily');return}
  const change=e.target.closest('[data-ride]');if(change){transaction('/api/rides/'+change.dataset.ride,'PATCH',{action:change.dataset.action});return}
  const cancel=e.target.closest('[data-cancel]');if(cancel){if(confirm('Diesen Auftrag wirklich stornieren?'))transaction('/api/rides/'+cancel.dataset.cancel,'PATCH',{action:'cancel'});return}
