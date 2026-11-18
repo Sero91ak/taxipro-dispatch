@@ -145,7 +145,7 @@ export function signatureSheetModel(customer,rows,options={}) {
     customerName:customer.name,
     periodStart:dates.reduce((a,b)=>a<b?a:b),periodEnd:dates.reduce((a,b)=>a>b?a:b),
     entries:rows.slice().sort((a,b)=>a.service_date.localeCompare(b.service_date)||a.pickup_time.localeCompare(b.pickup_time))
-    .map(r=>({date:r.service_date,time:r.pickup_time,pickup:r.pickup,destination:r.destination,
+    .map(r=>({date:r.service_date,serviceDate:r.service_date,time:r.pickup_time,pickup:r.pickup,destination:r.destination,
       direction:r.direction,recordStatus:r.ride_status})),
     note:String(options.note||'').slice(0,300)};
 }
