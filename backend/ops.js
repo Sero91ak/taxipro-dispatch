@@ -29,7 +29,8 @@ const JOURNEYS_SQL = `
  UNION ALL
  SELECT r.id,r.customer_id,NULL AS calendar_import_id,NULL AS customer_route_id,
    r.ride_date AS service_date,r.ride_time AS pickup_time,r.pickup,r.destination,r.direction,
-   CASE WHEN r.kind='Rechnungsfahrt' THEN 'RE'
+   CASE WHEN r.billing_class!='unknown' THEN r.billing_class
+        WHEN r.kind='Rechnungsfahrt' THEN 'RE'
         WHEN r.kind='Barfahrt' THEN 'private' ELSE 'unknown' END AS billing_class,
    CASE WHEN r.status='cancelled' THEN 'cancelled'
         WHEN r.status='done' AND rv.ride_id IS NOT NULL THEN 'confirmed'
