@@ -149,3 +149,8 @@ CREATE TABLE IF NOT EXISTS ride_reviews (
  reviewed_by TEXT NOT NULL REFERENCES users(id)
 );
 CREATE INDEX IF NOT EXISTS idx_ride_reviews_reviewer ON ride_reviews(reviewed_by,reviewed_at);
+
+-- Existing assigned trips keep their IDs. The billing class can now be
+-- explicitly selected without assuming every Krankenfahrt is KTS.
+ALTER TABLE rides ADD COLUMN billing_class TEXT NOT NULL DEFAULT 'unknown'
+  CHECK(billing_class IN ('KTS','RE','private','unknown'));
