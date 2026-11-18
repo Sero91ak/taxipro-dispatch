@@ -9,6 +9,13 @@ const normalize=s=>String(s??'').normalize('NFKD')
 const STOP=new Set(['herr','frau','dr','prof','taxi','re','kts','fahrt','fahrten','patient','kunde','abholung','nr','bonn','meckenheim','zum','zur','von','nach','und']);
 const isToken=t=>t.length>=3&&!STOP.has(t)&&!/^[0-9]+$/.test(t);
 export const normalizeName=normalize;
+/** Candidate duplicates must be reviewed, never silently merged. */
+export function possibleExistingCustomers(name,existing=[]) {
+ const key=normalize(name).split(' ').filter(isToken).sort().join('|');
+ if(!key)return [];
+ return existing.filter(c=>normalize(c.name).split(' ').filter(isToken).sort().join('|')===key)
+   .map(c=>({id:c.id,name:c.name}));
+}
 export const customerCode=s=>{
   const m=String(s??'').toUpperCase().match(/(?:^|[^A-Z0-9])(K[0-9]{4})(?=$|[^A-Z0-9])/);
   return m?.[1]||null;
