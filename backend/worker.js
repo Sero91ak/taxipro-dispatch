@@ -184,6 +184,10 @@ async function updatePosition(req,env,u){
   if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180||(accuracy!=null&&(!Number.isFinite(accuracy)||accuracy<0||accuracy>50000)))throw err(400,'Koordinaten ungültig.');
   const active=await env.DB.prepare('SELECT id FROM shifts WHERE driver_id=? AND ended_at IS NULL').bind(u.id).first();
   if(!active)throw err(409,'Ortung nur während einer aktiven Schicht.');
+  const paused=await env.DB.prepare('SELECT id FROM shift_breaks WHERE shift_id=? AND ended_at IS NULL').bind(active.id).first();
+  if(paused)throw err(409,'Während einer Pause wird kein Fahrerstandort übermittelt.');
+  const latest=await env.DB.prepare('SELECT reported_at FROM positions WHERE driver_id=?').bind(u.id).first();
+  if(latest&&Date.now()-Date.parse(latest.reported_at)<30000)return {received:false,rateLimited:true};
   await env.DB.prepare('INSERT INTO positions(driver_id,latitude,longitude,accuracy,reported_at) VALUES(?,?,?,?,?) ON CONFLICT(driver_id) DO UPDATE SET latitude=excluded.latitude,longitude=excluded.longitude,accuracy=excluded.accuracy,reported_at=excluded.reported_at')
     .bind(u.id,lat,lng,accuracy,timestamp()).run();
   return {received:true};
@@ -240,6 +244,7 @@ async function breakAction(req,env,u){
   const opened=await db.prepare('SELECT id FROM shift_breaks WHERE shift_id=? AND ended_at IS NULL').bind(shift.id).first();
   if(opened)throw err(409,'Eine Pause läuft bereits.');
   const id=ID();try{await db.prepare('INSERT INTO shift_breaks(id,shift_id,driver_id,started_at) VALUES(?,?,?,?)').bind(id,shift.id,u.id,timestamp()).run()}catch{throw err(409,'Eine Pause läuft bereits.')}
+  await db.prepare('DELETE FROM positions WHERE driver_id=?').bind(u.id).run();
   await audit(db,u.id,'break.started',id);return {id,active:true};
  }
  if(action==='end'){
