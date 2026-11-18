@@ -30,7 +30,7 @@ export function matchCalendarCustomer(event,customers=[]) {
   });
   if(candidates.length!==1)return {state:'review',customerId:null,
     reason:candidates.length>1?'Mehrere mögliche Kunden':'Kein zweifelsfrei eindeutiger vollständiger Name'};
-  return {state:'matched',customerId:candidates[0].id,reason:'Eindeutiger vollständiger Name – bitte bei Ersterfassung bestätigen'};
+  return {state:'review',customerId:candidates[0].id,reason:'Möglicher Namensmatch – vor Zuordnung durch Disponenten prüfen'};
 }
 export function classifyBilling(value) {
   const s=' '+String(value??'').toUpperCase().replace(/[^A-Z0-9]+/g,' ')+' ';
