@@ -28,3 +28,14 @@
 #driver-traffic-panel .tp-traffic-legal{font-size:11px;line-height:1.5;color:#7da1b6;margin-bottom:10px}
 #driver-traffic-panel .tp-traffic-attribution{color:#97aebd;font-size:10px;line-height:1.5;margin:8px 0}
 @media(min-width:760px){#driver-traffic-panel .tp-traffic-map{height:clamp(360px,60dvh,640px)}}
+
+/* Zuverlässige Daten- und Standortstatusanzeige, ohne die Karte zu überlagern */
+#driver-traffic-panel .tp-traffic-freshness{display:inline-flex;align-items:center;margin:0 0 11px;padding:6px 10px;border-radius:9px;border:1px solid #2f6b5d;color:#91f5d1;background:#10362f;font-size:11px;font-weight:700;line-height:1.3}
+#driver-traffic-panel .tp-traffic-freshness[data-state="stale"]{background:#462d19;border-color:#8c5b2a;color:#ffd69f}
+#driver-traffic-panel .tp-traffic-freshness[data-state="unavailable"]{background:#41242c;border-color:#a0484f;color:#fecaca}
+#driver-traffic-panel .tp-traffic-radius-row{display:flex;align-items:center;gap:10px;margin:0 0 3px}
+#driver-traffic-panel .tp-traffic-radius-row label{font-size:11px;color:#9fbdd0;flex:1}
+#driver-traffic-panel .tp-traffic-radius-row select{max-width:170px;min-width:0}
+#driver-traffic-panel .tp-traffic-location-status{font-size:11px;color:#8eabc0;margin:5px 0 11px;line-height:1.5}
+#driver-traffic-panel .tp-traffic-actions button:disabled{opacity:.55;cursor:wait}
+#driver-traffic-panel .tp-traffic-map .tp-traffic-empty{margin:15px}

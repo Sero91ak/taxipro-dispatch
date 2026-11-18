@@ -1586,6 +1586,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
       <div id="driver-traffic-panel" class="hidden" aria-label="Verkehrslage">
         <div class="tp-traffic-head"><div><h2>🗺️ Verkehrszentrale</h2><p class="tp-traffic-sub">Meckenheim · Bonn · Rhein-Sieg · Köln</p></div><span style="font-size:10px;color:#5eead4;font-weight:700">0 € API-Gebühren</span></div>
         <div id="tp-traffic-status" class="tp-traffic-status" role="status">Amtliche Verkehrsmeldungen werden geladen …</div>
+        <div id="tp-traffic-freshness" class="tp-traffic-freshness" role="status" aria-live="polite">Datenstand wird geprüft</div>
         <div class="tp-traffic-actions">
           <select id="tp-traffic-road" aria-label="Autobahn auswählen">
             <option value="all">Alle Autobahnen im Gebiet</option>
@@ -1595,6 +1596,16 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
           <button id="tp-traffic-locate" type="button" aria-label="Meinen Standort zeigen" title="Mein Standort">◎</button>
           <button id="tp-traffic-refresh" type="button" aria-label="Verkehrsdaten aktualisieren" title="Aktualisieren">↻</button>
         </div>
+        <div class="tp-traffic-radius-row">
+          <label for="tp-traffic-radius">Meldungen im Umkreis</label>
+          <select id="tp-traffic-radius" aria-label="Umkreis um meine Position">
+            <option value="all">Gesamtes Gebiet</option>
+            <option value="10">10 km</option>
+            <option value="25">25 km</option>
+            <option value="50">50 km</option>
+          </select>
+        </div>
+        <p id="tp-traffic-location-status" class="tp-traffic-location-status" aria-live="polite">Standort wird nur auf Anfrage ermittelt.</p>
         <div id="tp-traffic-map" class="tp-traffic-map" role="region" aria-label="Interaktive Verkehrskarte"></div>
         <div class="tp-traffic-filters" id="tp-traffic-filters" role="group" aria-label="Meldungen filtern">
           <button type="button" data-filter="all" aria-pressed="true">Alle Meldungen</button>
@@ -1605,7 +1616,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
         </div>
         <div class="drv-section-title" id="tp-traffic-count">Amtliche Meldungen</div>
         <div id="tp-traffic-list" class="tp-traffic-list" aria-live="polite"></div>
-        <p class="tp-traffic-legal">Keine Blitzer- oder Polizeikontrollwarnungen. Die Karte zeigt amtliche Autobahnmeldungen, nicht den vollständigen Live-Verkehrsfluss aller Straßen. Bitte im Fahrzeug nur sicher und verkehrsrechtskonform bedienen.</p>
+        <p class="tp-traffic-legal">Keine Blitzer- oder Polizeikontrollwarnungen. Die Karte zeigt amtliche Autobahnmeldungen, nicht den vollständigen Live-Verkehrsfluss aller Straßen. GPS-Koordinaten werden nicht an die Taxi-Zentrale gesendet; beim Verschieben der Karte erhält der Kartenkacheldienst jedoch die aufgerufenen Kartenausschnitte. Bedienung nur im Stand bzw. durch befugte Personen.</p>
         <p class="tp-traffic-attribution">Daten: Autobahn GmbH des Bundes · Karte: OpenFreeMap / OpenStreetMap / MapLibre · Quelle und Aktualisierungszeit siehe Status</p>
       </div>
       <div id="driver-team-panel" class="hidden">
