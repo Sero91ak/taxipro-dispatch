@@ -9,13 +9,15 @@
   const LABELS = { warning: 'Verkehrsgefahr', closure: 'Sperrung', roadworks: 'Baustelle' };
   const EMOJI = { warning: '⚠️', closure: '⛔', roadworks: '🚧' };
   const REGION = { minLng: 6.25, maxLng: 7.85, minLat: 50.22, maxLat: 51.28 };
-  const TTL = 15 * 60 * 1000;
-  const MAX_CACHE_AGE = 30 * 60 * 1000;
+  const TTL = 5 * 60 * 1000;
+  const MAX_CACHE_AGE = 120 * 60 * 1000;
+  const MAX_FEED_AGE = 45 * 60 * 1000;
+  const CENTRAL_FEED = 'traffic-feed.json';
   const CACHE_KEY = 'tp_public_traffic_cache_v1';
   const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
   const MAP_LIB = 'https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.mjs';
   let active = false, map = null, maplibre = null, libPromise = null, positionMarker = null;
-  let data = [], updatedAt = 0, fetching = null, lastAttempt = 0, filter = 'all', road = 'all';
+  let data = [], updatedAt = 0, fetching = null, lastAttempt = 0, filter = 'all', road = 'all', dataSource = 'cache';
   let markers = [], timer = null;
 
   const $ = id => document.getElementById(id);
@@ -53,6 +55,7 @@
       if (!saved || !Array.isArray(saved.data) || !saved.updatedAt) return;
       if (Date.now() - saved.updatedAt > MAX_CACHE_AGE) return;
       data = saved.data.filter(x => x && Array.isArray(x.coords));
+      dataSource = 'cache';
       updatedAt = saved.updatedAt;
     } catch (_) {}
   }
@@ -60,7 +63,7 @@
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data.slice(0, 450), updatedAt })); } catch (_) {}
   }
   function getVisible() {
-    const selected = data.filter(x => (filter === 'all' || x.kind === filter) && (road === 'all' || x.autobahn === road));
+    const selected = data.filter(x => (road === 'all' || x.autobahn === road) && (filter === 'planned' ? !!x.future : !x.future && (filter === 'all' || x.kind === filter)));
     if (!map) return selected;
     const center = map.getCenter();
     return selected.sort((a, b) => {
@@ -178,37 +181,103 @@
       return items.map((item, i) => normalize(item, kind, autobahn, i)).filter(Boolean);
     } finally { clearTimeout(timeout); }
   }
+  async function loadCentralFeed() {
+    const url = new URL(CENTRAL_FEED, location.href);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(url.toString(), { signal: controller.signal, cache: 'no-store' });
+      if (!response.ok) throw new Error('Feed HTTP ' + response.status);
+      const feed = await response.json();
+      if (feed?.schema !== 1 || !Array.isArray(feed.events)) throw new Error('Unbekanntes Feed-Format');
+      const timestamp = Date.parse(feed.generatedAt || '');
+      if (!Number.isFinite(timestamp) || timestamp > Date.now() + 300000) throw new Error('Noch keine gültigen Live-Daten vorhanden');
+      const events = feed.events.filter(x =>
+        x && ROADS.includes(x.autobahn) && KINDS.includes(x.kind) && Array.isArray(x.coords) &&
+        x.coords.length === 2 && Number.isFinite(x.coords[0]) && Number.isFinite(x.coords[1]) &&
+        x.coords[0] >= REGION.minLng && x.coords[0] <= REGION.maxLng &&
+        x.coords[1] >= REGION.minLat && x.coords[1] <= REGION.maxLat
+      );
+      return { events, timestamp, partial: !!feed.partial, failed: (feed.failedGroups || []).length, stale: (feed.staleGroups || []).length };
+    } finally { clearTimeout(timeout); }
+  }
+
+  async function loadDirectFallback() {
+    // Nur wenn der zentrale Feed nicht erreichbar oder veraltet ist.
+    // Kein kostenpflichtiger API-Dienst; begrenzte gleichzeitige Anfragen.
+    const queue = ROADS.flatMap(r => KINDS.map(k => [r, k]));
+    const results = [];
+    let next = 0;
+    async function worker() {
+      for (;;) {
+        const i = next++;
+        if (i >= queue.length) return;
+        const [r, k] = queue[i];
+        try { results.push({ success: true, rows: await fetchOfficial(r, k) }); }
+        catch (_) { results.push({ success: false, rows: [] }); }
+      }
+    }
+    await Promise.all(Array.from({ length: 4 }, worker));
+    const good = results.filter(x => x.success);
+    if (!good.length) return null;
+    const seen = new Set();
+    const events = good.flatMap(x => x.rows).filter(x => {
+      if (seen.has(x.id)) return false;
+      seen.add(x.id);
+      return true;
+    });
+    return { events, partial: good.length !== queue.length };
+  }
+
   async function refresh(force) {
     if (!active || document.hidden) return;
     if (fetching) return fetching;
-    if (!force && updatedAt && Date.now() - updatedAt < TTL) {
-      setStatus('Amtliche Meldungen · Stand: ' + dateText(updatedAt) + ' · Aktualisierung höchstens alle 15 Minuten');
-      render();
-      return;
-    }
-    if (Date.now() - lastAttempt < 30000) return;
+    if (!force && lastAttempt && Date.now() - lastAttempt < TTL) return;
+    if (lastAttempt && Date.now() - lastAttempt < 30000) return;
     lastAttempt = Date.now();
-    setStatus('Amtliche Meldungen für die Region werden aktualisiert …');
+    setStatus('Amtliche Verkehrsmeldungen werden abgeglichen …');
     fetching = (async () => {
-      const requests = ROADS.flatMap(r => KINDS.map(k => [r, k]));
-      const outcomes = await Promise.allSettled(requests.map(([r, k]) => fetchOfficial(r, k)));
-      const ok = outcomes.filter(o => o.status === 'fulfilled');
-      if (ok.length) {
-        const all = ok.flatMap(o => o.value);
-        const ids = new Set();
-        data = all.filter(x => { if (ids.has(x.id)) return false; ids.add(x.id); return true; });
-        updatedAt = Date.now(); saveCached();
-        setStatus('Amtliche Meldungen · Stand: ' + dateText(updatedAt) + (ok.length < requests.length ? ' · Einzelne Datenquellen nicht erreichbar' : ' · Automatische Aktualisierung alle 15 Minuten'));
+      let central = null;
+      try { central = await loadCentralFeed(); } catch (error) {
+        console.warn('TaxiPro: Zentraler Verkehrsfeed nicht verfügbar', error);
+      }
+      if (central) {
+        data = central.events;
+        updatedAt = central.timestamp;
+        dataSource = 'GitHub-Feed';
+        saveCached();
+        const age = Date.now() - updatedAt;
+        if (age <= MAX_FEED_AGE) {
+          setStatus('Amtliche Autobahnmeldungen · Stand: ' + dateText(updatedAt) +
+            (central.partial ? ' · Quellendaten teilweise unvollständig (' + central.failed + ' Ausfälle)' : '') +
+            (central.stale ? ' · ' + central.stale + ' Teilbereiche aus Cache' : '') +
+            ' · kein vollständiger Live-Verkehrsfluss');
+          render();
+          return;
+        }
+      }
+      const direct = await loadDirectFallback();
+      if (direct) {
+        data = direct.events;
+        updatedAt = Date.now();
+        dataSource = 'Autobahn-API direkt';
+        saveCached();
+        setStatus('Amtliche Autobahnmeldungen · Stand: ' + dateText(updatedAt) +
+          (direct.partial ? ' · Einige Datenquellen nicht erreichbar' : '') +
+          ' · direkt geladen · keine vollständige Live-Stauflusskarte');
+      } else if (updatedAt && Date.now() - updatedAt <= MAX_CACHE_AGE) {
+        setStatus('Achtung: Verkehrsquellen aktuell nicht erreichbar. Veraltete Daten vom ' + dateText(updatedAt) + ' – nicht als aktuelle Meldungen verwenden.');
       } else {
-        setStatus(updatedAt && Date.now() - updatedAt <= MAX_CACHE_AGE
-          ? 'Keine Verbindung zur Autobahn-Datenquelle. Angezeigt werden ältere Meldungen vom ' + dateText(updatedAt) + '.'
-          : 'Amtliche Verkehrsmeldungen derzeit nicht verfügbar. Keine Live-Daten vorhanden.');
-        if (!updatedAt || Date.now() - updatedAt > MAX_CACHE_AGE) { data = []; updatedAt = 0; }
+        data = [];
+        updatedAt = 0;
+        dataSource = 'nicht verfügbar';
+        setStatus('Verkehrsdaten derzeit nicht verfügbar. Karte und Standort können weiterhin nutzbar sein.');
       }
       render();
     })();
     try { await fetching; } finally { fetching = null; }
   }
+
   function locate() {
     if (!navigator.geolocation) { setStatus('Standortfunktion auf diesem Gerät nicht verfügbar.'); return; }
     const button = $('tp-traffic-locate');
