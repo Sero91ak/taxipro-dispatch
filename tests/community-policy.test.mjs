@@ -78,6 +78,15 @@ test('Dateien: privatautorisierte Downloads, keine öffentlichen Links',async()=
  assert.equal(file.response.status,200);
  assert.match(await file.response.text(),/TAXIPRO TEST/);
  await fails(call('GET','/api/attachments/'+id,null,b),403);
+ const pin=await call('PATCH','/api/attachments/'+id+'/pin',{pinned:true},a);
+ assert.equal(pin.data.pinned,true);
+ const filesA=(await call('GET','/api/attachments',null,a)).attachments;
+ assert.equal(filesA.find(x=>x.id===id).pinned,1,'Persönliche Anheftung für Empfänger');
+ const filesAdmin=(await call('GET','/api/attachments',null,admin)).attachments;
+ assert.equal(filesAdmin.find(x=>x.id===id).pinned,0,'Anheftung bleibt persönlich');
+ await fails(call('PATCH','/api/attachments/'+id+'/pin',{pinned:true},b),403);
+ const unpin=await call('PATCH','/api/attachments/'+id+'/pin',{pinned:false},a);
+ assert.equal(unpin.data.pinned,false);
 });
 test('UI stellt vertrauliche Funktionen nur innerhalb des Rollenportals dar',()=>{
  const handlers=[];
