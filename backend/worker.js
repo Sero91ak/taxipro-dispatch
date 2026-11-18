@@ -115,6 +115,21 @@ async function addCustomer(req,env,u) {
   await audit(env.DB,u.id,'customer.created',id);
   return {id};
 }
+async function listAssignedRides(req,env,u){
+ const params=new URL(req.url).searchParams;
+ const single=params.get('date');
+ const from=single||params.get('from')||'',to=single||params.get('to')||'';
+ if(!okDate(from)||!okDate(to)||from>to||Date.parse(to)-Date.parse(from)>30*86400000)
+   throw err(400,'Gültiges Tages- oder höchstens 31-tägiges Zeitfenster wählen.');
+ const columns=`SELECT r.*,c.name AS customer_name${u.role==='admin'?',drv.display_name AS driver_name':''}
+   FROM rides r JOIN customers c ON c.id=r.customer_id
+   ${u.role==='admin'?'JOIN users drv ON drv.id=r.driver_id':''}
+   WHERE r.ride_date BETWEEN ? AND ?${u.role==='driver'?' AND r.driver_id=?':''}
+   ORDER BY r.ride_date,r.ride_time,r.id LIMIT 501`;
+ const binds=u.role==='driver'?[from,to,u.id]:[from,to];
+ const found=(await env.DB.prepare(columns).bind(...binds).all()).results||[];
+ return {entries:found.slice(0,500),truncated:found.length>500,from,to,source:'taxipro-db'};
+}
 async function addRide(req,env,u){
   requireAdmin(u);const d=await parse(req);
   if(!okDate(d.date)||!okTime(d.time)||!['hin','rueck'].includes(d.direction)||!['Krankenfahrt','Rechnungsfahrt','Serienfahrt','Barfahrt'].includes(d.kind))throw err(400,'Fahrtart, Datum oder Uhrzeit ungültig.');
@@ -330,6 +345,7 @@ export default {
       const userMatch=path.match(/^\/api\/users\/([a-f0-9-]{36})$/);
       if(userMatch&&req.method==='PATCH')return respond(await resetDriver(req,env,u,userMatch[1]));
       if(path==='/api/customers'&&req.method==='POST')return respond(await addCustomer(req,env,u),201);
+      if(path==='/api/rides'&&req.method==='GET')return respond(await listAssignedRides(req,env,u));
       if(path==='/api/rides'&&req.method==='POST')return respond(await addRide(req,env,u),201);
       const rideMatch=path.match(/^\/api\/rides\/([a-f0-9-]{36})$/);
       if(rideMatch&&req.method==='PATCH')return respond(await changeRide(req,env,u,rideMatch[1]));
