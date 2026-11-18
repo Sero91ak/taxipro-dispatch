@@ -160,12 +160,20 @@
       map.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right');
       map.once('load', () => { map.resize(); render(); });
       map.on('error', e => {
-        if (!updatedAt && !fetching) setStatus('Kartenmaterial konnte teilweise nicht geladen werden. Internetverbindung prüfen.');
+        const container = $('tp-traffic-map');
+        if (container) container.title = 'Kartenmaterial teilweise nicht verfügbar; Datenmeldungen weiterhin separat lesbar.';
         console.warn('TaxiPro Verkehrskarte:', e.error);
       });
     } catch (e) {
       console.warn('TaxiPro: MapLibre nicht verfügbar', e);
-      setStatus('Karte nicht verfügbar. Verkehrsmeldungen sind weiterhin unten sichtbar.');
+      const container = $('tp-traffic-map');
+      if (container) {
+        container.replaceChildren();
+        const error = document.createElement('div');
+        error.className = 'tp-traffic-empty';
+        error.textContent = 'Kartenmaterial momentan nicht verfügbar. Die amtlichen Verkehrsmeldungen stehen weiterhin darunter.';
+        container.append(error);
+      }
     }
   }
   async function fetchOfficial(autobahn, kind) {
