@@ -104,7 +104,7 @@ test('Kompaktes Command Center hat Kundenakte, Kalenderprüfung und Monatsjourna
  for(const page of ['home','cases','calendar','ledger','case-detail'])
    assert.ok(ui.view(page).length>100,page);
  assert.match(ui.view('home'),/liveMap/);
- assert.match(ui.view('cases'),/Genehmigung/);
+ assert.match(ui.view('cases'),/genehmigte Fahrten/);
  assert.match(ui.view('ledger'),/Manuelle Fahrt/);
  }finally{globalThis.document=before;}
 });
