@@ -236,7 +236,8 @@ async function printData(db,u,search) {
     WHERE c.id=? AND c.active=1`).bind(id).first();
   if(!c)throw bad(404,'Kunde nicht gefunden.');
   const q=await db.prepare(`SELECT * FROM journey_ledger WHERE customer_id=? AND service_date BETWEEN ? AND ?
-    AND ride_status IN ('reported','confirmed') ORDER BY service_date,pickup_time LIMIT 150`)
+    AND ride_status IN ('reported','confirmed') AND direction IN ('hin','rueck')
+    ORDER BY service_date,pickup_time LIMIT 150`)
     .bind(id,from,to).all();
   if(!(q.results||[]).length)throw bad(404,'Keine gemeldeten oder bestätigten Fahrten im Zeitraum.');
   const selected=(q.results||[]).filter(x=>x.pickup&&x.destination);
