@@ -116,16 +116,24 @@ async function changeSwap(req,env,u,id) {
     throw error(403,'Nicht berechtigt.');
   const now=NOW();
   if(action==='approve') {
-    const ride=await env.DB.prepare("SELECT driver_id,status FROM rides WHERE id=?").bind(w.ride_id).first();
-    if(!ride||ride.driver_id!==w.requester_id||ride.status!=='assigned')throw error(409,'Fahrt ist nicht mehr tauschbar.');
-    // D1 batch is atomic; the guarded updates are not a substitute for a
-    // read-checked transaction under concurrent writes, so reject stale states first.
-    await env.DB.batch([
-      env.DB.prepare("UPDATE rides SET driver_id=? WHERE id=? AND driver_id=? AND status='assigned'")
-        .bind(w.target_driver_id,w.ride_id,w.requester_id),
-      env.DB.prepare("UPDATE shift_swap_requests SET status='approved',approved_at=?,approved_by=? WHERE id=? AND status='accepted'")
-        .bind(now,u.id,id)
+    const target=await env.DB.prepare("SELECT active FROM users WHERE id=? AND role='driver'").bind(w.target_driver_id).first();
+    if(!target||!target.active)throw error(409,'Der Ziel-Fahrer ist nicht mehr aktiv.');
+    // D1 batch is a database transaction. Approve the request only while
+    // its ride is still assigned to the original driver, then move that ride
+    // only if this particular request was approved in the same batch.
+    const results=await env.DB.batch([
+      env.DB.prepare(`UPDATE shift_swap_requests SET status='approved',approved_at=?,approved_by=?
+        WHERE id=? AND status='accepted'
+        AND EXISTS (SELECT 1 FROM rides r WHERE r.id=shift_swap_requests.ride_id
+          AND r.driver_id=shift_swap_requests.requester_id AND r.status='assigned')`)
+        .bind(now,u.id,id),
+      env.DB.prepare(`UPDATE rides SET driver_id=? WHERE id=? AND driver_id=? AND status='assigned'
+        AND EXISTS (SELECT 1 FROM shift_swap_requests s WHERE s.id=? AND s.ride_id=rides.id
+          AND s.status='approved' AND s.target_driver_id=?)`)
+        .bind(w.target_driver_id,w.ride_id,w.requester_id,id,w.target_driver_id)
     ]);
+    if(results[0]?.meta?.changes!==1||results[1]?.meta?.changes!==1)
+      throw error(409,'Die Fahrt oder die Tauschanfrage wurde inzwischen geändert.');
   } else {
     const col=action==='accept'||action==='decline'?'responded_at':'approved_at';
     const q="UPDATE shift_swap_requests SET status=?, "+col+"=? WHERE id=? AND status=?";
