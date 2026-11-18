@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildFeed } from '../scripts/update-traffic-feed.mjs';
+import { buildFeed, normalizeIncident, parseIncidentCoord } from '../scripts/update-traffic-feed.mjs';
 
 const when = new Date('2026-11-18T12:00:00.000Z');
 const item = (lat='50.625',lng='7.031',future=false)=>({
@@ -12,11 +12,10 @@ test('alle 18 amtlichen Quellen; valide Koordinaten und Ankündigungen',async()=
   const calls=[];
   const feed=await buildFeed({ now:when, previous:null, fetchGroup:async(road,kind)=>{
     calls.push(road+'/'+kind);
-    if(road==='A61'&&kind==='warning')return [
-      item(),item('52.520','13.405'),{identifier:'bad',coordinate:{lat:'n/a',long:'7'},title:'Ungültig'}
-    ];
-    if(road==='A565'&&kind==='roadworks')return [item('50.70','7.12',true)];
-    return [];
+    const raw=road==='A61'&&kind==='warning'
+      ? [item(),item('52.520','13.405'),{identifier:'bad',coordinate:{lat:'n/a',long:'7'},title:'Ungültig'}]
+      : road==='A565'&&kind==='roadworks' ? [item('50.70','7.12',true)] : [];
+    return raw.map((x,i)=>normalizeIncident(x,road,kind,i)).filter(Boolean);
   }});
   assert.equal(calls.length,18);
   assert.equal(feed.events.length,2);
@@ -54,7 +53,7 @@ test('vollständiger API-Ausfall führt zu Fehler, keine Schein-Aktualisierung',
 
 test('Freitext wird begrenzt und ASCII-Kontrollzeichen entfernt',async()=>{
   const feed=await buildFeed({now:when,previous:null,fetchGroup:async(road,kind)=>
-    road==='A61'&&kind==='warning'?[{...item(),title:'x'.repeat(900)+'\x01',description:['A\nB']}]:[]});
+    road==='A61'&&kind==='warning'?[normalizeIncident({...item(),title:'x'.repeat(900)+'\x01',description:['A\nB']},road,kind,0)]:[]});
   assert.equal(feed.events[0].title.length,180);
   assert.equal(feed.events[0].detail,'A B');
 });
