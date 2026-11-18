@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {matchCalendarCustomer,customerCode,classifyBilling,masterCustomers,
- normalizedGoogleEvent,berlinServiceDate,signatureSheetModel,displayPrefs} from '../backend/reconcile.js';
+ normalizedGoogleEvent,berlinServiceDate,signatureSheetModel,displayPrefs,possibleExistingCustomers} from '../backend/reconcile.js';
 
 const customers=[
  {id:'abc',name:'Müller Petra',externalKey:'K0011'},
@@ -21,6 +21,11 @@ test('Namensabgleich bleibt Vorschlag, gleiche Namen niemals automatisch bestät
  const unique=matchCalendarCustomer({summary:'Martin Müller · Meckenheim'},customers);
  assert.equal(unique.state,'review');
  assert.equal(unique.customerId,'def');
+});
+test('Dubletten-Schutz erkennt gleiche Namen auch bei vertauschtem Vor-/Nachnamen',()=>{
+ const found=possibleExistingCustomers('Petra Müller',[{id:'1',name:'Müller Petra'},{id:'2',name:'Müller Peter'}]);
+ assert.equal(found.length,1);
+ assert.equal(found[0].id,'1');
 });
 test('KTS und RE nur aus expliziter Kennzeichnung, keine Farb- oder Zielannahme',()=>{
  assert.equal(classifyBilling('08:00 Muster · KTS'),'KTS');
