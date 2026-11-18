@@ -3,6 +3,7 @@
  * All calls are after worker.js session verification. Never expose to GitHub Pages unauthenticated.
  */
 import {displayPrefs,berlinServiceDate,signatureSheetModel} from './reconcile.js';
+import {syncSources,isGoogleConfigured} from './google-sync.js';
 
 const uuid=()=>crypto.randomUUID();
 const now=()=>new Date().toISOString();
@@ -252,6 +253,25 @@ async function savePrefs(req,db,u){
 }
 export async function handleOps(req,env,u,path){
   const db=env.DB,search=new URL(req.url).searchParams,m=req.method;
+  if(path==='/api/ops/sources'&&m==='GET'){
+    requireAdmin(u);
+    const rows=await db.prepare('SELECT * FROM sync_checkpoints ORDER BY source').all();
+    return {data:{sources:rows.results||[],connections:{
+      calendarConfigured:!!isGoogleConfigured(env,'calendar'),
+      masterConfigured:!!isGoogleConfigured(env,'sheets')
+    }}};
+  }
+  if(path==='/api/ops/sync'&&m==='POST'){
+    requireAdmin(u);
+    const d=await parse(req),which=t(d.which,12)||'both';
+    if(!['both','calendar','master'].includes(which))throw bad(400,'Quelle unbekannt.');
+    const state=await db.prepare("SELECT last_attempt_at FROM sync_checkpoints WHERE source=?").bind(which==='master'?'google_master':'google_calendar_taxi').first();
+    if(state?.last_attempt_at&&Date.now()-Date.parse(state.last_attempt_at)<4*60000)
+       throw bad(429,'Letzter Abgleich ist weniger als vier Minuten her.');
+    const result=await syncSources(db,env,which);
+    await log(db,u,'sync.requested','',which);
+    return {data:result};
+  }
   if(path==='/api/ops/dashboard'&&m==='GET')return {data:await dashboard(db,u,search)};
   if(path==='/api/ops/customers'&&m==='GET')return {data:await customers(db,u,search)};
   const customer=path.match(/^\/api\/ops\/customers\/([a-f0-9-]{36})$/i);
