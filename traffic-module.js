@@ -18,7 +18,7 @@
   const MAP_LIB = 'https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.mjs';
   let active = false, map = null, maplibre = null, libPromise = null, positionMarker = null;
   let data = [], updatedAt = 0, fetching = null, lastAttempt = 0, filter = 'all', road = 'all', dataSource = 'cache';
-  let markers = [], timer = null;
+  let markers = [], timer = null, locationCoords = null, radiusKm = null;
 
   const $ = id => document.getElementById(id);
   function setStatus(message) {
@@ -27,6 +27,28 @@
   }
   function dateText(timestamp) {
     return timestamp ? new Date(timestamp).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–';
+  }
+
+  function distanceKm(a, b) {
+    const rad = Math.PI / 180;
+    const dLat = (b[1] - a[1]) * rad;
+    const dLon = (b[0] - a[0]) * rad;
+    const latA = a[1] * rad, latB = b[1] * rad;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(latA) * Math.cos(latB) * Math.sin(dLon / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(Math.min(1, h)));
+  }
+  function updateFreshness() {
+    const el = $('tp-traffic-freshness');
+    if (!el) return;
+    const age = updatedAt ? Date.now() - updatedAt : Infinity;
+    const isCurrent = age >= 0 && age <= MAX_FEED_AGE;
+    const isStale = Number.isFinite(age) && age <= MAX_CACHE_AGE && !isCurrent;
+    el.dataset.state = isCurrent ? 'current' : isStale ? 'stale' : 'unavailable';
+    el.textContent = isCurrent
+      ? '● Datenstand ' + dateText(updatedAt) + ' · amtliche Meldungen'
+      : isStale
+        ? '⚠ VERALTET: Stand ' + dateText(updatedAt) + ' · nicht als Live-Daten verwenden'
+        : '✕ Keine aktuellen Verkehrsdaten verfügbar';
   }
   function validCoord(raw) {
     const c = raw && raw.coordinate ? raw.coordinate : raw;
@@ -63,18 +85,17 @@
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data.slice(0, 450), updatedAt })); } catch (_) {}
   }
   function getVisible() {
-    const selected = data.filter(x => (road === 'all' || x.autobahn === road) && (filter === 'planned' ? !!x.future : !x.future && (filter === 'all' || x.kind === filter)));
-    if (!map) return selected;
-    const center = map.getCenter();
-    return selected.sort((a, b) => {
-      const da = (a.coords[0] - center.lng) ** 2 + (a.coords[1] - center.lat) ** 2;
-      const db = (b.coords[0] - center.lng) ** 2 + (b.coords[1] - center.lat) ** 2;
-      return da - db;
-    });
+    const selected = data.filter(x =>
+      (road === 'all' || x.autobahn === road) &&
+      (filter === 'planned' ? !!x.future : !x.future && (filter === 'all' || x.kind === filter)) &&
+      (!radiusKm || !locationCoords || distanceKm(locationCoords, x.coords) <= radiusKm));
+    const focus = locationCoords || (map ? [map.getCenter().lng, map.getCenter().lat] : [7.008, 50.650]);
+    return selected.sort((a, b) => distanceKm(focus, a.coords) - distanceKm(focus, b.coords));
   }
   function render() {
     const list = $('tp-traffic-list');
     if (!list) return;
+    updateFreshness();
     markers.forEach(m => m.remove());
     markers = [];
     list.replaceChildren();
@@ -146,7 +167,6 @@
   }
   async function ensureMap() {
     if (map) { requestAnimationFrame(() => map && map.resize()); return; }
-    setStatus('Karte wird geladen …');
     try {
       const ml = await loadLibrary();
       if (!active) return;
@@ -287,29 +307,44 @@
   }
 
   function locate() {
-    if (!navigator.geolocation) { setStatus('Standortfunktion auf diesem Gerät nicht verfügbar.'); return; }
+    const announce = message => { const el = $('tp-traffic-location-status'); if (el) el.textContent = message; };
+    if (!navigator.geolocation) {
+      announce('Standortfunktion ist auf diesem Gerät nicht verfügbar.');
+      if (radiusKm) { radiusKm = null; const sel = $('tp-traffic-radius'); if (sel) sel.value = 'all'; render(); }
+      return;
+    }
     const button = $('tp-traffic-locate');
     if (button) button.disabled = true;
     navigator.geolocation.getCurrentPosition(pos => {
       if (button) button.disabled = false;
-      if (!active || !map || !maplibre) return;
+      if (!active) return;
       const coords = [pos.coords.longitude, pos.coords.latitude];
-      if (positionMarker) positionMarker.remove();
-      const el = document.createElement('div');
-      el.style.cssText = 'width:16px;height:16px;background:#38bdf8;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px #38bdf840';
-      positionMarker = new maplibre.Marker({ element: el }).setLngLat(coords).addTo(map);
-      map.flyTo({ center: coords, zoom: 13, duration: 600 });
-      setStatus('Standort nur auf deinem Gerät angezeigt. Keine GPS-Übertragung an die Taxi-Zentrale.');
+      if (!Number.isFinite(coords[0]) || !Number.isFinite(coords[1]) || Math.abs(coords[1]) > 90 || Math.abs(coords[0]) > 180) {
+        announce('Ungültige GPS-Position erhalten.');
+        return;
+      }
+      locationCoords = coords;
+      if (map && maplibre) {
+        if (positionMarker) positionMarker.remove();
+        const el = document.createElement('div');
+        el.style.cssText = 'width:16px;height:16px;background:#38bdf8;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px #38bdf840';
+        positionMarker = new maplibre.Marker({ element: el }).setLngLat(coords).addTo(map);
+        map.flyTo({ center: coords, zoom: 12.5, duration: 600 });
+      }
+      announce('Standort einmalig ermittelt. ' + (radiusKm ? 'Meldungen im Umkreis von ' + radiusKm + ' km.' : 'Du kannst jetzt einen Umkreis wählen.') + ' Kein GPS-Versand an die Zentrale.');
+      render();
     }, () => {
       if (button) button.disabled = false;
-      setStatus('Standort nicht verfügbar oder Freigabe abgelehnt.');
+      if (radiusKm) { radiusKm = null; const sel = $('tp-traffic-radius'); if (sel) sel.value = 'all'; render(); }
+      announce('Standort nicht verfügbar oder Freigabe abgelehnt. Alle Meldungen bleiben sichtbar.');
     }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 });
   }
   function activate() {
     active = true;
     const panel = $('driver-traffic-panel');
     if (!panel) return;
-    if (!timer) timer = setInterval(() => { if (active && !document.hidden) refresh(false); }, 60000);
+    if (!timer) timer = setInterval(() => { if (active && !document.hidden) { updateFreshness(); refresh(false); } }, 60000);
+    updateFreshness();
     ensureMap();
     refresh(false);
   }
@@ -318,7 +353,13 @@
     if (!$('driver-traffic-panel')) return;
     loadCached();
     $('tp-traffic-road')?.addEventListener('change', e => { road = e.target.value; render(); });
-    $('tp-traffic-refresh')?.addEventListener('click', () => refresh(true));
+    $('tp-traffic-radius')?.addEventListener('change', e => {
+      const selected = Number(e.target.value);
+      radiusKm = [10, 25, 50].includes(selected) ? selected : null;
+      if (radiusKm && !locationCoords) locate();
+      else render();
+    });
+    $('tp-traffic-refresh')?.addEventListener('click', () => { ensureMap(); refresh(true); });
     $('tp-traffic-locate')?.addEventListener('click', locate);
     document.querySelectorAll('#tp-traffic-filters [data-filter]').forEach(button => {
       button.addEventListener('click', () => {
