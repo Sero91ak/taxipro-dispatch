@@ -9,7 +9,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
  const statusLabel={planned:'Geplant',reported:'Gefahren · gemeldet',confirmed:'Gefahren · geprüft',cancelled:'Storniert',
    approved:'Genehmigt',pending:'In Prüfung',rejected:'Abgelehnt',expired:'Abgelaufen',
    exempt:'Befreit',not_exempt:'Nicht befreit',unknown:'Ungeprüft',missing:'Fehlt',present:'Vorhanden',not_required:'Nicht erforderlich'};
- let pageCache={dashboard:null,customers:null,customer:null,calendar:null,ledger:null,conflicts:null};
+ let pageCache={dashboard:null,customers:null,customer:null,calendar:null,ledger:null,conflicts:null,customerChoices:null};
  let selectedCustomer=null,customersQuery='',periodFrom=nowBerlin().slice(0,8)+'01',periodTo=nowBerlin(),calendarState='review';
  let prefs={density:'compact',nav:'expanded',lastPage:'home',dateFilter:'today'},revision=0;
  let dashboardChecked=0;
@@ -161,27 +161,30 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
  }
  function calendarView(){
   const list=pageCache.calendar?.entries||[];
-  const customers=getState()?.customers||[];
-  const opts=customers.slice(0,300).map(x=>'<option value="'+esc(x.id)+'">'+text(x.name)+'</option>').join('');
+  const customers=pageCache.customerChoices||[];
+  const opts=customers.map(x=>'<option value="'+esc(x.id)+'">'+text((x.customer_code?x.customer_code+' · ':'')+x.name)+'</option>').join('');
   return head('Kalender-Abgleich','Fahrttermine prüfen, eindeutige Kunden zuordnen und Dubletten verhindern')+
    '<div class="center-shell"><div class="center-panel"><div class="center-panel-head"><b>Zuordnungsprüfung</b>'+
    iconBtn('refresh-calendar','↻ Aktualisieren')+'</div><div class="center-filters"><label>Status'+
    '<select id="center-calendar-state">'+['review','matched','ignored','all'].map(x=>'<option value="'+x+'" '+(calendarState===x?'selected':'')+'>'+({
     review:'Zur Prüfung',matched:'Zugeordnet',ignored:'Ausgeschlossen',all:'Alle'}[x])+'</option>').join('')+'</select></label>'+
    '<span class="center-muted">'+n(list.length)+' Einträge</span></div>'+
+   '<div class="center-filters"><label class="center-grow">Kundenakte aus dem gesamten Stamm finden'+
+   '<input type="search" id="center-match-search" maxlength="70" placeholder="Kundennummer oder Name" autocomplete="off"></label>'+
+   iconBtn('lookup-calendar-customers','Kunde suchen')+
+   '<label class="center-grow">Zuordnen zu<select id="center-match-customer"><option value="">Kundenakte wählen</option>'+opts+'</select></label></div>'+
    '<div class="center-review-list">'+(list.length?list.map(x=>'<article class="center-review">'+
    '<div><b>'+text(x.event_title)+'</b><small>'+fmtDate(x.start_at)+' · '+text(x.match_reason||'Zuordnung zu prüfen')+'</small>'+
    '<div>'+pill(x.status)+pill(x.match_state)+'</div></div>'+
-   '<div class="center-review-action"><select id="center-select-'+esc(x.id)+'"><option value="">Kundenakte auswählen</option>'+opts+'</select>'+
-   iconBtn('link-calendar','Kunde zuordnen','data-id="'+esc(x.id)+'"')+
+   '<div class="center-review-action">'+iconBtn('link-calendar','Kunde zuordnen','data-id="'+esc(x.id)+'"')+
    iconBtn('ignore-calendar','Kein Fahrtermin','data-id="'+esc(x.id)+'"')+'</div></article>').join(''):
    empty('Keine offenen Kalenderzuordnungen. Das bedeutet nicht automatisch, dass der Google-Synchronisierungsdienst aktiv ist.'))+'</div></div></div>';
  }
  function ledgerView(){
   const data=pageCache.ledger?.entries||[];
-  const customers=getState()?.customers||[];
+  const customers=pageCache.customerChoices||[];
   const opts='<option value="">Kundenakte auswählen</option>'+
-    customers.map(x=>'<option value="'+esc(x.id)+'">'+text(x.name)+'</option>').join('');
+    customers.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===selectedCustomer?'selected':'')+'>'+text((x.customer_code?x.customer_code+' · ':'')+x.name)+'</option>').join('');
   const journeys=data.map(x=>'<tr>'+td('<b>'+text(x.customer_code||'')+'</b><small>'+text(x.customer_name)+'</small>')+
     td(text(x.service_date)+' · '+text(x.pickup_time))+
     td(text(x.pickup)+' → '+text(x.destination))+
@@ -201,6 +204,8 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
       empty('Für diesen Zeitraum liegen noch keine Fahrten im neuen Journal vor.'))+'</div>'+
     '<div class="center-panel center-space"><div class="center-panel-head"><b>Manuelle Fahrt nachtragen</b></div>'+
     '<form id="center-ledger-form" class="center-form">'+
+      '<label class="center-full">Kundensuche<input type="search" id="center-ledger-customer-search" maxlength="70" autocomplete="off" placeholder="Kundennummer oder Nachname"></label>'+
+      '<div class="center-full">'+iconBtn('lookup-ledger-customers','Kunde aus Stammdaten suchen')+'</div>'+
       '<label class="center-full">Kunde<select name="customerId" required>'+opts+'</select></label>'+
       '<label>Datum<input type="date" name="serviceDate" value="'+esc(nowBerlin())+'" required></label>'+
       '<label>Abholzeit<input type="time" name="pickupTime" required></label>'+
@@ -285,12 +290,21 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   try{pageCache.conflicts=await request('/api/ops/master-conflicts');replaceView('import-review',conflictsView());}
   catch(e){toast(e.message);}
  }
+ async function loadCustomerChoices(query=''){
+  const data=await request('/api/ops/customers?q='+encodeURIComponent(query)+'&limit=100');
+  pageCache.customerChoices=data.customers||[];
+  return pageCache.customerChoices;
+ }
  async function loadCalendar(){
-  try{const d=await request('/api/ops/calendar?state='+calendarState);pageCache.calendar=d;replaceView('calendar',calendarView());}
+  try{const d=await request('/api/ops/calendar?state='+calendarState);pageCache.calendar=d;
+    if(!pageCache.customerChoices)await loadCustomerChoices();
+    replaceView('calendar',calendarView());}
   catch(e){toast(e.message);}
  }
  async function loadLedger(){
-  try{const d=await request('/api/ops/ledger?from='+periodFrom+'&to='+periodTo);pageCache.ledger=d;replaceView('ledger',ledgerView());}
+  try{const d=await request('/api/ops/ledger?from='+periodFrom+'&to='+periodTo);pageCache.ledger=d;
+    if(!pageCache.customerChoices)await loadCustomerChoices();
+    replaceView('ledger',ledgerView());}
   catch(e){toast(e.message);}
  }
  const replaceView=(page,html)=>{const root=$('pageView');if(root&&root.dataset.centerPage===page)root.innerHTML=html;};
@@ -395,9 +409,26 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   if(action==='print-customer')return printCustomer();
   if(action==='refresh-calendar'){calendarState=$('center-calendar-state')?.value||'review';
     await savePrefs({calendarState});return loadCalendar();}
+  if(action==='lookup-calendar-customers'||action==='lookup-ledger-customers'){
+    const calendar=action==='lookup-calendar-customers';
+    const q=(calendar?$('center-match-search'):$('center-ledger-customer-search'))?.value.trim()||'';
+    if(q.length<2)throw Error('Bitte mindestens zwei Zeichen oder eine Kundennummer suchen.');
+    const options=await loadCustomerChoices(q);
+    const select=calendar?$('center-match-customer'):$('center-ledger-form')?.querySelector('[name="customerId"]');
+    if(select){
+      const before=select.value;
+      select.innerHTML='<option value="">Kundenakte auswählen</option>'+options.map(x=>
+        '<option value="'+esc(x.id)+'">'+text((x.customer_code?x.customer_code+' · ':'')+x.name)+'</option>').join('');
+      if(options.some(x=>x.id===before))select.value=before;
+      else if(options.length===1)select.value=options[0].id;
+    }
+    toast(options.length===100?'100 Treffer – Suchbegriff eingrenzen.':options.length+' Kunden gefunden.');
+    return;
+  }
   if(action==='link-calendar'||action==='ignore-calendar'){
-    const customerId=$('center-select-'+el.dataset.id)?.value||null;
+    const customerId=$('center-match-customer')?.value||null;
     if(action==='link-calendar'&&!customerId)throw Error('Kundenakte auswählen.');
+    if(action==='link-calendar'&&!window.confirm('Diesen Kalendereintrag der ausgewählten Kundenakte verbindlich zuordnen?'))return;
     await request('/api/ops/calendar/'+el.dataset.id,'PATCH',
       action==='link-calendar'?{action:'link',customerId}:{action:'ignore'});
     await loadCalendar();return;
