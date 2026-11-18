@@ -1,6 +1,6 @@
 # TaxiPro – Taxi Meckenheim GmbH
 
-Professionelles Dispositions-System – **zwei getrennte Apps**, kostenlos, ohne API-Key.
+TaxiPro ist **ein Dispositionssystem** mit zwei bestehenden, getrennt installierbaren Rollen-Einstiegen (Zentrale/Fahrer). Der Umbau führt die Daten künftig in einer geschützten Serverdatenbank zusammen; die bisherigen PWAs bleiben bis zur Freigabe nutzbar.
 
 **Startseite:** https://sero91ak.github.io/taxipro-dispatch/home.html
 
@@ -81,3 +81,10 @@ In der [Google Cloud Console](https://console.cloud.google.com) Origin eintragen
 
 - `https://sero91ak.github.io`
 - `http://localhost:8080`
+
+
+## Einbau in die bereits installierten TaxiPro-Apps (Entwicklungsstand)
+
+Die PWA-Identitäten `./dispatch.html` und `./driver.html` bleiben unverändert. Die Startdateien laden `v2/config.js` und leiten nur weiter, wenn **beides** ausdrücklich konfiguriert wurde: gültige HTTPS-Worker-URL und `TAXIPRO_ENABLE_UPGRADED_ENTRIES = true`. Standard ist `false`, damit keine vorhandenen Fahrerzugänge oder Kalenderdaten durch eine unfertige Migration verloren gehen. Alte PINs/Tokens werden **nicht** in die neue Anmeldung weitergereicht.
+
+Der eine gemeinsame Datenstand wird aus bestehender Disposition (`rides`) plus manuellem Fahrtenjournal serverseitig dargestellt; Originalaufträge werden nicht kopiert. Nur bei tatsächlich abgeschlossenem Fahrerauftrag kann die Zentrale die Fahrt gesondert bestätigen. KTS-/RE-Zuordnung, Google OAuth, R2, Datenschutz und Geräte-End-to-End-Tests müssen vor Produktiv-Umschaltung freigegeben sein. Entwicklungsstand in Pull Request #10.
