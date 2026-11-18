@@ -13,3 +13,12 @@ database_id = "REPLACE_WITH_D1_DATABASE_ID"
 [vars]
 # Must match the exact published GitHub Pages origin (no trailing slash).
 APP_ORIGIN = "https://sero91ak.github.io"
+
+# Optional private object storage for driver PDFs/images and signatures.
+# Create a PRIVATE R2 bucket and then supply the actual bucket name.
+# Do not publicly expose the bucket or use public r2.dev URLs.
+# This binding is NOT active until configured and deployed.
+#
+# [[r2_buckets]]
+# binding = "ATTACHMENTS"
+# bucket_name = "taxipro-private-evidence"

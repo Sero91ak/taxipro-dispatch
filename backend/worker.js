@@ -4,6 +4,8 @@
  * Staging implementation: do not upload patient documents or use for live
  * healthcare operations before legal/security review and deployment tests.
  */
+import {handleCommunity,listReports,listSwaps,listFiles,listSignatures} from './community.js';
+import {fetchTimeSummary} from './time-summary.js';
 const encoder = new TextEncoder();
 const ID = () => crypto.randomUUID();
 const timestamp = () => new Date().toISOString();
@@ -182,6 +184,10 @@ async function updatePosition(req,env,u){
   if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180||(accuracy!=null&&(!Number.isFinite(accuracy)||accuracy<0||accuracy>50000)))throw err(400,'Koordinaten ungültig.');
   const active=await env.DB.prepare('SELECT id FROM shifts WHERE driver_id=? AND ended_at IS NULL').bind(u.id).first();
   if(!active)throw err(409,'Ortung nur während einer aktiven Schicht.');
+  const paused=await env.DB.prepare('SELECT id FROM shift_breaks WHERE shift_id=? AND ended_at IS NULL').bind(active.id).first();
+  if(paused)throw err(409,'Während einer Pause wird kein Fahrerstandort übermittelt.');
+  const latest=await env.DB.prepare('SELECT reported_at FROM positions WHERE driver_id=?').bind(u.id).first();
+  if(latest&&Date.now()-Date.parse(latest.reported_at)<30000)return {received:false,rateLimited:true};
   await env.DB.prepare('INSERT INTO positions(driver_id,latitude,longitude,accuracy,reported_at) VALUES(?,?,?,?,?) ON CONFLICT(driver_id) DO UPDATE SET latitude=excluded.latitude,longitude=excluded.longitude,accuracy=excluded.accuracy,reported_at=excluded.reported_at')
     .bind(u.id,lat,lng,accuracy,timestamp()).run();
   return {received:true};
@@ -191,7 +197,7 @@ async function sendMessage(req,env,u){
   if(!body)throw err(400,'Nachricht leer.');
   if(recipient){
     const target=await env.DB.prepare('SELECT role FROM users WHERE id=? AND active=1').bind(recipient).first();
-    if(!target||u.role==='driver'&&target.role!=='admin')throw err(403,'Empfänger nicht berechtigt.');
+    if(!target)throw err(404,'Empfänger nicht vorhanden.');
   }
   const id=ID();await env.DB.prepare('INSERT INTO messages(id,sender_id,recipient_id,body,created_at) VALUES(?,?,?,?,?)').bind(id,u.id,recipient,body,timestamp()).run();
   return {id};
@@ -238,6 +244,7 @@ async function breakAction(req,env,u){
   const opened=await db.prepare('SELECT id FROM shift_breaks WHERE shift_id=? AND ended_at IS NULL').bind(shift.id).first();
   if(opened)throw err(409,'Eine Pause läuft bereits.');
   const id=ID();try{await db.prepare('INSERT INTO shift_breaks(id,shift_id,driver_id,started_at) VALUES(?,?,?,?)').bind(id,shift.id,u.id,timestamp()).run()}catch{throw err(409,'Eine Pause läuft bereits.')}
+  await db.prepare('DELETE FROM positions WHERE driver_id=?').bind(u.id).run();
   await audit(db,u.id,'break.started',id);return {id,active:true};
  }
  if(action==='end'){
@@ -282,13 +289,17 @@ async function state(db,u){
   else base.breaks=(await db.prepare('SELECT * FROM shift_breaks WHERE driver_id=? ORDER BY started_at DESC LIMIT 200').bind(u.id).all()).results;
   base.team=(await db.prepare('SELECT id,username,display_name,role FROM users WHERE active=1 ORDER BY display_name LIMIT 100').all()).results;
   base.messages=(await db.prepare(`SELECT m.*,u.display_name AS sender_name FROM messages m JOIN users u ON u.id=m.sender_id WHERE (m.recipient_id IS NULL OR m.sender_id=? OR m.recipient_id=?) ORDER BY m.created_at DESC LIMIT 100`).bind(u.id,u.id).all()).results.reverse();
+  base.trafficReports=await listReports(db);
+  base.swaps=await listSwaps(db,u);
+  base.attachments=await listFiles(db,u);
+  base.signatures=await listSignatures(db,u);
   return base;
 }
 export default {
   async fetch(req,env){
     const origin=req.headers.get('origin');const allow=origin && env.APP_ORIGIN && origin===env.APP_ORIGIN;
     const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'};
-    if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,OPTIONS';headers['Access-Control-Max-Age']='600'}
+    if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type,x-taxipro-recipient,x-taxipro-filename,x-taxipro-note,x-taxipro-signer,x-taxipro-confirm,x-taxipro-ride-ids';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,OPTIONS';headers['Access-Control-Max-Age']='600'}
     const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers});
     if(req.method==='OPTIONS')return new Response(null,{status:allow?204:403,headers});
     if(origin&&!allow)return respond({error:'Origin nicht freigegeben.'},403);
@@ -320,12 +331,23 @@ export default {
       if(shiftMatch&&req.method==='PATCH')return respond(await correctShift(req,env,u,shiftMatch[1]));
       if(path==='/api/position'&&req.method==='POST')return respond(await updatePosition(req,env,u));
       if(path==='/api/messages'&&req.method==='POST')return respond(await sendMessage(req,env,u),201);
+      if(path==='/api/time-summary'&&req.method==='GET')return respond(await fetchTimeSummary(env.DB,u,new URL(req.url).searchParams));
+      const community=await handleCommunity(req,env,u,path);
+      if(community){
+        if(community.response){
+          const binaryHeaders=new Headers(community.response.headers);
+          if(allow)binaryHeaders.set('Access-Control-Allow-Origin',origin);
+          binaryHeaders.set('Vary','Origin');
+          return new Response(community.response.body,{status:community.response.status,headers:binaryHeaders});
+        }
+        return respond(community.data||community,community.status||200);
+      }
       if(path==='/api/export'&&req.method==='GET'){
         requireAdmin(u);return respond({exportedAt:timestamp(),...await state(env.DB,u)});
       }
       return respond({error:'Endpunkt nicht gefunden.'},404);
     }catch(e){
-      const code=e.status && e.status>=400&&e.status<=499?e.status:500;
+      const code=e.status && e.status>=400&&e.status<=599?e.status:500;
       if(code===500)console.error('TaxiPro backend error',String(e?.message||'unknown').slice(0,120));
       return respond({error:code===500?'Interner Fehler.':e.message},code);
     }
