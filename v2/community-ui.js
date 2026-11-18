@@ -57,8 +57,8 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
       '</section>'+
       '<section class="card op-section"><div class="card-title"><b>Empfangene und gesendete Dokumente</b><small>'+nf(files.length)+'</small></div>'+
       '<div class="op-list">'+(files.length?files.slice(0,150).map(f=>
-        '<div class="op-file"><div><b>'+esc(f.filename)+'</b><small>'+esc(f.owner_name)+' → '+esc(f.recipient_name)+' · '+fmt(f.created_at)+' · '+nf(f.bytes/1024)+' KB</small>'+
-        (f.note?'<p>'+esc(f.note)+'</p>':'')+'</div>'+button('download-file','data-id="'+esc(f.id)+'" data-name="'+esc(f.filename)+'"','Datei öffnen / herunterladen')+'</div>'
+        '<div class="op-file"><div><b>'+(f.pinned?'📌 ':'')+esc(f.filename)+'</b><small>'+esc(f.owner_name)+' → '+esc(f.recipient_name)+' · '+fmt(f.created_at)+' · '+nf(f.bytes/1024)+' KB</small>'+
+        (f.note?'<p>'+esc(f.note)+'</p>':'')+'</div><div class="op-actions">'+button('pin-file','data-id="'+esc(f.id)+'" data-pinned="'+(f.pinned?'1':'0')+'"',f.pinned?'Lösen':'Anheften')+button('download-file','data-id="'+esc(f.id)+'" data-name="'+esc(f.filename)+'"','Datei öffnen / herunterladen')+'</div></div>'
       ).join(''):'<div class="empty">Noch keine privaten Anhänge. Für die Übermittlung muss der private Cloud-Dateispeicher eingerichtet sein.</div>')+'</div></section>';
   }
   function filesView(db){return title('Dokumente & Austausch','Vertrauliche Dokumente mit eindeutiger Sender- und Empfängerzuordnung')+uploadView(db);}
@@ -322,6 +322,10 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
       if(!('Notification' in window)){toast('Systembenachrichtigungen hier nicht verfügbar.');return;}
       const p=await Notification.requestPermission();
       toast(p==='granted'?'Hinweise bei geöffneter App erlaubt.':'Benachrichtigungen nicht erlaubt.');return;
+    }
+    if(action==='pin-file'){
+      await request('/api/attachments/'+node.dataset.id+'/pin','PATCH',{pinned:node.dataset.pinned!=='1'});
+      await rerender();toast('Dokumentenübersicht aktualisiert.');return;
     }
     if(action==='download-file'||action==='download-signature'){
       await download(action==='download-file'?'/api/attachments/'+node.dataset.id:'/api/signatures/'+node.dataset.id+'/file',
