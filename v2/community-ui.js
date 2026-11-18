@@ -407,6 +407,6 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
     navigator.serviceWorker?.ready.then(reg=>reg.showNotification(title,{body,tag:'taxipro-community',icon:'icons/icon-192.png'}))
       .catch(()=>{});
   }
-  initListeners();
+  if(typeof document!=='undefined')initListeners();
   return {view,mount,chatExtra,onRefresh,fetchTime,setTripFocus};
 }
