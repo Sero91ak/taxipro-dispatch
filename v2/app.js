@@ -164,9 +164,13 @@ function dispatch(){return title('Auftrag zuweisen','Neuer Fahrauftrag auf das S
 '<div class="center-lookup-row"><input id="rcSearch" type="search" autocomplete="off" placeholder="Name oder Kundennummer (K0001)" maxlength="70">'+
 '<button type="button" class="btn" data-find-customer="1">Suchen</button></div>'+
 '<div class="small">Auch Kunden außerhalb der ersten angezeigten Stammdatensätze suchen.</div></div>'+
-'<div class="field"><label for="rc">Kunde</label><select id="rc" required>'+opts((db.customers||[]).map(c=>[c.id,c.name]))+'</select></div><div class="field"><label>Fahrer</label><select id="rd" required>'+opts((db.drivers||[]).filter(d=>d.active).map(d=>[d.id,d.display_name]))+'</select></div><div class="field"><label>Fahrtart</label><select id="rk"><option>Krankenfahrt</option><option>Rechnungsfahrt</option><option>Serienfahrt</option><option>Barfahrt</option></select></div><div class="field"><label>Fahrtrichtung</label><select id="rdir"><option value="hin">Hinfahrt</option><option value="rueck">Rückfahrt</option></select></div><div class="field wide"><label for="rcRoute">Strecke dieses Kunden</label>'+
+'<div class="field"><label for="rc">Kunde</label><select id="rc" required>'+opts((db.customers||[]).map(c=>[c.id,c.name]))+'</select></div><div class="field"><label>Fahrer</label><select id="rd" required>'+opts((db.drivers||[]).filter(d=>d.active).map(d=>[d.id,d.display_name]))+'</select></div><div class="field"><label>Fahrtart</label><select id="rk"><option>Krankenfahrt</option><option>Rechnungsfahrt</option><option>Serienfahrt</option><option>Barfahrt</option></select></div><div class="field"><label for="rclass">Abrechnung</label><select id="rclass" required>'+
+'<option value="unknown">Noch nicht geklärt</option><option value="KTS">KTS · Krankentransportschein</option>'+
+'<option value="RE">RE · Rechnung</option><option value="private">Privatfahrt</option></select></div>'+
+'<div class="field"><label>Fahrtrichtung</label><select id="rdir"><option value="hin">Hinfahrt</option><option value="rueck">Rückfahrt</option></select></div><div class="field wide"><label for="rcRoute">Strecke dieses Kunden</label>'+
 '<select id="rcRoute"><option value="">Stammadresse / Strecke manuell wählen</option></select>'+
-'<div id="routeHint" class="small">Mehrere Krankenhausziele können über die Kundenakte hinterlegt werden.</div></div>'+field('Abholadresse','rfrom')+field('Zieladresse','rto')+field('Datum','rdate','date',today())+field('Abholzeit','rtime','time','12:30')+'<div class="field wide"><label><input type="checkbox" id="rsig" style="width:auto"> Unterschrift erforderlich (wird nur vorgemerkt)</label></div><div class="field wide"><button class="btn gold">↗ Auftrag zuweisen</button></div></form></div>')}
+'<div id="routeHint" class="small">Mehrere Krankenhausziele können über die Kundenakte hinterlegt werden.</div>'+
+'<div id="billingHint" class="small">Abrechnung, Verordnung und Genehmigung bei der Zentrale prüfen.</div></div>'+field('Abholadresse','rfrom')+field('Zieladresse','rto')+field('Datum','rdate','date',today())+field('Abholzeit','rtime','time','12:30')+'<div class="field wide"><label><input type="checkbox" id="rsig" style="width:auto"> Unterschrift erforderlich (wird nur vorgemerkt)</label></div><div class="field wide"><button class="btn gold">↗ Auftrag zuweisen</button></div></form></div>')}
 function fillCustomer(){
  const rc=$('rc');if(!rc)return;
  const c=dispatchCustomer?.id===rc.value?dispatchCustomer:(db.customers||[]).find(c=>c.id===rc.value);
@@ -180,6 +184,13 @@ function fillCustomer(){
    option?.billing_class==='private'?'Barfahrt':c.kind;
  if(['Krankenfahrt','Rechnungsfahrt','Serienfahrt','Barfahrt'].includes(kind))$('rk').value=kind;
  $('rsig').checked=!!c.signature_required;
+ const explicit=option?.billing_class&&option.billing_class!=='unknown'?option.billing_class:
+   (c.billing_class&&c.billing_class!=='unknown'?c.billing_class:'unknown');
+ if($('rclass'))$('rclass').value=explicit;
+ const billingHint=$('billingHint');
+ if(billingHint)billingHint.textContent=explicit==='unknown'
+   ?'Abrechnung noch ungeprüft: KTS / RE / Privat vor der Abrechnung eindeutig zuordnen.'
+   : 'Abrechnungsvorschlag aus der Kundenakte ('+explicit+'). Für diese Fahrt prüfen.';
  const hint=$('routeHint');
  if(hint)hint.textContent=option
    ?'Gewählte Strecke: '+option.label+(from&&to?'':' · Start oder Ziel bitte ergänzen')
@@ -322,7 +333,7 @@ document.addEventListener('click',e=>{const find=e.target.closest('[data-find-cu
  const back=e.target.closest('#backupExport');if(back){exportData();return}const navbtn=e.target.closest('[data-nav]');if(navbtn){const r=(db.rides||[]).find(x=>x.id===navbtn.dataset.nav);if(r)window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(r.destination),'_blank','noopener,noreferrer')}});
 document.addEventListener('change',e=>{if(e.target.id==='dailyDate'){calendarDate=e.target.value;render('daily')}if(e.target.id==='rc'){dispatchCustomer=null;dispatchRoutes=[];loadDispatchCustomer(e.target.value)}
  if(e.target.id==='rcRoute'||e.target.id==='rdir')fillCustomer()});
-document.addEventListener('submit',e=>{if(e.target.id==='newRideForm'){e.preventDefault();transaction('/api/rides','POST',{customerId:$('rc').value,driverId:$('rd').value,kind:$('rk').value,direction:$('rdir').value,pickup:$('rfrom').value.trim(),destination:$('rto').value.trim(),date:$('rdate').value,time:$('rtime').value,signatureRequired:$('rsig').checked},'rides')}
+document.addEventListener('submit',e=>{if(e.target.id==='newRideForm'){e.preventDefault();transaction('/api/rides','POST',{customerId:$('rc').value,driverId:$('rd').value,kind:$('rk').value,billingClass:$('rclass').value,direction:$('rdir').value,pickup:$('rfrom').value.trim(),destination:$('rto').value.trim(),date:$('rdate').value,time:$('rtime').value,signatureRequired:$('rsig').checked},'rides')}
  if(e.target.id==='seriesForm'){e.preventDefault();const w=[...$('sw').selectedOptions].map(o=>Number(o.value));transaction('/api/series','POST',{customerId:$('sc').value,driverId:$('sd').value,kind:$('sk').value,weekdays:w,startDate:$('sstart').value,endDate:$('send').value,outboundTime:$('sout').value,returnTime:$('sret').value,pickup:$('spick').value.trim(),destination:$('sdest').value.trim(),signatureRequired:$('ssign').checked},'series')}
  if(e.target.id==='driverForm'){e.preventDefault();transaction('/api/users','POST',{username:$('duser').value.trim(),displayName:$('dname').value.trim(),password:$('dpass').value},'drivers')}
  if(e.target.id==='customerForm'){e.preventDefault();transaction('/api/customers','POST',{name:$('cname').value.trim(),pickup:$('cpickup').value.trim(),destination:$('cdest').value.trim(),kind:$('ckind').value,signatureRequired:$('csign').checked},'customers')}
