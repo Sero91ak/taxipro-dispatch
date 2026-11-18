@@ -1,4 +1,4 @@
-const CACHE = 'taxipro-dispatch-v29';const ASSETS = [
+const CACHE = 'taxipro-dispatch-v30';const ASSETS = [
   './',
   './index.html',
   './home.html',
@@ -62,18 +62,27 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+
+  // Der öffentliche Verkehrsfeed und die beiden Moduldaten dürfen nie
+  // dauerhaft aus einem alten Precache beantwortet werden.
+  const freshFirst = url.pathname.endsWith('.html') || url.pathname.endsWith('/') ||
+    ['traffic-module.js', 'traffic-module.css', 'traffic-feed.json'].some((name) => url.pathname.endsWith('/' + name));
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const network = fetch(e.request)
-        .then((res) => {
-          if (res && res.status === 200 && (url.pathname.endsWith('.html') || url.pathname.endsWith('/'))) {
-            const clone = res.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, clone));
+        .then(async (res) => {
+          if (res && res.ok && (freshFirst || url.pathname.endsWith('.html') || url.pathname.endsWith('/'))) {
+            try {
+              const cache = await caches.open(CACHE);
+              await cache.put(e.request, res.clone());
+            } catch (_) { /* Speicher kann voll sein; online bleibt funktionsfähig. */ }
           }
           return res;
         })
-        .catch(() => cached);
-      return cached || network;
+        .catch(() => null);
+      return freshFirst
+        ? network.then((fresh) => fresh || cached || Response.error())
+        : cached || network.then((fresh) => fresh || Response.error());
     })
   );
 });
