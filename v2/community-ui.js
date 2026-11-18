@@ -196,6 +196,7 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
     if(page==='traffic'){
       const el=$('ops-map');
       if(!el)return;
+      if(map&&map.getContainer()!==el){try{map.remove()}catch{}map=null;mapMarkers=[];pointMarker=null;}
       await officialData();
       if(!map&&window.maplibregl) {
         try {
@@ -247,7 +248,7 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
     const response=await fetch(getBase()+'/api/attachments',{
       method:'POST',headers:{Authorization:'Bearer '+getSession(),'Content-Type':file.type,
       'x-taxipro-recipient':recipient,'x-taxipro-filename':encodeURIComponent(name),
-      'x-taxipro-note':$('op-file-note')?.value||''},body:file
+      'x-taxipro-note':encodeURIComponent($('op-file-note')?.value||'')},body:file
     });
     let body;try{body=await response.json()}catch{throw new Error('Ungültige Serverantwort.')}
     if(!response.ok)throw new Error(body.error||'Dateiübermittlung fehlgeschlagen.');
