@@ -214,6 +214,14 @@ async function updatePosition(req,env,u){
     .bind(u.id,lat,lng,accuracy,timestamp()).run();
   return {received:true};
 }
+async function revokePosition(env,u){
+  requireDriver(u);
+  // Removing the most recently shared position is a separate consent action
+  // from ending a shift. Do not mutate positions belonging to other drivers.
+  const change=await env.DB.prepare('DELETE FROM positions WHERE driver_id=?').bind(u.id).run();
+  await audit(env.DB,u.id,'position.revoked',u.id);
+  return {disabled:true,removed:change.meta?.changes||0};
+}
 async function sendMessage(req,env,u){
   const d=await parse(req),body=safeText(d.body,1000),recipient=safeText(d.recipientId,80)||null;
   if(!body)throw err(400,'Nachricht leer.');
@@ -326,7 +334,7 @@ export default {
   async fetch(req,env){
     const origin=req.headers.get('origin');const allow=origin && env.APP_ORIGIN && origin===env.APP_ORIGIN;
     const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'};
-    if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type,x-taxipro-recipient,x-taxipro-filename,x-taxipro-note,x-taxipro-signer,x-taxipro-confirm,x-taxipro-ride-ids';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,OPTIONS';headers['Access-Control-Max-Age']='600'}
+    if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type,x-taxipro-recipient,x-taxipro-filename,x-taxipro-note,x-taxipro-signer,x-taxipro-confirm,x-taxipro-ride-ids';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,DELETE,OPTIONS';headers['Access-Control-Max-Age']='600'}
     const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers});
     if(req.method==='OPTIONS')return new Response(null,{status:allow?204:403,headers});
     if(origin&&!allow)return respond({error:'Origin nicht freigegeben.'},403);
@@ -358,6 +366,7 @@ export default {
       const shiftMatch=path.match(/^\/api\/shifts\/([a-f0-9-]{36})$/);
       if(shiftMatch&&req.method==='PATCH')return respond(await correctShift(req,env,u,shiftMatch[1]));
       if(path==='/api/position'&&req.method==='POST')return respond(await updatePosition(req,env,u));
+      if(path==='/api/position'&&req.method==='DELETE')return respond(await revokePosition(env,u));
       if(path==='/api/messages'&&req.method==='POST')return respond(await sendMessage(req,env,u),201);
       if(path==='/api/time-summary'&&req.method==='GET')return respond(await fetchTimeSummary(env.DB,u,new URL(req.url).searchParams));
       const operations=await handleOps(req,env,u,path);
