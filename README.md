@@ -38,6 +38,15 @@ Professionelles Dispositions-System – **zwei getrennte Apps**, kostenlos, ohne
 - Fahrschein-Unterschrift, Team-Chat, Schicht Start/Ende
 - Push + Sync alle ~45 Sek.
 
+## Verkehr ohne Fahrer-PIN
+
+Wer noch keinen Fahrerzugang besitzt, kann die **öffentliche TaxiPro-Verkehrskarte ohne Anmeldung** unter
+https://sero91ak.github.io/taxipro-dispatch/traffic.html verwenden. Die Seite ist Teil desselben TaxiPro-Projekts; es muss keine fremde App geöffnet werden.
+
+Auf der TaxiPro-Startseite und auf dem Fahrer-Login gibt es den Einstieg **„Verkehr ohne PIN“**. Die Seite nutzt nur das vorhandene öffentliche Karten- und Verkehrsdatenmodul: keine Fahrtaufträge, keinen Chat, keine Personal- oder Kundendaten, keine Übernahme eines Fahrer-Loginzustands. Ein GPS-Standort wird nur nach ausdrücklicher Browserfreigabe verwendet.
+
+**Für vollständigen Fahrerzugang:** Zentrale `dispatch.html` öffnen → „Fahrer“ → „+ Fahrer“ → Vorname und Telefonnummer erfassen (Pflichtfelder) → persönliche 4–6-stellige App-PIN festlegen oder „Neue PIN“ wählen → speichern → „App-Link“ beim Fahrer kopieren. Den individuellen Link nur an den berechtigten Fahrer geben; nicht öffentlich posten. Für synchronisierte Fahrten die bestehende Google-Drive-Synchronisierung prüfen.
+
 ## Integrierte Fahrer-Verkehrszentrale
 
 Der Reiter **Verkehr** erscheint direkt innerhalb der bestehenden Fahrer-PWA (keine zweite App und kein App-Wechsel).
