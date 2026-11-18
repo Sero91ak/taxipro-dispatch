@@ -1,0 +1,39 @@
+name: TaxiPro 2.4 – Dashboard und Quellenabgleich
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'v2/**'
+      - 'tests/reconcile.test.mjs'
+      - 'tests/ops-dashboard.test.mjs'
+      - '.github/workflows/taxipro-masterdata-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'v2/**'
+      - 'tests/reconcile.test.mjs'
+      - 'tests/ops-dashboard.test.mjs'
+      - '.github/workflows/taxipro-masterdata-checks.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript modules and Service Worker
+        run: |
+          node --check backend/reconcile.js
+          node --check backend/google-sync.js
+          node --check backend/ops.js
+          node --check backend/worker.js
+          node --check v2/master-dashboard.js
+          node --check v2/app.js
+          node --check v2/sw.js
+      - name: Secure canonical customer matching, unified dashboard and print layouts
+        run: node --experimental-sqlite --test tests/reconcile.test.mjs tests/ops-dashboard.test.mjs
