@@ -80,14 +80,14 @@ export async function pullMaster(db,env) {
   const vals=mergeColumns(names,phones,copays,targets);
   vals[0]=['Kunden-ID','Nachname','Vorname','Telefon','Zuzahlung/Befreiung','Stammziel / Einrichtung'];
   const imported=masterCustomers(vals);count=imported.length;
+  const existingNames=(await db.prepare("SELECT id,name FROM customers WHERE active=1 LIMIT 2500").all()).results||[];
   for(const row of imported){
     let linked=await db.prepare("SELECT customer_id FROM customer_source_links WHERE source='master_sheet' AND source_account='google_master' AND external_key=?")
       .bind(row.externalKey).first();
     let customerId=linked?.customer_id;
     const stamp=fresh();
     if(!customerId){
-      const legacy=await db.prepare("SELECT id,name FROM customers WHERE active=1 LIMIT 2500").all();
-      const candidates=possibleExistingCustomers(row.name,legacy.results||[]);
+      const candidates=possibleExistingCustomers(row.name,existingNames);
       if(candidates.length){
         await db.prepare(`INSERT INTO customer_import_conflicts(source,external_key,proposed_name,candidate_customer_ids,seen_at)
           VALUES('master_sheet',?,?,? ,?)
@@ -107,6 +107,7 @@ export async function pullMaster(db,env) {
           .bind(customerId,row.phone.slice(0,60),stamp)
       ]);
       created++;
+      existingNames.push({id:customerId,name:row.name});
     } else {
       // Do not overwrite manually corrected names or reviewed classifications.
       const caseRow=await db.prepare("SELECT phone FROM customer_case_status WHERE customer_id=?").bind(customerId).first();
