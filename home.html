@@ -24,6 +24,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circl
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .card.dispatch::before{background:linear-gradient(90deg,var(--gold),transparent)}
 .card.driver::before{background:linear-gradient(90deg,var(--teal),transparent)}
+.card.traffic::before{background:linear-gradient(90deg,#45d3bc,#2885aa)}
+.card.traffic .card-cta{background:rgba(20,184,166,.15);color:#5eead4}
 .card.preview::before{background:linear-gradient(90deg,#ffe3a2,#dba353)}
 .card.preview .card-cta{background:rgba(245,166,35,.15);color:#f8d18e}
 .card:hover{border-color:rgba(255,255,255,.16);box-shadow:0 16px 40px rgba(0,0,0,.35)}
@@ -55,6 +57,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:radial-gradient(circl
       <div class="card-title">Zentrale / Disponent</div>
       <p class="card-desc">Kalender, Kunden, Fahrten planen, Fahrer zuweisen, Google Drive Sync, Abrechnung.</p>
       <span class="card-cta">Zentrale öffnen →</span>
+    </a>
+    <a class="card traffic" href="traffic.html">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">Verkehrskarte · Ohne PIN</div>
+      <p class="card-desc">Amtliche Baustellen, Sperrungen und Gefahren im Raum Meckenheim, Bonn und Köln. Karte und Standortfilter direkt in TaxiPro, ohne Anmeldung.</p>
+      <span class="card-cta">Verkehr ohne PIN ansehen →</span>
     </a>
     <a class="card driver" href="driver.html?source=home">
       <div class="card-icon">🚕</div>
