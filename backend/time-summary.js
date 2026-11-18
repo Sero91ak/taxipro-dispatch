@@ -87,8 +87,8 @@ export async function fetchTimeSummary(db,user,search,nowMs=Date.now()) {
   const filterId=user.role==='driver'?user.id:search.get('driverId')||null;
   if(filterId&&!/^[a-f0-9-]{36}$/i.test(filterId))throw Object.assign(new Error('Fahrer-ID ungültig.'),{status:400});
   const ending=new Date(Math.min(bounds.to,nowMs)).toISOString(),beginning=new Date(bounds.from).toISOString();
-  const selectShifts='SELECT s.*,u.display_name AS driver_name FROM shifts s JOIN users u ON u.id=s.driver_id WHERE s.started_at<? AND (s.ended_at IS NULL OR s.ended_at>?)'+(filterId?' AND s.driver_id=?':'')+' ORDER BY s.started_at DESC LIMIT 2000';
-  const selectBreaks='SELECT b.* FROM shift_breaks b JOIN shifts s ON s.id=b.shift_id WHERE b.started_at<? AND (b.ended_at IS NULL OR b.ended_at>?)'+(filterId?' AND b.driver_id=?':'')+' ORDER BY b.started_at DESC LIMIT 5000';
+  const selectShifts='SELECT s.*,u.display_name AS driver_name FROM shifts s JOIN users u ON u.id=s.driver_id WHERE s.started_at<? AND (s.ended_at IS NULL OR s.ended_at>?)'+(filterId?' AND s.driver_id=?':'')+' ORDER BY s.started_at DESC';
+  const selectBreaks='SELECT b.* FROM shift_breaks b JOIN shifts s ON s.id=b.shift_id WHERE b.started_at<? AND (b.ended_at IS NULL OR b.ended_at>?)'+(filterId?' AND b.driver_id=?':'')+' ORDER BY b.started_at DESC';
   const bind=filterId?[ending,beginning,filterId]:[ending,beginning];
   const [shifts,breaks]=await Promise.all([
     db.prepare(selectShifts).bind(...bind).all(),
