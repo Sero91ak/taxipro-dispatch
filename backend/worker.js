@@ -123,8 +123,13 @@ async function addRide(req,env,u){
   const driver=await env.DB.prepare("SELECT id FROM users WHERE id=? AND role='driver' AND active=1").bind(d.driverId).first();
   const customer=await env.DB.prepare('SELECT id FROM customers WHERE id=? AND active=1').bind(d.customerId).first();
   if(!driver||!customer)throw err(400,'Fahrer oder Kunde unbekannt.');
-  const id=ID();await env.DB.prepare('INSERT INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,signature_required,status,assigned_at) VALUES(?,?,?,?,?,?,?,?,?,?,\'assigned\',?)')
-    .bind(id,d.customerId,d.driverId,d.date,d.time,pickup,destination,d.kind,d.direction,d.signatureRequired===true?1:0,timestamp()).run();
+  const selectedClass=d.billingClass||'unknown';
+  if(!['unknown','KTS','RE','private'].includes(selectedClass))throw err(400,'Abrechnungsart ungültig.');
+  const billing=selectedClass==='unknown'&&d.kind==='Rechnungsfahrt'?'RE':
+    selectedClass==='unknown'&&d.kind==='Barfahrt'?'private':selectedClass;
+  const id=ID();await env.DB.prepare(`INSERT INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,billing_class,signature_required,status,assigned_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,'assigned',?)`)
+    .bind(id,d.customerId,d.driverId,d.date,d.time,pickup,destination,d.kind,d.direction,billing,d.signatureRequired===true?1:0,timestamp()).run();
   await audit(env.DB,u.id,'ride.assigned',id);
   return {id};
 }
