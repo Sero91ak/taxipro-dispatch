@@ -22,3 +22,24 @@ APP_ORIGIN = "https://sero91ak.github.io"
 # [[r2_buckets]]
 # binding = "ATTACHMENTS"
 # bucket_name = "taxipro-private-evidence"
+
+# TaxiPro 2.4: synchronizer remains disabled by default. All authentication
+# credentials belong ONLY in Cloudflare Worker secrets, never this file.
+ENABLE_GOOGLE_SYNC = "false"
+#
+# After deploying a private HTTPS Worker, configuring DB/R2 and verifying OAuth:
+# use an explicitly enabled scheduled trigger for background refresh.
+# With Cloudflare crons a quarter-hourly UTC tick can be configured by:
+# [triggers]
+# crons = ["*/15 * * * *"]
+#
+# Suggested secret names for separate accounts:
+# GOOGLE_TAXI_CLIENT_ID, GOOGLE_TAXI_CLIENT_SECRET,
+# GOOGLE_TAXI_REFRESH_TOKEN, GOOGLE_TAXI_CALENDAR_ID
+# GOOGLE_MASTER_CLIENT_ID, GOOGLE_MASTER_CLIENT_SECRET,
+# GOOGLE_MASTER_REFRESH_TOKEN, GOOGLE_MASTER_SHEET_ID
+# GOOGLE_CONTACTS_CLIENT_ID, GOOGLE_CONTACTS_CLIENT_SECRET,
+# GOOGLE_CONTACTS_REFRESH_TOKEN
+#
+# Never put real patient information, credentials, tokens or account addresses
+# into repository sources. Respect Google OAuth quotas and Cloudflare free limits.
