@@ -187,10 +187,28 @@ async function fileUpload(req,env,u) {
 }
 export async function listFiles(db,u) {
   const result=await db.prepare(`SELECT a.id,a.owner_id,a.recipient_id,a.filename,a.mime_type,a.bytes,a.note,a.created_at,
-    o.display_name AS owner_name,r.display_name AS recipient_name FROM attachments a
+    o.display_name AS owner_name,r.display_name AS recipient_name,
+    CASE WHEN ap.attachment_id IS NULL THEN 0 ELSE 1 END AS pinned
+    FROM attachments a
     JOIN users o ON o.id=a.owner_id JOIN users r ON r.id=a.recipient_id
-    WHERE a.owner_id=? OR a.recipient_id=? ORDER BY a.created_at DESC LIMIT 200`).bind(u.id,u.id).all();
+    LEFT JOIN attachment_pins ap ON ap.attachment_id=a.id AND ap.user_id=?
+    WHERE a.owner_id=? OR a.recipient_id=?
+    ORDER BY pinned DESC, a.created_at DESC LIMIT 200`).bind(u.id,u.id,u.id).all();
   return result.results||[];
+}
+async function pinAttachment(req,env,u,id) {
+  const input=await json(req);
+  if(typeof input.pinned!=='boolean')throw error(400,'Anheften muss wahr oder falsch sein.');
+  const a=await env.DB.prepare('SELECT owner_id,recipient_id FROM attachments WHERE id=?').bind(id).first();
+  if(!a)throw error(404,'Datei nicht gefunden.');
+  if(a.owner_id!==u.id&&a.recipient_id!==u.id)throw error(403,'Nicht berechtigt.');
+  if(input.pinned){
+    await env.DB.prepare('INSERT INTO attachment_pins(user_id,attachment_id,pinned_at) VALUES(?,?,?) ON CONFLICT(user_id,attachment_id) DO UPDATE SET pinned_at=excluded.pinned_at').bind(u.id,id,NOW()).run();
+  }else{
+    await env.DB.prepare('DELETE FROM attachment_pins WHERE user_id=? AND attachment_id=?').bind(u.id,id).run();
+  }
+  await audit(env.DB,u,'attachment.pin',id,input.pinned?'pinned':'unpinned');
+  return {id,pinned:input.pinned};
 }
 async function fileDownload(env,u,id) {
   const store=requireObjectStore(env);
@@ -279,6 +297,8 @@ export async function handleCommunity(req,env,u,path) {
   if(path==='/api/attachments'&&m==='POST')return {status:201,data:await fileUpload(req,env,u)};
   const attached=path.match(/^\/api\/attachments\/([a-f0-9-]{36})$/i);
   if(attached&&m==='GET')return {response:await fileDownload(env,u,attached[1])};
+  const pinnedFile=path.match(/^\/api\/attachments\/([a-f0-9-]{36})\/pin$/i);
+  if(pinnedFile&&m==='PATCH')return {data:await pinAttachment(req,env,u,pinnedFile[1])};
   if(path==='/api/signatures'&&m==='GET')return {signatures:await listSignatures(env.DB,u),storageReady:!!env.ATTACHMENTS};
   if(path==='/api/signatures'&&m==='POST')return {status:201,data:await signatureUpload(req,env,u)};
   const signed=path.match(/^\/api\/signatures\/([a-f0-9-]{36})\/file$/i);
