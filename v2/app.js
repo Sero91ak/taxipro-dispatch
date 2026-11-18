@@ -248,7 +248,64 @@ function bindSeries(){const c=$('sc');if(!c)return;const fill=()=>{const cust=(d
 
 function customers(){const data=db.customers||[];return title('Kundenstamm','Zentrale Adressen und Unterschriftenregeln')+card('Neuen Kunden registrieren','<div class="card-body"><form id="customerForm" class="form-grid">'+field('Kundenname','cname')+field('Abholadresse','cpickup')+field('Standardziel','cdest')+'<div class="field"><label>Fahrtart</label><select id="ckind"><option>Krankenfahrt</option><option>Rechnungsfahrt</option><option>Serienfahrt</option><option>Barfahrt</option></select></div><div class="field wide"><label><input type="checkbox" id="csign" style="width:auto"> Unterschrift erforderlich</label></div><div class="field wide"><button class="btn gold">Kunde speichern</button></div></form></div>')+'<div class="section-gap">'+card('Registrierte Kunden',table(['Name','Abholadresse','Ziel','Fahrtart'],data.map(c=>row([esc(c.name),esc(c.pickup),esc(c.destination),esc(c.kind)]))))+'</div>'}
 function drivers(){return title('Fahrerverwaltung','Private Konten: Passwörter sind auch für Administratoren nicht auslesbar')+card('Fahrer anlegen','<div class="card-body"><form id="driverForm" class="form-grid">'+field('Vollständiger Anzeigename','dname')+field('Login-Name (a–z, 0–9, Punkt, - und _)','duser')+field('Temporäres Passwort (mind. 12 Zeichen)','dpass','password','','minlength="12"')+'<div class="field wide"><button class="btn gold">Fahrerzugang erstellen</button></div></form></div>')+'<div class="section-gap">'+card('Fahreraccounts',table(['Name','Login','Aktiv'],(db.drivers||[]).map(d=>row([esc(d.display_name),esc(d.username),'<span class="actions">'+(d.active?'Aktiv':'Gesperrt')+' <button class="btn" data-driver-reset="'+esc(d.id)+'">Passwort neu</button><button class="btn" data-driver-toggle="'+esc(d.id)+'" data-active="'+(d.active?'0':'1')+'">'+(d.active?'Sperren':'Aktivieren')+'</button></span>']))))+'</div>'+notice('Passwörter sind nie auslesbar. Administratoren können Zugänge sperren und ein neues Kennwort setzen. Aktive Schichten müssen vor einer Sperrung beendet werden.')}
-function driverHome(){const rides=db.rides||[],open=rides.filter(r=>r.status!=='done'&&r.status!=='cancelled');return title('Meine Fahraufträge','Persönlich zugewiesene Fahrten', '<button class="btn" data-page="shifts">Meine Schicht ↗</button>')+notice('Deine Fahrten werden nur angezeigt, wenn du angemeldet bist. Wenn du eine externe Navigations-App öffnest, kann die GPS-Übertragung deiner Web-App pausieren.')+card('Offene Aufträge',open.length?open.map(r=>'<div class="card-trip"><div class="sub-header"><b>'+esc(r.customer_name)+' · '+esc(r.ride_time)+' Uhr</b>'+badge(r.status)+'</div><div class="small">'+esc(r.kind)+' · '+esc(r.direction==='hin'?'Hinfahrt':'Rückfahrt')+'</div><p style="font-size:13px;line-height:1.8">'+esc(r.pickup)+'<br>↓<br>'+esc(r.destination)+'</p>'+(r.signature_required?'<p class="small">✍ Unterschrift erforderlich – digitale Signatur noch nicht freigeschaltet.</p>':'')+'<div class="actions"><button class="btn" data-nav="'+esc(r.id)+'">↗ Navigation</button>'+(r.status==='assigned'?'<button class="btn gold" data-ride="'+esc(r.id)+'" data-action="accept">Annehmen</button>':'')+(r.status==='accepted'?'<button class="btn green" data-ride="'+esc(r.id)+'" data-action="complete">Fahrt abschließen</button>':'')+'</div></div>').join(''):'<div class="empty">Keine offenen Aufträge.</div>')+'<div class="card-body small">Abgeschlossene Aufträge: '+rides.filter(r=>r.status==='done').length+'</div>'}
+function driverHome(){
+ const all=db.rides||[],day=today();
+ const tasks=all.filter(x=>x.ride_date===day).slice().sort((a,b)=>a.ride_time.localeCompare(b.ride_time));
+ const upcoming=all.filter(x=>x.ride_date>day&&x.status!=='cancelled'&&x.status!=='done')
+    .slice().sort((a,b)=>a.ride_date.localeCompare(b.ride_date)||a.ride_time.localeCompare(b.ride_time)).slice(0,3);
+ const running=activeShift(),openBreak=(db.breaks||[]).some(x=>running&&x.shift_id===running.id&&!x.ended_at);
+ const open=tasks.filter(x=>x.status==='assigned'||x.status==='accepted').length;
+ const complete=tasks.filter(x=>x.status==='done').length;
+ const lastMessage=(db.messages||[]).slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];
+ const smallCard=(label,value,sub)=>'<div class="driver-kpi"><small>'+label+'</small><strong>'+value+'</strong><span>'+sub+'</span></div>';
+ const journey=x=>'<article class="driver-trip-card"><div class="driver-trip-clock">'+
+    '<strong>'+esc(x.ride_time)+'</strong><span>Uhr</span></div>'+
+    '<div class="driver-trip-main"><div class="driver-trip-heading"><b>'+esc(x.customer_name)+'</b>'+badge(x.status)+'</div>'+
+    '<div class="driver-trip-route"><span>'+esc(x.pickup)+'</span><span aria-hidden="true">↓</span><span>'+esc(x.destination)+'</span></div>'+
+    '<div class="driver-trip-meta">'+esc(x.kind)+' · '+(x.direction==='rueck'?'Rückfahrt':'Hinfahrt')+
+      (x.signature_required?' · Unterschrift erforderlich':'')+'</div>'+
+    '<div class="driver-trip-actions">'+
+    '<button class="btn" type="button" data-nav="'+esc(x.id)+'">Route öffnen</button>'+
+    (x.status==='assigned'?'<button class="btn gold" type="button" data-ride="'+esc(x.id)+'" data-action="accept">Fahrt annehmen</button>':'')+
+    (x.status==='accepted'?'<button class="btn green" type="button" data-ride="'+esc(x.id)+'" data-action="complete">Als gefahren melden</button>':'')+
+    (x.signature_required?'<button class="btn" type="button" data-page="signatures">Unterschrift</button>':'')+
+    '</div></div></article>';
+ return '<div class="driver-cockpit">'+
+  '<div class="driver-hero"><div><div class="center-eyebrow">TAXIPRO · MITARBEITERPORTAL</div>'+
+  '<h2>Mein Dienst</h2><p>Meine Aufträge und mein aktueller Arbeitsstand · '+esc(day)+'</p></div>'+
+  '<span class="driver-duty-status '+(running?(openBreak?'is-break':'is-working'):'is-off')+'">'+
+  (running?(openBreak?'Ⅱ Pause aktiv':'● Im Dienst'):'○ Kein Dienst')+'</span></div>'+
+  '<div class="driver-kpis">'+
+    smallCard('Fahrten heute',String(tasks.length),'Zugewiesene Aufträge')+
+    smallCard('Noch offen',String(open),'Annehmen oder abschließen')+
+    smallCard('Gemeldet gefahren',String(complete),'Prüfung durch Zentrale separat')+
+    smallCard('Schichtdauer',running?duration(Date.now()-Date.parse(running.started_at)):'00:00:00','Inklusive Pausen')+
+  '</div>'+
+  '<div class="driver-quick-actions">'+
+   '<button class="btn gold" type="button" data-page="shifts">◷ Schicht & Pause</button>'+
+   '<button class="btn" type="button" data-page="traffic">⚠ Verkehrslage</button>'+
+   '<button class="btn" type="button" data-page="chat">✉ Nachrichten</button>'+
+   '<button class="btn" type="button" data-page="files">⇧ Dateien</button>'+
+  '</div>'+
+  '<section class="driver-schedule center-panel"><div class="center-panel-head"><b>Heutige Fahrten</b>'+
+  '<span class="center-muted">'+tasks.length+' Einträge · Nur meine Zuordnungen</span></div>'+
+  '<div class="driver-trip-list">'+(tasks.length?tasks.map(journey).join(''):
+   '<div class="center-empty">Für heute sind keine Fahrten zugewiesen.</div>')+'</div></section>'+
+  '<div class="driver-bottom-grid">'+
+  '<section class="center-panel"><div class="center-panel-head"><b>Nächste Fahrten</b><span class="center-muted">Vorschau</span></div>'+
+   '<div class="driver-next-list">'+(upcoming.length?upcoming.map(x=>
+    '<div class="driver-next-item"><b>'+esc(x.ride_date)+' · '+esc(x.ride_time)+'</b>'+
+     '<span>'+esc(x.customer_name)+' · '+esc(x.pickup)+' → '+esc(x.destination)+'</span></div>').join(''):
+    '<div class="center-empty">Keine weiteren Aufträge hinterlegt.</div>')+'</div></section>'+
+  '<section class="center-panel"><div class="center-panel-head"><b>Team & Kommunikation</b>'+
+    '<button type="button" class="btn center-action" data-page="chat">Messenger öffnen</button></div>'+
+   '<div class="driver-team-note">'+(lastMessage?
+     '<b>'+esc(lastMessage.sender_name||'Team')+'</b><p>'+esc(lastMessage.body).slice(0,180)+'</p>'+
+       '<small>'+fmt(lastMessage.created_at)+' · '+(lastMessage.recipient_id?'Privat':'Team')+'</small>':
+     '<p>Noch keine Nachrichten im Mitarbeiterbereich.</p>')+
+   '<p class="driver-privacy-note">Vertrauliche Nachrichten und Fahrtdaten sind nur nach Anmeldung zugänglich. Es gibt keine garantierte Hintergrundortung oder Push-Zustellung bei geschlossener PWA.</p>'+
+  '</div></section></div></div>';
+}
 
 function daily(){
   const all=db.rides||[],day=calendarDate,rs=all.filter(r=>r.ride_date===day),groups=new Map();
