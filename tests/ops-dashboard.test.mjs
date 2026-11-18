@@ -41,7 +41,7 @@ test('Alle berechtigten Geräte lesen dieselben Journalzahlen',async()=>{
  const a=await api('/api/ops/ledger','POST',{customerId:customer,serviceDate:'2026-11-18',
   pickupTime:'08:00',pickup:'Meckenheim',destination:'Bonn',direction:'hin',billingClass:'KTS',rideStatus:'reported'});
  const b=await api('/api/ops/ledger','POST',{customerId:customer,serviceDate:'2026-11-18',
-  pickupTime:'16:00',pickup:'Bonn',destination:'Meckenheim',direction:'rueck',billingClass:'KTS',rideStatus:'confirmed'});
+  pickupTime:'16:00',pickup:'Bonn',destination:'Meckenheim',direction:'rueck',billingClass:'KTS',rideStatus:'confirmed',note:'Durch Zentrale geprüft'});
  const after=await api('/api/ops/dashboard?date=2026-11-18');
  assert.equal(after.counts.reported,1);
  assert.equal(after.counts.confirmed,1);
