@@ -42,5 +42,5 @@ test('Offline-Betrieb: vorhandener Cache statt weißer Seite',async()=>{
   }
 });
 test('Cache-Version für bestehende installierte Geräte erhöht',()=>{
-  assert.match(script,/taxipro-dispatch-v31/);
+  assert.match(script,/taxipro-dispatch-v32-safety/);
 });
