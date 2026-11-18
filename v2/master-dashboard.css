@@ -175,3 +175,8 @@
 @media(max-width:600px){.driver-hero{padding:13px}.driver-hero h2{font-size:19px}.driver-kpi{padding:10px;min-height:83px}.driver-kpi strong{font-size:20px}.driver-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.driver-trip-card{grid-template-columns:55px minmax(0,1fr);gap:10px;padding:11px}.driver-trip-clock strong{font-size:16px}.driver-trip-list{padding:10px;gap:7px}.driver-trip-heading b{font-size:12px}}
 @media(max-width:375px){.driver-trip-card{grid-template-columns:1fr}.driver-trip-clock{display:block;text-align:left;border-right:0;border-bottom:1px solid #35556b;padding-bottom:7px}.driver-trip-clock strong{margin-right:6px}.driver-quick-actions button{font-size:11px}}
 @media print{.driver-quick-actions,.driver-trip-actions,.driver-privacy-note{display:none!important}.driver-trip-card,.driver-kpi{background:#fff!important;color:#000!important;border:1px solid #777!important}}
+
+/* Semantics for business classification, independent of Google Calendar colors. */
+.center-pill.state-private{color:#b6dfff;border-color:#3772a5;background:#183a61}
+.center-pill.state-unknown{color:#d0d9e3;border-color:#50657a;background:#283a49}
+@media(max-width:760px){.sidebar .mobile-menu-row button{min-height:43px}}
