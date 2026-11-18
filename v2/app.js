@@ -308,7 +308,7 @@ function driverHome(){
     smallCard('Fahrten heute',String(tasks.length),'Zugewiesene Aufträge')+
     smallCard('Noch offen',String(open),'Annehmen oder abschließen')+
     smallCard('Gemeldet gefahren',String(complete),'Prüfung durch Zentrale separat')+
-    smallCard('Schichtdauer',running?duration(Date.now()-Date.parse(running.started_at)):'00:00:00','Inklusive Pausen')+
+    '<div class="driver-kpi"><small>Schichtdauer</small><strong id="driverLiveShift">'+(running?duration(Date.now()-Date.parse(running.started_at)):'00:00:00')+'</strong><span>Inklusive Pausen</span></div>'+
   '</div>'+
   '<div class="driver-quick-actions">'+
    '<button class="btn gold" type="button" data-page="shifts">◷ Schicht & Pause</button>'+
@@ -434,7 +434,7 @@ document.addEventListener('submit',e=>{if(e.target.id==='newRideForm'){e.prevent
  if(e.target.id==='customerForm'){e.preventDefault();transaction('/api/customers','POST',{name:$('cname').value.trim(),pickup:$('cpickup').value.trim(),destination:$('cdest').value.trim(),kind:$('ckind').value,signatureRequired:$('csign').checked},'customers')}
  if(e.target.id==='correctionForm'){e.preventDefault();const id=$('correctionShift').value;const a=new Date($('correctFrom').value),b=new Date($('correctTo').value);if(!Number.isFinite(+a)||!Number.isFinite(+b)||b<=a){toast('Bitte gültige Uhrzeiten angeben.');return}if(!confirm('Diese nachträgliche Schichtänderung mit Begründung dauerhaft protokollieren?'))return;transaction('/api/shifts/'+id,'PATCH',{startedAt:a.toISOString(),endedAt:b.toISOString(),reason:$('correctReason').value.trim()},'shifts')}
  if(e.target.id==='chatForm'){e.preventDefault();transaction('/api/messages','POST',{recipientId:$('recipient').value||null,body:$('msgBody').value.trim()},'chat')}});
-setInterval(()=>{const v=$('liveShift');if(v&&me&&db){const current=activeShift();v.textContent=duration(current?Date.now()-Date.parse(current.started_at):0)}$('clock').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})},1000);
+setInterval(()=>{if(me&&db){const current=activeShift();const elapsed=duration(current?Date.now()-Date.parse(current.started_at):0);for(const id of ['liveShift','driverLiveShift']){const el=$(id);if(el)el.textContent=elapsed;}}$('clock').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'})},1000);
 window.addEventListener('pagehide',stopGPS);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 if(auth&&APIOK)init();else loginView();
