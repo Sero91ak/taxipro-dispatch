@@ -35,6 +35,6 @@ jobs:
       - name: Verify role isolation, recurring trips, shifts, pauses, GPS and account security
         run: node --experimental-sqlite tests/api-integration.mjs
       - name: Verify official traffic feed normalization and failure handling
-        run: node --test tests/traffic-feed.test.mjs tests/traffic-ui.test.mjs
+        run: node --test tests/traffic-feed.test.mjs tests/traffic-ui.test.mjs tests/traffic-guest.test.mjs
       - name: Verify PWA cache freshness and offline fallback
         run: node --test tests/sw-cache.test.mjs
