@@ -5,6 +5,7 @@ on:
       - 'backend/**'
       - 'v2/**'
       - 'tests/community-policy.test.mjs'
+      - 'tests/in-app-trip-focus.test.mjs'
       - 'tests/time-summary.test.mjs'
       - '.github/workflows/taxipro-community-checks.yml'
   push:
@@ -13,6 +14,7 @@ on:
       - 'backend/**'
       - 'v2/**'
       - 'tests/community-policy.test.mjs'
+      - 'tests/in-app-trip-focus.test.mjs'
       - 'tests/time-summary.test.mjs'
       - '.github/workflows/taxipro-community-checks.yml'
 permissions:
@@ -35,4 +37,4 @@ jobs:
           node --check v2/community-ui.js
           node --check v2/sw.js
       - name: Check staff-only traffic, shift swaps, privacy, uploads and worktime
-        run: node --experimental-sqlite --test tests/community-policy.test.mjs tests/time-summary.test.mjs
+        run: node --experimental-sqlite --test tests/community-policy.test.mjs tests/time-summary.test.mjs tests/in-app-trip-focus.test.mjs
