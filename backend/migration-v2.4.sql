@@ -67,7 +67,6 @@ CREATE TABLE IF NOT EXISTS calendar_imports (
   customer_id TEXT REFERENCES customers(id),
   match_reason TEXT NOT NULL DEFAULT '',
   imported_at TEXT NOT NULL,
-  PRIMARY KEY(id),
   UNIQUE(source_account,calendar_id,provider_event_id)
 );
 CREATE INDEX IF NOT EXISTS idx_calendar_imports_time ON calendar_imports(start_at,status);
