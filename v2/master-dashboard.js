@@ -11,7 +11,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
    exempt:'Befreit',not_exempt:'Nicht befreit',unknown:'Ungeprüft',missing:'Fehlt',present:'Vorhanden',not_required:'Nicht erforderlich'};
  let pageCache={dashboard:null,customers:null,customer:null,calendar:null,ledger:null,conflicts:null};
  let selectedCustomer=null,customersQuery='',periodFrom=nowBerlin().slice(0,8)+'01',periodTo=nowBerlin(),calendarState='review';
- let prefs={density:'compact',nav:'expanded',lastPage:'home',dateFilter:'today'},revision=0,prefSaving=false;
+ let prefs={density:'compact',nav:'expanded',lastPage:'home',dateFilter:'today'},revision=0;
  let dashboardChecked=0;
  const pill=(s,txt)=>'<span class="center-pill state-'+esc(s||'unknown')+'">'+esc(txt||statusLabel[s]||s||'Ungeprüft')+'</span>';
  const iconBtn=(action,label,more='')=>'<button type="button" class="btn center-action" data-center="'+action+'" '+more+'>'+label+'</button>';
@@ -226,20 +226,40 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   catch(e){console.warn('Anzeigeeinstellungen nicht geladen',e.message);}
   return prefs;
  }
- async function savePrefs(patch) {
-  if(prefSaving)return;
-  prefSaving=true;
-  const next={...prefs,...patch};
-  try{const d=await request('/api/ui-settings','PATCH',{settings:next,revision});prefs=d.settings;revision=d.revision;applyPrefs();}
-  catch(e){
-    if(/anderen Gerät|Gleichzeitige/.test(e.message)){
-      const latest=await request('/api/ui-settings');prefs=latest.settings;revision=latest.revision;applyPrefs();
-      toast('Ansicht wurde auf einem anderen Gerät geändert und aktualisiert.');
-    }else toast(e.message);
-  }finally{prefSaving=false;}
+ let saveQueue=Promise.resolve();
+ function savePrefs(patch) {
+  // Queue all writes. Rapid page/filter changes must not be discarded.
+  // Only whitelisted fields reach the authenticated user settings API.
+  const task=saveQueue.catch(()=>{}).then(async()=>{
+   let result;
+   try{
+    result=await request('/api/ui-settings','PATCH',{settings:{...prefs,...patch},revision});
+   }catch(e){
+    if(!/anderen Gerät|Gleichzeitige/.test(e.message))throw e;
+    const fresh=await request('/api/ui-settings');
+    prefs=fresh.settings;revision=fresh.revision;
+    // The most recent explicit action wins. Do not discard unrelated fields.
+    result=await request('/api/ui-settings','PATCH',{settings:{...prefs,...patch},revision});
+   }
+   prefs=result.settings;revision=result.revision;applyPrefs();
+   return result;
+  });
+  saveQueue=task;
+  return task.catch(e=>{toast(e.message);throw e});
  }
- async function openPage(page) {if(!getUser()||getUser().role!=='admin')return;
-  if(page!==prefs.lastPage)void savePrefs({lastPage:page});
+ async function synchronizePrefs(){
+  await saveQueue.catch(()=>{});
+  const current=await request('/api/ui-settings');
+  if(current.revision===revision)return false;
+  prefs=current.settings;revision=current.revision;
+  selectedCustomer=prefs.selectedCustomerId||null;
+  periodFrom=prefs.periodFrom||periodFrom;periodTo=prefs.periodTo||periodTo;
+  calendarState=prefs.calendarState||'review';
+  applyPrefs();
+  return true;
+ }
+ async function openPage(page) {if(!getUser())return;
+  if(page!==prefs.lastPage)void savePrefs({lastPage:page}).catch(()=>{});
  }
  async function loadDashboard(){
   const at=Date.now();
@@ -422,5 +442,5 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
   try{await handleSubmit(e.target)}catch(err){toast(err.message)}finally{if(btn)btn.disabled=false}
  });
- return {view,mount,eligible,front,openPage,loadPrefs,applyPrefs,savePrefs,getPrefs:()=>prefs,loadDashboard};
+ return {view,mount,eligible,front,openPage,loadPrefs,synchronizePrefs,applyPrefs,savePrefs,getPrefs:()=>prefs,loadDashboard};
 }
