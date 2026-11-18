@@ -3,7 +3,7 @@
  * All calls are after worker.js session verification. Never expose to GitHub Pages unauthenticated.
  */
 import {displayPrefs,berlinServiceDate,signatureSheetModel} from './reconcile.js';
-import {syncSources,isGoogleConfigured} from './google-sync.js';
+import {syncSources,isGoogleConfigured,searchGoogleContacts} from './google-sync.js';
 import {berlinMidnight} from './time-summary.js';
 
 const uuid=()=>crypto.randomUUID();
@@ -265,12 +265,17 @@ async function savePrefs(req,db,u){
 }
 export async function handleOps(req,env,u,path){
   const db=env.DB,search=new URL(req.url).searchParams,m=req.method;
+  if(path==='/api/ops/contacts'&&m==='GET'){
+    requireAdmin(u);
+    return {data:await searchGoogleContacts(env,search.get('q'))};
+  }
   if(path==='/api/ops/sources'&&m==='GET'){
     requireAdmin(u);
     const rows=await db.prepare('SELECT * FROM sync_checkpoints ORDER BY source').all();
     return {data:{sources:rows.results||[],connections:{
       calendarConfigured:!!isGoogleConfigured(env,'calendar'),
-      masterConfigured:!!isGoogleConfigured(env,'sheets')
+      masterConfigured:!!isGoogleConfigured(env,'sheets'),
+      contactsConfigured:!!isGoogleConfigured(env,'contacts')
     }}};
   }
   if(path==='/api/ops/sync'&&m==='POST'){
