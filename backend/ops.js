@@ -4,6 +4,7 @@
  */
 import {displayPrefs,berlinServiceDate,signatureSheetModel} from './reconcile.js';
 import {syncSources,isGoogleConfigured} from './google-sync.js';
+import {berlinMidnight} from './time-summary.js';
 
 const uuid=()=>crypto.randomUUID();
 const now=()=>new Date().toISOString();
@@ -30,7 +31,10 @@ async function dashboard(db,u,search){
   if(!dt(date))throw bad(400,'Datum ungültig.');
   const daily=await db.prepare(`SELECT ride_status,COUNT(*) AS n FROM journey_ledger WHERE service_date=? GROUP BY ride_status`).bind(date).all();
   const statuses=Object.fromEntries((daily.results||[]).map(r=>[r.ride_status,r.n]));
-  const [total,unmatched,sync,active,latest]=await Promise.all([
+  const [yr,mon,day]=date.split('-').map(Number);
+  const calendarStart=new Date(berlinMidnight(yr,mon,day)).toISOString();
+  const calendarEnd=new Date(berlinMidnight(yr,mon,day+1)).toISOString();
+  const [total,unmatched,sync,active,latest,calendarToday]=await Promise.all([
     db.prepare('SELECT COUNT(*) AS n FROM customers WHERE active=1').first(),
     db.prepare("SELECT COUNT(*) AS n FROM calendar_imports WHERE match_state='review' AND status!='cancelled'").first(),
     db.prepare('SELECT * FROM sync_checkpoints ORDER BY source').all(),
@@ -38,11 +42,15 @@ async function dashboard(db,u,search){
     db.prepare(`SELECT l.id,l.service_date,l.pickup_time,l.pickup,l.destination,l.direction,l.ride_status,l.billing_class,
       c.name AS customer_name,c.id AS customer_id,u.display_name AS driver_name
       FROM journey_ledger l JOIN customers c ON c.id=l.customer_id
-      LEFT JOIN users u ON u.id=l.driver_id WHERE l.service_date=? ORDER BY l.pickup_time,l.id LIMIT 120`).bind(date).all()
+      LEFT JOIN users u ON u.id=l.driver_id WHERE l.service_date=? ORDER BY l.pickup_time,l.id LIMIT 120`).bind(date).all(),
+    db.prepare(`SELECT i.id,i.start_at,i.event_title,i.match_state,i.status,i.customer_id,c.name AS customer_name
+      FROM calendar_imports i LEFT JOIN customers c ON c.id=i.customer_id
+      WHERE i.start_at>=? AND i.start_at<? AND i.status!='cancelled'
+      ORDER BY i.start_at,i.id LIMIT 120`).bind(calendarStart,calendarEnd).all()
   ]);
   return {date,counts:{customers:total?.n||0,unmatched:unmatched?.n||0,activeDrivers:active?.n||0,
     planned:statuses.planned||0,reported:statuses.reported||0,confirmed:statuses.confirmed||0,cancelled:statuses.cancelled||0},
-    latest:(latest.results||[]),sources:(sync.results||[])};
+    latest:(latest.results||[]),calendarToday:(calendarToday.results||[]),sources:(sync.results||[])};
 }
 async function customers(db,u,search){
   requireAdmin(u);
@@ -168,6 +176,8 @@ async function createLedger(req,db,u){
      !['hin','rueck','unknown'].includes(direction)||
      !['KTS','RE','private','unknown'].includes(billing)||
      !['planned','reported','confirmed'].includes(status))throw bad(400,'Fahrtangaben unvollständig.');
+  if(status==='confirmed'&&t(d.note,300).length<8)
+    throw bad(400,'Direkte Bestätigung benötigt eine dokumentierte Prüfnotiz.');
   const calendarId=d.calendarImportId||null;
   if(calendarId&&!validId(calendarId))throw bad(400,'Kalender-ID ungültig.');
   if(calendarId){
