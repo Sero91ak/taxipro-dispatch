@@ -159,3 +159,16 @@ ALTER TABLE rides ADD COLUMN billing_class TEXT NOT NULL DEFAULT 'unknown'
 -- that a medical appointment is a health-insurance-approved KTS ride.
 ALTER TABLE recurring_orders ADD COLUMN billing_class TEXT NOT NULL DEFAULT 'unknown'
   CHECK(billing_class IN ('KTS','RE','private','unknown'));
+
+-- Metadata-only Google Drive evidence; no personal file bytes, URLs, diagnoses, or
+-- patient insurance identifiers are copied into TaxiPro or public GitHub.
+CREATE TABLE IF NOT EXISTS customer_document_evidence (
+  source_document_id TEXT PRIMARY KEY,
+  customer_id TEXT NOT NULL REFERENCES customers(id),
+  filename TEXT NOT NULL DEFAULT '',
+  document_type TEXT NOT NULL DEFAULT '',
+  match_status TEXT NOT NULL DEFAULT 'review',
+  has_drive_reference INTEGER NOT NULL DEFAULT 0,
+  observed_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_customer_documents ON customer_document_evidence(customer_id,observed_at);
