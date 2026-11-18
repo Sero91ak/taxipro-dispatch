@@ -7,6 +7,7 @@
 import {handleCommunity,listReports,listSwaps,listFiles,listSignatures} from './community.js';
 import {fetchTimeSummary} from './time-summary.js';
 import {handleOps} from './ops.js';
+import {syncSources,isGoogleConfigured} from './google-sync.js';
 const encoder = new TextEncoder();
 const ID = () => crypto.randomUUID();
 const timestamp = () => new Date().toISOString();
@@ -354,5 +355,22 @@ export default {
       if(code===500)console.error('TaxiPro backend error',String(e?.message||'unknown').slice(0,120));
       return respond({error:code===500?'Interner Fehler.':e.message},code);
     }
+  },
+  async scheduled(controller,env,ctx){
+    // Explicit opt-in only. There is no automatic billing upgrade or fallback.
+    if(env.ENABLE_GOOGLE_SYNC!=='true'||!env.DB)return;
+    ctx.waitUntil((async()=>{
+      if(isGoogleConfigured(env,'calendar')){
+        try{await syncSources(env.DB,env,'calendar')}
+        catch(e){console.warn('TaxiPro Kalenderabgleich fehlgeschlagen (ohne Patientendaten).')}
+      }
+      if(isGoogleConfigured(env,'sheets')){
+        const old=await env.DB.prepare("SELECT last_success_at FROM sync_checkpoints WHERE source='google_master'").first();
+        if(!old?.last_success_at||Date.now()-Date.parse(old.last_success_at)>23*3600000){
+          try{await syncSources(env.DB,env,'master')}
+          catch(e){console.warn('TaxiPro Stammdatenabgleich fehlgeschlagen (ohne Patientendaten).')}
+        }
+      }
+    })());
   }
 };
