@@ -56,8 +56,16 @@ a{color:var(--teal)}
     <button type="button" class="btn btn-ghost" onclick="openDriverApp()">App öffnen (ohne Install)</button>
   </div>
 </div>
+<script src="v2/config.js"></script>
 <script>
 (function(){
+  // Existing installed Fahrer app. Legacy PIN/token/Drive URLs are NEVER
+  // transferred into the new authenticated workspace.
+  var ready=window.TAXIPRO_ENABLE_UPGRADED_ENTRIES===true &&
+    /^https:\/\/[^/]+/i.test(String(window.TAXIPRO_API_URL||''));
+  if(ready && new URLSearchParams(location.search).get('install')!=='1'){
+    location.replace('v2/app.html');return;
+  }
   var p=new URLSearchParams(location.search);
   if(location.hash.length>1){new URLSearchParams(location.hash.slice(1)).forEach(function(v,k){if(!p.has(k))p.set(k,v);});}
   var installMode=p.get('install')==='1';
