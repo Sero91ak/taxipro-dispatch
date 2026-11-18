@@ -7,6 +7,7 @@
 import {handleCommunity,listReports,listSwaps,listFiles,listSignatures} from './community.js';
 import {fetchTimeSummary} from './time-summary.js';
 import {handleOps} from './ops.js';
+import {handleIntegrations,deliverGenericPush} from './integrations.js';
 import {syncSources,isGoogleConfigured} from './google-sync.js';
 const encoder = new TextEncoder();
 const ID = () => crypto.randomUUID();
@@ -230,7 +231,7 @@ async function sendMessage(req,env,u){
     if(!target)throw err(404,'Empfänger nicht vorhanden.');
   }
   const id=ID();await env.DB.prepare('INSERT INTO messages(id,sender_id,recipient_id,body,created_at) VALUES(?,?,?,?,?)').bind(id,u.id,recipient,body,timestamp()).run();
-  return {id};
+  return {id,recipientId:recipient};
 }
 
 // The server creates trips from explicit recurring templates, never from calendar inference.
@@ -331,7 +332,7 @@ async function state(db,u){
   return base;
 }
 export default {
-  async fetch(req,env){
+  async fetch(req,env,ctx){
     const origin=req.headers.get('origin');const allow=origin && env.APP_ORIGIN && origin===env.APP_ORIGIN;
     const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'};
     if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type,x-taxipro-recipient,x-taxipro-filename,x-taxipro-note,x-taxipro-signer,x-taxipro-confirm,x-taxipro-ride-ids';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,DELETE,OPTIONS';headers['Access-Control-Max-Age']='600'}
@@ -367,7 +368,18 @@ export default {
       if(shiftMatch&&req.method==='PATCH')return respond(await correctShift(req,env,u,shiftMatch[1]));
       if(path==='/api/position'&&req.method==='POST')return respond(await updatePosition(req,env,u));
       if(path==='/api/position'&&req.method==='DELETE')return respond(await revokePosition(env,u));
-      if(path==='/api/messages'&&req.method==='POST')return respond(await sendMessage(req,env,u),201);
+      if(path==='/api/messages'&&req.method==='POST'){
+        const message=await sendMessage(req,env,u);
+        // The chat save never depends on external push availability. Notify
+        // only in the background, with no message body or patient details.
+        if(ctx?.waitUntil)ctx.waitUntil(
+          deliverGenericPush(env,env.DB,{senderId:u.id,recipientId:message.recipientId})
+            .catch(()=>{console.warn('TaxiPro push not delivered')})
+        );
+        return respond({id:message.id},201);
+      }
+      const connector=await handleIntegrations(req,env,u,path);
+      if(connector)return respond(connector.data||connector,connector.status||200);
       if(path==='/api/time-summary'&&req.method==='GET')return respond(await fetchTimeSummary(env.DB,u,new URL(req.url).searchParams));
       const operations=await handleOps(req,env,u,path);
       if(operations)return respond(operations.data||operations,operations.status||200);
