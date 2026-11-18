@@ -59,7 +59,41 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
  refresh().then(()=>{if(!isEditingNow())render();}).catch(()=>{});
 }});
 async function refresh(){const previous=db;db=await request('/api/state');if(me)ops.onRefresh(previous,db,me);$('syncLabel').textContent='Letzter Abgleich: '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});$('serverStatus').textContent='● VERBUNDEN'}
-function menu(){const admin=[['home','◈','Übersicht'],['cases','♙','Kundenakten'],['calendar','▦','Kalenderprüfung'],['import-review','♙','Dublettenprüfung'],['ledger','▤','Fahrtenjournal'],['dispatch','↗','Disposition'],['rides','▤','Fahrten'],['series','↻','Serienfahrten'],['daily','▦','Tageskontrolle'],['customers','♙','Kunden'],['drivers','♟','Fahrer'],['shifts','◷','Schichtkarten'],['worktime','◴','Tages- / Monats- / Jahreszeit'],['traffic','⚠','Verkehrszentrale'],['chat','✉','Messenger'],['files','⇧','Dokumente'],['swaps','↔','Fahrertausch'],['signatures','✍','Unterschriften']];const driver=[['home','▦','Meine Aufträge'],['shifts','◷','Meine Schicht'],['worktime','◴','Arbeitszeitberichte'],['traffic','⚠','Verkehr'],['chat','✉','Community / Nachrichten'],['files','⇧','Dokumente'],['swaps','↔','Fahrertausch'],['signatures','✍','Unterschriften']];$('appNav').innerHTML=(me.role==='admin'?admin:driver).map(([k,i,n])=>'<button class="'+(page===k?'active':'')+'" data-page="'+k+'">'+i+' &nbsp; '+n+'</button>').join('')}
+function menu(){
+ const admin=[
+  ['disposition','DISPOSITION',[
+   ['home','◈','Dashboard'],['dispatch','↗','Auftrag erstellen'],['daily','▦','Tageskontrolle'],
+   ['rides','▤','Fahreraufträge'],['series','↻','Serienfahrten']]],
+  ['kunden','KUNDEN & ABRECHNUNG',[
+   ['cases','♙','Kundenakten'],['ledger','▤','Fahrtenjournal'],
+   ['calendar','▦','Kalenderprüfung'],['import-review','◎','Dublettenprüfung'],['customers','＋','Kunden hinzufügen']]],
+  ['team','TEAM & ZEITEN',[
+   ['drivers','♟','Fahrer verwalten'],['shifts','◷','Schichten'],['worktime','◴','Zeitauswertung'],['swaps','⇄','Fahrertausch']]],
+  ['kommunikation','KOMMUNIKATION',[
+   ['traffic','⚠','Verkehrskarte'],['chat','✉','Nachrichten'],['files','⇧','Dokumente'],['signatures','✍','Unterschriften']]]
+ ];
+ const driver=[
+  ['fahrten','MEIN DIENST',[
+   ['home','▦','Meine Fahrten'],['shifts','◷','Schicht & Pause'],['worktime','◴','Meine Arbeitszeiten']]],
+  ['unterwegs','UNTERWEGS',[
+   ['traffic','⚠','Verkehr'],['swaps','⇄','Fahrertausch']]],
+  ['community','MITARBEITERBEREICH',[
+   ['chat','✉','Nachrichten'],['files','⇧','Dokumente'],['signatures','✍','Unterschriften']]]
+ ];
+ const list=me?.role==='admin'?admin:driver,nav=$('appNav');
+ if(!nav)return;
+ const selected=page==='case-detail'?'cases':page;
+ const scroll=nav.scrollTop;
+ nav.setAttribute('aria-label',me.role==='admin'?'Disponenten-Navigation':'Fahrer-Navigation');
+ nav.innerHTML=list.map(([key,heading,links])=>
+  '<div class="nav-group" data-section="'+key+'"><div class="nav-section-title">'+esc(heading)+'</div>'+
+  links.map(([target,icon,label])=>
+   '<button type="button" class="'+(selected===target?'active':'')+'" data-page="'+target+
+   '" aria-label="'+esc(label)+'"'+(selected===target?' aria-current="page"':'')+'>'+
+   '<span class="ico" aria-hidden="true">'+esc(icon)+'</span><span class="nav-text">'+esc(label)+'</span></button>'
+  ).join('')+'</div>').join('');
+ nav.scrollTop=scroll;
+}
 function render(p){if(p)page=p;if(!loggedIn()||!db)return;if(map&&typeof map.remove==='function'){map.remove();map=null}if(me.role==='driver'&&!['home','shifts','chat','traffic','files','swaps','worktime','signatures'].includes(page))page='home';$('crumb').textContent=page;$('heading').textContent=({home:me.role==='admin'?'Flottenübersicht':'Meine Aufträge',dispatch:'Disposition',rides:'Fahrtenjournal',customers:'Kundenstamm',drivers:'Fahrerverwaltung',shifts:'Arbeitszeiten',chat:'Messenger',daily:'Tageskontrolle',series:'Serienfahrten',cases:'Kundenakten',calendar:'Kalenderprüfung','import-review':'Dublettenprüfung',ledger:'Fahrtenjournal', 'case-detail':'Kundenakte',traffic:'Verkehrszentrale',files:'Dokumente',swaps:'Fahrertausch',worktime:'Arbeitszeitberichte',signatures:'Unterschriften'})[page]||'TaxiPro';menu();let html;try{
  html=me.role==='admin'&&office.eligible(page)
    ?office.view(page)
