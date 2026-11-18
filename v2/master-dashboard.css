@@ -129,3 +129,49 @@
 #rcRoute{max-width:100%}
 #routeHint{margin-top:7px;line-height:1.5;color:#a4c7d3}
 @media(max-width:470px){.center-lookup-row{flex-direction:column}.center-lookup-row button{width:100%}}
+
+/* Same TaxiPro frontend, role-adaptive driver dashboard. */
+.driver-cockpit{display:grid;gap:12px;min-width:0;max-width:1450px;margin:0 auto}
+.driver-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(118deg,#123a45,#102b40 70%);border:1px solid #3a6875;padding:17px 20px;border-radius:15px}
+.driver-hero h2{font-size:22px;letter-spacing:-.4px;margin:5px 0 3px;color:#f3dcaf}
+.driver-hero p{font-size:12px;color:#aacbd3;margin:0}
+.driver-duty-status{display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:8px 12px;font-size:11px;font-weight:800;border:1px solid #4c6171;background:#19394b;color:#bed7e6;white-space:nowrap}
+.driver-duty-status.is-working{color:#8becce;border-color:#2c866a;background:#154538}
+.driver-duty-status.is-break{color:#f4d7a6;border-color:#957444;background:#49371e}
+.driver-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.driver-kpi{min-height:94px;background:#152e42;border:1px solid #315367;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.driver-kpi small{font-size:10px;line-height:1.4;color:#9db8c9}
+.driver-kpi strong{color:#f3d9a4;font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.driver-kpi span{font-size:10px;line-height:1.45;color:#7bcabf;margin-top:auto}
+.driver-quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.driver-quick-actions button{min-height:44px;white-space:normal}
+.driver-trip-list{display:grid;gap:8px;padding:12px 14px;max-height:none}
+.driver-trip-card{display:grid;grid-template-columns:72px minmax(0,1fr);gap:13px;background:#142f43;border:1px solid #335469;border-radius:12px;padding:13px 14px}
+.driver-trip-card:hover{border-color:#638294}
+.driver-trip-clock{display:flex;flex-direction:column;gap:2px;padding-right:11px;border-right:1px solid #35556b;text-align:center;align-items:center;justify-content:center}
+.driver-trip-clock strong{font-size:20px;color:#f5dda6;font-variant-numeric:tabular-nums}
+.driver-trip-clock span{font-size:10px;color:#90b1c3}
+.driver-trip-main{min-width:0}
+.driver-trip-heading{display:flex;align-items:center;gap:9px;justify-content:space-between;flex-wrap:wrap;margin-bottom:9px}
+.driver-trip-heading b{font-size:14px;color:#edf6fa;overflow-wrap:anywhere}
+.driver-trip-route{display:grid;gap:3px;align-items:start;overflow-wrap:anywhere;font-size:12px;line-height:1.5;color:#c9deea}
+.driver-trip-route span:nth-child(2){color:#d8ad68;font-size:14px;line-height:1}
+.driver-trip-meta{margin:8px 0;color:#92b2c4;font-size:11px}
+.driver-trip-actions{display:flex;flex-wrap:wrap;gap:7px}
+.driver-trip-actions button{min-height:37px;padding:8px 11px}
+.driver-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.driver-next-list{padding:12px 14px;display:grid;gap:8px}
+.driver-next-item{display:grid;gap:5px;padding:10px;background:#153246;border-radius:9px;border:1px solid #315469}
+.driver-next-item b{font-size:11px;color:#efd6ac}
+.driver-next-item span{font-size:11px;line-height:1.5;color:#bbd3e0;overflow-wrap:anywhere}
+.driver-team-note{padding:14px;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.driver-team-note b{color:#e8d7b4}
+.driver-team-note p{color:#c3d9e4;margin:8px 0}
+.driver-team-note small{font-size:10px;color:#89a9b9}
+.driver-team-note .driver-privacy-note{margin-top:17px;padding-top:12px;border-top:1px solid #32536b;font-size:11px;color:#94b0c0}
+#serverStatus[data-connection="offline"]{background:#4e2d31;color:#ffd5d0;border-color:#96545b}
+#serverStatus[data-connection="online"]{background:#164539;color:#9ee8d2;border-color:#367963}
+@media(max-width:950px){.driver-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.driver-bottom-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.driver-hero{padding:13px}.driver-hero h2{font-size:19px}.driver-kpi{padding:10px;min-height:83px}.driver-kpi strong{font-size:20px}.driver-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.driver-trip-card{grid-template-columns:55px minmax(0,1fr);gap:10px;padding:11px}.driver-trip-clock strong{font-size:16px}.driver-trip-list{padding:10px;gap:7px}.driver-trip-heading b{font-size:12px}}
+@media(max-width:375px){.driver-trip-card{grid-template-columns:1fr}.driver-trip-clock{display:block;text-align:left;border-right:0;border-bottom:1px solid #35556b;padding-bottom:7px}.driver-trip-clock strong{margin-right:6px}.driver-quick-actions button{font-size:11px}}
+@media print{.driver-quick-actions,.driver-trip-actions,.driver-privacy-note{display:none!important}.driver-trip-card,.driver-kpi{background:#fff!important;color:#000!important;border:1px solid #777!important}}
