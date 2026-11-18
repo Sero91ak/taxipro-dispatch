@@ -110,8 +110,12 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     td(text(x.direction))+td(pill(x.billing_class))+td(pill(x.ride_status))+'</tr>');
   return head('Kundenakte · '+text(c.customer_code||'ohne K-Nummer'),
       text(c.name)+' · Eine Akte, mehrere Behandlungsziele, getrennte Fahrtarten',
-      iconBtn('back-customers','Zurück')+iconBtn('print-customer','Unterschriftenzettel erstellen'))+
-    '<div class="center-shell"><div class="center-detail-grid"><section class="center-panel">'+
+      iconBtn('back-customers','Zurück')+iconBtn('lookup-contact','Google Kontakte prüfen')+
+      iconBtn('print-customer','Unterschriftenzettel erstellen'))+
+    '<div class="center-shell"><div class="center-contact-info">'+
+    '<span>Telefon laut Masterakte: <b>'+text(c.phone||'Nicht hinterlegt')+'</b></span>'+
+    '<span id="center-contact-results" class="center-muted">Google-Kontakte-Suche nur auf Anfrage, keine automatische Identitätszuordnung.</span></div>'+
+    '<div class="center-detail-grid"><section class="center-panel">'+
     '<div class="center-panel-head"><b>Dokumentations- & Genehmigungsstatus</b>'+pill(c.approval_status)+'</div>'+
     '<form id="center-case-form" class="center-form">'+form+
     '<label>Genehmigung gültig bis<input name="approval_valid_until" type="date" value="'+esc(c.approval_valid_until||'')+'"></label>'+
@@ -315,6 +319,19 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     await savePrefs({periodFrom,periodTo});return loadCustomer();
   }
   if(action==='new-ledger-for-customer'){refreshMain('ledger');return;}
+  if(action==='lookup-contact'){
+    const c=pageCache.customer?.customer;
+    if(!c)throw Error('Kundenakte nicht geöffnet.');
+    const result=await request('/api/ops/contacts?q='+encodeURIComponent(c.name));
+    const target=$('center-contact-results');
+    if(target){
+      const matches=(result.contacts||[]).slice(0,10);
+      target.innerHTML=matches.length?matches.map(x=>
+        '<span class="center-contact-match"><b>'+text(x.name)+'</b> · '+text(x.phone||'Ohne Nummer')+'</span>').join(' '):
+        'Kein passender Kontakt gefunden.';
+    }
+    return;
+  }
   if(action==='print-customer')return printCustomer();
   if(action==='refresh-calendar'){calendarState=$('center-calendar-state')?.value||'review';
     await savePrefs({calendarState});return loadCalendar();}
