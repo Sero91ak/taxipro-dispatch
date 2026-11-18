@@ -136,6 +136,51 @@ async function addRoute(req,db,u,id){
   await log(db,u,'customer.route_created',key,id);
   return {id:key};
 }
+
+async function importConflicts(db,u) {
+  requireAdmin(u);
+  const entries=await db.prepare(`SELECT external_key,proposed_name,candidate_customer_ids,seen_at,status
+    FROM customer_import_conflicts WHERE status='review' ORDER BY seen_at DESC LIMIT 120`).all();
+  const result=[];
+  for(const c of entries.results||[]) {
+    let candidates=[];try{candidates=JSON.parse(c.candidate_customer_ids||'[]')}catch{}
+    const available=[];
+    for(const id of candidates.slice(0,15)){
+      const row=await db.prepare("SELECT id,name FROM customers WHERE id=? AND active=1").bind(id).first();
+      if(row)available.push(row);
+    }
+    result.push({externalKey:c.external_key,proposedName:c.proposed_name,candidates:available,seenAt:c.seen_at});
+  }
+  return {conflicts:result};
+}
+async function resolveImportConflict(req,db,u,externalKey) {
+  requireAdmin(u);
+  if(!/^K[0-9]{4,6}$/.test(externalKey))throw bad(400,'Kunden-ID ungültig.');
+  const d=await parse(req),action=t(d.action,20);
+  if(!['link','separate'].includes(action))throw bad(400,'Importaktion ungültig.');
+  const row=await db.prepare("SELECT * FROM customer_import_conflicts WHERE external_key=? AND status='review'").bind(externalKey).first();
+  if(!row)throw bad(404,'Offener Importkonflikt nicht gefunden.');
+  let customerId=d.customerId;
+  if(action==='link') {
+    if(!validId(customerId))throw bad(400,'Passenden Kunden manuell auswählen.');
+    const existing=await db.prepare('SELECT id FROM customers WHERE id=? AND active=1').bind(customerId).first();
+    if(!existing)throw bad(404,'Kundenakte existiert nicht.');
+  } else customerId=uuid();
+  const stamp=now();
+  try{
+    await db.batch([
+      ...(action==='separate'?[db.prepare("INSERT INTO customers(id,name,pickup,destination,kind,created_at) VALUES(?,?,'','','Rechnungsfahrt',?)")
+        .bind(customerId,row.proposed_name,stamp)]:[]),
+      db.prepare(`INSERT INTO customer_source_links(source,source_account,external_key,customer_id,first_seen_at,last_seen_at)
+        VALUES('master_sheet','google_master',?,?,?,?)`).bind(externalKey,customerId,stamp,stamp),
+      db.prepare("UPDATE customer_import_conflicts SET status=?,resolved_at=?,resolved_by=? WHERE external_key=? AND status='review'")
+        .bind(action==='link'?'linked':'separate',stamp,u.id,externalKey),
+      db.prepare('INSERT INTO audit(id,actor_id,event,entity_id,details,created_at) VALUES(?,?,?,?,?,?)')
+        .bind(uuid(),u.id,'master.conflict_'+action,customerId,externalKey,stamp)
+    ]);
+  }catch(e){throw bad(409,'Importkonflikt wurde bereits bearbeitet. Bitte neu laden.');}
+  return {externalKey,customerId,resolved:true,action};
+}
 async function calendarReview(db,u,search){
   requireAdmin(u);
   const state=search.get('state')||'review';
@@ -298,6 +343,9 @@ export async function handleOps(req,env,u,path){
   if(caseRoute&&m==='PATCH')return {data:await updateCase(req,db,u,caseRoute[1])};
   const route=path.match(/^\/api\/ops\/customers\/([a-f0-9-]{36})\/routes$/i);
   if(route&&m==='POST')return {status:201,data:await addRoute(req,db,u,route[1])};
+  if(path==='/api/ops/master-conflicts'&&m==='GET')return {data:await importConflicts(db,u)};
+  const conflicted=path.match(/^\/api\/ops\/master-conflicts\/(K[0-9]{4,6})$/i);
+  if(conflicted&&m==='PATCH')return {data:await resolveImportConflict(req,db,u,conflicted[1].toUpperCase())};
   if(path==='/api/ops/calendar'&&m==='GET')return {data:await calendarReview(db,u,search)};
   const review=path.match(/^\/api\/ops\/calendar\/([a-f0-9-]{36})$/i);
   if(review&&m==='PATCH')return {data:await linkCalendar(req,db,u,review[1])};
