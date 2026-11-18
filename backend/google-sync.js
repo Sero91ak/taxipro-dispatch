@@ -72,10 +72,13 @@ export async function pullMaster(db,env) {
  let count=0,created=0,changed=0;
  try{
   const access=await token(env,'sheets'),sid=env.GOOGLE_MASTER_SHEET_ID;
-  const [names,phones,copays,targets,approvalKeys,approvalDates,approvalStatuses,rxKeys,rxDates]=await batchValues(sid,[
+  const [names,phones,copays,targets,approvalKeys,approvalDates,approvalStatuses,rxKeys,rxDates,docNames,docKeys,docLinks]=await batchValues(sid,[
     "'Kundenstamm'!A1:C1001","'Kundenstamm'!I1:I1001","'Kundenstamm'!L1:L1001","'Kundenstamm'!O1:O1001",
     "'Genehmigungen'!A1:B1001","'Genehmigungen'!F1:G1001","'Genehmigungen'!N1:N1001",
-    "'Verordnungen'!A1:B1001","'Verordnungen'!J1:K1001"
+    "'Verordnungen'!A1:B1001","'Verordnungen'!J1:K1001",
+    "'Dokumenten-Zuordnung'!A1:D1001",
+    "'Dokumenten-Zuordnung'!F1:G1001",
+    "'Dokumenten-Zuordnung'!N1:N1001"
   ],access);
   const vals=mergeColumns(names,phones,copays,targets);
   vals[0]=['Kunden-ID','Nachname','Vorname','Telefon','Zuzahlung/Befreiung','Stammziel / Einrichtung'];
@@ -156,8 +159,37 @@ export async function pullMaster(db,env) {
        .bind(kind,key,link.customer_id,value,safeDate(d[0]),safeDate(d[1]),fresh()).run();
     }
   }
+
+  // Minimal document index: file name, type, verified customer code and
+  // presence of a Drive reference. Never import diagnoses, raw URLs or bytes.
+  let indexedDocuments=0,reviewDocuments=0;
+  for(let i=1;i<docNames.length;i++){
+    const row=docNames[i]||[],metadata=docKeys[i]||[];
+    const externalDocumentId=String(row[0]||'').trim().slice(0,100);
+    const externalCustomerId=String(metadata[0]||'').trim().toUpperCase();
+    const matchState=String(metadata[1]||'').trim().slice(0,80);
+    if(!externalDocumentId||!/^K[0-9]{4,6}$/.test(externalCustomerId))continue;
+    const customer=await db.prepare(
+      "SELECT customer_id FROM customer_source_links WHERE source='master_sheet' AND source_account='google_master' AND external_key=?"
+    ).bind(externalCustomerId).first();
+    if(!customer)continue;
+    const accepted=/^(zugeordnet|bestätigt|bestaetigt|eindeutig|geprüft|geprueft|matched|verified)$/i.test(matchState);
+    if(!accepted){reviewDocuments++;continue;}
+    const linkExists=!!String(docLinks[i]?.[0]||'').trim();
+    await db.prepare(`INSERT INTO customer_document_evidence(
+      source_document_id,customer_id,filename,document_type,match_status,has_drive_reference,observed_at)
+      VALUES(?,?,?,?,?,?,?)
+      ON CONFLICT(source_document_id) DO UPDATE SET
+        customer_id=excluded.customer_id,filename=excluded.filename,
+        document_type=excluded.document_type,match_status=excluded.match_status,
+        has_drive_reference=excluded.has_drive_reference,observed_at=excluded.observed_at`)
+      .bind(externalDocumentId,customer.customer_id,String(row[2]||'').slice(0,160),
+        String(row[3]||'').slice(0,80),matchState,linkExists?1:0,fresh()).run();
+    indexedDocuments++;
+  }
   await setCheckpoint(db,source,'ok','',count);
-  return {configured:true,created,records:count,routeSuggestions:changed};
+  return {configured:true,created,records:count,routeSuggestions:changed,
+    indexedDocuments,reviewDocuments};
  }catch(e){
   await setCheckpoint(db,source,'error','Verbindung oder Tabellenstruktur prüfen.');
   throw e;
