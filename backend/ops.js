@@ -121,7 +121,11 @@ async function customerDetail(db,u,id,search){
       ORDER BY j.service_date,j.pickup_time LIMIT 700`).bind(id,from,to).all();
   const evidence=await db.prepare(`SELECT source,external_key,source_status,valid_from,valid_until,document_in_drive,observed_at
     FROM customer_source_evidence WHERE customer_id=? ORDER BY observed_at DESC LIMIT 100`).bind(id).all();
-  return {customer,routes:routes.results||[],journeys:journeys.results||[],evidence:evidence.results||[],from,to};
+  const documents=await db.prepare(`SELECT source_document_id,filename,document_type,match_status,
+     has_drive_reference,observed_at FROM customer_document_evidence
+     WHERE customer_id=? ORDER BY observed_at DESC LIMIT 200`).bind(id).all();
+  return {customer,routes:routes.results||[],journeys:journeys.results||[],
+    evidence:evidence.results||[],documents:documents.results||[],from,to};
 }
 async function updateCase(req,db,u,id){
   requireAdmin(u);const d=await parse(req);
