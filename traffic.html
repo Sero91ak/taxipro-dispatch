@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#0a1628"/>
+<meta name="description" content="TaxiPro Verkehrszentrale: kostenlose amtliche Autobahnmeldungen ohne Fahrer-PIN."/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>TaxiPro · Verkehr ohne Anmeldung</title>
+<link rel="icon" type="image/svg+xml" href="./icon.svg"/>
+<link rel="stylesheet" href="./traffic-module.css"/>
+<style>
+:root{color-scheme:dark;--background:#0a1628;--text:#e8f4fc;--teal:#14b8a6;--muted:#94b8d4;--border:#23445d}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--background)}
+body{margin:0;min-height:100dvh;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--text);background:radial-gradient(ellipse 90% 38% at 50% -7%,rgba(20,184,166,.12),transparent),var(--background)}
+a{color:#71eee0}
+.shell{max-width:960px;margin:0 auto;padding:16px 16px calc(26px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between;border-bottom:1px solid var(--border);padding:4px 0 16px;margin-bottom:16px}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.brand-icon{width:43px;height:43px;display:grid;place-items:center;background:#123348;border-radius:13px;border:1px solid #2b5a65;font-size:23px;flex-shrink:0}
+.brand-name{font-weight:800;font-size:19px;letter-spacing:-.5px}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.link{border:1px solid #315a70;background:#112b3e;color:#aee7e4;padding:9px 12px;border-radius:11px;text-decoration:none;font-size:12px;font-weight:700;min-height:38px;display:inline-flex;align-items:center}
+.link:focus-visible{outline:2px solid #5eead4;outline-offset:3px}
+.link.primary{background:#126e66;border-color:#208e82;color:white}
+.public-note{padding:11px 13px;background:#113044;border:1px solid #2a5169;border-radius:12px;color:#b4d5e1;font-size:12px;line-height:1.55;margin-bottom:16px}
+.guest-badge{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#5eead4;border:1px solid #245c56;background:#11362f;border-radius:7px;padding:5px 7px;white-space:nowrap}
+#driver-traffic-panel{max-width:none}
+#driver-traffic-panel .tp-traffic-map{height:clamp(320px,58dvh,670px)}
+.bottom{margin-top:16px;border-top:1px solid var(--border);padding-top:14px;color:#83a4b9;font-size:11px;line-height:1.6}
+@media(max-width:540px){.top{flex-wrap:wrap}.nav{justify-content:flex-start;width:100%}.brand-name{font-size:17px}.shell{padding-left:12px;padding-right:12px}#driver-traffic-panel .tp-traffic-map{height:clamp(280px,46dvh,510px)}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">🚕</div>
+      <div><div class="brand-name">TaxiPro Meckenheim</div><div class="brand-sub">Öffentliche Verkehrsinformationen</div></div>
+      <span class="guest-badge">Gastmodus</span>
+    </div>
+    <nav class="nav" aria-label="TaxiPro-Navigation">
+      <a href="./driver.html" class="link primary">Fahrer-Anmeldung</a>
+      <a href="./home.html" class="link">TaxiPro-Startseite</a>
+    </nav>
+  </header>
+  <section class="public-note">
+    Diese Verkehrskarte ist <strong>ohne Fahrer-PIN</strong> nutzbar. Sie enthält ausschließlich öffentliche Verkehrsinformationen.
+    Fahrtaufträge, Personen- und Mitarbeiterdaten sowie der Team-Chat bleiben in der Fahrer-App geschützt.
+  </section>
+  <section id="driver-traffic-panel" aria-label="Amtliche Verkehrsinformationen">
+    <div class="tp-traffic-head">
+      <div><h2>🗺️ Verkehrszentrale</h2><p class="tp-traffic-sub">Meckenheim · Bonn · Rhein-Sieg · Köln</p></div>
+      <span style="font-size:10px;color:#5eead4;font-weight:700">Ohne API-Abonnement</span>
+    </div>
+    <div id="tp-traffic-status" class="tp-traffic-status" role="status">Amtliche Verkehrsmeldungen werden geladen …</div>
+    <div id="tp-traffic-freshness" class="tp-traffic-freshness" role="status" aria-live="polite">Datenstand wird geprüft</div>
+    <div class="tp-traffic-actions">
+      <select id="tp-traffic-road" aria-label="Autobahn auswählen">
+        <option value="all">Alle Autobahnen im Gebiet</option>
+        <option value="A61">A61</option><option value="A565">A565</option><option value="A555">A555</option>
+        <option value="A59">A59</option><option value="A4">A4</option><option value="A3">A3</option>
+      </select>
+      <button id="tp-traffic-locate" type="button" aria-label="Meinen Standort zeigen" title="Mein Standort">◎</button>
+      <button id="tp-traffic-refresh" type="button" aria-label="Verkehrsdaten aktualisieren" title="Aktualisieren">↻</button>
+    </div>
+    <div class="tp-traffic-radius-row">
+      <label for="tp-traffic-radius">Meldungen im Umkreis</label>
+      <select id="tp-traffic-radius" aria-label="Umkreis um meine Position">
+        <option value="all">Gesamtes Gebiet</option>
+        <option value="10">10 km</option><option value="25">25 km</option><option value="50">50 km</option>
+      </select>
+    </div>
+    <p id="tp-traffic-location-status" class="tp-traffic-location-status" aria-live="polite">Standort wird nur auf Anfrage ermittelt.</p>
+    <div id="tp-traffic-map" class="tp-traffic-map" role="region" aria-label="Interaktive Verkehrskarte"></div>
+    <div class="tp-traffic-filters" id="tp-traffic-filters" role="group" aria-label="Meldungen filtern">
+      <button type="button" data-filter="all" aria-pressed="true">Alle aktuellen</button>
+      <button type="button" data-filter="warning" aria-pressed="false">⚠️ Gefahren</button>
+      <button type="button" data-filter="closure" aria-pressed="false">⛔ Sperrungen</button>
+      <button type="button" data-filter="roadworks" aria-pressed="false">🚧 Baustellen</button>
+      <button type="button" data-filter="planned" aria-pressed="false">🗓️ Geplant</button>
+    </div>
+    <div class="drv-section-title" id="tp-traffic-count">Amtliche Meldungen</div>
+    <div id="tp-traffic-list" class="tp-traffic-list" aria-live="polite"></div>
+    <p class="tp-traffic-legal">Keine Blitzer- oder Polizeikontrollwarnungen. Die Karte zeigt amtliche Autobahnmeldungen, nicht den vollständigen Live-Verkehrsfluss aller Straßen. GPS-Koordinaten werden nicht an TaxiPro übertragen; der Kartendienst erhält Informationen über den angefragten Kartenausschnitt. Bediene die Karte im Fahrzeug nur im Stand.</p>
+    <p class="tp-traffic-attribution">Daten: Autobahn GmbH des Bundes · Karte: OpenFreeMap / OpenStreetMap / MapLibre · Datenstand siehe oben</p>
+  </section>
+  <footer class="bottom">TaxiPro ist ein Angebot der Taxi Meckenheim GmbH. Das Gastangebot zeigt ausschließlich allgemein zugängliche Verkehrsmeldungen; ohne Anmeldung sind keine Fahrtaufträge oder Mitarbeiterdaten abrufbar. Kostenfreie externe Dienste können vorübergehend nicht verfügbar sein.</footer>
+</main>
+<script src="./traffic-module.js"></script>
+<script>
+(function(){
+  if (window.TaxiTraffic) window.TaxiTraffic.activate();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(()=>{});
+})();
+</script>
+</body>
+</html>
