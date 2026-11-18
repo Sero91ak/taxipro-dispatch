@@ -1,4 +1,4 @@
-const CACHE = 'taxipro-dispatch-v28';const ASSETS = [
+const CACHE = 'taxipro-dispatch-v29';const ASSETS = [
   './',
   './index.html',
   './home.html',
@@ -8,6 +8,8 @@ const CACHE = 'taxipro-dispatch-v28';const ASSETS = [
   './manifest-driver.json',
   './series-system.css',
   './series-system.js',
+  './traffic-module.css',
+  './traffic-module.js',
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png'
