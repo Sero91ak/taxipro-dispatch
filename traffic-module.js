@@ -18,7 +18,7 @@
   const MAP_LIB = 'https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.mjs';
   let active = false, map = null, maplibre = null, libPromise = null, positionMarker = null;
   let data = [], updatedAt = 0, fetching = null, lastAttempt = 0, filter = 'all', road = 'all', dataSource = 'cache';
-  let markers = [], timer = null, locationCoords = null, radiusKm = null;
+  let markers = [], timer = null, locationCoords = null, radiusKm = null, lastDirectAttempt = 0;
 
   const $ = id => document.getElementById(id);
   function setStatus(message) {
@@ -232,6 +232,9 @@
 
   async function loadDirectFallback() {
     // Nur wenn der zentrale Feed nicht erreichbar oder veraltet ist.
+    // Schonender Fallback: maximal ein Direktabruf pro Fahrergerät in 15 Minuten.
+    if (lastDirectAttempt && Date.now() - lastDirectAttempt < 15 * 60 * 1000) return null;
+    lastDirectAttempt = Date.now();
     // Kein kostenpflichtiger API-Dienst; begrenzte gleichzeitige Anfragen.
     const queue = ROADS.flatMap(r => KINDS.map(k => [r, k]));
     const results = [];
