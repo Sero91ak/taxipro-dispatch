@@ -82,7 +82,9 @@ async function customerDetail(db,u,id,search){
   const journeys=await db.prepare(`SELECT l.*,u.display_name AS driver_name FROM journey_ledger l
       LEFT JOIN users u ON u.id=l.driver_id WHERE l.customer_id=? AND l.service_date BETWEEN ? AND ?
       ORDER BY l.service_date,l.pickup_time LIMIT 700`).bind(id,from,to).all();
-  return {customer,routes:routes.results||[],journeys:journeys.results||[],from,to};
+  const evidence=await db.prepare(`SELECT source,external_key,source_status,valid_from,valid_until,document_in_drive,observed_at
+    FROM customer_source_evidence WHERE customer_id=? ORDER BY observed_at DESC LIMIT 100`).bind(id).all();
+  return {customer,routes:routes.results||[],journeys:journeys.results||[],evidence:evidence.results||[],from,to};
 }
 async function updateCase(req,db,u,id){
   requireAdmin(u);const d=await parse(req);
