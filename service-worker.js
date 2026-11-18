@@ -65,7 +65,8 @@ self.addEventListener('fetch', (e) => {
 
   // Der öffentliche Verkehrsfeed und die beiden Moduldaten dürfen nie
   // dauerhaft aus einem alten Precache beantwortet werden.
-  const freshFirst = ['traffic-module.js', 'traffic-module.css', 'traffic-feed.json'].some((name) => url.pathname.endsWith('/' + name));
+  const freshFirst = url.pathname.endsWith('.html') || url.pathname.endsWith('/') ||
+    ['traffic-module.js', 'traffic-module.css', 'traffic-feed.json'].some((name) => url.pathname.endsWith('/' + name));
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const network = fetch(e.request)
