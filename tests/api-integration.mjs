@@ -186,3 +186,31 @@ const taxiKts=await call('/api/rides','POST',{
 assert.equal(taxiKts.status,201);
 const ktsRow=(await call('/api/rides?date=2026-11-20')).data.entries.find(x=>x.id===taxiKts.data.id);
 assert.equal(ktsRow.billing_class,'KTS','KTS bleibt im Original-Fahrerauftrag erhalten');
+
+
+const recurringKts=await call('/api/series','POST',{
+ customerId:cust.data.id,driverId:userA.data.id,startDate:'2026-11-20',
+ endDate:'2026-12-18',weekdays:[5],outboundTime:'09:20',returnTime:'13:10',
+ pickup:'Meckenheim',destination:'Klinik Bonn',kind:'Krankenfahrt',
+ billingClass:'KTS',signatureRequired:true
+});
+assert.equal(recurringKts.status,201,'Serienvorlage mit KTS anlegen');
+const ktsSeries=await call('/api/series/generate','POST',{
+ seriesId:recurringKts.data.id,from:'2026-11-20',to:'2026-11-20'
+});
+assert.equal(ktsSeries.status,200);
+assert.equal(ktsSeries.data.created,2,'Hin- und Rückfahrt dieser Woche erzeugt');
+const recurringEntries=(await call('/api/rides?date=2026-11-20')).data.entries.filter(
+ x=>x.recurring_order_id===recurringKts.data.id);
+assert.equal(recurringEntries.length,2);
+assert.ok(recurringEntries.every(x=>x.billing_class==='KTS'),'Serienfahrten behalten explizite KTS-Klasse');
+assert.deepEqual(recurringEntries.map(x=>x.direction).sort(),['hin','rueck']);
+const duplicateKts=await call('/api/series/generate','POST',{
+ seriesId:recurringKts.data.id,from:'2026-11-20',to:'2026-11-20'});
+assert.equal(duplicateKts.data.created,0);
+assert.equal(duplicateKts.data.existing,2);
+const invalidBilling=await call('/api/series','POST',{
+ customerId:cust.data.id,driverId:userA.data.id,startDate:'2026-11-20',
+ endDate:'2026-12-18',weekdays:[5],outboundTime:'09:20',
+ pickup:'Meckenheim',destination:'Bonn',kind:'Krankenfahrt',billingClass:'invalid'});
+assert.equal(invalidBilling.status,400,'Unerlaubte Abrechnungsart wird abgewiesen');
