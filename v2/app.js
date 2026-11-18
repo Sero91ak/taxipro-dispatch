@@ -1,4 +1,5 @@
 import {createOperations} from './community-ui.js';
+import {createDispatchCenter} from './master-dashboard.js';
 /* TaxiPro Dispatch 2.0 – production shell (Cloudflare Worker API required)
  * All authorization is enforced on the server. This UI deliberately does not
  * pretend to protect driver data by hiding menu items.
@@ -11,6 +12,9 @@ function todaySafe(){const d=new Date();return [d.getFullYear(),String(d.getMont
 const ops=createOperations({
   request,toast,esc,fmt,getSession:()=>auth,getBase:()=>apiBase,getMe:()=>me,getDb:()=>db,
   rerender:async()=>{await refresh();render();}
+});
+const office=createDispatchCenter({
+  request,esc,toast,getUser:()=>me,getState:()=>db,refreshMain:page=>render(page)
 });
 const APIOK=/^https:\/\/[^/]+/.test(apiBase);
 const now = () => new Date();
@@ -36,10 +40,35 @@ function loggedIn(){return !!me&&!!auth}
 function loginView(){ $('loginScreen').classList.add('active');$('appScreen').classList.remove('active');$('setupNotice').textContent=APIOK?'Sichere API konfiguriert. Bitte mit deinem Konto anmelden.':'Der geschützte Backend-Dienst ist noch nicht eingerichtet. Die sichere Anmeldung ist daher absichtlich gesperrt. Die interaktive Design-Demo kannst du bereits öffnen.';$('loginForm').querySelector('button').disabled=!APIOK }
 function logout(remote=true){if(remote&&auth)request('/api/logout','POST',{}).catch(()=>{});auth='';me=null;db=null;sessionStorage.removeItem('taxipro_v2_session');stopGPS();clearInterval(poll);poll=null;loginView()}
 async function signIn(){const username=$('user').value.trim(),password=$('password').value;$('loginError').textContent='';try{const a=await request('/api/login','POST',{username,password});auth=a.token;sessionStorage.setItem('taxipro_v2_session',auth);me=a.user;$('password').value='';await init()}catch(e){$('loginError').textContent=e.message;auth='';sessionStorage.removeItem('taxipro_v2_session')}}
-async function init(){try{me=await request('/api/me');await refresh();$('loginScreen').classList.remove('active');$('appScreen').classList.add('active');$('sidebarName').textContent=me.displayName+' · '+me.username;$('roleLabel').textContent=me.role==='admin'?'DISPONENTENZENTRALE':'MEIN FAHRERBEREICH';menu();render();if(!poll)poll=setInterval(()=>{if(document.visibilityState==='visible'&&loggedIn())refresh().then(render).catch(e=>$('syncLabel').textContent=e.message)},45000)}catch(e){logout(false);$('loginError').textContent=e.message}}
+async function init(){try{me=await request('/api/me');await refresh();
+  await office.loadPrefs();if(me.role==='admin')page=office.getPrefs().lastPage;
+  $('loginScreen').classList.remove('active');$('appScreen').classList.add('active');
+  $('sidebarName').textContent=me.displayName+' · '+me.username;
+  $('roleLabel').textContent=me.role==='admin'?'DISPONENTENZENTRALE':'MEIN FAHRERBEREICH';
+  menu();render();
+  if(!poll)poll=setInterval(()=>{if(document.visibilityState==='visible'&&loggedIn())
+    refresh().then(()=>{if(!isEditingNow())render();}).catch(e=>$('syncLabel').textContent=e.message)},45000);
+}catch(e){logout(false);$('loginError').textContent=e.message}}
+function isEditingNow(){
+ const el=document.activeElement;
+ return !!document.querySelector('dialog[open]') || !!(el&&
+   (el.matches('input,textarea,select,[contenteditable="true"]')||el.closest('form')));
+}
+window.addEventListener('online',()=>{if(loggedIn())refresh().then(()=>{if(!isEditingNow())render();}).catch(()=>{})});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn()){
+ refresh().then(()=>{if(!isEditingNow())render();}).catch(()=>{});
+}});
 async function refresh(){const previous=db;db=await request('/api/state');if(me)ops.onRefresh(previous,db,me);$('syncLabel').textContent='Letzter Abgleich: '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});$('serverStatus').textContent='● VERBUNDEN'}
-function menu(){const admin=[['home','◈','Übersicht'],['dispatch','↗','Disposition'],['rides','▤','Fahrten'],['series','↻','Serienfahrten'],['daily','▦','Tageskontrolle'],['customers','♙','Kunden'],['drivers','♟','Fahrer'],['shifts','◷','Schichtkarten'],['worktime','◴','Tages- / Monats- / Jahreszeit'],['traffic','⚠','Verkehrszentrale'],['chat','✉','Messenger'],['files','⇧','Dokumente'],['swaps','↔','Fahrertausch'],['signatures','✍','Unterschriften']];const driver=[['home','▦','Meine Aufträge'],['shifts','◷','Meine Schicht'],['worktime','◴','Arbeitszeitberichte'],['traffic','⚠','Verkehr'],['chat','✉','Community / Nachrichten'],['files','⇧','Dokumente'],['swaps','↔','Fahrertausch'],['signatures','✍','Unterschriften']];$('appNav').innerHTML=(me.role==='admin'?admin:driver).map(([k,i,n])=>'<button class="'+(page===k?'active':'')+'" data-page="'+k+'">'+i+' &nbsp; '+n+'</button>').join('')}
-function render(p){if(p)page=p;if(!loggedIn()||!db)return;if(map&&typeof map.remove==='function'){map.remove();map=null}if(me.role==='driver'&&!['home','shifts','chat','traffic','files','swaps','worktime','signatures'].includes(page))page='home';$('crumb').textContent=page;$('heading').textContent=({home:me.role==='admin'?'Flottenübersicht':'Meine Aufträge',dispatch:'Disposition',rides:'Fahrtenjournal',customers:'Kundenstamm',drivers:'Fahrerverwaltung',shifts:'Arbeitszeiten',chat:'Messenger',daily:'Tageskontrolle',series:'Serienfahrten',traffic:'Verkehrszentrale',files:'Dokumente',swaps:'Fahrertausch',worktime:'Arbeitszeitberichte',signatures:'Unterschriften'})[page]||'TaxiPro';menu();let html;try{html=({home:me.role==='admin'?adminHome:driverHome,dispatch:dispatch,rides:rides,customers:customers,drivers:drivers,shifts:shifts,chat:chat,daily:daily,series:series})[page]?.()||ops.view(page,db)}catch(e){html=notice('Anzeige konnte nicht geladen werden: '+esc(e.message))}$('pageView').innerHTML=page==='chat'?html+ops.chatExtra(db):html;ops.mount(page).catch(e=>toast(e.message));if(page==='home'&&me.role==='admin')setTimeout(buildMap,30);if(page==='dispatch')fillCustomer(false);if(page==='series')bindSeries();if(page==='shifts'&&me.role==='admin')bindCorrection();if(page==='chat'){let el=$('messages');if(el)el.scrollTop=el.scrollHeight}}
+function menu(){const admin=[['home','◈','Übersicht'],['cases','♙','Kundenakten'],['calendar','▦','Kalenderprüfung'],['ledger','▤','Fahrtenjournal'],['dispatch','↗','Disposition'],['rides','▤','Fahrten'],['series','↻','Serienfahrten'],['daily','▦','Tageskontrolle'],['customers','♙','Kunden'],['drivers','♟','Fahrer'],['shifts','◷','Schichtkarten'],['worktime','◴','Tages- / Monats- / Jahreszeit'],['traffic','⚠','Verkehrszentrale'],['chat','✉','Messenger'],['files','⇧','Dokumente'],['swaps','↔','Fahrertausch'],['signatures','✍','Unterschriften']];const driver=[['home','▦','Meine Aufträge'],['shifts','◷','Meine Schicht'],['worktime','◴','Arbeitszeitberichte'],['traffic','⚠','Verkehr'],['chat','✉','Community / Nachrichten'],['files','⇧','Dokumente'],['swaps','↔','Fahrertausch'],['signatures','✍','Unterschriften']];$('appNav').innerHTML=(me.role==='admin'?admin:driver).map(([k,i,n])=>'<button class="'+(page===k?'active':'')+'" data-page="'+k+'">'+i+' &nbsp; '+n+'</button>').join('')}
+function render(p){if(p)page=p;if(!loggedIn()||!db)return;if(map&&typeof map.remove==='function'){map.remove();map=null}if(me.role==='driver'&&!['home','shifts','chat','traffic','files','swaps','worktime','signatures'].includes(page))page='home';$('crumb').textContent=page;$('heading').textContent=({home:me.role==='admin'?'Flottenübersicht':'Meine Aufträge',dispatch:'Disposition',rides:'Fahrtenjournal',customers:'Kundenstamm',drivers:'Fahrerverwaltung',shifts:'Arbeitszeiten',chat:'Messenger',daily:'Tageskontrolle',series:'Serienfahrten',cases:'Kundenakten',calendar:'Kalenderprüfung',ledger:'Fahrtenjournal', 'case-detail':'Kundenakte',traffic:'Verkehrszentrale',files:'Dokumente',swaps:'Fahrertausch',worktime:'Arbeitszeitberichte',signatures:'Unterschriften'})[page]||'TaxiPro';menu();let html;try{
+ html=me.role==='admin'&&office.eligible(page)
+   ?office.view(page)
+   :({home:me.role==='admin'?adminHome:driverHome,dispatch:dispatch,rides:rides,customers:customers,drivers:drivers,shifts:shifts,chat:chat,daily:daily,series:series})[page]?.()||ops.view(page,db);
+}catch(e){html=notice('Anzeige konnte nicht geladen werden: '+esc(e.message))}
+$('pageView').innerHTML=page==='chat'?html+ops.chatExtra(db):html;
+ops.mount(page).catch(e=>toast(e.message));
+if(me.role==='admin'&&office.eligible(page))office.mount(page).catch(e=>toast(e.message));
+if(page==='home'&&me.role==='admin')setTimeout(buildMap,30);if(page==='dispatch')fillCustomer(false);if(page==='series')bindSeries();if(page==='shifts'&&me.role==='admin')bindCorrection();if(page==='chat'){let el=$('messages');if(el)el.scrollTop=el.scrollHeight}}
 function activeShift(uid=me.id){return (db.shifts||[]).find(s=>s.driver_id===uid&&!s.ended_at)}
 function sHours(uid,days){const recent=Date.now()-days*86400000;return (db.shifts||[]).filter(s=>(!uid||s.driver_id===uid)&&Date.parse(s.started_at)>=recent).reduce((sum,s)=>sum+(Date.parse(s.ended_at||new Date().toISOString())-Date.parse(s.started_at)),0)}
 function adminHome(){const drivers=db.drivers||[],rides=db.rides||[],active=(db.shifts||[]).filter(s=>!s.ended_at),positions=db.positions||[];return title('Heute im Blick','Disposition, Fahrzeuge und Fahrer in einer Oberfläche','<div class="actions"><button class="btn" id="backupExport">⇩ Export</button><button class="btn gold" data-page="dispatch">+ Auftrag anlegen</button></div>')+
@@ -141,7 +170,7 @@ async function exportData(){
  }catch(e){toast(e.message)}
 }
 $('loginForm').addEventListener('submit',e=>{e.preventDefault();signIn()});$('refreshBtn').onclick=()=>refresh().then(render).catch(e=>toast(e.message));$('logoutBtn').onclick=()=>logout();$('mobileMenu').onclick=()=>$('appNav').classList.toggle('open');
-document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);$('appNav').classList.remove('open');return}
+document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me?.role==='admin')office.openPage(nav.dataset.page);$('appNav').classList.remove('open');return}
  const todayButton=e.target.closest('[data-today]');if(todayButton){calendarDate=today();render('daily');return}
  const change=e.target.closest('[data-ride]');if(change){transaction('/api/rides/'+change.dataset.ride,'PATCH',{action:change.dataset.action});return}
  const cancel=e.target.closest('[data-cancel]');if(cancel){if(confirm('Diesen Auftrag wirklich stornieren?'))transaction('/api/rides/'+cancel.dataset.cancel,'PATCH',{action:'cancel'});return}
