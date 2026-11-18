@@ -103,6 +103,10 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
       ev.source==='master_prescription'?'Verordnung / Arztbeleg':'Zuzahlung laut Stammdaten')+'</b>'+
     '<small>Referenz: '+text(ev.external_key)+' · '+text(ev.source_status||'Noch nicht geprüft')+
     (ev.valid_until?' · Gültig bis '+text(ev.valid_until):'')+'</small></div>').join('');
+  const documents=(d.documents||[]).slice(0,70).map(doc=>
+    '<div class="center-route"><b>'+text(doc.filename||'Unbenannter Beleg')+'</b>'+
+    '<small>'+text(doc.document_type||'Dokument')+' · Zuordnung: '+text(doc.match_status)+
+    ' · '+(doc.has_drive_reference?'Drive-Referenz vorhanden':'Ohne Drive-Referenz')+'</small></div>').join('');
   const form=flags.map(([label,key,values])=>'<label>'+label+'<select name="'+key+'">'+
     values.map(v=>'<option value="'+v+'" '+((c[key]||'unknown')===v?'selected':'')+'>'+esc(statusLabel[v]||v)+'</option>').join('')+'</select></label>').join('');
   const routes=rs.map(x=>'<div class="center-route"><b>'+text(x.label)+'</b><small>'+
@@ -127,7 +131,9 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     '<button class="btn gold" type="submit">Geprüften Aktenstatus speichern</button></form>'+
     '<p class="center-caption">Nur die Disposition darf die Status bestätigen. Ein vorhandenes Dokument allein beweist keine gültige Genehmigung oder Befreiung.</p>'+
     '<div class="center-panel-head"><b>Quellenhinweise aus Google Drive</b><span class="center-muted">Keine automatische Freigabe</span></div>'+
-    '<div class="center-route-list">'+(evidence||empty('Keine zugeordneten Quellenbelege.'))+'</div></section>'+
+    '<div class="center-route-list">'+(evidence||empty('Keine zugeordneten Quellenbelege.'))+'</div>'+
+    '<div class="center-panel-head"><b>Dokumenten-Zuordnung</b><span class="center-muted">'+n(d.documents?.length||0)+' zugeordnete Belege</span></div>'+
+    '<div class="center-route-list">'+(documents||empty('Keine eindeutig zugeordneten Dokumente aus der Mastertabelle.'))+'</div></section>'+
     '<section class="center-panel"><div class="center-panel-head"><b>Strecken und Einrichtungen</b><span class="center-muted">'+n(rs.length)+' aktiv</span></div>'+
     '<div class="center-route-list">'+(routes||empty('Noch keine konkrete Strecke erfasst.'))+'</div>'+
     '<form id="center-route-form" class="center-form">'+
