@@ -187,6 +187,16 @@ export async function pullCalendar(db,env){
     const data=await googleJSON(url.href,access);
     if(!Array.isArray(data.items))throw fail(503,'Kalender lieferte keine gültige Ereignisliste.');
     for(const raw of data.items){
+      // A cancelled recurring instance can arrive from Google without start.dateTime.
+      // Retire the previously staged event by its stable provider ID instead of
+      // leaving an outdated "confirmed" record in the dispatcher dashboard.
+      if(raw?.status==='cancelled' && !raw?.start?.dateTime && raw?.id){
+        const retired=await db.prepare(`UPDATE calendar_imports SET status='cancelled',imported_at=?
+          WHERE source_account='google_taxi' AND calendar_id=? AND provider_event_id=?`)
+          .bind(fresh(),calendarId,String(raw.id).slice(0,255)).run();
+        updated+=retired.meta?.changes||0;
+        continue;
+      }
       const event=normalizedGoogleEvent(raw,'google_taxi',calendarId);
       if(!event)continue;
       seen++;
