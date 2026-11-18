@@ -11,14 +11,15 @@ const fresh=()=>new Date().toISOString(),ID=()=>crypto.randomUUID();
 const fail=(code,m)=>Object.assign(new Error(m),{status:code});
 const SCOPES={
  calendar:['GOOGLE_TAXI_CLIENT_ID','GOOGLE_TAXI_CLIENT_SECRET','GOOGLE_TAXI_REFRESH_TOKEN','GOOGLE_TAXI_CALENDAR_ID'],
- sheets:['GOOGLE_MASTER_CLIENT_ID','GOOGLE_MASTER_CLIENT_SECRET','GOOGLE_MASTER_REFRESH_TOKEN','GOOGLE_MASTER_SHEET_ID']
+ sheets:['GOOGLE_MASTER_CLIENT_ID','GOOGLE_MASTER_CLIENT_SECRET','GOOGLE_MASTER_REFRESH_TOKEN','GOOGLE_MASTER_SHEET_ID'],
+ contacts:['GOOGLE_CONTACTS_CLIENT_ID','GOOGLE_CONTACTS_CLIENT_SECRET','GOOGLE_CONTACTS_REFRESH_TOKEN']
 };
 export function isGoogleConfigured(env,source){
  return (SCOPES[source]||[]).every(k=>typeof env[k]==='string'&&env[k].trim());
 }
 async function token(env,source) {
  if(!isGoogleConfigured(env,source))return null;
- const prefix=source==='calendar'?'GOOGLE_TAXI_':'GOOGLE_MASTER_';
+ const prefix=source==='calendar'?'GOOGLE_TAXI_':source==='contacts'?'GOOGLE_CONTACTS_':'GOOGLE_MASTER_';
  const form=new URLSearchParams({
    client_id:env[prefix+'CLIENT_ID'],client_secret:env[prefix+'CLIENT_SECRET'],
    refresh_token:env[prefix+'REFRESH_TOKEN'],grant_type:'refresh_token'
@@ -32,7 +33,8 @@ async function token(env,source) {
  return data.access_token;
 }
 async function googleJSON(url,accessToken){
- if(!url.startsWith('https://www.googleapis.com/'))throw fail(500,'Google-Endpunkt nicht zugelassen.');
+ if(!url.startsWith('https://www.googleapis.com/')&&!url.startsWith('https://people.googleapis.com/'))
+    throw fail(500,'Google-Endpunkt nicht zugelassen.');
  const r=await fetch(url,{headers:{Authorization:'Bearer '+accessToken},signal:AbortSignal.timeout(20000)});
  if(!r.ok)throw fail(503,'Google-Quelle nicht erreichbar (HTTP '+r.status+').');
  const d=await r.json();
@@ -209,4 +211,25 @@ export async function syncSources(db,env,which='both'){
  if(which==='both'||which==='master')result.master=await pullMaster(db,env);
  if(which==='both'||which==='calendar')result.calendar=await pullCalendar(db,env);
  return result;
+}
+
+/**
+ * On-demand directory search; never persist or disclose private contacts
+ * outside the authenticated dispatcher session.
+ * Requires Google People API with contacts.readonly OAuth scope.
+ */
+export async function searchGoogleContacts(env,query) {
+ if(!isGoogleConfigured(env,'contacts'))throw fail(503,'Google-Kontakte-OAuth für TaxiPro nicht eingerichtet.');
+ const q=String(query||'').trim().slice(0,80);
+ if(q.length<3||/[\u0000-\u001f]/.test(q))throw fail(400,'Bitte mindestens drei Zeichen eingeben.');
+ const access=await token(env,'contacts');
+ const url=new URL('https://people.googleapis.com/v1/people:searchContacts');
+ url.searchParams.set('query',q);url.searchParams.set('readMask','names,phoneNumbers');
+ url.searchParams.set('pageSize','10');
+ const data=await googleJSON(url.href,access);
+ return {contacts:(Array.isArray(data.results)?data.results:[]).slice(0,10).map(x=>({
+  resourceId:String(x.person?.resourceName||'').slice(0,100),
+  name:String(x.person?.names?.[0]?.displayName||'').slice(0,120),
+  phone:String(x.person?.phoneNumbers?.[0]?.value||'').slice(0,60)
+ })).filter(x=>x.name)};
 }
