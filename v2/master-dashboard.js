@@ -29,7 +29,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
    '<h2>Heute im Überblick</h2><p>Gemeinsamer Stand aus der geschützten TaxiPro-Datenbank · '+esc(nowBerlin())+'</p></div>'+
    '<div class="center-command">'+iconBtn('density','Ansicht: '+(prefs.density==='compact'?'Kompakt':'Komfortabel'))+
    iconBtn('sidebar','Menü '+(prefs.nav==='expanded'?'reduzieren':'ausklappen'))+'</div></div>'+
-   '<div id="center-live-root">'+dashboardMarkup(d)+'</div></div>';
+   '<div id="center-live-root">'+dashboardMarkup(d)+'</div><div class="center-fleet-map center-panel"><div class="center-panel-head"><b>Flottenkarte</b><span class="center-muted">Letzter GPS-Standort mit Zeitstempel</span></div><div id="liveMap" class="map-live"></div></div></div>';
  }
  function dashboardMarkup(d) {
   if(!d)return empty('Das gemeinsame Fahrtenjournal wird geladen. Eine Google-Synchronisierung benötigt separate Firmen-OAuth-Freigaben.');
