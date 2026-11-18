@@ -71,14 +71,16 @@ function connectionInterrupted(message){
  $('serverStatus').setAttribute('data-connection','offline');
  $('syncLabel').textContent='Letzter Stand – '+String(message||'Netzwerk prüfen').slice(0,80);
 }
-async function syncLive(){
+async function syncLive(resume=false){
  if(syncBusy||!loggedIn())return;
  syncBusy=true;
  const previousState=JSON.stringify(db);
  try{
   await refresh();
+  const prefsUpdated=resume&&!isEditingNow()?await office.synchronizePrefs():false;
+  if(prefsUpdated)page=office.getPrefs().lastPage||page;
   const changed=previousState!==JSON.stringify(db);
-  if(changed||unsavedUpdates){
+  if(changed||unsavedUpdates||prefsUpdated){
    if(isEditingNow()){
     unsavedUpdates=true;
     $('syncLabel').textContent='Neuer Stand verfügbar · nach Speichern / Seitenwechsel';
@@ -93,10 +95,10 @@ async function syncLive(){
  }catch(e){connectionInterrupted(e.message);}
  finally{syncBusy=false;}
 }
-window.addEventListener('online',()=>{if(loggedIn())void syncLive();});
+window.addEventListener('online',()=>{if(loggedIn())void syncLive(true);});
 window.addEventListener('offline',()=>connectionInterrupted('Internetverbindung fehlt'));
 document.addEventListener('visibilitychange',()=>{
- if(document.visibilityState==='visible'&&loggedIn())void syncLive();
+ if(document.visibilityState==='visible'&&loggedIn())void syncLive(true);
 });
 async function refresh(){
  const previous=db;const current=await request('/api/state');
@@ -141,7 +143,7 @@ function menu(){
   ).join('')+'</div>').join('');
  nav.scrollTop=scroll;
 }
-function render(p){if(p)page=p;if(!loggedIn()||!db)return;if(map&&typeof map.remove==='function'){map.remove();map=null}if(me.role==='driver'&&!['home','shifts','chat','traffic','files','swaps','worktime','signatures'].includes(page))page='home';$('crumb').textContent=page;$('heading').textContent=({home:me.role==='admin'?'Flottenübersicht':'Meine Aufträge',dispatch:'Disposition',rides:'Fahrtenjournal',customers:'Kundenstamm',drivers:'Fahrerverwaltung',shifts:'Arbeitszeiten',chat:'Messenger',daily:'Tageskontrolle',series:'Serienfahrten',cases:'Kundenakten',calendar:'Kalenderprüfung','import-review':'Dublettenprüfung',ledger:'Fahrtenjournal', 'case-detail':'Kundenakte',traffic:'Verkehrszentrale',files:'Dokumente',swaps:'Fahrertausch',worktime:'Arbeitszeitberichte',signatures:'Unterschriften'})[page]||'TaxiPro';menu();let html;try{
+function render(p){if(p){page=p;unsavedUpdates=false;}if(!loggedIn()||!db)return;if(map&&typeof map.remove==='function'){map.remove();map=null}if(me.role==='driver'&&!['home','shifts','chat','traffic','files','swaps','worktime','signatures'].includes(page))page='home';$('crumb').textContent=page;$('heading').textContent=({home:me.role==='admin'?'Flottenübersicht':'Meine Aufträge',dispatch:'Disposition',rides:'Fahrtenjournal',customers:'Kundenstamm',drivers:'Fahrerverwaltung',shifts:'Arbeitszeiten',chat:'Messenger',daily:'Tageskontrolle',series:'Serienfahrten',cases:'Kundenakten',calendar:'Kalenderprüfung','import-review':'Dublettenprüfung',ledger:'Fahrtenjournal', 'case-detail':'Kundenakte',traffic:'Verkehrszentrale',files:'Dokumente',swaps:'Fahrertausch',worktime:'Arbeitszeitberichte',signatures:'Unterschriften'})[page]||'TaxiPro';menu();let html;try{
  html=me.role==='admin'&&office.eligible(page)
    ?office.view(page)
    :({home:me.role==='admin'?adminHome:driverHome,dispatch:dispatch,rides:rides,customers:customers,drivers:drivers,shifts:shifts,chat:chat,daily:daily,series:series})[page]?.()||ops.view(page,db);
@@ -307,7 +309,7 @@ async function exportData(){
 }
 $('loginForm').addEventListener('submit',e=>{e.preventDefault();signIn()});$('refreshBtn').onclick=()=>refresh().then(render).catch(e=>toast(e.message));$('logoutBtn').onclick=()=>logout();$('mobileMenu').onclick=()=>$('appNav').classList.toggle('open');
 document.addEventListener('click',e=>{const find=e.target.closest('[data-find-customer]');if(find){find.disabled=true;findDispatchCustomer().catch(err=>toast(err.message)).finally(()=>find.disabled=false);return}
- const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me?.role==='admin')office.openPage(nav.dataset.page);$('appNav').classList.remove('open');return}
+ const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me)office.openPage(nav.dataset.page);$('appNav').classList.remove('open');return}
  const todayButton=e.target.closest('[data-today]');if(todayButton){calendarDate=today();render('daily');return}
  const change=e.target.closest('[data-ride]');if(change){transaction('/api/rides/'+change.dataset.ride,'PATCH',{action:change.dataset.action});return}
  const cancel=e.target.closest('[data-cancel]');if(cancel){if(confirm('Diesen Auftrag wirklich stornieren?'))transaction('/api/rides/'+cancel.dataset.cancel,'PATCH',{action:'cancel'});return}
