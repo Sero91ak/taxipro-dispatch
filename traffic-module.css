@@ -1,0 +1,30 @@
+/* TaxiPro Fahrer: kostenlose integrierte Verkehrszentrale */
+#driver-traffic-panel{color:#e8f4fc;min-height:0}
+#driver-traffic-panel .tp-traffic-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+#driver-traffic-panel .tp-traffic-head h2{font-size:19px;font-weight:800;margin:0;color:#e8f4fc}
+#driver-traffic-panel .tp-traffic-sub{font-size:12px;color:#94b8d4;line-height:1.5;margin-top:4px}
+#driver-traffic-panel .tp-traffic-status{border:1px solid #28506b;background:#10283d;border-radius:10px;color:#a7d5e2;padding:8px 10px;font-size:11px;line-height:1.4;margin-bottom:10px}
+#driver-traffic-panel .tp-traffic-actions{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+#driver-traffic-panel button,#driver-traffic-panel select{background:#15324b;color:#e4f5fb;border:1px solid #295370;border-radius:10px;padding:10px 11px;font-size:12px;font-weight:700;min-height:40px;cursor:pointer}
+#driver-traffic-panel button:focus-visible,#driver-traffic-panel select:focus-visible{outline:2px solid #14b8a6;outline-offset:2px}
+#driver-traffic-panel .tp-traffic-actions select{flex:1;min-width:0}
+#driver-traffic-panel .tp-traffic-map{position:relative;width:100%;height:clamp(280px,48dvh,510px);background:#16283b;border:1px solid #24445c;border-radius:16px;overflow:hidden}
+#driver-traffic-panel .tp-traffic-map .maplibregl-control-container{font-family:system-ui,sans-serif}
+#driver-traffic-panel .tp-traffic-filters{display:flex;gap:7px;overflow-x:auto;padding:12px 0 9px;scrollbar-width:thin}
+#driver-traffic-panel .tp-traffic-filters button{white-space:nowrap;min-height:36px;padding:8px 10px;color:#a6c3d3}
+#driver-traffic-panel .tp-traffic-filters button[aria-pressed=true]{color:#071b28;background:#5eead4;border-color:#5eead4}
+#driver-traffic-panel .tp-traffic-list{display:flex;flex-direction:column;gap:8px;margin:3px 0 12px}
+#driver-traffic-panel .tp-traffic-item{text-align:left;display:flex;gap:11px;align-items:flex-start;width:100%;padding:11px;border-radius:12px;background:#10273b;border:1px solid #2a4960;color:#dcecf4;min-height:58px}
+#driver-traffic-panel .tp-traffic-symbol{border-radius:10px;background:#20405a;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:20px}
+#driver-traffic-panel .tp-traffic-item-main{min-width:0;flex:1}
+#driver-traffic-panel .tp-traffic-item-title{font-size:12px;font-weight:700;line-height:1.4}
+#driver-traffic-panel .tp-traffic-item-sub{margin-top:4px;color:#91b1c8;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+#driver-traffic-panel .tp-traffic-foot{font-size:11px;color:#89a4ba;line-height:1.5;padding:4px 1px 10px}
+#driver-traffic-panel .tp-traffic-pin{width:33px;height:33px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#0e283e;border:2px solid #5eead4;box-shadow:0 2px 10px #06121d90;font-size:18px}
+#driver-traffic-panel .tp-traffic-pin.roadworks{border-color:#ffc36b}
+#driver-traffic-panel .tp-traffic-pin.warning{border-color:#fda4af}
+#driver-traffic-panel .tp-traffic-pin.closure{border-color:#f87171}
+#driver-traffic-panel .tp-traffic-empty{padding:18px;border:1px dashed #305066;border-radius:13px;color:#9fbdd0;font-size:12px;line-height:1.5;text-align:center}
+#driver-traffic-panel .tp-traffic-legal{font-size:11px;line-height:1.5;color:#7da1b6;margin-bottom:10px}
+#driver-traffic-panel .tp-traffic-attribution{color:#97aebd;font-size:10px;line-height:1.5;margin:8px 0}
+@media(min-width:760px){#driver-traffic-panel .tp-traffic-map{height:clamp(360px,60dvh,640px)}}
