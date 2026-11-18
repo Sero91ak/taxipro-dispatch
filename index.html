@@ -1242,6 +1242,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
 }
 </style>
 <link rel="stylesheet" href="series-system.css"/>
+<link rel="stylesheet" href="traffic-module.css"/>
 </head>
 <body>
 <div id="app">
@@ -1582,6 +1583,30 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
         <div class="drv-section-title" style="margin-top:16px">Kommend</div>
         <div id="driver-rides-upcoming"></div>
       </div>
+      <div id="driver-traffic-panel" class="hidden" aria-label="Verkehrslage">
+        <div class="tp-traffic-head"><div><h2>🗺️ Verkehrszentrale</h2><p class="tp-traffic-sub">Meckenheim · Bonn · Rhein-Sieg · Köln</p></div><span style="font-size:10px;color:#5eead4;font-weight:700">0 € API-Gebühren</span></div>
+        <div id="tp-traffic-status" class="tp-traffic-status" role="status">Amtliche Verkehrsmeldungen werden geladen …</div>
+        <div class="tp-traffic-actions">
+          <select id="tp-traffic-road" aria-label="Autobahn auswählen">
+            <option value="all">Alle Autobahnen im Gebiet</option>
+            <option value="A61">A61</option><option value="A565">A565</option><option value="A555">A555</option>
+            <option value="A59">A59</option><option value="A4">A4</option><option value="A3">A3</option>
+          </select>
+          <button id="tp-traffic-locate" type="button" aria-label="Meinen Standort zeigen" title="Mein Standort">◎</button>
+          <button id="tp-traffic-refresh" type="button" aria-label="Verkehrsdaten aktualisieren" title="Aktualisieren">↻</button>
+        </div>
+        <div id="tp-traffic-map" class="tp-traffic-map" role="region" aria-label="Interaktive Verkehrskarte"></div>
+        <div class="tp-traffic-filters" id="tp-traffic-filters" role="group" aria-label="Meldungen filtern">
+          <button type="button" data-filter="all" aria-pressed="true">Alle Meldungen</button>
+          <button type="button" data-filter="warning" aria-pressed="false">⚠️ Gefahren</button>
+          <button type="button" data-filter="closure" aria-pressed="false">⛔ Sperrungen</button>
+          <button type="button" data-filter="roadworks" aria-pressed="false">🚧 Baustellen</button>
+        </div>
+        <div class="drv-section-title" id="tp-traffic-count">Amtliche Meldungen</div>
+        <div id="tp-traffic-list" class="tp-traffic-list" aria-live="polite"></div>
+        <p class="tp-traffic-legal">Keine Blitzer- oder Polizeikontrollwarnungen. Die Karte zeigt amtliche Autobahnmeldungen, nicht den vollständigen Live-Verkehrsfluss aller Straßen. Bitte im Fahrzeug nur sicher und verkehrsrechtskonform bedienen.</p>
+        <p class="tp-traffic-attribution">Daten: Autobahn GmbH des Bundes · Karte: OpenFreeMap / OpenStreetMap / MapLibre · Quelle und Aktualisierungszeit siehe Status</p>
+      </div>
       <div id="driver-team-panel" class="hidden">
         <div class="drv-section-title">Team-Radio</div>
         <p style="font-size:13px;color:#94b8d4;margin-bottom:14px;line-height:1.5">Stau, Unfall, Blitzer – alle Fahrer informieren sich hier.</p>
@@ -1611,6 +1636,7 @@ html.driver-boot #app,html.driver-boot .fab,html.driver-boot #mobile-bottom-nav,
     </div>
     <nav id="driver-bottom-nav" aria-label="Fahrer-Navigation">
       <button type="button" class="drv-nav-item active" data-drv-tab="rides" onclick="switchDriverTab('rides')"><span style="font-size:22px">🚗</span>Fahrten</button>
+      <button type="button" class="drv-nav-item" data-drv-tab="traffic" onclick="switchDriverTab('traffic')"><span style="font-size:22px">🗺️</span>Verkehr</button>
       <button type="button" class="drv-nav-item" data-drv-tab="team" onclick="switchDriverTab('team')"><span style="font-size:22px">👥</span>Team</button>
       <button type="button" class="drv-nav-item" data-drv-tab="profile" onclick="switchDriverTab('profile')"><span style="font-size:22px">👤</span>Profil<span class="drv-nav-badge hidden" id="drv-docs-badge">0</span></button>
     </nav>
@@ -8260,6 +8286,7 @@ async function driverLoginByToken(token){
 }
 
 function driverLogout(){
+  if(window.TaxiTraffic)window.TaxiTraffic.deactivate();
   stopDriverPolling();
   showDriverLogin();
   document.getElementById('driver-pin-input').value='';
@@ -8269,6 +8296,8 @@ function switchDriverTab(tab){
   document.querySelectorAll('.drv-nav-item').forEach(b=>b.classList.toggle('active',b.dataset.drvTab===tab));
   document.getElementById('driver-rides-panel').classList.toggle('hidden',tab!=='rides');
   document.getElementById('driver-team-panel').classList.toggle('hidden',tab!=='team');
+  document.getElementById('driver-traffic-panel').classList.toggle('hidden',tab!=='traffic');
+  if(window.TaxiTraffic){if(tab==='traffic')window.TaxiTraffic.activate();else window.TaxiTraffic.deactivate();}
   document.getElementById('driver-profile-panel').classList.toggle('hidden',tab!=='profile');
   if(tab==='team') renderDriverChat();
 }
@@ -9868,5 +9897,6 @@ if(!initAppMode()){
 }
 </script>
 <script src="series-system.js"></script>
+<script defer src="traffic-module.js"></script>
 </body>
 </html>
