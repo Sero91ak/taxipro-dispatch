@@ -167,3 +167,22 @@ assert.equal(deniedTime.status,200,'Fahrerfilter wird serverseitig auf eigenes K
 
 console.log('PASS: TaxiPro Community 2.3 – Meldungen, private Fahrerkommunikation, Tauschanfragen, Upload-Zugriff, Tagesübersicht und Kunden-Unterschrift (synthetische Daten).');
 
+
+
+// TaxiPro integrated dispatch: no role leakage in date-specific assignments.
+const driverDay=await call('/api/rides?date=2026-10-30','GET',null,aToken);
+assert.equal(driverDay.status,200,'Fahrer darf eigene Tagesfahrten abrufen');
+assert.ok(driverDay.data.entries.every(r=>r.driver_id===userA.data.id),'Fahrer sieht keine fremden Aufträge');
+const dispatcherDay=await call('/api/rides?date=2026-10-30');
+assert.equal(dispatcherDay.status,200);
+assert.ok(dispatcherDay.data.entries.some(r=>r.id===rB.data.id),'Disposition sieht auch Fahrer B');
+assert.ok(dispatcherDay.data.entries.some(r=>r.id===rA.data.id),'Disposition sieht Fahrer A');
+const invalidWindow=await call('/api/rides?from=2026-10-01&to=2026-12-05','GET',null,aToken);
+assert.equal(invalidWindow.status,400,'Zeitraumgrenzen werden im Backend erzwungen');
+const taxiKts=await call('/api/rides','POST',{
+ customerId:cust.data.id,driverId:userA.data.id,date:'2026-11-20',time:'09:05',
+ pickup:'Meckenheim',destination:'Klinik Bonn',kind:'Krankenfahrt',direction:'hin',billingClass:'KTS'
+});
+assert.equal(taxiKts.status,201);
+const ktsRow=(await call('/api/rides?date=2026-11-20')).data.entries.find(x=>x.id===taxiKts.data.id);
+assert.equal(ktsRow.billing_class,'KTS','KTS bleibt im Original-Fahrerauftrag erhalten');
