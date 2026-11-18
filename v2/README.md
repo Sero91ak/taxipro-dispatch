@@ -1,6 +1,6 @@
-# TaxiPro Dispatch 2.2 – neues Command Center
+# TaxiPro Dispatch – Umbau und Erweiterung der vorhandenen Web-App
 
-Das neue Rollenportal läuft unter `/v2/app.html`; die interaktive Demonstration mit erfundenen Kundendaten unter `/v2/index.html`.
+Das vorhandene Rollenportal läuft unter `/v2/app.html`; die interaktive Demonstration mit erfundenen Kundendaten unter `/v2/index.html`.
 
 - **Disponenten-Portal:** Aufträge, Kunden, Fahrer, Tageskontrolle, Serienfahrten, Schichtkorrekturen, GPS-Positionen (mit Zeitstempel), Messenger, verschlüsselter Export.
 - **Fahrer-Portal:** eigene Aufträge, Annehmen/Abschließen, Schichtstart/-ende, echte Pausenerfassung, Navigation, Standortfreigabe und Nachrichten.
@@ -11,4 +11,6 @@ Das neue Rollenportal läuft unter `/v2/app.html`; die interaktive Demonstration
 
 Aktueller Funktions- und Sicherheitsstatus: [docs/V22-STATUS.md](../docs/V22-STATUS.md). Cloudflare-Konfiguration: [Einrichtung](../docs/EINRICHTUNG.md).
 
-Für Tests: `node --experimental-sqlite tests/api-integration.mjs` (64 Assertions).
+Die Disponenten- und Fahrerbereiche benutzen die gemeinsame Cloudflare-API und dieselben Kunden- und Fahrer-IDs. Die bestehende PWA-Identität `./app.html` bleibt unverändert: keine zweite App-Installation. KTS-/RE-Status und einzelne Fahrten werden in einer einheitlichen Dispositionssicht zusammengeführt. Die Google-Quellenanbindung benötigt eigene sichere OAuth-Freigaben; die bestehende ChatGPT-Verbindung kann nicht als App-Schlüssel verwendet werden.
+
+CI-Prüfung: `node --experimental-sqlite tests/api-integration.mjs` sowie die getrennten Community- und Masterdaten-Tests.
