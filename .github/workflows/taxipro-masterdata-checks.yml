@@ -6,6 +6,7 @@ on:
       - 'v2/**'
       - 'tests/reconcile.test.mjs'
       - 'tests/ops-dashboard.test.mjs'
+      - 'tests/google-sync.test.mjs'
       - '.github/workflows/taxipro-masterdata-checks.yml'
   push:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - 'v2/**'
       - 'tests/reconcile.test.mjs'
       - 'tests/ops-dashboard.test.mjs'
+      - 'tests/google-sync.test.mjs'
       - '.github/workflows/taxipro-masterdata-checks.yml'
 permissions:
   contents: read
@@ -36,4 +38,4 @@ jobs:
           node --check v2/app.js
           node --check v2/sw.js
       - name: Secure canonical customer matching, unified dashboard and print layouts
-        run: node --experimental-sqlite --test tests/reconcile.test.mjs tests/ops-dashboard.test.mjs
+        run: node --experimental-sqlite --test tests/reconcile.test.mjs tests/ops-dashboard.test.mjs tests/google-sync.test.mjs
