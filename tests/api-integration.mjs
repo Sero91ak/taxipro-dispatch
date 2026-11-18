@@ -214,3 +214,36 @@ const invalidBilling=await call('/api/series','POST',{
  endDate:'2026-12-18',weekdays:[5],outboundTime:'09:20',
  pickup:'Meckenheim',destination:'Bonn',kind:'Krankenfahrt',billingClass:'invalid'});
 assert.equal(invalidBilling.status,400,'Unerlaubte Abrechnungsart wird abgewiesen');
+
+
+// End-to-end proof using real worker API and two authenticated roles.
+// A driver completion reaches the SAME dispatcher month journal; no copy is made.
+const crossRide=await call('/api/rides','POST',{
+ customerId:cust.data.id,driverId:userA.data.id,date:'2026-11-21',time:'10:45',
+ pickup:'Meckenheim Teststraße',destination:'Klinik Bonn',
+ kind:'Rechnungsfahrt',direction:'hin',billingClass:'RE',signatureRequired:true
+});
+assert.equal(crossRide.status,201);
+const seenByDriver=await call('/api/rides?date=2026-11-21','GET',null,aToken);
+assert.equal(seenByDriver.data.entries.filter(x=>x.id===crossRide.data.id).length,1);
+const notByColleague=await call('/api/rides?date=2026-11-21','GET',null,newPass.data.token);
+assert.equal(notByColleague.data.entries.filter(x=>x.id===crossRide.data.id).length,0);
+let asLedger=await call('/api/ops/ledger?from=2026-11-21&to=2026-11-21');
+assert.equal(asLedger.status,200);
+assert.equal(asLedger.data.entries.find(x=>x.id===crossRide.data.id).ride_status,'planned');
+assert.equal((await call('/api/rides/'+crossRide.data.id,'PATCH',{action:'accept'},aToken)).status,200);
+assert.equal((await call('/api/rides/'+crossRide.data.id,'PATCH',{action:'complete'},aToken)).status,200);
+asLedger=await call('/api/ops/ledger?from=2026-11-21&to=2026-11-21');
+assert.equal(asLedger.data.entries.find(x=>x.id===crossRide.data.id).ride_status,'reported');
+const checkedCross=await call('/api/ops/ledger/'+crossRide.data.id,'PATCH',{
+ rideStatus:'confirmed',note:'Fahrerleistung und Unterlagen durch Disposition geprüft'
+});
+assert.equal(checkedCross.status,200);
+asLedger=await call('/api/ops/ledger?from=2026-11-21&to=2026-11-21');
+assert.equal(asLedger.data.entries.filter(x=>x.id===crossRide.data.id).length,1);
+assert.equal(asLedger.data.entries.find(x=>x.id===crossRide.data.id).ride_status,'confirmed');
+const printable=await call('/api/ops/signature-sheet?customerId='+cust.data.id+
+ '&from=2026-11-21&to=2026-11-21');
+assert.equal(printable.status,200);
+assert.equal(printable.data.entries.filter(x=>x.serviceDate==='2026-11-21').length,1,
+ 'Fahrerauftrag wird ohne Kopie genau einmal zum Unterschriftszettel');
