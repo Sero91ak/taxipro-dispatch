@@ -54,8 +54,16 @@ body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(e
     <button type="button" class="btn btn-ghost" onclick="openDispatchApp()">App öffnen (ohne Install)</button>
   </div>
 </div>
+<script src="v2/config.js"></script>
 <script>
 (function(){
+  // Existing installed Zentrale: only opt-in after the backend and accounts
+  // have been migrated. This does NOT change its original PWA manifest ID.
+  var ready=window.TAXIPRO_ENABLE_UPGRADED_ENTRIES===true &&
+    /^https:\/\/[^/]+/i.test(String(window.TAXIPRO_API_URL||''));
+  if(ready && new URLSearchParams(location.search).get('install')!=='1'){
+    location.replace('v2/app.html');return;
+  }
   try{localStorage.setItem('tp_app_role','dispatch');}catch(e){}
   var installMode=new URLSearchParams(location.search).get('install')==='1';
   window.openDispatchApp=function(){
