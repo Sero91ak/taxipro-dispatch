@@ -34,7 +34,7 @@ async function dashboard(db,u,search){
   const [yr,mon,day]=date.split('-').map(Number);
   const calendarStart=new Date(berlinMidnight(yr,mon,day)).toISOString();
   const calendarEnd=new Date(berlinMidnight(yr,mon,day+1)).toISOString();
-  const [total,unmatched,sync,active,latest,calendarToday]=await Promise.all([
+  const [total,unmatched,sync,active,latest,calendarToday,conflictCount]=await Promise.all([
     db.prepare('SELECT COUNT(*) AS n FROM customers WHERE active=1').first(),
     db.prepare("SELECT COUNT(*) AS n FROM calendar_imports WHERE match_state='review' AND status!='cancelled'").first(),
     db.prepare('SELECT * FROM sync_checkpoints ORDER BY source').all(),
@@ -46,10 +46,12 @@ async function dashboard(db,u,search){
     db.prepare(`SELECT i.id,i.start_at,i.event_title,i.match_state,i.status,i.customer_id,c.name AS customer_name
       FROM calendar_imports i LEFT JOIN customers c ON c.id=i.customer_id
       WHERE i.start_at>=? AND i.start_at<? AND i.status!='cancelled'
-      ORDER BY i.start_at,i.id LIMIT 120`).bind(calendarStart,calendarEnd).all()
+      ORDER BY i.start_at,i.id LIMIT 120`).bind(calendarStart,calendarEnd).all(),
+    db.prepare("SELECT COUNT(*) AS n FROM customer_import_conflicts WHERE status='review'").first()
   ]);
   return {date,counts:{customers:total?.n||0,unmatched:unmatched?.n||0,activeDrivers:active?.n||0,
-    planned:statuses.planned||0,reported:statuses.reported||0,confirmed:statuses.confirmed||0,cancelled:statuses.cancelled||0},
+    planned:statuses.planned||0,reported:statuses.reported||0,confirmed:statuses.confirmed||0,cancelled:statuses.cancelled||0,
+      importConflicts:conflictCount?.n||0},
     latest:(latest.results||[]),calendarToday:(calendarToday.results||[]),sources:(sync.results||[])};
 }
 async function customers(db,u,search){
