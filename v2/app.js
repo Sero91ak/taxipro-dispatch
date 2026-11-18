@@ -9,6 +9,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<'
 const apiBase = String(window.TAXIPRO_API_URL || '').replace(/\/$/,'');
 let auth = sessionStorage.getItem('taxipro_v2_session') || '', me=null, db=null, page='home', map=null,watch=null,locationLast=0,poll=null, calendarDate=todaySafe(), rideFilter='all';
 function todaySafe(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+let dispatchCustomer=null,dispatchRoutes=[],dispatchCustomerSeq=0;
 const ops=createOperations({
   request,toast,esc,fmt,getSession:()=>auth,getBase:()=>apiBase,getMe:()=>me,getDb:()=>db,
   rerender:async()=>{await refresh();render();}
@@ -102,7 +103,7 @@ function render(p){if(p)page=p;if(!loggedIn()||!db)return;if(map&&typeof map.rem
 $('pageView').innerHTML=page==='chat'?html+ops.chatExtra(db):html;
 ops.mount(page).catch(e=>toast(e.message));
 if(me.role==='admin'&&office.eligible(page))office.mount(page).catch(e=>toast(e.message));
-if(page==='home'&&me.role==='admin')setTimeout(buildMap,30);if(page==='dispatch')fillCustomer(false);if(page==='series')bindSeries();if(page==='shifts'&&me.role==='admin')bindCorrection();if(page==='chat'){let el=$('messages');if(el)el.scrollTop=el.scrollHeight}}
+if(page==='home'&&me.role==='admin')setTimeout(buildMap,30);if(page==='dispatch'){dispatchCustomer=null;dispatchRoutes=[];if($('rc')?.value)loadDispatchCustomer($('rc').value);}if(page==='series')bindSeries();if(page==='shifts'&&me.role==='admin')bindCorrection();if(page==='chat'){let el=$('messages');if(el)el.scrollTop=el.scrollHeight}}
 function activeShift(uid=me.id){return (db.shifts||[]).find(s=>s.driver_id===uid&&!s.ended_at)}
 function sHours(uid,days){const recent=Date.now()-days*86400000;return (db.shifts||[]).filter(s=>(!uid||s.driver_id===uid)&&Date.parse(s.started_at)>=recent).reduce((sum,s)=>sum+(Date.parse(s.ended_at||new Date().toISOString())-Date.parse(s.started_at)),0)}
 function adminHome(){const drivers=db.drivers||[],rides=db.rides||[],active=(db.shifts||[]).filter(s=>!s.ended_at),positions=db.positions||[];return title('Heute im Blick','Disposition, Fahrzeuge und Fahrer in einer Oberfläche','<div class="actions"><button class="btn" id="backupExport">⇩ Export</button><button class="btn gold" data-page="dispatch">+ Auftrag anlegen</button></div>')+
@@ -110,8 +111,63 @@ function adminHome(){const drivers=db.drivers||[],rides=db.rides||[],active=(db.
  '<div class="main-grid">'+card('Flottenkarte · Live-Meldungen','<div id="liveMap" class="map-live"></div><div class="card-body"><span class="small">Nur letzter gemeldeter Standort mit Zeitstempel. Positionsübertragung nur bei geöffneter Fahrer-PWA und aktivem GPS.</span></div>','<span class="small">OpenFreeMap</span>')+
  card('Fahrerübersicht','<div class="fleet">'+drivers.map(d=>{const isWorking=active.some(s=>s.driver_id===d.id),pos=positions.find(p=>p.driver_id===d.id),busy=rides.some(r=>r.driver_id===d.id&&r.status==='accepted'),stale=pos&&Date.now()-Date.parse(pos.reported_at)>120000;return '<div class="fleet-item"><div class="avatar">🚕</div><div class="grow"><div class="primary">'+esc(d.display_name)+'</div><div class="secondary">'+(!isWorking?'Nicht im Dienst':busy?'Besetzt':'Im Dienst · frei')+' · '+(pos?(stale?'Letzte Position ':'GPS-Meldung ')+fmt(pos.reported_at):'Keine GPS-Meldung')+'</div></div></div>'}).join('')+'</div>')+'</div>'+card('Nächste Aufträge',table(['Kunde','Fahrer','Zeit','Status'],rides.slice(0,10).map(r=>row([esc(r.customer_name),esc(r.driver_name),esc(r.ride_date+' '+r.ride_time),badge(r.status)]))))}
 function buildMap(){if(map&&typeof map.remove==='function'){map.remove();map=null}const el=$('liveMap');if(!el)return;const positions=db.positions||[];if(!window.maplibregl){el.textContent='Kartenbibliothek nicht verfügbar.';return}try{map=new maplibregl.Map({container:el,style:'https://tiles.openfreemap.org/styles/liberty',center:[7.032,50.624],zoom:12,pitch:36});map.addControl(new maplibregl.NavigationControl(),'top-right');positions.forEach(p=>{const age=Date.now()-Date.parse(p.reported_at),stale=age>120000;const mark=document.createElement('div');mark.textContent='🚕';mark.style.cssText='font-size:22px;background:'+(stale?'#8c96a7':'#51d6ac')+';border:2px solid white;border-radius:12px;padding:4px';new maplibregl.Marker({element:mark}).setLngLat([p.longitude,p.latitude]).setPopup(new maplibregl.Popup().setText(p.driver_name+' · '+(stale?'Letzter Standort: ':'Aktuelle Meldung: ')+fmt(p.reported_at))).addTo(map)})}catch(e){el.textContent='Karte konnte nicht geladen werden.'}}
-function dispatch(){return title('Auftrag zuweisen','Neuer Fahrauftrag auf das Smartphone des Fahrers')+notice('Aufträge werden in der Datenbank gespeichert. Die Fahrer-App prüft bei geöffneter App regelmäßig neue Zuweisungen. Echte Push-Nachrichten sind noch nicht eingerichtet.')+card('Fahrt anlegen','<div class="card-body"><form id="newRideForm" class="form-grid"><div class="field"><label>Kunde</label><select id="rc" required>'+opts((db.customers||[]).map(c=>[c.id,c.name]))+'</select></div><div class="field"><label>Fahrer</label><select id="rd" required>'+opts((db.drivers||[]).filter(d=>d.active).map(d=>[d.id,d.display_name]))+'</select></div><div class="field"><label>Fahrtart</label><select id="rk"><option>Krankenfahrt</option><option>Rechnungsfahrt</option><option>Serienfahrt</option><option>Barfahrt</option></select></div><div class="field"><label>Fahrtrichtung</label><select id="rdir"><option value="hin">Hinfahrt</option><option value="rueck">Rückfahrt</option></select></div>'+field('Abholadresse','rfrom')+field('Zieladresse','rto')+field('Datum','rdate','date',today())+field('Abholzeit','rtime','time','12:30')+'<div class="field wide"><label><input type="checkbox" id="rsig" style="width:auto"> Unterschrift erforderlich (wird nur vorgemerkt)</label></div><div class="field wide"><button class="btn gold">↗ Auftrag zuweisen</button></div></form></div>')}
-function fillCustomer(swap){if(!$('rc'))return;const c=db.customers.find(c=>c.id===$('rc').value);if(!c)return;$('rfrom').value=c.pickup;$('rto').value=c.destination;$('rk').value=c.kind;$('rsig').checked=!!c.signature_required;if(swap){const from=$('rfrom').value;$('rfrom').value=$('rto').value;$('rto').value=from}}
+function dispatch(){return title('Auftrag zuweisen','Neuer Fahrauftrag auf das Smartphone des Fahrers')+notice('Aufträge werden in der Datenbank gespeichert. Die Fahrer-App prüft bei geöffneter App regelmäßig neue Zuweisungen. Echte Push-Nachrichten sind noch nicht eingerichtet.')+card('Fahrt anlegen','<div class="card-body"><form id="newRideForm" class="form-grid">'+
+'<div class="field wide"><label for="rcSearch">Kunde nach Name oder Kunden-ID suchen</label>'+
+'<div class="center-lookup-row"><input id="rcSearch" type="search" autocomplete="off" placeholder="Name oder Kundennummer (K0001)" maxlength="70">'+
+'<button type="button" class="btn" data-find-customer="1">Suchen</button></div>'+
+'<div class="small">Auch Kunden außerhalb der ersten angezeigten Stammdatensätze suchen.</div></div>'+
+'<div class="field"><label for="rc">Kunde</label><select id="rc" required>'+opts((db.customers||[]).map(c=>[c.id,c.name]))+'</select></div><div class="field"><label>Fahrer</label><select id="rd" required>'+opts((db.drivers||[]).filter(d=>d.active).map(d=>[d.id,d.display_name]))+'</select></div><div class="field"><label>Fahrtart</label><select id="rk"><option>Krankenfahrt</option><option>Rechnungsfahrt</option><option>Serienfahrt</option><option>Barfahrt</option></select></div><div class="field"><label>Fahrtrichtung</label><select id="rdir"><option value="hin">Hinfahrt</option><option value="rueck">Rückfahrt</option></select></div><div class="field wide"><label for="rcRoute">Strecke dieses Kunden</label>'+
+'<select id="rcRoute"><option value="">Stammadresse / Strecke manuell wählen</option></select>'+
+'<div id="routeHint" class="small">Mehrere Krankenhausziele können über die Kundenakte hinterlegt werden.</div></div>'+field('Abholadresse','rfrom')+field('Zieladresse','rto')+field('Datum','rdate','date',today())+field('Abholzeit','rtime','time','12:30')+'<div class="field wide"><label><input type="checkbox" id="rsig" style="width:auto"> Unterschrift erforderlich (wird nur vorgemerkt)</label></div><div class="field wide"><button class="btn gold">↗ Auftrag zuweisen</button></div></form></div>')}
+function fillCustomer(){
+ const rc=$('rc');if(!rc)return;
+ const c=dispatchCustomer?.id===rc.value?dispatchCustomer:(db.customers||[]).find(c=>c.id===rc.value);
+ if(!c)return;
+ const option=dispatchRoutes.find(r=>r.id===$('rcRoute')?.value);
+ const from=(option?.pickup||c.pickup||'').trim(),to=(option?.destination||c.destination||'').trim();
+ const returnTrip=$('rdir')?.value==='rueck';
+ $('rfrom').value=returnTrip?to:from;
+ $('rto').value=returnTrip?from:to;
+ const kind=option?.billing_class==='RE'?'Rechnungsfahrt':option?.billing_class==='KTS'?'Krankenfahrt':
+   option?.billing_class==='private'?'Barfahrt':c.kind;
+ if(['Krankenfahrt','Rechnungsfahrt','Serienfahrt','Barfahrt'].includes(kind))$('rk').value=kind;
+ $('rsig').checked=!!c.signature_required;
+ const hint=$('routeHint');
+ if(hint)hint.textContent=option
+   ?'Gewählte Strecke: '+option.label+(from&&to?'':' · Start oder Ziel bitte ergänzen')
+   :from&&to?'Stammstrecke ausgewählt.': 'Bitte Start- und Zieladresse sorgfältig ergänzen.';
+}
+async function loadDispatchCustomer(customerId){
+ if(!customerId||!$('rc'))return;
+ const seq=++dispatchCustomerSeq;
+ try{
+  const detail=await request('/api/ops/customers/'+encodeURIComponent(customerId));
+  if(seq!==dispatchCustomerSeq||$('rc')?.value!==customerId)return;
+  dispatchCustomer=detail.customer;dispatchRoutes=detail.routes||[];
+  const selector=$('rcRoute');
+  if(selector){
+   selector.innerHTML='<option value="">Stammadresse / Strecke manuell wählen</option>'+
+     dispatchRoutes.map(r=>'<option value="'+esc(r.id)+'">'+esc(r.label)+' · '+esc(r.destination||'Ziel fehlt')+'</option>').join('');
+   const complete=dispatchRoutes.find(r=>r.is_primary&&r.pickup&&r.destination)||
+     dispatchRoutes.find(r=>r.pickup&&r.destination);
+   if(complete)selector.value=complete.id;
+  }
+  fillCustomer();
+ }catch(e){toast('Strecken konnten nicht geladen werden: '+e.message);}
+}
+async function findDispatchCustomer(){
+ const q=$('rcSearch')?.value.trim()||'';
+ if(q.length<2){toast('Bitte mindestens zwei Zeichen des Namens oder eine Kundennummer eingeben.');return}
+ const result=await request('/api/ops/customers?q='+encodeURIComponent(q)+'&limit=100');
+ const found=result.customers||[];
+ if(!found.length){toast('Kein eindeutiger Eintrag. Kundenakte oder Dublettenprüfung öffnen.');return}
+ const selector=$('rc');if(!selector)return;
+ selector.innerHTML=opts(found.map(c=>[c.id,(c.customer_code?c.customer_code+' · ':'')+c.name]));
+ selector.value=found[0].id;
+ dispatchCustomer=null;dispatchRoutes=[];
+ await loadDispatchCustomer(selector.value);
+ toast(found.length===100?'100 Treffer angezeigt – bitte die Suche eingrenzen.':found.length+' Kundentreffer gefunden.');
+}
 function rides(){const r=db.rides||[];return title('Fahrtenjournal','Zuordnung, Statuswechsel und Nachweise', '<button class="btn gold" data-page="dispatch">+ Neue Fahrt</button>')+card('Aufträge',table(['Kunde & Strecke','Termin','Fahrer','Status','Aktionen'],r.map(x=>row(['<b>'+esc(x.customer_name)+'</b><br>'+esc(x.pickup)+' → '+esc(x.destination)+'<br><span class="small">'+esc(x.direction)+' · '+esc(x.kind)+'</span>',esc(x.ride_date+' '+x.ride_time),esc(x.driver_name),badge(x.status),x.status==='assigned'||x.status==='accepted'?'<button class="btn" data-cancel="'+esc(x.id)+'">Stornieren</button>':'—']))))}
 function series(){
  const data=db.series||[];
@@ -204,7 +260,8 @@ async function exportData(){
  }catch(e){toast(e.message)}
 }
 $('loginForm').addEventListener('submit',e=>{e.preventDefault();signIn()});$('refreshBtn').onclick=()=>refresh().then(render).catch(e=>toast(e.message));$('logoutBtn').onclick=()=>logout();$('mobileMenu').onclick=()=>$('appNav').classList.toggle('open');
-document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me?.role==='admin')office.openPage(nav.dataset.page);$('appNav').classList.remove('open');return}
+document.addEventListener('click',e=>{const find=e.target.closest('[data-find-customer]');if(find){find.disabled=true;findDispatchCustomer().catch(err=>toast(err.message)).finally(()=>find.disabled=false);return}
+ const nav=e.target.closest('[data-page]');if(nav){render(nav.dataset.page);if(me?.role==='admin')office.openPage(nav.dataset.page);$('appNav').classList.remove('open');return}
  const todayButton=e.target.closest('[data-today]');if(todayButton){calendarDate=today();render('daily');return}
  const change=e.target.closest('[data-ride]');if(change){transaction('/api/rides/'+change.dataset.ride,'PATCH',{action:change.dataset.action});return}
  const cancel=e.target.closest('[data-cancel]');if(cancel){if(confirm('Diesen Auftrag wirklich stornieren?'))transaction('/api/rides/'+cancel.dataset.cancel,'PATCH',{action:'cancel'});return}
@@ -215,7 +272,8 @@ document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');
  const utoggle=e.target.closest('[data-driver-toggle]');if(utoggle){const active=utoggle.dataset.active==='1';if(!confirm('Fahreraccount '+(active?'reaktivieren':'sperren')+'?'))return;transaction('/api/users/'+utoggle.dataset.driverToggle,'PATCH',{active},'drivers');return}
  const gps=e.target.closest('[data-gps]');if(gps){toggleGPS();return}
  const back=e.target.closest('#backupExport');if(back){exportData();return}const navbtn=e.target.closest('[data-nav]');if(navbtn){const r=(db.rides||[]).find(x=>x.id===navbtn.dataset.nav);if(r)window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(r.destination),'_blank','noopener,noreferrer')}});
-document.addEventListener('change',e=>{if(e.target.id==='dailyDate'){calendarDate=e.target.value;render('daily')}if(e.target.id==='rc')fillCustomer(false);if(e.target.id==='rdir')fillCustomer(e.target.value==='rueck')});
+document.addEventListener('change',e=>{if(e.target.id==='dailyDate'){calendarDate=e.target.value;render('daily')}if(e.target.id==='rc'){dispatchCustomer=null;dispatchRoutes=[];loadDispatchCustomer(e.target.value)}
+ if(e.target.id==='rcRoute'||e.target.id==='rdir')fillCustomer()});
 document.addEventListener('submit',e=>{if(e.target.id==='newRideForm'){e.preventDefault();transaction('/api/rides','POST',{customerId:$('rc').value,driverId:$('rd').value,kind:$('rk').value,direction:$('rdir').value,pickup:$('rfrom').value.trim(),destination:$('rto').value.trim(),date:$('rdate').value,time:$('rtime').value,signatureRequired:$('rsig').checked},'rides')}
  if(e.target.id==='seriesForm'){e.preventDefault();const w=[...$('sw').selectedOptions].map(o=>Number(o.value));transaction('/api/series','POST',{customerId:$('sc').value,driverId:$('sd').value,kind:$('sk').value,weekdays:w,startDate:$('sstart').value,endDate:$('send').value,outboundTime:$('sout').value,returnTime:$('sret').value,pickup:$('spick').value.trim(),destination:$('sdest').value.trim(),signatureRequired:$('ssign').checked},'series')}
  if(e.target.id==='driverForm'){e.preventDefault();transaction('/api/users','POST',{username:$('duser').value.trim(),displayName:$('dname').value.trim(),password:$('dpass').value},'drivers')}
