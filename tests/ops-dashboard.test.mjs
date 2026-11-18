@@ -124,3 +124,38 @@ test('Kompaktes Command Center hat Kundenakte, Kalenderprüfung und Monatsjourna
  assert.match(ui.view('ledger'),/Manuelle Fahrt/);
  }finally{globalThis.document=before;}
 });
+
+
+test('Vorhandener Fahrerauftrag erscheint ohne Kopie im Monatsjournal, der Kundenakte und im Unterschriftszettel',async()=>{
+ const ride='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+ sqlite.prepare(`INSERT INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,status,assigned_at)
+   VALUES(?,?,?,?,?,?,?,?,?,'assigned',?)`)
+   .run(ride,customer,driver.id,'2026-11-18','12:15','Meckenheim','Bonn','Rechnungsfahrt','hin',stamp);
+ let day=await api('/api/ops/dashboard?date=2026-11-18');
+ assert.equal(day.counts.planned,1,'Vorhandener Fahrerauftrag zählt in derselben Tageszentrale');
+ let journal=await api('/api/ops/ledger?from=2026-11-18&to=2026-11-18');
+ assert.equal(journal.entries.filter(x=>x.id===ride).length,1);
+ let trip=journal.entries.find(x=>x.id===ride);
+ assert.equal(trip.origin,'dispatch');
+ assert.equal(trip.ride_status,'planned');
+ assert.equal(trip.billing_class,'RE');
+ await denies(api('/api/ops/ledger/'+ride,'PATCH',{rideStatus:'confirmed',note:'Im Büro geprüft'}),409);
+ sqlite.prepare("UPDATE rides SET status='done',completed_at=? WHERE id=?").run(stamp,ride);
+ journal=await api('/api/ops/ledger?from=2026-11-18&to=2026-11-18');
+ trip=journal.entries.find(x=>x.id===ride);
+ assert.equal(trip.ride_status,'reported','Fahrerabschluss ist nicht automatisch Rechnungsprüfung');
+ await denies(api('/api/ops/ledger','POST',{
+   customerId:customer,serviceDate:'2026-11-18',pickupTime:'12:15',
+   pickup:'Meckenheim',destination:'Bonn',direction:'hin',billingClass:'RE',rideStatus:'reported'
+ }),409);
+ await api('/api/ops/ledger/'+ride,'PATCH',{rideStatus:'confirmed',note:'Fahrerabschluss und Beleg geprüft'});
+ const verified=await api('/api/ops/ledger?from=2026-11-18&to=2026-11-18');
+ assert.equal(verified.entries.find(x=>x.id===ride).ride_status,'confirmed');
+ const details=await api('/api/ops/customers/'+customer+'?from=2026-11-18&to=2026-11-18');
+ assert.equal(details.journeys.filter(x=>x.id===ride).length,1);
+ const sheet=await api('/api/ops/signature-sheet?customerId='+customer+'&from=2026-11-18&to=2026-11-18');
+ assert.equal(sheet.entries.length,3,'Zwei manuelle Fahrten plus Original-Fahrerauftrag');
+ const reviews=sqlite.prepare("SELECT COUNT(*) AS count FROM ride_reviews WHERE ride_id=?").get(ride);
+ assert.equal(reviews.count,1,'Ein einziges Prüfprotokoll, keine Kopie der Fahrt');
+ await denies(api('/api/ops/ledger/'+ride,'PATCH',{rideStatus:'confirmed',note:'Fremdprüfung'},driver),403);
+});
