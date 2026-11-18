@@ -49,11 +49,15 @@ async function createReport(req,env,u) {
   if(lat<47||lat>55.2||lng<5.5||lng>15.6)throw error(400,'Standort außerhalb des Einsatzgebietes.');
   const description=text(body.description,500),road=text(body.road,45);
   if(description.length<5)throw error(400,'Bitte die Verkehrslage genauer beschreiben.');
+  if(/\\b(blitzer|radar|lasermessung|geschwindigkeitskontrolle|polizeikontrolle|messwagen|speedcam)\\b/i.test(description+' '+road))
+    throw error(400,'Meldungen über Geschwindigkeitskontrollen werden nicht als Fahrerwarnung verbreitet.');
   const accuracy=body.accuracy==null?null:coord(body.accuracy,10000,'GPS-Genauigkeit');
   if(accuracy!==null&&accuracy<0)throw error(400,'GPS-Genauigkeit ungültig.');
   const id=ID(),now=NOW(),expires=dateMinutes(EXPIRY[category]);
   await env.DB.prepare(`INSERT INTO traffic_reports(id,reporter_id,category,road,description,latitude,longitude,accuracy,status,observed_at,expires_at,created_at,updated_at)
     VALUES(?,?,?,?,?,?,?,?,'active',?,?,?,?)`).bind(id,u.id,category,road,description,lat,lng,accuracy,now,expires,now,now).run();
+  await env.DB.prepare('INSERT INTO messages(id,sender_id,recipient_id,body,created_at) VALUES(?,?,?,?,?)')
+    .bind(ID(),u.id,null,'🚧 Verkehr: '+(road?road+' · ':'')+description.slice(0,440)+' (Details auf der internen Verkehrskarte)',now).run();
   await audit(env.DB,u,'traffic.created',id,category+' '+road);
   return {id,category,expiresAt:expires};
 }
@@ -69,7 +73,7 @@ async function resolveReport(req,env,u,id) {
   await audit(env.DB,u,'traffic.resolved',id);
   return {id,resolved:true};
 }
-async function listSwaps(db,u) {
+export async function listSwaps(db,u) {
   const clause=u.role==='admin'?'':'WHERE w.requester_id=? OR w.target_driver_id=?';
   const q=`SELECT w.*,r.ride_date,r.ride_time,r.pickup,r.destination,
     a.display_name AS requester_name,b.display_name AS target_name
@@ -180,7 +184,7 @@ async function fileUpload(req,env,u) {
   await audit(env.DB,u,'attachment.sent',id,filename);
   return {id,filename,mimeType:mime,bytes:data.byteLength,recipientId:recipient,createdAt:created};
 }
-async function listFiles(db,u) {
+export async function listFiles(db,u) {
   const result=await db.prepare(`SELECT a.id,a.owner_id,a.recipient_id,a.filename,a.mime_type,a.bytes,a.note,a.created_at,
     o.display_name AS owner_name,r.display_name AS recipient_name FROM attachments a
     JOIN users o ON o.id=a.owner_id JOIN users r ON r.id=a.recipient_id
@@ -239,7 +243,7 @@ async function signatureUpload(req,env,u) {
   await audit(env.DB,u,'ride.signature',id,rideIds.join(','));
   return {id,rideIds,createdAt:created,signerName:signer};
 }
-async function listSignatures(db,u) {
+export async function listSignatures(db,u) {
   const clause=u.role==='admin'?'':'WHERE s.driver_id=?';
   const stmt=db.prepare(`SELECT s.id,s.driver_id,s.customer_id,s.signer_name,s.created_at,group_concat(l.ride_id) AS ride_ids
     FROM ride_signatures s LEFT JOIN ride_signature_links l ON l.signature_id=s.id
