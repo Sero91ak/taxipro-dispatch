@@ -361,7 +361,9 @@ function daily(){
   return heading+bar+stats+alerts+'<div class="day-list">'+content+'</div>'+notice('Die Zuordnung erfolgt über Kunden-ID und Datum. Eine fehlende Rückfahrt beweist nicht, dass sie vertraglich vorgesehen war. Digitale KTS-Signaturen werden erst nach abgesicherter Einführung als „erfasst“ ausgewiesen.');
 }
 
-function shifts(){const current=activeShift(),all=db.shifts||[],uid=me.role==='driver'?me.id:null,millis=sHours(uid,7),breaks=db.breaks||[],openBreak=breaks.find(b=>current&&b.shift_id===current.id&&!b.ended_at);return title(me.role==='admin'?'Schichtkarten':'Meine Schicht','Bruttoarbeitszeit, echte Pausenbuchungen und Änderungsprotokoll')+'<div class="op-actions" style="margin:0 0 15px"><button type="button" class="btn" data-page="worktime">▦ Tages-, Monats- und Jahresauswertung</button></div>'+(me.role==='driver'?'<div class="driver-panel"><div class="shift-summary"><h2>Aktuelle Schicht</h2><strong id="liveShift" class="mono">'+duration(current?Date.now()-Date.parse(current.started_at):0)+'</strong><p class="small">'+(current?'Begonnen: '+fmt(current.started_at):'Keine aktive Schicht')+'</p><div class="actions"><button class="btn '+(current?'red':'gold')+'" data-shift="'+(current?'end':'start')+'">'+(current?'■ Schicht beenden':'▶ Schicht beginnen')+'</button><button class="btn" data-break="'+(openBreak?'end':'start')+'" '+(!current?'disabled':'')+'>'+(openBreak?'▶ Pause beenden':'Ⅱ Pause beginnen')+'</button><button class="btn" id="gpsBtn" data-gps="toggle" '+(!current?'disabled':'')+'>'+(watch===null?'⌖ GPS freigeben':'◉ GPS beenden')+'</button></div><p class="small">Standort nur während der Schicht und bei aktiver App, freiwillig startbar und jederzeit stoppbar.</p></div></div>':'')+
+function shifts(){const current=activeShift(),all=db.shifts||[],uid=me.role==='driver'?me.id:null,millis=sHours(uid,7),breaks=db.breaks||[],openBreak=breaks.find(b=>current&&b.shift_id===current.id&&!b.ended_at);return title(me.role==='admin'?'Schichtkarten':'Meine Schicht','Bruttoarbeitszeit, echte Pausenbuchungen und Änderungsprotokoll')+'<div class="op-actions" style="margin:0 0 15px"><button type="button" class="btn" data-page="worktime">▦ Tages-, Monats- und Jahresauswertung</button></div>'+(me.role==='driver'?'<div class="driver-panel"><div class="shift-summary"><h2>Aktuelle Schicht</h2><strong id="liveShift" class="mono">'+duration(current?Date.now()-Date.parse(current.started_at):0)+'</strong><p class="small">'+(current?'Begonnen: '+fmt(current.started_at):'Keine aktive Schicht')+'</p><div class="actions"><button class="btn '+(current?'red':'gold')+'" data-shift="'+(current?'end':'start')+'">'+(current?'■ Schicht beenden':'▶ Schicht beginnen')+'</button><button class="btn" data-break="'+(openBreak?'end':'start')+'" '+(!current?'disabled':'')+'>'+(openBreak?'▶ Pause beenden':'Ⅱ Pause beginnen')+'</button><button class="btn" id="gpsBtn" data-gps="toggle" '+(!current?'disabled':'')+'>'+(watch===null?'⌖ GPS freigeben':'◉ GPS beenden')+'</button>'+
+'<button class="btn" type="button" data-gps="revoke">Letzte GPS-Position löschen</button></div>'+
+'<p class="small">Ortung nur nach Freigabe während der Schicht und bei geöffneter App. Widerruf entfernt den gespeicherten Standort auch nach einem App-Neustart.</p></div></div>':'')+
  '<div class="stats section-gap"><div class="stat"><small>Schichten im Verlauf</small><strong>'+all.length+'</strong><span>Vorhandene Einträge</span></div><div class="stat"><small>Letzte 7 Tage</small><strong>'+duration(millis).slice(0,5)+'</strong><span>Bruttozeit</span></div><div class="stat"><small>Aktive Schichten</small><strong>'+all.filter(s=>!s.ended_at).length+'</strong><span>Zurzeit laufend</span></div><div class="stat"><small>Bericht</small><strong style="font-size:16px">PDF</strong><span>Über Drucken</span></div></div>'+card('Arbeitszeitnachweis',table(['Fahrer','Beginn','Ende','Bruttodauer'],all.map(x=>row([esc(x.driver_name||me.displayName),fmt(x.started_at),fmt(x.ended_at),x.ended_at?duration(Date.parse(x.ended_at)-Date.parse(x.started_at)):'Laufend']))),'<button class="btn" onclick="window.print()">Drucken / PDF</button>')+card('Erfasste Pausen',table(['Fahrer-ID','Beginn','Ende','Dauer'],breaks.slice(0,120).map(b=>row([esc(b.driver_id.slice(0,8)),fmt(b.started_at),fmt(b.ended_at),b.ended_at?duration(Date.parse(b.ended_at)-Date.parse(b.started_at)):'Läuft'])))) + notice('Arbeitszeit wird als Brutto-Schichtzeit angezeigt; die tatsächlich erfassten Pausen stehen separat darunter. Für rechtlich korrekte Nettozeiten und Sonderfälle ist eine Abnahme erforderlich. Admin-Korrekturen brauchen eine Begründung.')+(me.role==='admin'?shiftCorrectionPanel():'')}
 
 function localDateTime(value){if(!value)return '';const d=new Date(value);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
@@ -375,7 +377,38 @@ function chat(){return title('Messenger','Team, vertrauliche Direktnachrichten a
     '<div class="op-actions" style="margin:0 0 14px">'+
     '<button type="button" class="btn" data-operation="notify">🔔 Hinweise bei offener App erlauben</button></div>'+card('Teamkommunikation','<div id="messages" class="msg-panel">'+(db.messages||[]).map(m=>'<div class="message '+(m.sender_id===me.id?'mine':'')+'"><b>'+esc(m.sender_name)+'</b><br>'+esc(m.body)+'<small>'+fmt(m.created_at)+(m.recipient_id?' · Privat':' · Team')+'</small></div>').join('')+'</div><form id="chatForm" class="chat-form"><select id="recipient" class="btn" style="max-width:190px">'+opts([['','Team-Gruppe'],...(db.team||[]).filter(u=>u.id!==me.id).map(u=>[u.id,u.display_name])])+'</select><input id="msgBody" maxlength="1000" required placeholder="Nachricht …"><button class="btn gold">Senden</button></form>')}
 function stopGPS(){if(watch!==null&&navigator.geolocation)navigator.geolocation.clearWatch(watch);watch=null}
-function toggleGPS(){if(watch!==null){stopGPS();render('shifts');toast('GPS-Ortung beendet.');return}if(!activeShift()){toast('Erst eine Schicht starten.');return}if((db.breaks||[]).some(x=>!x.ended_at&&x.driver_id===me.id)){toast('Während einer Pause bleibt die GPS-Übertragung deaktiviert.');return}if(!navigator.geolocation){toast('GPS nicht verfügbar.');return}watch=navigator.geolocation.watchPosition(async pos=>{if(Date.now()-locationLast<45000||document.visibilityState!=='visible')return;locationLast=Date.now();try{await request('/api/position','POST',{latitude:pos.coords.latitude,longitude:pos.coords.longitude,accuracy:pos.coords.accuracy})}catch(e){toast(e.message)}},e=>{stopGPS();toast(e.code===1?'Standortberechtigung fehlt.':'Standort kann nicht ermittelt werden.')},{enableHighAccuracy:true,maximumAge:20000,timeout:20000});render('shifts');toast('GPS aktiviert – nur bei geöffneter App zuverlässig.')}
+async function revokeGPS(){
+ stopGPS();
+ try{
+  await request('/api/position','DELETE');
+  locationLast=0;
+  if(page==='shifts')render('shifts');
+  toast('GPS deaktiviert. Letzter Standort aus der Zentrale entfernt.');
+ }catch(e){
+  if(page==='shifts')render('shifts');
+  toast('GPS am Gerät beendet. Der Server konnte den letzten Standort NICHT löschen: '+e.message);
+ }
+}
+function toggleGPS(){
+ if(watch!==null){void revokeGPS();return}
+ if(!activeShift()){toast('Erst eine Schicht starten.');return}
+ if((db.breaks||[]).some(x=>!x.ended_at&&x.driver_id===me.id)){
+  toast('Während einer Pause bleibt die GPS-Übertragung deaktiviert.');return
+ }
+ if(!navigator.geolocation){toast('GPS nicht verfügbar.');return}
+ locationLast=0;
+ watch=navigator.geolocation.watchPosition(async pos=>{
+  if(Date.now()-locationLast<45000||document.visibilityState!=='visible')return;
+  locationLast=Date.now();
+  try{
+   await request('/api/position','POST',{latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude,accuracy:pos.coords.accuracy});
+  }catch(e){toast(e.message)}
+ },e=>{stopGPS();toast(e.code===1?'Standortberechtigung fehlt.':'Standort kann nicht ermittelt werden.')},
+   {enableHighAccuracy:true,maximumAge:20000,timeout:20000});
+ render('shifts');
+ toast('GPS aktiviert – nur bei geöffneter App zuverlässig.');
+}
 async function transaction(path,method,payload,after){
  try{
   await request(path,method,payload);
@@ -434,7 +467,7 @@ document.addEventListener('click',e=>{const find=e.target.closest('[data-find-cu
  const sg=e.target.closest('[data-series-generate]');if(sg){const id=sg.dataset.seriesGenerate,from=$('sf_'+id)?.value,to=$('st_'+id)?.value;if(!from||!to){toast('Bitte Anfang und Ende wählen.');return}transaction('/api/series/generate','POST',{seriesId:id,from,to},'series');return}
  const ureset=e.target.closest('[data-driver-reset]');if(ureset){securePasswordDialog('Neues Fahrer-Passwort setzen').then(pw=>{if(pw!==null&&confirm('Alte Sitzungen abmelden und Passwort ersetzen?'))transaction('/api/users/'+ureset.dataset.driverReset,'PATCH',{password:pw},'drivers')});return}
  const utoggle=e.target.closest('[data-driver-toggle]');if(utoggle){const active=utoggle.dataset.active==='1';if(!confirm('Fahreraccount '+(active?'reaktivieren':'sperren')+'?'))return;transaction('/api/users/'+utoggle.dataset.driverToggle,'PATCH',{active},'drivers');return}
- const gps=e.target.closest('[data-gps]');if(gps){toggleGPS();return}
+ const gps=e.target.closest('[data-gps]');if(gps){if(gps.dataset.gps==='revoke')void revokeGPS();else toggleGPS();return}
  const back=e.target.closest('#backupExport');if(back){exportData();return}const navbtn=e.target.closest('[data-nav]');if(navbtn){const r=(db.rides||[]).find(x=>x.id===navbtn.dataset.nav);if(r)window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(r.destination),'_blank','noopener,noreferrer')}});
 document.addEventListener('change',e=>{if(e.target.id==='dailyDate'){calendarDate=e.target.value;render('daily')}if(e.target.id==='rc'){dispatchCustomer=null;dispatchRoutes=[];loadDispatchCustomer(e.target.value)}
  if(e.target.id==='rcRoute'||e.target.id==='rdir')fillCustomer()});
