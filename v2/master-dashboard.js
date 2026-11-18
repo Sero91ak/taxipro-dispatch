@@ -9,7 +9,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
  const statusLabel={planned:'Geplant',reported:'Gefahren · gemeldet',confirmed:'Gefahren · geprüft',cancelled:'Storniert',
    approved:'Genehmigt',pending:'In Prüfung',rejected:'Abgelehnt',expired:'Abgelaufen',
    exempt:'Befreit',not_exempt:'Nicht befreit',unknown:'Ungeprüft',missing:'Fehlt',present:'Vorhanden',not_required:'Nicht erforderlich'};
- let pageCache={dashboard:null,customers:null,customer:null,calendar:null,ledger:null};
+ let pageCache={dashboard:null,customers:null,customer:null,calendar:null,ledger:null,conflicts:null};
  let selectedCustomer=null,customersQuery='',periodFrom=nowBerlin().slice(0,8)+'01',periodTo=nowBerlin(),calendarState='review';
  let prefs={density:'compact',nav:'expanded',lastPage:'home',dateFilter:'today'},revision=0,prefSaving=false;
  let dashboardChecked=0;
@@ -55,6 +55,8 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     td('<b>'+text(r.pickup_time)+'</b>')+td(pill(r.billing_class))+
     td(pill(r.ride_status))+td(text(r.driver_name))+'</tr>').join('');
   return '<div class="center-kpis">'+cards+'</div>'+
+    (c.importConflicts?'<div class="center-import-warning"><b>'+n(c.importConflicts)+' Kunden-Identitäten aus Drive ungeklärt</b>'+
+    iconBtn('open-conflicts','Dubletten prüfen')+'</div>':'')+
     '<div class="center-overview-grid"><section class="center-panel"><div class="center-panel-head"><b>Fahrtenjournal · '+esc(d.date)+'</b>'+
     iconBtn('refresh-home','↻ Neu laden')+'</div>'+
     (list?rows(['Kunde / Strecke','Zeit','Abrechnung','Status','Fahrer'],[list]):
@@ -139,6 +141,22 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     iconBtn('refresh-customer','Fahrten anzeigen')+iconBtn('new-ledger-for-customer','Fahrt hinzufügen')+'</div>'+
     (journeys.length?rows(['Datum','Abholung','Start → Ziel','Richtung','KTS / RE','Status'],journeys):empty('Noch keine Journalfahrten im ausgewählten Zeitraum.'))+
     '</div></div>';
+ }
+ function conflictsView() {
+  const conflicts=pageCache.conflicts?.conflicts||[];
+  const cards=conflicts.map(c=>'<article class="center-review">'+
+    '<div><b>'+text(c.externalKey)+' · '+text(c.proposedName)+'</b>'+
+    '<small>Namensgleichheit im bisherigen Kundenstamm: noch keine automatische Zusammenführung.</small></div>'+
+    '<div class="center-review-action"><select id="center-conflict-'+esc(c.externalKey)+'">'+
+    '<option value="">Bestehende Kundenakte auswählen</option>'+
+    c.candidates.map(x=>'<option value="'+esc(x.id)+'">'+text(x.name)+'</option>').join('')+'</select>'+
+    iconBtn('resolve-conflict','Mit Bestand verknüpfen','data-key="'+esc(c.externalKey)+'"')+
+    iconBtn('separate-conflict','Anderer Kunde','data-key="'+esc(c.externalKey)+'"')+
+    '</div></article>').join('');
+  return head('Kunden-Dublettenprüfung','Gleiche Namen aus Drive und TaxiPro niemals ungeprüft zusammenführen')+
+    '<div class="center-shell"><section class="center-panel"><div class="center-panel-head"><b>Offene Identitätskonflikte</b>'+
+    iconBtn('refresh-conflicts','↻ Aktualisieren')+'</div>'+
+    '<div class="center-review-list">'+(cards||empty('Keine offenen Namenskonflikte.'))+'</div></section></div>';
  }
  function calendarView(){
   const list=pageCache.calendar?.entries||[];
@@ -240,6 +258,10 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
     pageCache.customer=d;replaceView('case-detail',customerDetails());}
   catch(e){toast(e.message);}
  }
+ async function loadConflicts(){
+  try{pageCache.conflicts=await request('/api/ops/master-conflicts');replaceView('import-review',conflictsView());}
+  catch(e){toast(e.message);}
+ }
  async function loadCalendar(){
   try{const d=await request('/api/ops/calendar?state='+calendarState);pageCache.calendar=d;replaceView('calendar',calendarView());}
   catch(e){toast(e.message);}
@@ -255,6 +277,7 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   if(page==='cases')await loadCustomers();
   if(page==='case-detail')await loadCustomer();
   if(page==='calendar')await loadCalendar();
+  if(page==='import-review')await loadConflicts();
   if(page==='ledger')await loadLedger();
  }
  function view(page) {
@@ -262,10 +285,11 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   if(page==='cases')return customersView();
   if(page==='case-detail')return customerDetails();
   if(page==='calendar')return calendarView();
+  if(page==='import-review')return conflictsView();
   if(page==='ledger')return ledgerView();
   return '';
  }
- function eligible(p){return ['home','cases','case-detail','calendar','ledger'].includes(p);}
+ function eligible(p){return ['home','cases','case-detail','calendar','ledger','import-review'].includes(p);}
  function docHtml(model) {
   const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const body=model.entries.map(x=>'<tr><td>'+h(x.date)+'</td><td>'+h(x.time)+'</td><td>'+h(x.pickup)+'</td><td>'+h(x.destination)+'</td><td>'+h(x.direction==='hin'?'Hin':x.direction==='rueck'?'Rück':'—')+'</td></tr>').join('');
@@ -308,6 +332,19 @@ export function createDispatchCenter({request,esc,toast,getUser,getState,refresh
   if(action==='open-ledger'){refreshMain('ledger');return;}
   if(action==='open-calendar'){refreshMain('calendar');return;}
   if(action==='open-cases'||action==='back-customers'){refreshMain('cases');return;}
+  if(action==='open-conflicts'){refreshMain('import-review');return;}
+  if(action==='refresh-conflicts')return loadConflicts();
+  if(action==='resolve-conflict'||action==='separate-conflict'){
+    const key=el.dataset.key;
+    if(!key)throw Error('Importkennung fehlt.');
+    const actionType=action==='resolve-conflict'?'link':'separate';
+    const customerId=$('center-conflict-'+key)?.value||null;
+    if(actionType==='link'&&!customerId)throw Error('Bestehende Kundenakte auswählen.');
+    if(actionType==='separate'&&!confirm('Tatsächlich ein anderer Kunde trotz gleichen Namens?'))return;
+    await request('/api/ops/master-conflicts/'+key,'PATCH',{action:actionType,customerId});
+    toast('Zuordnung im gemeinsamen Kundenstamm gespeichert.');
+    await loadConflicts();return;
+  }
   if(action==='refresh-customers'||action==='search-customers'){
     customersQuery=$('center-customer-search')?.value||'';return loadCustomers();
   }
