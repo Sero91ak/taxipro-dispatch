@@ -13,6 +13,35 @@ const bad=(code,msg)=>Object.assign(new Error(msg),{status:code});
 const t=(v,n=200)=>typeof v==='string'?v.trim().slice(0,n):'';
 const dt=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+'T12:00:00Z'));
 const validId=v=>/^[a-f0-9-]{36}$/i.test(v);
+
+/**
+ * One business view over the EXISTING dispatched rides and the supplementary
+ * manual trip ledger. Original driver assignments remain in rides (single
+ * authoritative source); reporting never silently copies them into ledger.
+ * A finished driver ride is "reported" until the dispatcher verifies it.
+ */
+const JOURNEYS_SQL = \`
+ SELECT l.id,l.customer_id,l.calendar_import_id,l.customer_route_id,
+   l.service_date,l.pickup_time,l.pickup,l.destination,l.direction,
+   l.billing_class,l.ride_status,l.operator_note,l.driver_id,
+   l.recorded_at,l.updated_at,l.verified_at,l.verified_by,'manual' AS origin
+ FROM journey_ledger l
+ UNION ALL
+ SELECT r.id,r.customer_id,NULL AS calendar_import_id,NULL AS customer_route_id,
+   r.ride_date AS service_date,r.ride_time AS pickup_time,r.pickup,r.destination,r.direction,
+   CASE WHEN r.kind='Rechnungsfahrt' THEN 'RE'
+        WHEN r.kind='Barfahrt' THEN 'private' ELSE 'unknown' END AS billing_class,
+   CASE WHEN r.status='cancelled' THEN 'cancelled'
+        WHEN r.status='done' AND rv.ride_id IS NOT NULL THEN 'confirmed'
+        WHEN r.status='done' THEN 'reported'
+        ELSE 'planned' END AS ride_status,
+   COALESCE(rv.review_note,'') AS operator_note,r.driver_id,
+   r.assigned_at AS recorded_at,COALESCE(rv.reviewed_at,r.completed_at,r.assigned_at) AS updated_at,
+   rv.reviewed_at,rv.reviewed_by,'dispatch' AS origin
+ FROM rides r LEFT JOIN ride_reviews rv ON rv.ride_id=r.id
+\`;
+const JOURNEYS_CTE = \`WITH unified AS (\${JOURNEYS_SQL})\`;
+
 async function parse(req){
   if(!(req.headers.get('content-type')||'').includes('application/json'))throw bad(415,'JSON erforderlich.');
   if(Number(req.headers.get('content-length')||0)>12000)throw bad(413,'Anfrage zu groß.');
@@ -29,7 +58,7 @@ async function dashboard(db,u,search){
   requireAdmin(u);
   const date=search.get('date')||berlinServiceDate(now());
   if(!dt(date))throw bad(400,'Datum ungültig.');
-  const daily=await db.prepare(`SELECT ride_status,COUNT(*) AS n FROM journey_ledger WHERE service_date=? GROUP BY ride_status`).bind(date).all();
+  const daily=await db.prepare(`${JOURNEYS_CTE} SELECT ride_status,COUNT(*) AS n FROM unified WHERE service_date=? GROUP BY ride_status`).bind(date).all();
   const statuses=Object.fromEntries((daily.results||[]).map(r=>[r.ride_status,r.n]));
   const [yr,mon,day]=date.split('-').map(Number);
   const calendarStart=new Date(berlinMidnight(yr,mon,day)).toISOString();
@@ -39,10 +68,13 @@ async function dashboard(db,u,search){
     db.prepare("SELECT COUNT(*) AS n FROM calendar_imports WHERE match_state='review' AND status!='cancelled'").first(),
     db.prepare('SELECT * FROM sync_checkpoints ORDER BY source').all(),
     db.prepare('SELECT COUNT(*) AS n FROM shifts WHERE ended_at IS NULL').first(),
-    db.prepare(`SELECT l.id,l.service_date,l.pickup_time,l.pickup,l.destination,l.direction,l.ride_status,l.billing_class,
+    db.prepare(`${JOURNEYS_CTE}
+      SELECT j.id,j.service_date,j.pickup_time,j.pickup,j.destination,j.direction,
+      j.ride_status,j.billing_class,j.origin,
       c.name AS customer_name,c.id AS customer_id,u.display_name AS driver_name
-      FROM journey_ledger l JOIN customers c ON c.id=l.customer_id
-      LEFT JOIN users u ON u.id=l.driver_id WHERE l.service_date=? ORDER BY l.pickup_time,l.id LIMIT 120`).bind(date).all(),
+      FROM unified j JOIN customers c ON c.id=j.customer_id
+      LEFT JOIN users u ON u.id=j.driver_id
+      WHERE j.service_date=? ORDER BY j.pickup_time,j.id LIMIT 120`).bind(date).all(),
     db.prepare(`SELECT i.id,i.start_at,i.event_title,i.match_state,i.status,i.customer_id,c.name AS customer_name
       FROM calendar_imports i LEFT JOIN customers c ON c.id=i.customer_id
       WHERE i.start_at>=? AND i.start_at<? AND i.status!='cancelled'
@@ -60,7 +92,8 @@ async function customers(db,u,search){
   const q=`SELECT c.id,c.name,c.pickup,c.destination,c.kind,c.signature_required,
        x.external_key AS customer_code, s.billing_class,s.prescription_status,s.approval_status,
        s.copayment_status,s.approval_valid_until,s.prescription_valid_until,s.phone,
-       (SELECT COUNT(*) FROM journey_ledger l WHERE l.customer_id=c.id) AS journey_count
+       ((SELECT COUNT(*) FROM journey_ledger l WHERE l.customer_id=c.id)
+        +(SELECT COUNT(*) FROM rides r WHERE r.customer_id=c.id)) AS journey_count
        FROM customers c LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
        LEFT JOIN customer_case_status s ON s.customer_id=c.id
        WHERE c.active=1 AND (?='' OR c.name LIKE ? OR EXISTS (SELECT 1 FROM customer_source_links y WHERE y.customer_id=c.id AND y.source='master_sheet' AND y.external_key LIKE ?))
@@ -81,9 +114,10 @@ async function customerDetail(db,u,id,search){
   const from=search.get('from')||new Date(Date.now()-30*86400000).toISOString().slice(0,10);
   const to=search.get('to')||new Date().toISOString().slice(0,10);
   if(!dt(from)||!dt(to)||from>to)throw bad(400,'Zeitraum ungültig.');
-  const journeys=await db.prepare(`SELECT l.*,u.display_name AS driver_name FROM journey_ledger l
-      LEFT JOIN users u ON u.id=l.driver_id WHERE l.customer_id=? AND l.service_date BETWEEN ? AND ?
-      ORDER BY l.service_date,l.pickup_time LIMIT 700`).bind(id,from,to).all();
+  const journeys=await db.prepare(`${JOURNEYS_CTE}
+      SELECT j.*,u.display_name AS driver_name FROM unified j
+      LEFT JOIN users u ON u.id=j.driver_id WHERE j.customer_id=? AND j.service_date BETWEEN ? AND ?
+      ORDER BY j.service_date,j.pickup_time LIMIT 700`).bind(id,from,to).all();
   const evidence=await db.prepare(`SELECT source,external_key,source_status,valid_from,valid_until,document_in_drive,observed_at
     FROM customer_source_evidence WHERE customer_id=? ORDER BY observed_at DESC LIMIT 100`).bind(id).all();
   return {customer,routes:routes.results||[],journeys:journeys.results||[],evidence:evidence.results||[],from,to};
@@ -227,6 +261,10 @@ async function createLedger(req,db,u){
      !['planned','reported','confirmed'].includes(status))throw bad(400,'Fahrtangaben unvollständig.');
   if(status==='confirmed'&&t(d.note,300).length<8)
     throw bad(400,'Direkte Bestätigung benötigt eine dokumentierte Prüfnotiz.');
+  const alreadyAssigned=await db.prepare(`SELECT id FROM rides WHERE customer_id=? AND ride_date=? AND ride_time=? AND direction=?
+    AND pickup=? AND destination=? AND status!='cancelled' LIMIT 1`)
+    .bind(customerId,date,time,direction,pickup,dest).first();
+  if(alreadyAssigned)throw bad(409,'Diese Fahrt existiert bereits als Fahrerauftrag. Bitte den vorhandenen Auftrag verwenden.');
   const calendarId=d.calendarImportId||null;
   if(calendarId&&!validId(calendarId))throw bad(400,'Kalender-ID ungültig.');
   if(calendarId){
@@ -250,11 +288,12 @@ async function ledgerList(db,u,search){
   const from=search.get('from')||berlinServiceDate(now()),to=search.get('to')||from;
   const id=search.get('customerId')||null;
   if(!dt(from)||!dt(to)||from>to||id&&!validId(id))throw bad(400,'Filter ungültig.');
-  const query=`SELECT l.*,c.name AS customer_name,x.external_key AS customer_code
-    FROM journey_ledger l JOIN customers c ON c.id=l.customer_id
+  const query=`${JOURNEYS_CTE}
+    SELECT j.*,c.name AS customer_name,x.external_key AS customer_code
+    FROM unified j JOIN customers c ON c.id=j.customer_id
     LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
-    WHERE l.service_date BETWEEN ? AND ? AND (? IS NULL OR l.customer_id=?)
-    ORDER BY l.service_date,l.pickup_time LIMIT 1800`;
+    WHERE j.service_date BETWEEN ? AND ? AND (? IS NULL OR j.customer_id=?)
+    ORDER BY j.service_date,j.pickup_time LIMIT 1800`;
   const r=await db.prepare(query).bind(from,to,id,id).all();
   return {entries:r.results||[],from,to};
 }
@@ -262,7 +301,20 @@ async function updateLedger(req,db,u,id){
   requireAdmin(u);const d=await parse(req),status=t(d.rideStatus,20),note=t(d.note,300);
   if(!['planned','reported','confirmed','cancelled'].includes(status))throw bad(400,'Status ungültig.');
   const existing=await db.prepare('SELECT ride_status FROM journey_ledger WHERE id=?').bind(id).first();
-  if(!existing)throw bad(404,'Fahrt nicht gefunden.');
+  if(!existing) {
+    const assigned=await db.prepare('SELECT id,status FROM rides WHERE id=?').bind(id).first();
+    if(!assigned)throw bad(404,'Fahrt nicht gefunden.');
+    if(assigned.status!=='done')throw bad(409,'Ein Fahrerauftrag muss vor der Prüfung abgeschlossen sein.');
+    if(status!=='confirmed'||note.length<8)
+      throw bad(400,'Fahrerauftrag kann nur mit Prüfvermerk bestätigt werden.');
+    const stamp=now();
+    await db.prepare(`INSERT INTO ride_reviews(ride_id,review_note,reviewed_at,reviewed_by)
+      VALUES(?,?,?,?) ON CONFLICT(ride_id) DO UPDATE SET
+      review_note=excluded.review_note,reviewed_at=excluded.reviewed_at,reviewed_by=excluded.reviewed_by`)
+      .bind(id,note,stamp,u.id).run();
+    await log(db,u,'ride.verified',id);
+    return {id,rideStatus:'confirmed',source:'dispatch'};
+  }
   if(existing.ride_status==='cancelled'&&status!=='cancelled')throw bad(409,'Stornierte Fahrten zuerst manuell prüfen.');
   if(status==='confirmed'&&note.length<8)throw bad(400,'Bestätigung benötigt eine kurze Prüfnotiz.');
   const timestamp=now();
@@ -282,7 +334,7 @@ async function printData(db,u,search) {
     LEFT JOIN (SELECT customer_id,MIN(external_key) AS external_key FROM customer_source_links WHERE source='master_sheet' GROUP BY customer_id) x ON x.customer_id=c.id
     WHERE c.id=? AND c.active=1`).bind(id).first();
   if(!c)throw bad(404,'Kunde nicht gefunden.');
-  const q=await db.prepare(`SELECT * FROM journey_ledger WHERE customer_id=? AND service_date BETWEEN ? AND ?
+  const q=await db.prepare(`${JOURNEYS_CTE} SELECT * FROM unified WHERE customer_id=? AND service_date BETWEEN ? AND ?
     AND ride_status IN ('reported','confirmed') AND direction IN ('hin','rueck')
     ORDER BY service_date,pickup_time LIMIT 150`)
     .bind(id,from,to).all();
