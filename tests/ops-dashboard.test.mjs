@@ -93,6 +93,22 @@ test('Einstellungen sind pro Benutzer identisch auf allen Geräten, mit Konflikt
  const driverPrefs=await api('/api/ui-settings','GET',null,driver);
  assert.equal(driverPrefs.revision,0);
 });
+test('Kundenkonflikt aus Drive muss geprüft und sicher verknüpft werden',async()=>{
+ sqlite.prepare("INSERT INTO customer_import_conflicts(external_key,proposed_name,candidate_customer_ids,seen_at) VALUES(?,?,?,?)")
+ .run('K0099','Testkunde',JSON.stringify([customer]),stamp);
+ const before=await api('/api/ops/dashboard?date=2026-11-18');
+ assert.equal(before.counts.importConflicts,1);
+ const result=await api('/api/ops/master-conflicts');
+ assert.equal(result.conflicts.length,1);
+ assert.equal(result.conflicts[0].candidates[0].id,customer);
+ await denies(api('/api/ops/master-conflicts/K0099','PATCH',{action:'link',customerId:customer},driver),403);
+ const linked=await api('/api/ops/master-conflicts/K0099','PATCH',{action:'link',customerId:customer});
+ assert.equal(linked.resolved,true);
+ const after=await api('/api/ops/customers?limit=100');
+ assert.equal(after.customers.length,1,'Beide externe IDs referenzieren nur eine Kundenakte');
+ const direct=await api('/api/ops/customers?q=K0099');
+ assert.equal(direct.customers.length,1,'Auch eine zweite Quellen-ID ist suchbar');
+});
 test('Kompaktes Command Center hat Kundenakte, Kalenderprüfung und Monatsjournal',()=>{
  const before=globalThis.document;
  globalThis.document={addEventListener(){}};
