@@ -7,13 +7,25 @@ export function createIntegrationsUI({request,toast,getUser,getPage,getDate}){
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const flag=(ready,extra)=>'<span class="center-pill '+(ready?'state-ok':'state-unknown')+'">'+
   (ready?'Konfiguriert':'Nicht eingerichtet')+' · '+esc(extra)+'</span>';
+ function syncInfo(source){
+  const s=data?.googleSync?.[source];
+  if(!s)return 'Kein erfolgreicher Quellenabgleich dokumentiert.';
+  const when=s.lastSuccessAt?new Intl.DateTimeFormat('de-DE',{
+   dateStyle:'short',timeStyle:'short',timeZone:'Europe/Berlin'
+  }).format(new Date(s.lastSuccessAt)):'noch nie';
+  if(s.status==='ok'&&s.lastSuccessAt)
+   return 'Letzter erfolgreicher Abgleich: '+when+' · '+Number(s.itemsSeen||0)+' Einträge geprüft.';
+  return 'Letzter Erfolg: '+when+' · aktueller Abgleichstatus: '+String(s.status||'unbekannt')+'.';
+ }
  function view(){
   const me=getUser(),p=data?.oneSignal||{},c=data?.claude||{};
   const goog=me?.role==='admin'?'<section class="center-panel">'+
    '<div class="center-panel-head"><b>Google Workspace · Taxi Meckenheim</b></div>'+
    '<div class="integration-list">'+
-   '<div><b>Taxi-Kalender</b>'+flag(data?.google?.taxiCalendar,'Nur lesend')+'</div>'+
-   '<div><b>Google Drive / Master-Kundenakte</b>'+flag(data?.google?.masterSheets,'Nur lesend')+'</div>'+
+   '<div><b>Taxi-Kalender</b>'+flag(data?.google?.taxiCalendar,'Nur lesend')+
+   '<div class="center-caption">'+esc(syncInfo('calendar'))+'</div></div>'+
+   '<div><b>Google Drive / Master-Kundenakte</b>'+flag(data?.google?.masterSheets,'Nur lesend')+
+   '<div class="center-caption">'+esc(syncInfo('master'))+'</div></div>'+
    '<div><b>Google Kontakte</b>'+flag(data?.google?.contacts,'Nur lesend')+'</div></div>'+
    '<p class="center-caption">Konfiguriert bedeutet nicht automatisch erfolgreich synchronisiert. Quellenstand und Fehler im Dashboard kontrollieren.</p></section>':'';
   return '<div class="center-shell">'+
