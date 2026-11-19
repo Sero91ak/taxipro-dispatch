@@ -68,3 +68,22 @@ Die bereits installierten Zentrale-/Fahrer-Startadressen `dispatch.html` und `dr
 - [ ] Erst nach abschließender Abnahme PR #9 und #10 mergen, produktive App freischalten
 
 **Hinweis zur Kostenkontrolle:** API-Limits mindern Risiken, ersetzen aber keine Anbieter-seitigen Rechnungssperren und Tarifprüfung. Ohne explizite Aktivierung bleibt die Zahl neuer Push-/Claude-Anfragen bei null.
+
+## Verifizierte Anbieter- und Quellenzuordnung (19.11.2026)
+
+Diese Konten wurden mit den vorhandenen, ausschließlich für ChatGPT gültigen Zugängen **lesend geprüft**. Sie sind dadurch **nicht** automatisch als TaxiPro-Worker-OAuth autorisiert.
+
+| Quelle | Bestätigtes Konto / Bestand | TaxiPro-Verhalten |
+| --- | --- | --- |
+| Google Kalender | Taxi Meckenheim, `info@meckenheim-taxi.de` | Derzeit genau **ein** ausdrücklich freigegebener Fahrtkalender per `GOOGLE_TAXI_CALENDAR_ID`. Kein automatischer Import aller sichtbaren Kalender. |
+| Weitere Kalender | Fahrer, RSVG Schüler Termine, Urlaubsantrag, Schulferien und Feiertage | Zunächst getrennt belassen. Fahrer- und Schulverwaltung brauchen eine eigene Zuordnung; Urlaub/Feiertage sind keine Kundenfahrten. |
+| Google Kontakte | Taxi Meckenheim, `info@meckenheim-taxi.de` | Separate, autorisierte und nur auf Abruf erlaubte `contacts.readonly`-Suche. |
+| Google Drive / Master | Persönlich angebundenes Google-Drive-Konto `sero91ak@gmail.com`, Datei „MASTER – Kunden- & Fahrtenverwaltung 2026 – AKTUELL“ | Nur das exakt autorisierte Master-Sheet abfragen; nicht pauschal sämtliche Drive-Dateien oder Patientendokumente herunterladen. |
+| OneSignal | Nur DĀR AL TAWḤĪD APP und TAWḤĪD KIDS vorhanden | Keine TaxiPro-App-ID vorhanden; **niemals** deren Schlüssel wiederverwenden. |
+| Claude | Keine eigene Claude-API-Anwendungsberechtigung verifiziert | `CLAUDE_ENABLED=false`; mit dem gegenwärtigen Nullkosten-Ziel keine bezahlten Anfragen. |
+
+**Quelle ist nicht gleich Integration:** Die bereits vorhandenen ChatGPT-OAuth-Zustimmungen lassen sich nicht auf einen fremden Cloudflare Worker übertragen. Kein Schreiben in die Google-Originalquellen, keine Datenübertragung an Claude, kein Push ohne eigenes TaxiPro-OneSignal-Projekt.
+
+**Bessere Diagnose in der vorhandenen Integrationsansicht:** Die TaxiPro-Oberfläche zeigt jetzt für Disponenten getrennt den Konfigurationsstand und die tatsächlichen `sync_checkpoints` mit letztem erfolgreichen Kalender-/Master-Abgleich und aktuellem Fehlerstatus. Dabei werden keine externen Fehlermeldungen, Zugangsdaten oder Quelleninhalte an Fahrer ausgegeben.
+
+**Nächster externer Einrichtungsschritt:** Cloudflare Worker und private D1 mit sicheren Secrets einrichten; dann Taxi-OAuth für Kalender/Kontakte und separates Master-OAuth für die oben identifizierte Tabelle im Google-Consent-Flow bestätigen. OneSignal muss im Anbieter-Dashboard als eigene TaxiPro-App angelegt werden. Bis zur erfolgreichen Testzustellung bleiben die Flags für Google-Cron, Push, Claude und die Produktivumschaltung aus.
