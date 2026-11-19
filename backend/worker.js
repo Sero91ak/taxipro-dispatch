@@ -6,6 +6,9 @@
  */
 import {handleCommunity,listReports,listSwaps,listFiles,listSignatures} from './community.js';
 import {fetchTimeSummary} from './time-summary.js';
+import {handleOps} from './ops.js';
+import {handleIntegrations,deliverGenericPush} from './integrations.js';
+import {syncSources,isGoogleConfigured} from './google-sync.js';
 const encoder = new TextEncoder();
 const ID = () => crypto.randomUUID();
 const timestamp = () => new Date().toISOString();
@@ -113,6 +116,21 @@ async function addCustomer(req,env,u) {
   await audit(env.DB,u.id,'customer.created',id);
   return {id};
 }
+async function listAssignedRides(req,env,u){
+ const params=new URL(req.url).searchParams;
+ const single=params.get('date');
+ const from=single||params.get('from')||'',to=single||params.get('to')||'';
+ if(!okDate(from)||!okDate(to)||from>to||Date.parse(to)-Date.parse(from)>30*86400000)
+   throw err(400,'Gültiges Tages- oder höchstens 31-tägiges Zeitfenster wählen.');
+ const columns=`SELECT r.*,c.name AS customer_name${u.role==='admin'?',drv.display_name AS driver_name':''}
+   FROM rides r JOIN customers c ON c.id=r.customer_id
+   ${u.role==='admin'?'JOIN users drv ON drv.id=r.driver_id':''}
+   WHERE r.ride_date BETWEEN ? AND ?${u.role==='driver'?' AND r.driver_id=?':''}
+   ORDER BY r.ride_date,r.ride_time,r.id LIMIT 501`;
+ const binds=u.role==='driver'?[from,to,u.id]:[from,to];
+ const found=(await env.DB.prepare(columns).bind(...binds).all()).results||[];
+ return {entries:found.slice(0,500),truncated:found.length>500,from,to,source:'taxipro-db'};
+}
 async function addRide(req,env,u){
   requireAdmin(u);const d=await parse(req);
   if(!okDate(d.date)||!okTime(d.time)||!['hin','rueck'].includes(d.direction)||!['Krankenfahrt','Rechnungsfahrt','Serienfahrt','Barfahrt'].includes(d.kind))throw err(400,'Fahrtart, Datum oder Uhrzeit ungültig.');
@@ -121,8 +139,13 @@ async function addRide(req,env,u){
   const driver=await env.DB.prepare("SELECT id FROM users WHERE id=? AND role='driver' AND active=1").bind(d.driverId).first();
   const customer=await env.DB.prepare('SELECT id FROM customers WHERE id=? AND active=1').bind(d.customerId).first();
   if(!driver||!customer)throw err(400,'Fahrer oder Kunde unbekannt.');
-  const id=ID();await env.DB.prepare('INSERT INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,signature_required,status,assigned_at) VALUES(?,?,?,?,?,?,?,?,?,?,\'assigned\',?)')
-    .bind(id,d.customerId,d.driverId,d.date,d.time,pickup,destination,d.kind,d.direction,d.signatureRequired===true?1:0,timestamp()).run();
+  const selectedClass=d.billingClass||'unknown';
+  if(!['unknown','KTS','RE','private'].includes(selectedClass))throw err(400,'Abrechnungsart ungültig.');
+  const billing=selectedClass==='unknown'&&d.kind==='Rechnungsfahrt'?'RE':
+    selectedClass==='unknown'&&d.kind==='Barfahrt'?'private':selectedClass;
+  const id=ID();await env.DB.prepare(`INSERT INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,billing_class,signature_required,status,assigned_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,'assigned',?)`)
+    .bind(id,d.customerId,d.driverId,d.date,d.time,pickup,destination,d.kind,d.direction,billing,d.signatureRequired===true?1:0,timestamp()).run();
   await audit(env.DB,u.id,'ride.assigned',id);
   return {id};
 }
@@ -192,6 +215,14 @@ async function updatePosition(req,env,u){
     .bind(u.id,lat,lng,accuracy,timestamp()).run();
   return {received:true};
 }
+async function revokePosition(env,u){
+  requireDriver(u);
+  // Removing the most recently shared position is a separate consent action
+  // from ending a shift. Do not mutate positions belonging to other drivers.
+  const change=await env.DB.prepare('DELETE FROM positions WHERE driver_id=?').bind(u.id).run();
+  await audit(env.DB,u.id,'position.revoked',u.id);
+  return {disabled:true,removed:change.meta?.changes||0};
+}
 async function sendMessage(req,env,u){
   const d=await parse(req),body=safeText(d.body,1000),recipient=safeText(d.recipientId,80)||null;
   if(!body)throw err(400,'Nachricht leer.');
@@ -200,7 +231,7 @@ async function sendMessage(req,env,u){
     if(!target)throw err(404,'Empfänger nicht vorhanden.');
   }
   const id=ID();await env.DB.prepare('INSERT INTO messages(id,sender_id,recipient_id,body,created_at) VALUES(?,?,?,?,?)').bind(id,u.id,recipient,body,timestamp()).run();
-  return {id};
+  return {id,recipientId:recipient};
 }
 
 // The server creates trips from explicit recurring templates, never from calendar inference.
@@ -209,12 +240,17 @@ async function addSeries(req,env,u){
  const weekdayArray=Array.isArray(d.weekdays)?[...new Set(d.weekdays.map(Number))]:[];
  const start=safeText(d.startDate,10),end=safeText(d.endDate,10),time=safeText(d.outboundTime,5),ret=safeText(d.returnTime,5)||null;
  const pickup=safeText(d.pickup,200),dest=safeText(d.destination,200),kind=safeText(d.kind,40);
+ const explicitBilling=d.billingClass||'unknown';
+ if(!['unknown','KTS','RE','private'].includes(explicitBilling))
+   throw err(400,'KTS, RE oder Privatfahrt für Serienvorlage ungültig.');
+ const seriesBilling=explicitBilling==='unknown'&&kind==='Rechnungsfahrt'?'RE':
+   explicitBilling==='unknown'&&kind==='Barfahrt'?'private':explicitBilling;
  if(!okDate(start)||!okDate(end)||end<start||Date.parse(end)-Date.parse(start)>366*86400000||!weekdayArray.length||weekdayArray.some(n=>!Number.isInteger(n)||n<0||n>6)||!okTime(time)||(ret&&!okTime(ret))||!pickup||!dest||!['Krankenfahrt','Rechnungsfahrt','Serienfahrt','Barfahrt'].includes(kind))throw err(400,'Serienfahrt unvollständig oder ungültig.');
  const driver=await env.DB.prepare("SELECT id FROM users WHERE id=? AND role='driver' AND active=1").bind(d.driverId).first();
  const customer=await env.DB.prepare('SELECT id FROM customers WHERE id=? AND active=1').bind(d.customerId).first();
  if(!driver||!customer)throw err(400,'Kunde oder Fahrer nicht gefunden.');
- const id=ID();await env.DB.prepare(`INSERT INTO recurring_orders(id,customer_id,driver_id,start_date,end_date,weekdays,outbound_time,return_time,pickup,destination,kind,signature_required,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`)
- .bind(id,d.customerId,d.driverId,start,end,weekdayArray.sort().join(','),time,ret,pickup,dest,kind,d.signatureRequired===true?1:0,timestamp()).run();
+ const id=ID();await env.DB.prepare(`INSERT INTO recurring_orders(id,customer_id,driver_id,start_date,end_date,weekdays,outbound_time,return_time,pickup,destination,kind,billing_class,signature_required,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+ .bind(id,d.customerId,d.driverId,start,end,weekdayArray.sort().join(','),time,ret,pickup,dest,kind,seriesBilling,d.signatureRequired===true?1:0,timestamp()).run();
  await audit(env.DB,u.id,'series.created',id);return {id};
 }
 async function generateSeries(req,env,u){
@@ -228,8 +264,8 @@ async function generateSeries(req,env,u){
   const date=new Date(n).toISOString().slice(0,10);if(date<series.start_date||date>series.end_date||!days.has(new Date(n).getUTCDay()))continue;
   for(const direction of series.return_time?['hin','rueck']:['hin']){
    const backward=direction==='rueck';const id=ID();
-   const result=await env.DB.prepare(`INSERT OR IGNORE INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,signature_required,status,assigned_at,recurring_order_id) VALUES(?,?,?,?,?,?,?,?,?,?,'assigned',?,?)`)
-    .bind(id,series.customer_id,series.driver_id,date,backward?series.return_time:series.outbound_time,backward?series.destination:series.pickup,backward?series.pickup:series.destination,series.kind,direction,series.signature_required,timestamp(),series.id).run();
+   const result=await env.DB.prepare(`INSERT OR IGNORE INTO rides(id,customer_id,driver_id,ride_date,ride_time,pickup,destination,kind,direction,billing_class,signature_required,status,assigned_at,recurring_order_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,'assigned',?,?)`)
+    .bind(id,series.customer_id,series.driver_id,date,backward?series.return_time:series.outbound_time,backward?series.destination:series.pickup,backward?series.pickup:series.destination,series.kind,direction,series.billing_class||'unknown',series.signature_required,timestamp(),series.id).run();
    if(result.meta?.changes)created++;else existing++;
   }
  }
@@ -296,10 +332,10 @@ async function state(db,u){
   return base;
 }
 export default {
-  async fetch(req,env){
+  async fetch(req,env,ctx){
     const origin=req.headers.get('origin');const allow=origin && env.APP_ORIGIN && origin===env.APP_ORIGIN;
     const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'};
-    if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type,x-taxipro-recipient,x-taxipro-filename,x-taxipro-note,x-taxipro-signer,x-taxipro-confirm,x-taxipro-ride-ids';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,OPTIONS';headers['Access-Control-Max-Age']='600'}
+    if(allow){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Headers']='authorization,content-type,x-taxipro-recipient,x-taxipro-filename,x-taxipro-note,x-taxipro-signer,x-taxipro-confirm,x-taxipro-ride-ids';headers['Access-Control-Allow-Methods']='GET,POST,PATCH,DELETE,OPTIONS';headers['Access-Control-Max-Age']='600'}
     const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers});
     if(req.method==='OPTIONS')return new Response(null,{status:allow?204:403,headers});
     if(origin&&!allow)return respond({error:'Origin nicht freigegeben.'},403);
@@ -323,6 +359,7 @@ export default {
       const userMatch=path.match(/^\/api\/users\/([a-f0-9-]{36})$/);
       if(userMatch&&req.method==='PATCH')return respond(await resetDriver(req,env,u,userMatch[1]));
       if(path==='/api/customers'&&req.method==='POST')return respond(await addCustomer(req,env,u),201);
+      if(path==='/api/rides'&&req.method==='GET')return respond(await listAssignedRides(req,env,u));
       if(path==='/api/rides'&&req.method==='POST')return respond(await addRide(req,env,u),201);
       const rideMatch=path.match(/^\/api\/rides\/([a-f0-9-]{36})$/);
       if(rideMatch&&req.method==='PATCH')return respond(await changeRide(req,env,u,rideMatch[1]));
@@ -330,8 +367,22 @@ export default {
       const shiftMatch=path.match(/^\/api\/shifts\/([a-f0-9-]{36})$/);
       if(shiftMatch&&req.method==='PATCH')return respond(await correctShift(req,env,u,shiftMatch[1]));
       if(path==='/api/position'&&req.method==='POST')return respond(await updatePosition(req,env,u));
-      if(path==='/api/messages'&&req.method==='POST')return respond(await sendMessage(req,env,u),201);
+      if(path==='/api/position'&&req.method==='DELETE')return respond(await revokePosition(env,u));
+      if(path==='/api/messages'&&req.method==='POST'){
+        const message=await sendMessage(req,env,u);
+        // The chat save never depends on external push availability. Notify
+        // only in the background, with no message body or patient details.
+        if(ctx?.waitUntil)ctx.waitUntil(
+          deliverGenericPush(env,env.DB,{senderId:u.id,recipientId:message.recipientId})
+            .catch(()=>{console.warn('TaxiPro push not delivered')})
+        );
+        return respond({id:message.id},201);
+      }
+      const connector=await handleIntegrations(req,env,u,path);
+      if(connector)return respond(connector.data||connector,connector.status||200);
       if(path==='/api/time-summary'&&req.method==='GET')return respond(await fetchTimeSummary(env.DB,u,new URL(req.url).searchParams));
+      const operations=await handleOps(req,env,u,path);
+      if(operations)return respond(operations.data||operations,operations.status||200);
       const community=await handleCommunity(req,env,u,path);
       if(community){
         if(community.response){
@@ -351,5 +402,22 @@ export default {
       if(code===500)console.error('TaxiPro backend error',String(e?.message||'unknown').slice(0,120));
       return respond({error:code===500?'Interner Fehler.':e.message},code);
     }
+  },
+  async scheduled(controller,env,ctx){
+    // Explicit opt-in only. There is no automatic billing upgrade or fallback.
+    if(env.ENABLE_GOOGLE_SYNC!=='true'||!env.DB)return;
+    ctx.waitUntil((async()=>{
+      if(isGoogleConfigured(env,'calendar')){
+        try{await syncSources(env.DB,env,'calendar')}
+        catch(e){console.warn('TaxiPro Kalenderabgleich fehlgeschlagen (ohne Patientendaten).')}
+      }
+      if(isGoogleConfigured(env,'sheets')){
+        const old=await env.DB.prepare("SELECT last_success_at FROM sync_checkpoints WHERE source='google_master'").first();
+        if(!old?.last_success_at||Date.now()-Date.parse(old.last_success_at)>23*3600000){
+          try{await syncSources(env.DB,env,'master')}
+          catch(e){console.warn('TaxiPro Stammdatenabgleich fehlgeschlagen (ohne Patientendaten).')}
+        }
+      }
+    })());
   }
 };

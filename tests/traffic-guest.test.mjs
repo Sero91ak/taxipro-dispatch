@@ -38,7 +38,7 @@ test('Fahrer-PIN bleibt für Fahrten aktiv; Verkehrs-Gastzugang ist leicht auffi
 });
 
 test('PWA-Cache berücksichtigt Gastseite und erneuerte Versionsnummer',()=>{
-  assert.match(sw,/taxipro-dispatch-v31/);
+  assert.match(sw,/taxipro-dispatch-v32-safety/);
   assert.match(sw,/'\.\/traffic\.html'/);
   assert.match(sw,/url\.pathname\.endsWith\('\.html'\)/);
 });

@@ -22,3 +22,32 @@ APP_ORIGIN = "https://sero91ak.github.io"
 # [[r2_buckets]]
 # binding = "ATTACHMENTS"
 # bucket_name = "taxipro-private-evidence"
+
+# TaxiPro 2.4: synchronizer remains disabled by default. All authentication
+# credentials belong ONLY in Cloudflare Worker secrets, never this file.
+ENABLE_GOOGLE_SYNC = "false"
+#
+# After deploying a private HTTPS Worker, configuring DB/R2 and verifying OAuth:
+# use an explicitly enabled scheduled trigger for background refresh.
+# With Cloudflare crons a quarter-hourly UTC tick can be configured by:
+# [triggers]
+# crons = ["*/15 * * * *"]
+#
+# Preferred Google OAuth identity (explicitly authorize the personal
+# management account ending in "091" in Google Cloud / OAuth consent):
+# GOOGLE_PRIMARY_CLIENT_ID, GOOGLE_PRIMARY_CLIENT_SECRET,
+# GOOGLE_PRIMARY_REFRESH_TOKEN
+# Select resources separately; they are NOT access tokens or passwords:
+# GOOGLE_TAXI_CALENDAR_ID = shared Taxi operations calendar
+# GOOGLE_MASTER_SHEET_ID  = selected private master spreadsheet
+#
+# OAuth scopes: calendar.readonly and spreadsheets.readonly.
+# Optional contacts.readonly only if contacts under that identity are approved.
+# Legacy source-specific GOOGLE_TAXI_*, GOOGLE_MASTER_* and GOOGLE_CONTACTS_*
+# credentials remain supported when GOOGLE_PRIMARY_* is absent.
+#
+# Two-way document operations are NOT live. A future dedicated Drive upload
+# requires its own consent (e.g. drive.file) and protected server endpoints.
+#
+# Never put real patient information, credentials, tokens or account addresses
+# into repository sources. Respect Google OAuth quotas and Cloudflare free limits.

@@ -14,11 +14,26 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
   const typeLabels={jam:'🚗 Stau',accident:'💥 Unfall',roadworks:'🚧 Baustelle',closure:'⛔ Sperrung',hazard:'⚠️ Gefahr'};
   let map=null, mapMarkers=[], mapEvents=[], point=null, pointMarker=null, officialEvents=[],officialLoaded=0,officialGenerated=0;
   let date=localDate(),period='day',timeData=null,timeLoading=false,openedSignature=false,seenMessages=null,seenReports=null;
+  let tripFocus=null;
   const formButton=(id,text)=>'<button type="button" class="btn" data-operation="'+id+'">'+text+'</button>';
   const button=(action,attrs,label)=>'<button type="button" class="btn" data-operation="'+action+'" '+attrs+'>'+label+'</button>';
   function roleUser(u){return getMe()?.role==='admin' || getMe()?.id===u;}
   function title(name,sub) {return '<header class="head"><div><h2>'+name+'</h2><p>'+sub+'</p></div></header>';}
   function escapeDate(d){return esc(d?.slice(0,16)||'');}
+  function setTripFocus(ride){
+    if(!ride){tripFocus=null;return false;}
+    const user=getMe();
+    if(!user||user.role!=='driver'||ride.driver_id!==user.id)return false;
+    tripFocus={
+      id:String(ride.id||'').slice(0,50),
+      customerName:String(ride.customer_name||'').slice(0,120),
+      pickup:String(ride.pickup||'').slice(0,200),
+      destination:String(ride.destination||'').slice(0,200),
+      date:String(ride.ride_date||'').slice(0,10),
+      time:String(ride.ride_time||'').slice(0,5)
+    };
+    return true;
+  }
   function trafficView(db) {
     const data=db.trafficReports||[];
     const cards=data.slice(0,70).map(x=>
@@ -26,8 +41,15 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
       '<p>'+esc(x.description)+'</p><small>'+esc(x.reporter_name)+' · '+fmt(x.observed_at)+' · Meldung von Mitarbeitern, nicht amtlich verifiziert</small>'+
       (roleUser(x.reporter_id)?'<div class="op-actions">'+button('resolve-report','data-id="'+esc(x.id)+'"','Als erledigt markieren')+'</div>':'')+'</article>'
     ).join('');
+    const focus=tripFocus&&getMe()?.role==='driver'?
+      '<section class="card op-trip-focus"><div class="card-title"><b>Ausgewählter Fahrauftrag · '+esc(tripFocus.date)+' · '+esc(tripFocus.time)+'</b>'+
+      '<small>Fahrtdaten ausschließlich im angemeldeten Mitarbeiterbereich</small></div>'+
+      '<div class="op-trip-route"><div><small>Abholung</small><b>'+esc(tripFocus.pickup)+'</b></div>'+
+      '<div class="op-trip-arrow" aria-hidden="true">→</div>'+
+      '<div><small>Ziel</small><b>'+esc(tripFocus.destination)+'</b></div></div>'+
+      '<p class="op-caption">Die interne Karte zeigt offizielle Verkehrsereignisse und Teamhinweise. Sie bietet derzeit keine berechnete Routenführung oder Abbiegeanweisungen.</p></section>':'';
     return title('Verkehr & Community','Amtliche Autobahndaten und von Mitarbeitenden gemeldete Gefahrenstellen')+
-      '<div class="op-grid"><section class="card op-mapcard"><div class="card-title"><b>Live-Verkehrskarte</b><small>OpenFreeMap / Autobahn GmbH</small></div>'+
+      focus+'<div class="op-grid"><section class="card op-mapcard"><div class="card-title"><b>Live-Verkehrskarte</b><small>OpenFreeMap / Autobahn GmbH</small></div>'+
       '<div id="ops-map" class="op-map" role="region" aria-label="Interne Verkehrskarte"></div>'+
       '<div id="ops-map-note" class="op-note">Karte, offizielle Meldungen und eigene Teammarkierungen werden geladen …</div>'+
       '<p class="op-caption">Gelb = Amtlich · Türkis = Team. GPS ist nur auf Anfrage verfügbar. Keine Radar- oder Polizeikontrollwarnung.</p></section>'+
@@ -385,6 +407,6 @@ export function createOperations({request,toast,esc,fmt,getSession,getBase,getMe
     navigator.serviceWorker?.ready.then(reg=>reg.showNotification(title,{body,tag:'taxipro-community',icon:'icons/icon-192.png'}))
       .catch(()=>{});
   }
-  initListeners();
-  return {view,mount,chatExtra,onRefresh,fetchTime};
+  if(typeof document!=='undefined')initListeners();
+  return {view,mount,chatExtra,onRefresh,fetchTime,setTripFocus};
 }

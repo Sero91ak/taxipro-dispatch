@@ -52,3 +52,15 @@
 @media(max-width:850px){.op-grid{grid-template-columns:1fr}.op-map{height:clamp(290px,48dvh,480px)}}
 @media(max-width:540px){.op-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.op-map{margin:10px;height:clamp(290px,43dvh,410px)}.op-file{flex-wrap:wrap}.op-file button{width:100%}}
 @media print{.op-form,.op-actions,.op-map,.op-sign-dialog,.op-caption{display:none!important}.op-kpis>div,.op-file{background:transparent!important;color:black!important}.op-kpis strong,.op-file b{color:black!important}}
+
+/* Reuse the existing TaxiPro traffic map for a driver's assigned trip. */
+.op-trip-focus{margin-bottom:14px;border-color:#3d7385;background:#153044}
+.op-trip-focus .card-title{padding:13px 16px;flex-wrap:wrap}
+.op-trip-focus .card-title small{font-size:10px;color:#9dbac8}
+.op-trip-route{display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);align-items:center;gap:9px;padding:13px 17px 7px}
+.op-trip-route div:not(.op-trip-arrow){display:grid;gap:4px;min-width:0}
+.op-trip-route small{font-size:10px;color:#96b4c5}
+.op-trip-route b{font-size:12px;line-height:1.5;color:#f1e1be;overflow-wrap:anywhere}
+.op-trip-arrow{color:#e7b876;text-align:center}
+.op-trip-focus .op-caption{margin:5px 17px 14px;color:#9cbccc;line-height:1.55}
+@media(max-width:550px){.op-trip-route{grid-template-columns:1fr;gap:7px}.op-trip-arrow{transform:rotate(90deg);text-align:left;width:18px}}
