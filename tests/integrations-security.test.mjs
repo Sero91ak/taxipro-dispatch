@@ -95,3 +95,24 @@ test('Claude sends only aggregate counts after explicit key AND hard budget; dri
  }finally{globalThis.fetch=original}
  sql.close();
 });
+
+test('Google status reveals real checkpoint health only to dispatcher, not just OAuth readiness',async()=>{
+ const {sql,db}=setup(),stamp='2026-11-19T07:00:00.000Z';
+ sql.prepare(`INSERT INTO sync_checkpoints(source,last_attempt_at,last_success_at,status,last_error,items_seen)
+  VALUES(?,?,?,?,?,?)`).run('google_calendar_taxi',stamp,stamp,'ok','',37);
+ sql.prepare(`INSERT INTO sync_checkpoints(source,last_attempt_at,last_success_at,status,last_error,items_seen)
+  VALUES(?,?,?,?,?,?)`).run('google_master',stamp,null,'error','OAuth test failure',0);
+ const env={DB:db};
+ const admin=await handleIntegrations(path('/api/integrations/status'),env,ADMIN,'/api/integrations/status');
+ assert.equal(admin.data.google.taxiCalendar,false,'Credentials still absent, regardless of stale checkpoints');
+ assert.equal(admin.data.googleSync.calendar.status,'ok');
+ assert.equal(admin.data.googleSync.calendar.lastSuccessAt,stamp);
+ assert.equal(admin.data.googleSync.calendar.itemsSeen,37);
+ assert.equal(admin.data.googleSync.master.status,'error');
+ assert.equal(admin.data.googleSync.master.lastSuccessAt,null);
+ assert.equal(JSON.stringify(admin.data).includes('OAuth test failure'),false,'No provider errors or secrets leaked');
+ const driver=await handleIntegrations(path('/api/integrations/status'),env,DRIVER,'/api/integrations/status');
+ assert.equal(driver.data.google,undefined);
+ assert.equal(driver.data.googleSync,undefined);
+ sql.close();
+});
