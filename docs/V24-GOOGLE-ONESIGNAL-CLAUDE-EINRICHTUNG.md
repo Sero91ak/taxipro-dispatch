@@ -1,11 +1,25 @@
 # TaxiPro 2.4 – echte Google-, OneSignal- und Claude-Anbindung
-Stand: 18.11.2026 · ausschließlich bestehendes GitHub-Projekt `Sero91ak/taxipro-dispatch`
+Stand: 19.11.2026 · ausschließlich bestehendes GitHub-Projekt `Sero91ak/taxipro-dispatch`
 
 > **Status:** Code und Einrichtungsansichten implementiert; keine live geschalteten Zugangsdaten. Die ChatGPT-Connector-Berechtigungen können technisch **nicht** als Google-OAuth-Refresh-Token oder Anbieter-API-Key der separat betriebenen TaxiPro-App genutzt werden. Keine Zugangsdaten in GitHub, Chat, URLs oder Screenshots eintragen.
 
+## Verbindliche Hauptkonto-Entscheidung vom 19.11.2026
+
+**Für künftige TaxiPro-Anbieter-OAuth-Logins verwenden: `sero91ak@gmail.com` (091), nicht `info@meckenheim-taxi.de`.** Die vorige Empfehlung, das Taxi-E-Mail-Konto zum primären Google-Account der App zu machen, ist korrigiert.
+
+- Das **persönliche** Google-Konto sieht den geteilten Betriebskalender `info@meckenheim-taxi.de` bereits mit Besitzer-/Zugriffsrolle; zugleich liegt dort das Drive-Master-Sheet „MASTER – Kunden- & Fahrtenverwaltung 2026 – AKTUELL“. Kalendername und OAuth-Konto dürfen nicht verwechselt werden.
+- `backend/google-sync.js` akzeptiert jetzt einen **gemeinsamen** geheimen OAuth-Credential-Satz (`GOOGLE_PRIMARY_*`) für den ausdrücklich ausgewählten Taxi-Kalender, das Master-Sheet und optional die persönlichen Kontakte. Es werden trotzdem nur die zwei vordefinierten, getrennt konfigurierten IDs für Kalender und Sheet gelesen. Vorhandene ältere `GOOGLE_TAXI_*`, `GOOGLE_MASTER_*` und `GOOGLE_CONTACTS_*` bleiben als **Fallback** kompatibel.
+- Wenn die Hauptkonto-Credentials gesetzt sind, werden diese **bevorzugt**. Die Aktualisierung löscht oder verändert keine Termine, Tabellen oder Legacy-Secrets. Ein Hinterlegen der Credentials ersetzt keinen echten erfolgreichen Abgleich.
+
+### Dokumente in beide Richtungen: bewusst separate Schreibfreigabe
+
+**Aktuell implementiert:** Lesen der Master-Tabellen und Zuordnen geprüfter Dokument-Metadaten in TaxiPro. **Noch nicht implementiert:** Ein vollständiger Live-Upload/-Download aller Dokumente über Google Drive, Dateiänderungen am Original oder bidirektionale konfliktfreie Synchronisierung.
+
+Für zukünftigen, ausdrücklich freigegebenen Dokumentenaustausch muss das TaxiPro-Backend separat ein begrenztes Drive-Schreibrecht wie `drive.file` erhalten. Mit diesem Scope kann die App von ihr angelegte oder durch den Benutzer gezielt geöffnete/freigegebene Dateien verwalten; **nicht** ungefragt den gesamten bestehenden Drive-Bestand. Der Disponent soll Dateien gezielt in einer dedizierten geschützten TaxiPro-Ablage auswählen; Backend prüft Kundenakte, berechtigte Rolle, Dateityp, erlaubte Dateigröße, Zuordnung, Version und Audit-Log. Kein Browser-/GitHub-Secret, kein unbeaufsichtigtes Überschreiben, keine Patientenakten ohne Datenschutz- und Berechtigungsprüfung.
+
 ## Bereits geprüfte Google-Quellen
 
-- Taxi-Kalender: Google-Konto der Taxi-Zentrale; nur festgelegte, echte Fahrtenkalender lesen, keine Mitarbeiterurlaube als Fahrten importieren.
+- Taxi-Kalender: Google-Hauptkonto `sero91ak@gmail.com` kann den separat freigegebenen Kalender `info@meckenheim-taxi.de` bereits sehen. Nur diesen ausdrücklich ausgewählten Fahrtkalender lesen; keine persönlichen Kalender oder Mitarbeiterurlaube als Fahrten importieren.
 - Google-Drive-Master: vorhandene Tabelle mit `Kundenstamm`, `Genehmigungen`, `Verordnungen`, `Dokumenten-Zuordnung`, `Streckenpreise 2026` und Monatsblättern.
 - Google Kontakte: Name und Telefon ausschließlich über individuelle, disponentenberechtigte Suche; keine automatische Identitätsverknüpfung nur anhand eines Nachnamens.
 - Belegzuordnung: Master-Register `Dokumenten-Zuordnung` Spalten `A:D`, `F:G`, `N`. Nur als **Eindeutig/Bestätigt** markierte Kunden-ID-Verknüpfungen erscheinen als Dokument-Metadaten. `Wahrscheinlich` bleibt zurückgestellt; keine PDF-Bytes, Diagnosen, Original-URLs oder Versichertennummern werden in die öffentlichen Quellen exportiert.
@@ -15,21 +29,15 @@ Stand: 18.11.2026 · ausschließlich bestehendes GitHub-Projekt `Sero91ak/taxipr
 
 1. Im **vorhandenen** Cloudflare-Projekt den TaxiPro Worker und die private D1-Datenbank bereitstellen. Bei bestehender 2.3-Datenbank vor **einmaliger** `backend/migration-v2.4.sql`-Ausführung ein wiederherstellbares Backup erstellen.
 2. In Google Cloud ein eigenes OAuth-Webclient-Projekt für **TaxiPro** konfigurieren, inklusive erlaubtem sicheren Callback und Consent Screen. Keine Google-Cloud-API-Anmeldung über ChatGPT-Token erzwingen.
-3. Den Taxikonto-Zugriff ausdrücklich für `calendar.readonly` erteilen. Für das Konto, das die Kunden-Mastertabelle enthält, `spreadsheets.readonly` erteilen. Für Google Kontakte separat `contacts.readonly`. Falls alle drei Quellen demselben Konto gehören, lassen sich die Freigaben bei entsprechender Zweckbindung zusammenlegen; keine unnötigen Vollzugriff-Scopes anfordern.
+3. Bei der TaxiPro-OAuth-Freigabe als **Google-Hauptkonto `sero91ak@gmail.com`** auswählen. Dafür gezielt `calendar.readonly` und `spreadsheets.readonly` freigeben; `contacts.readonly` nur bei ausdrücklicher Nutzung von Kontakten dieses Hauptkontos. Die freigegebenen Calendar-/Sheets-Ressourcen sind durch ihre getrennten IDs beschränkt. `info@meckenheim-taxi.de` bleibt der Name des geteilten Betriebskalenders, ist aber **nicht** das Standard-OAuth-Anmeldekonto. Vor Freischaltung prüfen, dass der Hauptkonto-Token den freigegebenen Taxi-Kalender und das Master-Sheet tatsächlich lesen kann.
 4. Nur in **Cloudflare Secrets**, niemals im öffentlichen Repository, hinterlegen:
 
 ```text
-GOOGLE_TAXI_CLIENT_ID
-GOOGLE_TAXI_CLIENT_SECRET
-GOOGLE_TAXI_REFRESH_TOKEN
+GOOGLE_PRIMARY_CLIENT_ID
+GOOGLE_PRIMARY_CLIENT_SECRET
+GOOGLE_PRIMARY_REFRESH_TOKEN
 GOOGLE_TAXI_CALENDAR_ID
-GOOGLE_MASTER_CLIENT_ID
-GOOGLE_MASTER_CLIENT_SECRET
-GOOGLE_MASTER_REFRESH_TOKEN
 GOOGLE_MASTER_SHEET_ID
-GOOGLE_CONTACTS_CLIENT_ID
-GOOGLE_CONTACTS_CLIENT_SECRET
-GOOGLE_CONTACTS_REFRESH_TOKEN
 ```
 
 5. Erst nach positiven synthetischen Importtests und Rechteprüfung `ENABLE_GOOGLE_SYNC="true"` setzen und kontrollierten Kalender-Cron aktivieren. Die Quellenstatus-Seite darf `Konfiguriert` nicht als `Live erfolgreich geprüft` darstellen. Die echten letzten Synchronisierungszeitpunkte liefert `/api/ops/sources`.
@@ -60,7 +68,7 @@ Die bereits installierten Zentrale-/Fahrer-Startadressen `dispatch.html` und `dr
 ## Abnahmeprotokoll
 
 - [ ] Sichere Worker- und D1-Bindung samt Backup durch Betreiber eingerichtet
-- [ ] Exakte Google OAuth-Scopes und die beiden Quellkonten autorisiert
+- [ ] TaxiPro-OAuth für `sero91ak@gmail.com` mit benötigten Lesescopes autorisiert; Kalender-/Master-ID einzeln verifiziert
 - [ ] Echte Kalender-, Kunden-, Dokumenten- und Kontakte-Abfragen mit Testkonten erfolgreich
 - [ ] Neue OneSignal-TaxiPro-App erstellt, eigene Berechtigung und Web-Push-Geräte getestet
 - [ ] Claude nur nach tatsächlicher Kosten-/Datenschutzfreigabe aktiviert
@@ -75,9 +83,9 @@ Diese Konten wurden mit den vorhandenen, ausschließlich für ChatGPT gültigen 
 
 | Quelle | Bestätigtes Konto / Bestand | TaxiPro-Verhalten |
 | --- | --- | --- |
-| Google Kalender | Taxi Meckenheim, `info@meckenheim-taxi.de` | Derzeit genau **ein** ausdrücklich freigegebener Fahrtkalender per `GOOGLE_TAXI_CALENDAR_ID`. Kein automatischer Import aller sichtbaren Kalender. |
-| Weitere Kalender | Fahrer, RSVG Schüler Termine, Urlaubsantrag, Schulferien und Feiertage | Zunächst getrennt belassen. Fahrer- und Schulverwaltung brauchen eine eigene Zuordnung; Urlaub/Feiertage sind keine Kundenfahrten. |
-| Google Kontakte | Taxi Meckenheim, `info@meckenheim-taxi.de` | Separate, autorisierte und nur auf Abruf erlaubte `contacts.readonly`-Suche. |
+| Google Kalender | **Hauptkonto `sero91ak@gmail.com`** sieht den separat freigegebenen Betriebskalender `info@meckenheim-taxi.de` | TaxiPro-OAuth künftig mit Hauptkonto; genau ein ausgewählter Fahrtkalender per `GOOGLE_TAXI_CALENDAR_ID`. Kein automatischer Import sämtlicher persönlicher Kalender. |
+| Weitere Kalender | Fahrer, RSVG Schüler Termine, Urlaubsantrag, Schulferien und Feiertage sind im **separaten Taxi-Konto** vorhanden | Über das persönliche Hauptkonto ist deren Freigabe nicht belegt; nicht automatisch importieren. Urlaub/Feiertage sind keine Kundenfahrten. |
+| Google Kontakte | Bisher über ChatGPT geprüftes Taxi-Kontakteprofil: `info@meckenheim-taxi.de`; persönliche Kontakte bisher nicht verifiziert | Bei einheitlichem Hauptkonto optional dessen `contacts.readonly`-Berechtigung separat einholen; keine falsche Behauptung, dass die Taxi-Kontakte dort ebenfalls freigegeben sind. |
 | Google Drive / Master | Persönlich angebundenes Google-Drive-Konto `sero91ak@gmail.com`, Datei „MASTER – Kunden- & Fahrtenverwaltung 2026 – AKTUELL“ | Nur das exakt autorisierte Master-Sheet abfragen; nicht pauschal sämtliche Drive-Dateien oder Patientendokumente herunterladen. |
 | OneSignal | Nur DĀR AL TAWḤĪD APP und TAWḤĪD KIDS vorhanden | Keine TaxiPro-App-ID vorhanden; **niemals** deren Schlüssel wiederverwenden. |
 | Claude | Keine eigene Claude-API-Anwendungsberechtigung verifiziert | `CLAUDE_ENABLED=false`; mit dem gegenwärtigen Nullkosten-Ziel keine bezahlten Anfragen. |
