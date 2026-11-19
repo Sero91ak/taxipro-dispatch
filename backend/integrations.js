@@ -142,9 +142,28 @@ async function claudeSummary(req,env,u){
     .map(x=>x.text).join('\n').slice(0,1600),
    anonymized:true,billedRequest:true};
 }
+/** Distinguish configured credentials from a real, successful Google import. */
+async function googleSyncHealth(db){
+ const rows=await db.prepare(`SELECT source,status,last_attempt_at,last_success_at,items_seen
+   FROM sync_checkpoints WHERE source IN ('google_calendar_taxi','google_master')`).all();
+ const health={calendar:null,master:null};
+ for(const row of rows.results||[]){
+  const key=row.source==='google_calendar_taxi'?'calendar':row.source==='google_master'?'master':null;
+  if(key)health[key]={
+   status:row.status||'unknown',
+   lastAttemptAt:row.last_attempt_at||null,
+   lastSuccessAt:row.last_success_at||null,
+   itemsSeen:Number(row.items_seen||0)
+  };
+ }
+ return health;
+}
 export async function handleIntegrations(req,env,u,path){
- if(path==='/api/integrations/status'&&req.method==='GET')
-  return {data:integrationStatus(env,u)};
+ if(path==='/api/integrations/status'&&req.method==='GET'){
+  const result=integrationStatus(env,u);
+  if(u.role==='admin'&&env.DB)result.googleSync=await googleSyncHealth(env.DB);
+  return {data:result};
+ }
  if(path==='/api/integrations/push'&&req.method==='POST')
   return {data:await pushSubscription(req,env,u)};
  const match=path.match(/^\/api\/integrations\/push\/([0-9a-f-]{36})$/i);
