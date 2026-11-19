@@ -20,14 +20,14 @@ export function createIntegrationsUI({request,toast,getUser,getPage,getDate}){
  function view(){
   const me=getUser(),p=data?.oneSignal||{},c=data?.claude||{};
   const goog=me?.role==='admin'?'<section class="center-panel">'+
-   '<div class="center-panel-head"><b>Google Workspace · Taxi Meckenheim</b></div>'+
+   '<div class="center-panel-head"><b>Google · Hauptkonto &amp; Taxi-Kalender</b></div>'+
    '<div class="integration-list">'+
    '<div><b>Taxi-Kalender</b>'+flag(data?.google?.taxiCalendar,'Nur lesend')+
    '<div class="center-caption">'+esc(syncInfo('calendar'))+'</div></div>'+
    '<div><b>Google Drive / Master-Kundenakte</b>'+flag(data?.google?.masterSheets,'Nur lesend')+
    '<div class="center-caption">'+esc(syncInfo('master'))+'</div></div>'+
    '<div><b>Google Kontakte</b>'+flag(data?.google?.contacts,'Nur lesend')+'</div></div>'+
-   '<p class="center-caption">Konfiguriert bedeutet nicht automatisch erfolgreich synchronisiert. Quellenstand und Fehler im Dashboard kontrollieren.</p></section>':'';
+   '<p class="center-caption">Bevorzugtes Google-Hauptkonto: 091. Der geteilte Taxi-Kalender und das Drive-Masterblatt bleiben eigenständige Quellen. Konfiguriert ist nicht gleich erfolgreich synchronisiert; Quellenstand kontrollieren.</p></section>':'';
   return '<div class="center-shell">'+
    '<div class="center-welcome"><div><div class="center-eyebrow">TAXIPRO · VERBINDUNGEN</div>'+
    '<h2>Geschützte Integrationen</h2>'+
