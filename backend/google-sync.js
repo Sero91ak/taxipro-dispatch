@@ -2,24 +2,35 @@
  * TaxiPro Google READ-ONLY bridge.
  *
  * All OAuth refresh tokens are private Cloudflare Worker secrets, not ChatGPT
- * connector tokens. Calendar and Sheets may belong to DIFFERENT Google accounts.
+ * connector tokens. A single authorized primary Google account may read the
+ * explicitly selected taxi calendar, master Sheet and contacts. Legacy
+ * per-source credentials stay supported without migration or destructive writes.
  * No source edits, no patient documents, no notes or IDs sent to GitHub.
  */
 import {masterCustomers,matchCalendarCustomer,normalizedGoogleEvent,possibleExistingCustomers} from './reconcile.js';
 
 const fresh=()=>new Date().toISOString(),ID=()=>crypto.randomUUID();
 const fail=(code,m)=>Object.assign(new Error(m),{status:code});
-const SCOPES={
- calendar:['GOOGLE_TAXI_CLIENT_ID','GOOGLE_TAXI_CLIENT_SECRET','GOOGLE_TAXI_REFRESH_TOKEN','GOOGLE_TAXI_CALENDAR_ID'],
- sheets:['GOOGLE_MASTER_CLIENT_ID','GOOGLE_MASTER_CLIENT_SECRET','GOOGLE_MASTER_REFRESH_TOKEN','GOOGLE_MASTER_SHEET_ID'],
- contacts:['GOOGLE_CONTACTS_CLIENT_ID','GOOGLE_CONTACTS_CLIENT_SECRET','GOOGLE_CONTACTS_REFRESH_TOKEN']
-};
+// Default: one explicitly authorized Google account for TaxiPro, with the
+// calendar and master Sheet identified separately. The calendar's owner need
+// not be the OAuth account when that calendar is shared with it.
+const LEGACY_PREFIX={calendar:'GOOGLE_TAXI_',sheets:'GOOGLE_MASTER_',contacts:'GOOGLE_CONTACTS_'};
+const SOURCE_RESOURCE={calendar:'GOOGLE_TAXI_CALENDAR_ID',sheets:'GOOGLE_MASTER_SHEET_ID'};
+const hasValue=(env,key)=>typeof env[key]==='string'&&!!env[key].trim();
+const hasOAuth=(env,prefix)=>['CLIENT_ID','CLIENT_SECRET','REFRESH_TOKEN']
+ .every(k=>hasValue(env,prefix+k));
+export function googleOAuthSource(env,source){
+ if(!Object.hasOwn(LEGACY_PREFIX,source))return null;
+ if(hasOAuth(env,'GOOGLE_PRIMARY_'))return 'primary';
+ return hasOAuth(env,LEGACY_PREFIX[source])?'legacy':null;
+}
 export function isGoogleConfigured(env,source){
- return (SCOPES[source]||[]).every(k=>typeof env[k]==='string'&&env[k].trim());
+ return !!googleOAuthSource(env,source)&&
+   (!SOURCE_RESOURCE[source]||hasValue(env,SOURCE_RESOURCE[source]));
 }
 async function token(env,source) {
  if(!isGoogleConfigured(env,source))return null;
- const prefix=source==='calendar'?'GOOGLE_TAXI_':source==='contacts'?'GOOGLE_CONTACTS_':'GOOGLE_MASTER_';
+ const prefix=googleOAuthSource(env,source)==='primary'?'GOOGLE_PRIMARY_':LEGACY_PREFIX[source];
  const form=new URLSearchParams({
    client_id:env[prefix+'CLIENT_ID'],client_secret:env[prefix+'CLIENT_SECRET'],
    refresh_token:env[prefix+'REFRESH_TOKEN'],grant_type:'refresh_token'
