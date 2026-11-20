@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "source": "Autobahn GmbH des Bundes",
-  "generatedAt": "2026-11-20T08:16:33.987Z",
+  "generatedAt": "2026-11-20T17:08:41.899Z",
   "region": "Meckenheim · Bonn · Rhein-Sieg · Köln",
   "roads": [
     "A61",
@@ -27,7 +27,7 @@
       "title": "Markierung Lohmar-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.11.26 um 21:00 Uhr Ende: 29.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 29.11.26) Von Auffahrt auf die A3: AS Lohmar-Nord (aus Richtung Sülztal) nach A3: Köln -> Frankfurt, zwischen AS Lohmar-Nord und 2.8 km vor AS Lohmar Länge: konnte nicht ermittelt werden Markierung Lohmar-Nord",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:closure:2026-056535--vi-fbm.2026-11-27_21-00-00-000.devi-zus.2026-11-13_21-00-00-000.de5",
@@ -40,7 +40,7 @@
       "title": "Markierung Lohmar-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.11.26 um 21:00 Uhr Ende: 29.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 29.11.26) Von A3: Frankfurt -> Köln, zwischen 2.9 km hinter AS Lohmar und AS Lohmar-Nord nach Abfahrt von der A3: AS Lohmar-Nord (aus Richtung Lohmar) Länge: konnte nicht ermittelt werden Markierung Lohmar-Nord",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de290",
@@ -53,7 +53,7 @@
       "title": "A3 | Bad Honnef/Linz - Bonn/Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Frankfurt -> Köln, zwischen 3.6 km hinter AS Bad Honnef/Linz und 10.8 km vor AK Bonn/Siegburg Länge: 2.49 km | Maximale Durchfahrtsbreite: 9.75 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000214--vi-bs.2026-11-30_09-00-00-000.devi-zus.2030-05-11_09-00-00-000.f_001.de105",
@@ -66,7 +66,7 @@
       "title": "A3 | Bad Honnef/Linz - Logebachtal",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 30.11.26 von 09:00 bis 16:00 Uhr A3: Frankfurt -> Köln, zwischen 1.6 km hinter AS Bad Honnef/Linz und 1.6 km vor Logebachtal Länge: 0.5 km | Maximale Durchfahrtsbreite: 7.5 m Erhaltungsentwurf Abs. V Siebengebirge - Bad Honnef_Linz",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de288",
@@ -79,7 +79,7 @@
       "title": "A3 | Bonn/Siegburg - Logebachtal",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Köln -> Frankfurt, zwischen 10.9 km hinter AK Bonn/Siegburg und 1.1 km vor Logebachtal Länge: 1.1 km | Maximale Durchfahrtsbreite: 9.75 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2025-052789--vi-bs.2026-09-07_09-00-00-000.devi-zus.2026-10-12_09-00-00-000.de7",
@@ -92,7 +92,7 @@
       "title": "A3 | Bonn/Siegburg - Lohmar",
       "detail": "Zeitraum dieser Bauphase: Beginn: 07.09.26 um 09:00 Uhr Ende: 20.03.27 um 09:00 Uhr (Ende der Gesamtmaßnahme: 25.09.27) A3: Frankfurt -> Köln, zwischen 4.0 km hinter AK Bonn/Siegburg und 1.7 km vor AS Lohmar Länge: 0.35 km | Maximale Durchfahrtsbreite: 11.25 m DEGES Umbau Raststätte Siegburg-Ost",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de278",
@@ -105,7 +105,7 @@
       "title": "A3 | Bonn/Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Köln -> Frankfurt, zwischen 10.6 km hinter AK Bonn/Siegburg und 0.2 km vor AS Siebengebirge Länge: 0.34 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 9.25 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de276",
@@ -118,7 +118,7 @@
       "title": "A3 | Bonn/Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Köln -> Frankfurt, zwischen 3.3 km hinter AK Bonn/Siegburg und 0.6 km vor AS Siebengebirge Länge: 7.3 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 9.75 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de274",
@@ -131,20 +131,20 @@
       "title": "A3 | Bonn/Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Köln -> Frankfurt, zwischen 2.3 km hinter AK Bonn/Siegburg und 7.9 km vor AS Siebengebirge Länge: 0.95 km | Maximale Durchfahrtsbreite: 9.75 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-23_08-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de305",
       "autobahn": "A3",
       "kind": "roadworks",
       "coords": [
-        7.258786410087117,
-        50.700909260928356
+        7.253983181709153,
+        50.703577582698784
       ],
       "title": "A3 | Bonn/Siegburg - Siebengebirge",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 08:00 bis zum 26.11.26 24:00 Uhr. 27.11.26 von 00:00 bis 14:00 Uhr A3: Köln -> Frankfurt, zwischen 9.1 km hinter AK Bonn/Siegburg und 1.7 km vor AS Siebengebirge Länge: 0.3 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.5 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 08:00 bis zum 26.11.26 24:00 Uhr. 27.11.26 von 00:00 bis 14:00 Uhr A3: Köln -> Frankfurt, zwischen 8.7 km hinter AK Bonn/Siegburg und 1.7 km vor AS Siebengebirge Länge: 0.75 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.5 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-027142--vi-bs.2026-06-10_09-00-00-000_001.de0",
@@ -157,7 +157,7 @@
       "title": "A3 | Bonn/Siegburg - Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.06.26 um 09:00 Uhr Ende: 05.12.26 um 00:00 Uhr (Ende der Gesamtmaßnahme: 05.12.26) A3: Frankfurt -> Köln, zwischen 3.8 km hinter AK Bonn/Siegburg und 0.3 km vor Siegburg Länge: konnte nicht ermittelt werden | Maximale Durchfahrtsbreite: 10.25 m Spülbohrung Raststätte Siegburg-Ost",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2024-036115--vi-bs.2026-07-15_22-00-00-000.devi-zus.2024-08-24_05-00-00-000.f_002.de170",
@@ -170,7 +170,7 @@
       "title": "A3 | Hilden - Stindertal / Stinderhof",
       "detail": "Zeitraum dieser Bauphase: Beginn: 15.07.26 um 22:00 Uhr Ende: 29.02.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 29.02.28) A3: Köln -> Oberhausen, zwischen 0.2 km hinter AK Hilden und 4.6 km vor Stindertal / Stinderhof Länge: 0.44 km | Maximale Durchfahrtsbreite: 6.75 m BW In den Birken",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-005843--vi-bs.2026-07-01_20-00-00-000.devi-zus.2026-02-25_09-00-00-000_021.de21",
@@ -183,7 +183,7 @@
       "title": "A3 | Köln-Dellbrück - Köln-Mülheim",
       "detail": "Zeitraum dieser Bauphase: Beginn: 01.07.26 um 20:00 Uhr Ende: 30.11.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 30.11.26) A3: Köln -> Oberhausen, zwischen 0.2 km hinter AS Köln-Dellbrück und 1.2 km vor AS Köln-Mülheim Länge: 0.8 km | Max. 120 km/h | Maximale Durchfahrtsbreite: 12.5 m A3 BW Prüfung (LSW) K.-Dellbrück",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000264--vi-bs.2024-11-22_15-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de126",
@@ -196,7 +196,20 @@
       "title": "A3 | Köln-Heumar - Köln-Ost",
       "detail": "Zeitraum dieser Bauphase: Beginn: 22.11.24 um 15:00 Uhr Ende: 31.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) A3: Frankfurt -> Köln, zwischen AD Köln-Heumar und 3.2 km vor AK Köln-Ost Länge: 0.35 km | Maximale Durchfahrtsbreite: 7 m (DEGES) Umbau AD Heumar",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A3:roadworks:2023-000209--vi-bs.2026-11-21_09-00-00-000.devi-zus.2016-04-12_15-00-00-000.f_001.de58",
+      "autobahn": "A3",
+      "kind": "roadworks",
+      "coords": [
+        7.104569929685504,
+        50.9151762893567
+      ],
+      "title": "A3 | Köln-Heumar - Königsforst",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 21.11.26 von 09:00 bis 15:00 Uhr 23.11.26 von 09:00 bis 15:00 Uhr A3: Köln -> Frankfurt, zwischen 3.3 km hinter AD Köln-Heumar und 1.6 km vor Königsforst Länge: 2.37 km | Maximale Durchfahrtsbreite: 7.5 m BW Gieselbach",
+      "future": true,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000264--vi-bs.2024-11-22_15-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de122",
@@ -209,7 +222,7 @@
       "title": "A3 | Köln-Ost - Königsforst",
       "detail": "Zeitraum dieser Bauphase: Beginn: 22.11.24 um 15:00 Uhr Ende: 31.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) A3: Köln -> Frankfurt, zwischen 3.1 km hinter AK Köln-Ost und 3.1 km vor AS Königsforst Länge: 0.9 km | Maximale Durchfahrtsbreite: 5.85 m (DEGES) Umbau AD Heumar",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000264--vi-bs.2024-11-22_15-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de124",
@@ -222,7 +235,7 @@
       "title": "A3 | Königsforst - Köln-Heumar",
       "detail": "Zeitraum dieser Bauphase: Beginn: 22.11.24 um 15:00 Uhr Ende: 31.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) A3: Frankfurt -> Köln, zwischen 3.2 km hinter AS Königsforst und AD Köln-Heumar Länge: 0.24 km | Maximale Durchfahrtsbreite: 5.85 m (DEGES) Umbau AD Heumar",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2025-013274--vi-bs.2026-09-13_00-00-00-000.devi-zus.2026-03-01_00-00-00-000_001.de5",
@@ -235,7 +248,7 @@
       "title": "A3 | Landsberg an der Warthe - Ransbach-Baumbach / Mogendorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.09.26 um 00:00 Uhr Ende: 21.07.27 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A3: Köln -> Frankfurt, zwischen 0.6 km hinter Landsberg an der Warthe und 0.9 km vor AS Ransbach-Baumbach / Mogendorf Länge: 4.24 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 9.25 m A3 Brückenneubau Wildbrücke Oberhaid",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-060116--vi-bs.2026-11-23_09-00-00-000_004.de0",
@@ -248,7 +261,20 @@
       "title": "A3 | Leverkusen - Leverkusen-Zentrum",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 15:00 Uhr A3: Oberhausen -> Köln, zwischen 0.3 km hinter AK Leverkusen und 1.6 km vor AS Leverkusen-Zentrum Länge: 0.12 km | Maximale Durchfahrtsbreite: 3.5 m A3 Arbeiten an LSW (Fluchttür)",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A3:roadworks:2026-056535--vi-fbm.2026-11-23_11-00-00-000.devi-zus.2026-11-13_21-00-00-000.de7",
+      "autobahn": "A3",
+      "kind": "roadworks",
+      "coords": [
+        7.211552635357914,
+        50.84752587577933
+      ],
+      "title": "A3 | Lohmar - Lohmar-Nord",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 11:00 bis 15:00 Uhr A3: Frankfurt -> Köln, zwischen 2.9 km hinter AS Lohmar und 0.2 km vor AS Lohmar-Nord Länge: 0.19 km | Maximale Durchfahrtsbreite: 3.5 m Markierung Lohmar-Nord",
+      "future": true,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2025-013274--vi-bs.2026-07-27_00-00-00-000.devi-zus.2026-03-01_00-00-00-000_001.de21",
@@ -261,7 +287,7 @@
       "title": "A3 | Merker Wald - Welchehahn",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.07.26 um 00:00 Uhr Ende: 12.11.29 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A3: Köln -> Frankfurt, zwischen 0.9 km hinter Merker Wald und 3.5 km vor Welchehahn Länge: 9.95 km | Maximale Durchfahrtsbreite: 14.25 m A3 Brückenneubau Wildbrücke Oberhaid",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-060310--vi-bs.2026-12-01_09-00-00-000.de0",
@@ -274,7 +300,20 @@
       "title": "A3 | Mettmann - Ratingen-Ost",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: Jeden Dienstag, Mittwoch, Donnerstag und Freitag zwischen dem 01.12.26 und dem 04.12.26 von 09:00 bis 18:00 Uhr. A3: Köln -> Oberhausen, zwischen 0.6 km hinter AS Mettmann und 3.8 km vor AK Ratingen-Ost Länge: 0.2 km | Max. 100 km/h | Maximale Durchfahrtsbreite: 11.25 m A3 von Mettmann (AS) nach Ratingen-Ost ",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A3:roadworks:2026-060315--vi-bs.2026-12-01_09-00-00-000_001.de0",
+      "autobahn": "A3",
+      "kind": "roadworks",
+      "coords": [
+        6.913089096675978,
+        51.26879560835939
+      ],
+      "title": "A3 | Mettmann - Ratingen-Ost",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: Jeden Dienstag, Mittwoch, Donnerstag und Freitag zwischen dem 01.12.26 und dem 04.12.26 von 09:00 bis 18:00 Uhr. A3: Köln -> Oberhausen, zwischen 1.1 km hinter AS Mettmann und 3.2 km vor AK Ratingen-Ost Länge: 0.35 km | Max. 100 km/h | Maximale Durchfahrtsbreite: 11.25 m A3 von Mettmann (AS) nach Ratingen-Ost",
+      "future": true,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2025-013274--vi-bs.2026-07-27_00-00-00-000.devi-zus.2026-03-01_00-00-00-000_001.de23",
@@ -287,7 +326,7 @@
       "title": "A3 | Montabaur - Welchehahn",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.07.26 um 00:00 Uhr Ende: 12.11.29 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A3: Frankfurt -> Köln, zwischen 0.6 km hinter Montabaur und 1.1 km vor Welchehahn Länge: 9.91 km | Maximale Durchfahrtsbreite: 14.25 m A3 Brückenneubau Wildbrücke Oberhaid",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-010258--vi-bs.2026-02-04_00-00-00-000_001.de0",
@@ -300,7 +339,7 @@
       "title": "A3 | Neuwied - Urbacher Wald",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.02.26 um 00:00 Uhr Ende: 01.01.27 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.01.27) A3: Köln -> Frankfurt, zwischen 2.7 km hinter AS Neuwied und 1.2 km vor Urbacher Wald Länge: 1 km | Maximale Durchfahrtsbreite: 11.25 m Defekter Anpralldämpfer",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2024-036115--vi-bs.2026-07-15_22-00-00-000.devi-zus.2024-08-24_05-00-00-000.f_002.de168",
@@ -313,7 +352,7 @@
       "title": "A3 | Ohligser Heide - Stindertal / Stinderhof",
       "detail": "Zeitraum dieser Bauphase: Beginn: 15.07.26 um 22:00 Uhr Ende: 29.02.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 29.02.28) A3: Köln -> Oberhausen, zwischen 3.8 km hinter Ohligser Heide und 5.0 km vor Stindertal / Stinderhof Länge: 0.69 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 8.75 m BW In den Birken",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2025-013274--vi-bs.2026-09-13_00-00-00-000.devi-zus.2026-03-01_00-00-00-000_001.de7",
@@ -326,7 +365,7 @@
       "title": "A3 | Ransbach-Baumbach / Mogendorf - Landsberg an der Warthe",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.09.26 um 00:00 Uhr Ende: 21.07.27 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A3: Frankfurt -> Köln, zwischen 0.9 km hinter AS Ransbach-Baumbach / Mogendorf und 0.6 km vor Landsberg an der Warthe Länge: 4.24 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.25 m A3 Brückenneubau Wildbrücke Oberhaid",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000185--vi-bs.2026-10-12_05-00-00-000.devi-zus.2022-02-12_05-00-00-000_002.f.de1438",
@@ -339,7 +378,7 @@
       "title": "A3 | Siebengebirge - Bonn/Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 12.10.26 um 05:00 Uhr Ende: 25.09.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 25.09.27) A3: Frankfurt -> Köln, zwischen 9.5 km hinter AS Siebengebirge und 0.7 km vor AK Bonn/Siegburg Länge: 0.85 km | Maximale Durchfahrtsbreite: 6.5 m Erhaltungsentwurf Abs. III Lohmar - AK Bonn_Siegburg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de294",
@@ -352,7 +391,7 @@
       "title": "A3 | Siebengebirge - Bonn/Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Frankfurt -> Köln, zwischen 0.7 km hinter AS Siebengebirge und 2.9 km vor AK Bonn/Siegburg Länge: 7.5 km | Maximale Durchfahrtsbreite: 9.75 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de292",
@@ -365,7 +404,7 @@
       "title": "A3 | Siebengebirge - Bonn/Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) A3: Frankfurt -> Köln, zwischen 0.4 km hinter AS Siebengebirge und 10.4 km vor AK Bonn/Siegburg Länge: 0.32 km | Maximale Durchfahrtsbreite: 9.25 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000185--vi-bs.2026-10-12_05-00-00-000.devi-zus.2022-02-12_05-00-00-000_002.f.de1442",
@@ -378,7 +417,7 @@
       "title": "A3 | Siebengebirge - Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 12.10.26 um 05:00 Uhr Ende: 25.09.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 25.09.27) A3: Frankfurt -> Köln, zwischen 10.4 km hinter AS Siebengebirge und 2.5 km vor Siegburg Länge: 2.36 km | Maximale Durchfahrtsbreite: 6.25 m Erhaltungsentwurf Abs. III Lohmar - AK Bonn_Siegburg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000185--vi-bs.2026-10-12_05-00-00-000.devi-zus.2022-02-12_05-00-00-000_002.f.de1444",
@@ -391,7 +430,7 @@
       "title": "A3 | Siegburg - Bonn/Siegburg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 12.10.26 um 05:00 Uhr Ende: 25.09.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 25.09.27) A3: Köln -> Frankfurt, zwischen 1.2 km hinter Siegburg und 1.6 km vor AK Bonn/Siegburg Länge: 1.3 km | Maximale Durchfahrtsbreite: 6.5 m Erhaltungsentwurf Abs. III Lohmar - AK Bonn_Siegburg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-056535--vi-fbm.2026-11-10_09-00-00-000.devi-zus.2026-11-13_21-00-00-000.de3",
@@ -404,7 +443,7 @@
       "title": "A3 | Siegburg - Lohmar",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: Jeden Montag, Dienstag, Mittwoch, Donnerstag und Freitag zwischen dem 10.11.26 und dem 26.11.26 von 09:00 bis 15:00 Uhr. A3: Frankfurt -> Köln, zwischen 1.0 km hinter Siegburg und 0.4 km vor AS Lohmar Länge: 0.5 km | Max. 120 km/h | Maximale Durchfahrtsbreite: 11.25 m Markierung Lohmar-Nord",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000185--vi-bs.2026-10-12_05-00-00-000.devi-zus.2022-02-12_05-00-00-000_002.f.de1440",
@@ -417,7 +456,7 @@
       "title": "A3 | Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 12.10.26 um 05:00 Uhr Ende: 25.09.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 25.09.27) A3: Köln -> Frankfurt, zwischen 2.5 km hinter Siegburg und 10.4 km vor AS Siebengebirge Länge: 2.36 km | Maximale Durchfahrtsbreite: 6.25 m Erhaltungsentwurf Abs. III Lohmar - AK Bonn_Siegburg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2024-036115--vi-bs.2026-07-15_22-00-00-000.devi-zus.2024-08-24_05-00-00-000.f_002.de172",
@@ -430,7 +469,7 @@
       "title": "A3 | Stindertal / Stinderhof - Hilden",
       "detail": "Zeitraum dieser Bauphase: Beginn: 15.07.26 um 22:00 Uhr Ende: 29.02.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 29.02.28) A3: Oberhausen -> Köln, zwischen 4.6 km hinter Stindertal / Stinderhof und 0.2 km vor AK Hilden Länge: 0.44 km | Maximale Durchfahrtsbreite: 8.7 m BW In den Birken",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2024-036115--vi-bs.2026-07-15_22-00-00-000.devi-zus.2024-08-24_05-00-00-000.f_002.de174",
@@ -443,7 +482,7 @@
       "title": "A3 | Stindertal / Stinderhof - Hilden",
       "detail": "Zeitraum dieser Bauphase: Beginn: 15.07.26 um 22:00 Uhr Ende: 29.02.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 29.02.28) A3: Oberhausen -> Köln, zwischen 3.7 km hinter Stindertal / Stinderhof und 0.6 km vor AK Hilden Länge: 0.9 km | Maximale Durchfahrtsbreite: 9.1 m BW In den Birken",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2025-013274--vi-bs.2026-07-27_00-00-00-000.devi-zus.2026-03-01_00-00-00-000_001.de27",
@@ -456,7 +495,7 @@
       "title": "A3 Brückenneubau Wildbrücke Oberhaid",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.07.26 um 00:00 Uhr Ende: 12.11.29 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) Abfahrt von der A48: AD Dernbach (aus Richtung Höhr-Grenzhausen) Länge: 1.57 km | Maximale Durchfahrtsbreite: 6.75 m A3 Brückenneubau Wildbrücke Oberhaid",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2026-005843--vi-bs.2026-07-01_20-00-00-000.devi-zus.2026-02-25_09-00-00-000_021.de23",
@@ -469,7 +508,7 @@
       "title": "A3 BW Prüfung (LSW) K.-Dellbrück",
       "detail": "Zeitraum dieser Bauphase: Beginn: 01.07.26 um 20:00 Uhr Ende: 30.11.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 30.11.26) Auffahrt auf die A3: AS Köln-Dellbrück (aus Richtung Köln-Ost) Länge: 0.3 km | Maximale Durchfahrtsbreite: 3.25 m A3 BW Prüfung (LSW) K.-Dellbrück",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2024-036115--vi-bs.2026-07-15_22-00-00-000.devi-zus.2024-08-24_05-00-00-000.f_002.de180",
@@ -482,7 +521,7 @@
       "title": "BW In den Birken",
       "detail": "Zeitraum dieser Bauphase: Beginn: 15.07.26 um 22:00 Uhr Ende: 29.02.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 29.02.28) Auffahrt auf die A3: AK Hilden (aus Richtung Ohligser Heide) Länge: 0.05 km | Maximale Durchfahrtsbreite: 3.5 m BW In den Birken",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de286",
@@ -495,7 +534,7 @@
       "title": "Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) Von A3: Köln -> Frankfurt, zwischen 10.4 km hinter AK Bonn/Siegburg und AS Siebengebirge nach Abfahrt von der A3: AS Siebengebirge (aus Richtung Bonn/Siegburg) Länge: 0.36 km | Maximale Durchfahrtsbreite: 3.25 m Erhaltungsentwurf Abs. IV AK",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de284",
@@ -508,7 +547,7 @@
       "title": "Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) Von Auffahrt auf die A3: AS Siebengebirge (aus Richtung Bonn/Siegburg) nach A3: Köln -> Frankfurt, zwischen AK Bonn/Siegburg und AS Siebengebirge Länge: 0.43 km | Maximale Durchfahrtsbreite: 3.25 m Erhaltungsentwurf Abs. IV AK Bonn_Siegburg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de282",
@@ -521,7 +560,7 @@
       "title": "Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) Von Auffahrt auf die A3: AS Siebengebirge (aus Richtung Logebachtal) nach A3: Frankfurt -> Köln, zwischen AS Siebengebirge und 10.3 km vor AK Bonn/Siegburg Länge: 0.37 km | Maximale Durchfahrtsbreite: 3.25 m Erhaltungsentwurf Abs. IV AK Bon",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A3:roadworks:2023-000213--vi-bs.2026-11-09_05-00-00-000.devi-zus.2019-07-11_09-00-00-000.f_001.de280",
@@ -534,7 +573,33 @@
       "title": "Erhaltungsentwurf Abs. IV AK Bonn_Siegburg - Siebengebirge",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 05:00 Uhr Ende: 31.05.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.35) Von A3: Frankfurt -> Köln, zwischen 0.1 km hinter AS Siebengebirge und AK Bonn/Siegburg nach Abfahrt von der A3: AS Siebengebirge (aus Richtung Logebachtal) Länge: 0.37 km | Maximale Durchfahrtsbreite: 3.25 m Erhaltungsentwurf Abs. IV AK Bo",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A3:warning:INRIX--vi-avl.2026-11-20_12-42-00-000_028.de0",
+      "autobahn": "A3",
+      "kind": "warning",
+      "coords": [
+        7.012496871107351,
+        50.995548486987765
+      ],
+      "title": "A3 | Köln-Mülheim - Leverkusen",
+      "detail": "Beginn: 20.11.26 um 13:42 Uhr Angespannte Verkehrslage, seit 20.11.2026, 12:42 A3: Köln -> Oberhausen, zwischen 1.4 km hinter AS Köln-Mülheim und 1.3 km vor AK Leverkusen Ereignismeldung: - Stockender Verkehr - Durchschnittsgeschwindigkeit: 40 km/h - Reisezeitverlust: 3 Minuten",
+      "future": false,
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A3:warning:INRIX--vi-avl.2026-11-20_16-48-00-000_011.de0",
+      "autobahn": "A3",
+      "kind": "warning",
+      "coords": [
+        7.228560914383255,
+        50.79866790504951
+      ],
+      "title": "A3 | Siegburg - Bonn/Siegburg",
+      "detail": "Beginn: 20.11.26 um 17:48 Uhr Angespannte Verkehrslage, seit 20.11.2026, 16:48 A3: Köln -> Frankfurt, zwischen 1.3 km hinter Siegburg und 0.3 km vor AK Bonn/Siegburg Ereignismeldung: - Stockender Verkehr - Durchschnittsgeschwindigkeit: 25 km/h - Reisezeitverlust: 4 Minuten (zunehmend)",
+      "future": false,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-055330--vi-fbm.2026-11-16_09-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de69",
@@ -547,7 +612,7 @@
       "title": "A4 | Erlenhof - Bielstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.11.26 um 09:00 Uhr Ende: 27.11.26 um 20:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Köln -> Olpe, zwischen 5.6 km hinter Erlenhof und 0.1 km vor AS Bielstein Länge: konnte nicht ermittelt werden Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-055330--vi-fbm.2026-11-23_06-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de76",
@@ -560,7 +625,7 @@
       "title": "A4 | Hasbacher Höhe - Hömeler Feld",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 06:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Olpe -> Köln, zwischen 3.6 km hinter Hasbacher Höhe und 1.2 km vor Hömeler Feld Länge: konnte nicht ermittelt werden Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-015801--vi-fbm.2026-11-06_19-00-00-000.devi-zus.2024-10-26_05-00-00-000_001.f.de55",
@@ -573,7 +638,7 @@
       "title": "BW AK Köln-Ost FB-Übergang",
       "detail": "Zeitraum dieser Bauphase: Beginn: 06.11.26 um 19:00 Uhr Ende: 31.01.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) Abfahrt von der A4: AK Köln-Ost (aus Richtung Köln-Heumar) Länge: konnte nicht ermittelt werden BW AK Köln-Ost FB-Übergang",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2025-056969--vi-fbm.2026-11-23_21-00-00-000.devi-zus.2026-09-07_09-00-00-000.de61",
@@ -586,7 +651,7 @@
       "title": "Deckensanierung AS Langerwehe - AS Düren",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 21:00 bis zum 24.11.26 05:00 Uhr. (Ende der Gesamtmaßnahme: 20.11.30) Auffahrt auf die A4: AS Düren (aus Richtung Merzenich) Länge: konnte nicht ermittelt werden Deckensanierung AS Langerwehe - AS Düren",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-055330--vi-fbm.2026-11-23_06-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de78",
@@ -599,7 +664,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 06:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Von Auffahrt auf die A4: AS Gummersbach (aus Richtung Morkepütz) nach A4: Olpe -> Köln, zwischen AS Gummersbach und 4.2 km vor AS Bielstein Länge: konnte nicht ermittelt werden Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max.",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-055330--vi-fbm.2026-11-23_06-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de77",
@@ -612,7 +677,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 06:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Abfahrt von der A4: AS Gummersbach (aus Richtung Morkepütz) Länge: konnte nicht ermittelt werden Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-055330--vi-fbm.2026-11-16_09-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de71",
@@ -625,7 +690,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.11.26 um 09:00 Uhr Ende: 27.11.26 um 20:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Abfahrt von der A4: AS Bielstein (aus Richtung Bellingroth) Länge: konnte nicht ermittelt werden Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:closure:2024-055330--vi-fbm.2026-11-16_09-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de70",
@@ -638,7 +703,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.11.26 um 09:00 Uhr Ende: 27.11.26 um 20:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Auffahrt auf die A4: AS Engelskirchen (aus Richtung Erlenhof) Länge: konnte nicht ermittelt werden Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de32",
@@ -651,7 +716,7 @@
       "title": "A4 | Bellingroth - Bielstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Köln -> Olpe, zwischen 0.4 km hinter Bellingroth und 0.8 km vor AS Bielstein Länge: 0.25 km | Maximale Durchfahrtsbreite: 3.5 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de34",
@@ -664,7 +729,7 @@
       "title": "A4 | Bellingroth - Bielstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Köln -> Olpe, zwischen 0.7 km hinter Bellingroth und 0.5 km vor AS Bielstein Länge: 0.25 km | Maximale Durchfahrtsbreite: 6.75 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de40",
@@ -677,7 +742,7 @@
       "title": "A4 | Bellingroth - Wiehltalbrücke",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Köln -> Olpe, zwischen 0.9 km hinter Bellingroth und 0.8 km vor Wiehltalbrücke Länge: 1.5 km | Maximale Durchfahrtsbreite: 3.5 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-002045--vi-bs.2026-10-16_05-00-00-000.devi-zus.2023-07-27_09-00-00-000_003.de514",
@@ -690,7 +755,7 @@
       "title": "A4 | Bergisch Gladbach-Frankenforst - Bergisch Gladbach-Refrath",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 30.11.26) A4: Olpe -> Köln, zwischen 0.5 km hinter AS Bergisch Gladbach-Frankenforst und 0.9 km vor AS Bergisch Gladbach-Refrath Länge: 0.87 km | Maximale Durchfahrtsbreite: 6.75 m FB-Sanierung K-Merheim - Untereschbach",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-002045--vi-bs.2026-10-16_05-00-00-000.devi-zus.2023-07-27_09-00-00-000_003.de516",
@@ -703,7 +768,7 @@
       "title": "A4 | Bergisch Gladbach-Refrath - Bergisch Gladbach-Frankenforst",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 30.11.26) A4: Köln -> Olpe, zwischen 0.3 km hinter AS Bergisch Gladbach-Refrath und 1.0 km vor AS Bergisch Gladbach-Frankenforst Länge: 1 km | Maximale Durchfahrtsbreite: 6.75 m FB-Sanierung K-Merheim - Untereschbach",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-009935--vi-bs.2026-06-30_05-00-00-000.devi-zus.2025-06-14_05-00-00-000_005.f.de1",
@@ -716,7 +781,7 @@
       "title": "A4 | Bielstein - Hömeler Feld",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.06.26 um 05:00 Uhr Ende: 22.09.33 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.33) A4: Köln -> Olpe, zwischen 0.2 km hinter AS Bielstein und 0.4 km vor Hömeler Feld Länge: 2.3 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6 m Brückenlager Wiehltalbrücke",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2024-11-19_09-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de1",
@@ -729,7 +794,7 @@
       "title": "A4 | Bielstein - Hömeler Feld",
       "detail": "Zeitraum dieser Bauphase: Beginn: 19.11.24 um 09:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Köln -> Olpe, zwischen 1.0 km hinter AS Bielstein und 0.7 km vor Hömeler Feld Länge: 1.2 km | Max. 100 km/h | Maximale Durchfahrtsbreite: 3.75 m | zulässiges Gesamtgewicht: 44 t Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-060175--vi-bs.2026-11-23_19-00-00-000.devi-zus.2026-11-23_19-00-00-000_004.de3",
@@ -742,7 +807,7 @@
       "title": "A4 | Düren - Merzenich",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 24.11.26 von 05:00 bis 18:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 3.7 km hinter AS Düren und 0.1 km vor AS Merzenich Länge: 1.03 km | Maximale Durchfahrtsbreite: 7.5 m A4 Bergbauschaden RWE",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-060175--vi-bs.2026-11-23_19-00-00-000.devi-zus.2026-11-23_19-00-00-000_004.de1",
@@ -755,7 +820,20 @@
       "title": "A4 | Düren - Merzenich",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 19:00 bis zum 24.11.26 05:00 Uhr. A4: Heerlen/Aachen -> Köln, zwischen 3.7 km hinter AS Düren und 0.1 km vor AS Merzenich Länge: 1.03 km | Maximale Durchfahrtsbreite: 3.25 m A4 Bergbauschaden RWE",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A4:roadworks:2026-060353--vi-bs.2026-11-26_11-00-00-000.de0",
+      "autobahn": "A4",
+      "kind": "roadworks",
+      "coords": [
+        7.771115487662901,
+        50.98025286032353
+      ],
+      "title": "A4 | Eckenhagen - Olpe-Süd",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 26.11.26 von 11:00 bis 12:00 Uhr A4: Köln -> Olpe, zwischen 4.4 km hinter AS Eckenhagen und 4.9 km vor AK Olpe-Süd Länge: 0.15 km | Maximale Durchfahrtsbreite: 7.5 m A4 - Beseitigung Unfallfolgen - AkD 60353",
+      "future": true,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-002066--vi-bs.2026-11-14_09-00-00-000.devi-zus.2024-11-16_09-00-00-000.f_001.de3",
@@ -768,7 +846,7 @@
       "title": "A4 | Eckenhagen - Reichshof/Bergneustadt",
       "detail": "Zeitraum dieser Bauphase: Beginn: 14.11.26 um 09:00 Uhr Ende: 19.08.28 um 15:00 Uhr (Ende der Gesamtmaßnahme: 19.08.28) A4: Olpe -> Köln, zwischen 1.1 km hinter AS Eckenhagen und 3.5 km vor AS Reichshof/Bergneustadt Länge: 1 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.25 m PWC Hasbacher Höhe",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-002576--vi-bs.2026-06-20_09-00-00-000.de0",
@@ -781,7 +859,7 @@
       "title": "A4 | Engelskirchen - Erlenhof",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.06.26 um 09:00 Uhr Ende: 13.02.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 13.02.27) A4: Olpe -> Köln, zwischen 0.3 km hinter AS Engelskirchen und 4.5 km vor Erlenhof Länge: 1.11 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.25 m LSW Engelskirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de28",
@@ -794,7 +872,20 @@
       "title": "A4 | Erlenhof - Bielstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Köln -> Olpe, zwischen 5.5 km hinter Erlenhof und 1.0 km vor AS Bielstein Länge: 1.91 km | Max. 100 km/h | Maximale Durchfahrtsbreite: 7 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A4:roadworks:2024-046557--vi-fbm.2026-11-25_09-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de366",
+      "autobahn": "A4",
+      "kind": "roadworks",
+      "coords": [
+        6.81458358514996,
+        50.929716493634054
+      ],
+      "title": "A4 | Frechen - Frechen-Nord",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 von 09:00 bis 15:00 Uhr 25.11.26 20:00 bis zum 26.11.26 05:00 Uhr. A4: Heerlen/Aachen -> Köln, zwischen 2.8 km hinter Frechen und 0.2 km vor AS Frechen-Nord Länge: 0.16 km | Maximale Durchfahrtsbreite: 6.5 m BW Eifeltor",
+      "future": true,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-059405--vi-bs.2026-11-26_09-00-00-000_003.de0",
@@ -807,7 +898,7 @@
       "title": "A4 | Frechen - Frechen-Nord",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 26.11.26 von 09:00 bis 15:00 Uhr 27.11.26 von 09:00 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 1.1 km hinter Frechen und 1.1 km vor AS Frechen-Nord Länge: 1 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.5 m A4 von Frechen (Raststaette) nach Frechen-Nord (AS) Bauwerksarbeiten",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-059414--vi-bs.2026-11-23_09-00-00-000_001.de0",
@@ -820,7 +911,7 @@
       "title": "A4 | Frechen - Frechen-Nord",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 15:00 Uhr 24.11.26 von 09:00 bis 15:00 Uhr 25.11.26 von 09:00 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 0.3 km hinter Frechen und 2.1 km vor AS Frechen-Nord Länge: 0.8 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.5 m A4 von Frechen (Raststaette) nach Frechen-Nord (AS) Bauw",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-029876--vi-bs.2026-11-23_09-00-00-000.devi-zus.2026-06-15_21-00-00-000_003.de15",
@@ -833,7 +924,7 @@
       "title": "A4 | Frechen - Kerpen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: Jeden Montag, Dienstag, Mittwoch und Donnerstag zwischen dem 23.11.26 und dem 26.11.26 von 09:00 bis 15:00 Uhr. 27.11.26 von 09:00 bis 13:00 Uhr A4: Köln -> Heerlen/Aachen, zwischen 4.1 km hinter Frechen und 2.5 km vor AK Kerpen Länge: 0.4 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7.5 m BW.-Prüfung",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000832--vi-bs.2026-07-13_05-00-00-000.devi-zus.2016-08-30_05-00-00-000.f_001.de39",
@@ -846,7 +937,7 @@
       "title": "A4 | Frechen - Kerpen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.07.26 um 05:00 Uhr Ende: 30.11.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 30.11.27) A4: Köln -> Heerlen/Aachen, zwischen 1.5 km hinter Frechen und 4.2 km vor AK Kerpen Länge: 1.28 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 8.6 m AS Königsdorf",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-051497--vi-bs.2026-11-21_08-00-00-000.devi-bs.2026-10-08_09-00-00-000_020.de28",
@@ -859,7 +950,7 @@
       "title": "A4 | Frechen - Köln-West",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 21.11.26 von 08:00 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 3.0 km hinter Frechen und 1.7 km vor AK Köln-West Länge: 0.35 km | Maximale Durchfahrtsbreite: 11.25 m Ausbau AS Frechen-Nord",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-fbm.2026-11-23_09-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de362",
@@ -872,7 +963,7 @@
       "title": "A4 | Frechen-Nord - Frechen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 15:00 Uhr 23.11.26 20:00 bis zum 24.11.26 05:00 Uhr. A4: Köln -> Heerlen/Aachen, zwischen 0.2 km hinter AS Frechen-Nord und 2.9 km vor Frechen Länge: 0.12 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7.5 m BW Eifeltor",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-059907--vi-bs.2026-11-24_09-00-00-000_007.de0",
@@ -885,20 +976,7 @@
       "title": "A4 | Frechen-Nord - Frechen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 24.11.26 von 09:00 bis 15:00 Uhr 25.11.26 von 09:00 bis 15:00 Uhr A4: Köln -> Heerlen/Aachen, zwischen 1.1 km hinter AS Frechen-Nord und 1.7 km vor Frechen Länge: 0.32 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.5 m A4 von Frechen-Nord (AS) nach Frechen (Raststaette) Fahrbahninstandhaltung",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A4:roadworks:2026-029876--vi-bs.2026-11-16_09-00-00-000.devi-zus.2026-06-15_21-00-00-000_003.de13",
-      "autobahn": "A4",
-      "kind": "roadworks",
-      "coords": [
-        6.7875563023909,
-        50.92974627839813
-      ],
-      "title": "A4 | Frechen-Nord - Kerpen",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 09:00 bis 13:00 Uhr A4: Köln -> Heerlen/Aachen, zwischen 2.3 km hinter AS Frechen-Nord und 5.4 km vor AK Kerpen Länge: 2.5 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7.5 m BW.-Prüfung",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-027493--vi-bs.2026-11-23_09-00-00-000.devi-zus.2025-06-15_21-00-00-000_001.de10",
@@ -911,7 +989,20 @@
       "title": "A4 | Frechen-Nord - Köln-Klettenberg",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 02.12.26 21:00 bis zum 03.12.26 04:00 Uhr. 03.12.26 21:00 bis zum 04.12.26 04:00 Uhr. A4: Heerlen/Aachen -> Köln, zwischen 0.9 km hinter AS Frechen-Nord und 5.4 km vor AS Köln-Klettenberg Länge: 1.01 km | Maximale Durchfahrtsbreite: 3.5 m A1_A4 BW.-Prüfung AK K.-West",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A4:roadworks:2024-046557--vi-fbm.2026-11-25_09-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de368",
+      "autobahn": "A4",
+      "kind": "roadworks",
+      "coords": [
+        6.841762446237655,
+        50.926605437711466
+      ],
+      "title": "A4 | Frechen-Nord - Köln-West",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 von 09:00 bis 15:00 Uhr 25.11.26 20:00 bis zum 26.11.26 05:00 Uhr. A4: Heerlen/Aachen -> Köln, zwischen 1.6 km hinter AS Frechen-Nord und AK Köln-West Länge: 0.22 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7.5 m BW Eifeltor",
+      "future": true,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-009935--vi-bs.2026-06-30_05-00-00-000.devi-zus.2025-06-14_05-00-00-000_005.f.de3",
@@ -924,7 +1015,7 @@
       "title": "A4 | Hömeler Feld - Bielstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.06.26 um 05:00 Uhr Ende: 22.09.33 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.33) A4: Olpe -> Köln, zwischen 0.4 km hinter Hömeler Feld und 0.2 km vor AS Bielstein Länge: 2.29 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6 m Brückenlager Wiehltalbrücke",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2024-11-19_09-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de3",
@@ -937,7 +1028,7 @@
       "title": "A4 | Hömeler Feld - Bielstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 19.11.24 um 09:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Olpe -> Köln, zwischen 0.3 km hinter Hömeler Feld und 1.1 km vor AS Bielstein Länge: 1.5 km | Max. 100 km/h | Maximale Durchfahrtsbreite: 3.75 m | zulässiges Gesamtgewicht: 44 t Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000832--vi-bs.2026-11-24_09-00-00-000.devi-zus.2016-08-30_05-00-00-000.f_001.de67",
@@ -950,7 +1041,7 @@
       "title": "A4 | Kerpen - Frechen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 24.11.26 von 09:00 bis 15:00 Uhr 25.11.26 von 09:00 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 5.2 km hinter AK Kerpen und 1.5 km vor Frechen Länge: 0.3 km | Maximale Durchfahrtsbreite: 5.85 m AS Königsdorf",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000832--vi-bs.2026-07-13_05-00-00-000.devi-zus.2016-08-30_05-00-00-000.f_001.de41",
@@ -963,7 +1054,7 @@
       "title": "A4 | Kerpen - Frechen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.07.26 um 05:00 Uhr Ende: 30.11.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 30.11.27) A4: Heerlen/Aachen -> Köln, zwischen 4.2 km hinter AK Kerpen und 1.5 km vor Frechen Länge: 1.31 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 9.35 m AS Königsdorf",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-054647--vi-bs.2026-11-25_09-30-00-000.devi-bs.2026-11-25_09-30-00-000.de1",
@@ -976,33 +1067,7 @@
       "title": "A4 | Köln-Eifeltor - Köln-Süd",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 von 09:30 bis 15:00 Uhr 26.11.26 von 09:30 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 0.2 km hinter AS Köln-Eifeltor und 1.3 km vor AK Köln-Süd Länge: 1.72 km | Maximale Durchfahrtsbreite: 7.5 m Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A4:roadworks:2025-043634--vi-bs.2026-11-16_09-00-00-000.devi-zus.2025-09-10_09-00-00-000_013.de17",
-      "autobahn": "A4",
-      "kind": "roadworks",
-      "coords": [
-        6.934570221663331,
-        50.88733736961452
-      ],
-      "title": "A4 | Köln-Eifeltor - Köln-Süd",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 09:00 bis 13:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 0.8 km hinter AS Köln-Eifeltor und 1.9 km vor AK Köln-Süd Länge: 0.55 km | Max. 100 km/h | Maximale Durchfahrtsbreite: 11.25 m BW-Prüfung",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A4:roadworks:2025-043634--vi-bs.2026-11-16_09-00-00-000.devi-zus.2025-09-10_09-00-00-000_013.de15",
-      "autobahn": "A4",
-      "kind": "roadworks",
-      "coords": [
-        6.93906546072432,
-        50.885954553606496
-      ],
-      "title": "A4 | Köln-Eifeltor - Köln-Süd",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 09:00 bis 13:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 1.1 km hinter AS Köln-Eifeltor und 1.5 km vor AK Köln-Süd Länge: 0.6 km | Maximale Durchfahrtsbreite: 7.5 m BW-Prüfung",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000264--vi-bs.2026-10-30_21-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de249",
@@ -1015,7 +1080,7 @@
       "title": "A4 | Köln-Gremberg - Köln-Ost",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.10.26 um 21:00 Uhr Ende: 02.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) A4: Heerlen/Aachen -> Olpe, zwischen 2.2 km hinter AK Köln-Gremberg und 3.2 km vor AK Köln-Ost Länge: 0.62 km | Maximale Durchfahrtsbreite: 3.25 m (DEGES) Umbau AD Heumar",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000264--vi-bs.2024-11-22_15-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de130",
@@ -1028,7 +1093,7 @@
       "title": "A4 | Köln-Gremberg - Köln-Ost",
       "detail": "Zeitraum dieser Bauphase: Beginn: 22.11.24 um 15:00 Uhr Ende: 31.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) A4: Heerlen/Aachen -> Olpe, zwischen 1.7 km hinter AK Köln-Gremberg und 3.3 km vor AK Köln-Ost Länge: 1.03 km | Maximale Durchfahrtsbreite: 6.5 m (DEGES) Umbau AD Heumar",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-10-20_05-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de263",
@@ -1041,7 +1106,7 @@
       "title": "A4 | Köln-Gremberg - Köln-Süd",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 13.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 13.12.26) A4: Köln -> Heerlen/Aachen, zwischen 1.0 km hinter AK Köln-Gremberg und 1.5 km vor AK Köln-Süd Länge: 3.1 km | Maximale Durchfahrtsbreite: 11.25 m Rheinbrücke Rodenkirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-11-25_09-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de269",
@@ -1054,7 +1119,7 @@
       "title": "A4 | Köln-Gremberg - Rodenkirchener Brücke",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 von 09:00 bis 15:00 Uhr A4: Köln -> Heerlen/Aachen, zwischen 1.8 km hinter AK Köln-Gremberg und 1.3 km vor Rodenkirchener Brücke Länge: 0.2 km | Maximale Durchfahrtsbreite: 7.5 m Rheinbrücke Rodenkirchen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-fbm.2026-11-23_09-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de273",
@@ -1067,7 +1132,7 @@
       "title": "A4 | Köln-Heumar - Köln-Gremberg",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 11:00 Uhr A4: Köln -> Heerlen/Aachen, zwischen 1.9 km hinter AD Köln-Heumar und 0.3 km vor AK Köln-Gremberg Länge: 0.12 km | Maximale Durchfahrtsbreite: 7.5 m Rheinbrücke Rodenkirchen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-10-20_05-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de261",
@@ -1080,7 +1145,7 @@
       "title": "A4 | Köln-Heumar - Köln-Poll",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 13.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 13.12.26) A4: Köln -> Heerlen/Aachen, zwischen 2.2 km hinter AD Köln-Heumar und 0.9 km vor AS Köln-Poll Länge: 1.2 km | Maximale Durchfahrtsbreite: 9.25 m Rheinbrücke Rodenkirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de282",
@@ -1093,7 +1158,7 @@
       "title": "A4 | Köln-Klettenberg - Köln-Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 01.12.29 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Heerlen/Aachen -> Köln, zwischen 0.2 km hinter AS Köln-Klettenberg und 0.1 km vor AS Köln-Eifeltor Länge: 1.01 km | Maximale Durchfahrtsbreite: 3.25 m | zulässiges Gesamtgewicht: 44 t BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-fbm.2026-11-23_09-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de364",
@@ -1106,20 +1171,7 @@
       "title": "A4 | Köln-Klettenberg - Köln-West",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 24.11.26 von 09:00 bis 15:00 Uhr 24.11.26 20:00 bis zum 25.11.26 05:00 Uhr. A4: Köln -> Heerlen/Aachen, zwischen 3.3 km hinter AS Köln-Klettenberg und 0.4 km vor AK Köln-West Länge: 1.77 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7.5 m BW Eifeltor",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A4:roadworks:2025-045625--vi-bs.2026-11-16_09-00-00-000.devi-zus.2025-09-24_09-00-00-000_008.de9",
-      "autobahn": "A4",
-      "kind": "roadworks",
-      "coords": [
-        6.864061643591374,
-        50.91908678454374
-      ],
-      "title": "A4 | Köln-Klettenberg - Köln-West",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 09:00 bis 13:00 Uhr A4: Köln -> Heerlen/Aachen, zwischen 3.9 km hinter AS Köln-Klettenberg und 1.0 km vor AK Köln-West Länge: 0.5 km | Maximale Durchfahrtsbreite: 7.5 m BW.-Prüf. K-West - Klettenberg",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de278",
@@ -1132,7 +1184,7 @@
       "title": "A4 | Köln-Süd - Köln-Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 01.12.29 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Köln -> Heerlen/Aachen, zwischen 2.7 km hinter AK Köln-Süd und 0.2 km vor AS Köln-Eifeltor Länge: 0.35 km | Maximale Durchfahrtsbreite: 3.25 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de276",
@@ -1145,7 +1197,7 @@
       "title": "A4 | Köln-Süd - Köln-Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 01.12.29 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Köln -> Heerlen/Aachen, zwischen 2.0 km hinter AK Köln-Süd und 0.5 km vor AS Köln-Eifeltor Länge: 0.7 km | Maximale Durchfahrtsbreite: 3.25 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de280",
@@ -1158,7 +1210,7 @@
       "title": "A4 | Köln-Süd - Köln-Klettenberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 01.12.29 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Köln -> Heerlen/Aachen, zwischen 3.1 km hinter AK Köln-Süd und 0.7 km vor AS Köln-Klettenberg Länge: 0.82 km | Maximale Durchfahrtsbreite: 3.25 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-11-23_09-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de271",
@@ -1171,7 +1223,7 @@
       "title": "A4 | Köln-Süd - Köln-Poll",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen 1.0 km hinter AK Köln-Süd und 0.7 km vor AS Köln-Poll Länge: 2.05 km | Maximale Durchfahrtsbreite: 6.5 m Rheinbrücke Rodenkirchen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-10-20_05-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de257",
@@ -1184,7 +1236,7 @@
       "title": "A4 | Köln-Süd - Köln-Poll",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 13.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 13.12.26) A4: Heerlen/Aachen -> Köln, zwischen 1.9 km hinter AK Köln-Süd und 1.1 km vor AS Köln-Poll Länge: 0.75 km | Maximale Durchfahrtsbreite: 9 m Rheinbrücke Rodenkirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-054647--vi-bs.2026-12-02_09-30-00-000.devi-bs.2026-11-25_09-30-00-000.de9",
@@ -1197,7 +1249,7 @@
       "title": "A4 | Köln-Süd - Rodenkirchener Brücke",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 02.12.26 von 09:30 bis 15:00 Uhr 03.12.26 von 09:30 bis 15:00 Uhr A4: Heerlen/Aachen -> Köln, zwischen AK Köln-Süd und 0.3 km vor Rodenkirchener Brücke Länge: 1.96 km | Maximale Durchfahrtsbreite: 6.5 m Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-10-20_05-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de255",
@@ -1210,7 +1262,7 @@
       "title": "A4 | Köln-Süd - Rodenkirchener Brücke",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 13.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 13.12.26) A4: Heerlen/Aachen -> Köln, zwischen 0.3 km hinter AK Köln-Süd und 0.3 km vor Rodenkirchener Brücke Länge: 1.56 km | Maximale Durchfahrtsbreite: 10.5 m Rheinbrücke Rodenkirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-fbm.2026-11-23_09-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de360",
@@ -1223,7 +1275,7 @@
       "title": "A4 | Köln-West - Frechen-Nord",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 15:00 Uhr 23.11.26 20:00 bis zum 24.11.26 05:00 Uhr. A4: Köln -> Heerlen/Aachen, zwischen AK Köln-West und 1.7 km vor AS Frechen-Nord Länge: 0.12 km | Maximale Durchfahrtsbreite: 6.5 m BW Eifeltor",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de290",
@@ -1236,7 +1288,7 @@
       "title": "A4 | Köln-West - Köln-Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 31.12.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Heerlen/Aachen -> Köln, zwischen 4.4 km hinter AK Köln-West und 1.1 km vor AS Köln-Eifeltor Länge: 1.3 km | Maximale Durchfahrtsbreite: 3.25 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-04_21-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de257",
@@ -1249,7 +1301,7 @@
       "title": "A4 | Köln-West - Köln-Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.07.26 um 21:00 Uhr Ende: 11.03.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Heerlen/Aachen -> Köln, zwischen 5.3 km hinter AK Köln-West und 1.1 km vor AS Köln-Eifeltor Länge: 0.4 km | Maximale Durchfahrtsbreite: 5.85 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de286",
@@ -1262,7 +1314,7 @@
       "title": "A4 | Köln-West - Köln-Klettenberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 31.12.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Heerlen/Aachen -> Köln, zwischen 3.4 km hinter AK Köln-West und 1.4 km vor AS Köln-Klettenberg Länge: 0.7 km | Maximale Durchfahrtsbreite: 8.75 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-04_21-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de255",
@@ -1275,7 +1327,7 @@
       "title": "A4 | Köln-West - Köln-Klettenberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.07.26 um 21:00 Uhr Ende: 11.03.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Heerlen/Aachen -> Köln, zwischen 4.6 km hinter AK Köln-West und 0.2 km vor AS Köln-Klettenberg Länge: 0.7 km | Maximale Durchfahrtsbreite: 8.75 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-16_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de288",
@@ -1288,7 +1340,7 @@
       "title": "A4 | Köln-West - Köln-Klettenberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.07.26 um 18:00 Uhr Ende: 31.12.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) A4: Heerlen/Aachen -> Köln, zwischen 4.1 km hinter AK Köln-West und 1.1 km vor AS Köln-Klettenberg Länge: 0.3 km | Maximale Durchfahrtsbreite: 6 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-056969--vi-bs.2026-11-02_09-00-00-000.devi-zus.2026-09-07_09-00-00-000.de41",
@@ -1301,7 +1353,7 @@
       "title": "A4 | Langerwehe - Merzenich",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.11.26 um 09:00 Uhr Ende: 17.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 20.11.30) A4: Heerlen/Aachen -> Köln, zwischen 0.5 km hinter AS Langerwehe und 4.5 km vor AS Merzenich Länge: 4.77 km | Maximale Durchfahrtsbreite: 7 m Deckensanierung AS Langerwehe - AS Düren",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-056969--vi-bs.2026-11-02_09-00-00-000.devi-zus.2026-09-07_09-00-00-000.de45",
@@ -1314,20 +1366,7 @@
       "title": "A4 | Merzenich - Düren",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.11.26 um 09:00 Uhr Ende: 17.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 20.11.30) A4: Köln -> Heerlen/Aachen, zwischen 3.4 km hinter AS Merzenich und 0.4 km vor AS Düren Länge: 0.99 km | Maximale Durchfahrtsbreite: 6.75 m Deckensanierung AS Langerwehe - AS Düren",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A4:roadworks:2025-056969--vi-fbm.2026-11-23_21-00-00-000.devi-zus.2026-09-07_09-00-00-000.de59",
-      "autobahn": "A4",
-      "kind": "roadworks",
-      "coords": [
-        6.461441395410321,
-        50.8407884416651
-      ],
-      "title": "A4 | Merzenich - Langerwehe",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 21:00 bis zum 24.11.26 05:00 Uhr. A4: Köln -> Heerlen/Aachen, zwischen 4.2 km hinter AS Merzenich und 0.3 km vor AS Langerwehe Länge: 5.32 km | Maximale Durchfahrtsbreite: 3.5 m Deckensanierung AS Langerwehe - AS Düren",
-      "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-056969--vi-bs.2026-11-02_09-00-00-000.devi-zus.2026-09-07_09-00-00-000.de43",
@@ -1340,33 +1379,20 @@
       "title": "A4 | Merzenich - Langerwehe",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.11.26 um 09:00 Uhr Ende: 17.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 20.11.30) A4: Köln -> Heerlen/Aachen, zwischen 4.5 km hinter AS Merzenich und 0.5 km vor AS Langerwehe Länge: 4.77 km | Maximale Durchfahrtsbreite: 3.5 m Deckensanierung AS Langerwehe - AS Düren",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
-      "id": "A4:roadworks:2026-060061--vi-bs.2026-11-20_11-00-00-000.de0",
+      "id": "A4:roadworks:2025-056969--vi-fbm.2026-11-23_21-00-00-000.devi-zus.2026-09-07_09-00-00-000.de59",
       "autobahn": "A4",
       "kind": "roadworks",
       "coords": [
-        7.532799974239984,
-        50.97348609550795
+        6.461441395410321,
+        50.8407884416651
       ],
-      "title": "A4 | Morkepütz - Gummersbach",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 11:00 bis 12:00 Uhr A4: Olpe -> Köln, zwischen 1.3 km hinter Morkepütz und 0.3 km vor AS Gummersbach Länge: 0.15 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.5 m A4 von Morkepütz (Rastplatz) nach Gummersbach (AS) Arbeiten an Schutzeinrichtungen",
+      "title": "A4 | Merzenich - Langerwehe",
+      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 21:00 bis zum 24.11.26 05:00 Uhr. A4: Köln -> Heerlen/Aachen, zwischen 4.2 km hinter AS Merzenich und 0.3 km vor AS Langerwehe Länge: 5.32 km | Maximale Durchfahrtsbreite: 3.5 m Deckensanierung AS Langerwehe - AS Düren",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A4:roadworks:2026-060060--vi-bs.2026-11-20_09-00-00-000_005.de0",
-      "autobahn": "A4",
-      "kind": "roadworks",
-      "coords": [
-        7.536356444911559,
-        50.9734562766235
-      ],
-      "title": "A4 | Morkepütz - Hömeler Feld",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 09:00 bis 11:00 Uhr A4: Olpe -> Köln, zwischen 1.0 km hinter Morkepütz und 0.6 km vor Hömeler Feld Länge: 1.79 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.5 m A4 von Morkepütz (Rastplatz) nach Hömeler Feld (Parkplatz) Arbeiten an Schutzeinrichtungen",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-002066--vi-bs.2026-11-14_09-00-00-000.devi-zus.2024-11-16_09-00-00-000.f_001.de1",
@@ -1379,7 +1405,7 @@
       "title": "A4 | Reichshof/Bergneustadt - Eckenhagen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 14.11.26 um 09:00 Uhr Ende: 19.08.28 um 15:00 Uhr (Ende der Gesamtmaßnahme: 19.08.28) A4: Köln -> Olpe, zwischen 3.5 km hinter AS Reichshof/Bergneustadt und 1.1 km vor AS Eckenhagen Länge: 1 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.25 m PWC Hasbacher Höhe",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-059554--vi-bs.2026-11-21_08-00-00-000_006.de0",
@@ -1392,7 +1418,7 @@
       "title": "A4 | Reichshof/Bergneustadt - Köln-Merheim",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 21.11.26 von 08:00 bis 18:00 Uhr A4: Olpe -> Köln, zwischen 1.1 km hinter AS Reichshof/Bergneustadt und 1.3 km vor AS Köln-Merheim Länge: 42.64 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.5 m A4 von ReichshofBergneustadt (AS) nach Köln-Merheim (AS) Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de42",
@@ -1405,7 +1431,7 @@
       "title": "A4 | Reichshof/Bergneustadt - Wiehltalbrücke",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) A4: Olpe -> Köln, zwischen 6.8 km hinter AS Reichshof/Bergneustadt und 0.8 km vor Wiehltalbrücke Länge: 3.69 km | Maximale Durchfahrtsbreite: 3.5 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-10-20_05-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de259",
@@ -1418,7 +1444,7 @@
       "title": "A4 | Rodenkirchener Brücke - Köln-Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 13.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 13.12.26) A4: Heerlen/Aachen -> Köln, zwischen 0.4 km hinter Rodenkirchener Brücke und 0.3 km vor AK Köln-Gremberg Länge: 2.64 km | Maximale Durchfahrtsbreite: 9 m Rheinbrücke Rodenkirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000849--vi-bs.2026-10-20_05-00-00-000.devi-zus.2021-08-13_05-00-00-000.f_001.de265",
@@ -1431,7 +1457,7 @@
       "title": "A4 | Rodenkirchener Brücke - Köln-Süd",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 13.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 13.12.26) A4: Köln -> Heerlen/Aachen, zwischen 0.8 km hinter Rodenkirchener Brücke und 0.8 km vor AK Köln-Süd Länge: 0.7 km | Maximale Durchfahrtsbreite: 9.25 m Rheinbrücke Rodenkirchen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-059549--vi-bs.2026-11-21_08-00-00-000_005.de0",
@@ -1444,7 +1470,7 @@
       "title": "A4 | Röttgesberg - Eckenhagen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 21.11.26 von 08:00 bis 18:00 Uhr 23.11.26 von 08:00 bis 18:00 Uhr A4: Köln -> Olpe, zwischen Röttgesberg und 0.8 km vor AS Eckenhagen Länge: 39.32 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.5 m A4 von Röttgesberg (Parkplatz) nach Eckenhagen (AS) Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-056969--vi-bs.2026-11-02_09-00-00-000.devi-zus.2026-09-07_09-00-00-000.de39",
@@ -1457,7 +1483,7 @@
       "title": "A4 | Weisweiler - Rur-Scholle",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.11.26 um 09:00 Uhr Ende: 17.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 20.11.30) A4: Heerlen/Aachen -> Köln, zwischen 3.6 km hinter AS Weisweiler und 2.3 km vor Rur-Scholle Länge: 1 km | Maximale Durchfahrtsbreite: 7 m Deckensanierung AS Langerwehe - AS Düren",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-11-19_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de196",
@@ -1470,7 +1496,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 19.11.26 um 09:00 Uhr Ende: 27.11.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Von A4: Heerlen/Aachen -> Köln, zwischen 1.6 km hinter AS Köln-Poll und AK Köln-Gremberg nach Abfahrt von der A4: AK Köln-Gremberg (aus Richtung Köln-Poll) Länge: 0.21 km | Maximale Durchfahrtsbreite: 3.5 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-11-19_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de194",
@@ -1483,7 +1509,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 19.11.26 um 09:00 Uhr Ende: 27.11.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Auffahrt auf die A4: AK Köln-Gremberg (aus Richtung Köln-Poll) Länge: 0.23 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-08-10_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de11",
@@ -1496,7 +1522,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.08.26 um 09:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Auffahrt auf die A4: AK Köln-Gremberg (aus Richtung Köln-Poll) Länge: 0.23 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-08-10_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de9",
@@ -1509,7 +1535,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.08.26 um 09:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Auffahrt auf die A4: AK Köln-Gremberg (aus Richtung Köln-Heumar) Länge: 0.24 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-08-10_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de7",
@@ -1522,7 +1548,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.08.26 um 09:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Abfahrt von der A4: AK Köln-Gremberg (aus Richtung Köln-Heumar) Länge: 0.25 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-08-10_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de5",
@@ -1535,7 +1561,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.08.26 um 09:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Auffahrt auf die A4: AK Köln-Gremberg (aus Richtung Köln-Heumar) Länge: 0.22 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-08-10_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de3",
@@ -1548,7 +1574,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.08.26 um 09:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Abfahrt von der A4: AK Köln-Gremberg (aus Richtung Köln-Heumar) Länge: 0.28 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2023-000845--vi-bs.2026-08-10_09-00-00-000.devi-zus.2024-06-03_20-00-00-000.f_182.de1",
@@ -1561,7 +1587,7 @@
       "title": "BW AK Gremberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 10.08.26 um 09:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 22.09.29) Abfahrt von der A4: AK Köln-Gremberg (aus Richtung Köln-Poll) Länge: 0.2 km | Maximale Durchfahrtsbreite: 3.25 m BW AK Gremberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-29_18-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de319",
@@ -1574,7 +1600,7 @@
       "title": "BW Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.07.26 um 18:00 Uhr Ende: 31.12.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) Von Auffahrt auf die A4: AS Köln-Klettenberg (aus Richtung Köln-West) nach A4: Heerlen/Aachen -> Köln, zwischen AS Köln-Klettenberg und 0.9 km vor AS Köln-Eifeltor Länge: 0.48 km | Maximale Durchfahrtsbreite: 3.25 m | zulässiges Gesamtgewic",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-046557--vi-bs.2026-07-04_21-00-00-000.devi-zus.2024-10-19_15-00-00-000.f.de259",
@@ -1587,7 +1613,7 @@
       "title": "BW Eifeltor",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.07.26 um 21:00 Uhr Ende: 11.03.28 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.29) Von A4: Heerlen/Aachen -> Köln, zwischen 5.3 km hinter AK Köln-West und AS Köln-Eifeltor nach Abfahrt von der A4: AS Köln-Klettenberg (aus Richtung Köln-West) Länge: 0.43 km | Maximale Durchfahrtsbreite: 3.25 m BW Eifeltor",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2025-056969--vi-bs.2026-11-02_09-00-00-000.devi-zus.2026-09-07_09-00-00-000.de47",
@@ -1600,7 +1626,7 @@
       "title": "Deckensanierung AS Langerwehe - AS Düren",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.11.26 um 09:00 Uhr Ende: 17.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 20.11.30) Von A4: Köln -> Heerlen/Aachen, zwischen 4.3 km hinter AS Merzenich und AS Düren nach Abfahrt von der A4: AS Düren (aus Richtung Merzenich) Länge: 0.36 km | Maximale Durchfahrtsbreite: 3.25 m Deckensanierung AS Langerwehe - AS Düren",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-054647--vi-bs.2026-11-30_09-30-00-000.devi-bs.2026-11-25_09-30-00-000.de5",
@@ -1613,7 +1639,7 @@
       "title": "Grünpflege",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 30.11.26 von 09:30 bis 15:00 Uhr 01.12.26 von 09:30 bis 15:00 Uhr Von Auffahrt auf die A555: AK Köln-Süd (aus Richtung Köln-Bayenthal) nach A555: Köln -> Bonn, zwischen AK Köln-Süd und 1.7 km vor AS Köln-Rodenkirchen Länge: 0.88 km | Maximale Durchfahrtsbreite: 3.5 m Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2026-054647--vi-bs.2026-11-30_09-30-00-000.devi-bs.2026-11-25_09-30-00-000.de3",
@@ -1626,7 +1652,7 @@
       "title": "Grünpflege",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 30.11.26 von 09:30 bis 15:00 Uhr 01.12.26 von 09:30 bis 15:00 Uhr Von A4: Heerlen/Aachen -> Köln, zwischen 2.2 km hinter AS Köln-Eifeltor und AK Köln-Süd nach Abfahrt von der A4: AK Köln-Süd (aus Richtung Köln-Eifeltor) Länge: 0.61 km | Maximale Durchfahrtsbreite: 3.5 m Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-23_06-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de74",
@@ -1639,7 +1665,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 06:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Auffahrt auf die A4: AS Reichshof/Bergneustadt (aus Richtung Hasbacher Höhe) Länge: 0.23 km | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-23_06-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de72",
@@ -1652,7 +1678,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 06:00 Uhr Ende: 30.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Auffahrt auf die A4: AS Reichshof/Bergneustadt (aus Richtung Hasbacher Höhe) Länge: 0.25 km | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de46",
@@ -1665,7 +1691,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Auffahrt auf die A4: AS Gummersbach (aus Richtung Morkepütz) Länge: 0.19 km | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de44",
@@ -1678,7 +1704,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Abfahrt von der A4: AS Gummersbach (aus Richtung Morkepütz) Länge: 0.17 km | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de38",
@@ -1691,7 +1717,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Auffahrt auf die A4: AS Bielstein (aus Richtung Bellingroth) Länge: 0.19 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de36",
@@ -1704,7 +1730,7 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Abfahrt von der A4: AS Bielstein (aus Richtung Bellingroth) Länge: 0.2 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A4:roadworks:2024-055330--vi-bs.2026-11-30_05-00-00-000.devi-zus.2024-11-15_00-00-00-000.f.de30",
@@ -1717,33 +1743,72 @@
       "title": "Wiehltalbrücke Kompensation Sperrung für Schwerlastverkehr max. 44to",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 05:00 Uhr Ende: 01.12.34 um 00:00 Uhr (Ende der Gesamtmaßnahme: 01.12.34) Von Auffahrt auf die A4: AS Engelskirchen (aus Richtung Erlenhof) nach A4: Köln -> Olpe, zwischen AS Overath und 0.2 km vor AS Engelskirchen Länge: 0.16 km | Maximale Durchfahrtsbreite: 3.25 m Wiehltalbrücke Kompensation Sperrung für Schwer",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
-      "id": "A4:warning:INRIX--vi-zus.2026-11-20_08-06-32-000.de0",
+      "id": "A4:warning:INRIX--vi-avl.2026-11-20_15-46-00-000_025.de0",
       "autobahn": "A4",
       "kind": "warning",
       "coords": [
-        6.920350990390937,
-        50.89355300720929
+        7.0303442016453355,
+        50.917359622154706
       ],
-      "title": "A4 | Köln-Eifeltor - Köln-Klettenberg",
-      "detail": "Beginn: 20.11.26 um 09:06 Uhr Zusammengesetzte Verkehrsinformation, seit 20.11.2026, 08:06 A4: Köln -> Heerlen/Aachen, zwischen 0.4 km hinter AS Köln-Eifeltor und 0.6 km vor AS Köln-Klettenberg Ereignismeldung: - Unfall",
+      "title": "A4 | Köln-Heumar - Köln-Süd",
+      "detail": "Beginn: 20.11.26 um 16:46 Uhr Angespannte Verkehrslage, seit 20.11.2026, 15:46 A4: Köln -> Heerlen/Aachen, zwischen 2.2 km hinter AD Köln-Heumar und 0.6 km vor AK Köln-Süd Ereignismeldung: - Im Stillstand - Reisezeitverlust: 10 Minuten",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
-      "id": "A4:warning:INRIX--vi-avl.2026-11-20_05-31-00-000_010.de0",
+      "id": "A4:warning:INRIX--vi-avl.2026-11-20_15-14-00-000_013.de0",
       "autobahn": "A4",
       "kind": "warning",
       "coords": [
-        6.883235315713922,
-        50.91022008252906
+        6.8782887774313695,
+        50.91245566120594
       ],
       "title": "A4 | Köln-West - Köln-Eifeltor",
-      "detail": "Beginn: 20.11.26 um 06:31 Uhr Angespannte Verkehrslage, seit 20.11.2026, 05:31 A4: Heerlen/Aachen -> Köln, zwischen 3.2 km hinter AK Köln-West und 1.2 km vor AS Köln-Eifeltor Ereignismeldung: - Stockender Verkehr - Durchschnittsgeschwindigkeit: 20 km/h - Reisezeitverlust: 5 Minuten",
+      "detail": "Beginn: 20.11.26 um 16:14 Uhr Angespannte Verkehrslage, seit 20.11.2026, 15:14 A4: Heerlen/Aachen -> Köln, zwischen 2.8 km hinter AK Köln-West und 1.2 km vor AS Köln-Eifeltor Ereignismeldung: - Stockender Verkehr - Durchschnittsgeschwindigkeit: 40 km/h - Reisezeitverlust: 2 Minuten (abnehmend)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A4:warning:INRIX--vi-avl.2026-11-20_10-20-00-000_008.de0",
+      "autobahn": "A4",
+      "kind": "warning",
+      "coords": [
+        6.4716503265455385,
+        50.84390706925738
+      ],
+      "title": "A4 | Merzenich - Weisweiler",
+      "detail": "Beginn: 20.11.26 um 11:20 Uhr Angespannte Verkehrslage, seit 20.11.2026, 10:20 A4: Köln -> Heerlen/Aachen, zwischen 3.4 km hinter AS Merzenich und 2.1 km vor AS Weisweiler Ereignismeldung: - Im Stillstand - Reisezeitverlust: 36 Minuten (zunehmend)",
+      "future": false,
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A4:warning:NLR_2026_003703--vi-zus.2026-11-20_16-56-00-932.de0",
+      "autobahn": "A4",
+      "kind": "warning",
+      "coords": [
+        7.199039087709161,
+        50.9521379420112
+      ],
+      "title": "A4 | Röttgesberg - Untereschbach",
+      "detail": "Beginn: 20.11.26 um 14:14 Uhr Ereignismeldung: - Unfall Vollsperrung A4: Köln -> Olpe, zwischen 0.1 km hinter Röttgesberg und 1.3 km vor AS Untereschbach Ereignisnummer: NLR_2026_003703",
+      "future": false,
+      "observedAt": "2026-11-20T17:08:41.899Z"
+    },
+    {
+      "id": "A4:warning:INRIX--vi-unf.2026-11-20_16-41-33-000.de0",
+      "autobahn": "A4",
+      "kind": "warning",
+      "coords": [
+        6.378383319424023,
+        50.83547779178203
+      ],
+      "title": "A4 | Verkehrsmeldung",
+      "detail": "Beginn: 20.11.26 um 17:41 Uhr Unfall, seit 20.11.2026, 16:41 Von A4: Köln -> Heerlen/Aachen, zwischen 0.4 km hinter AS Langerwehe und AS Weisweiler nach Abfahrt von der A4: AS Weisweiler (aus Richtung Langerwehe) Ereignismeldung: - Unfall - Gegenstand auf der Fahrbahn",
+      "future": false,
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A555:roadworks:2023-000224--vi-bs.2026-03-23_05-00-00-000.devi-zus.2022-04-29_09-00-00-000.f_001.de110",
@@ -1756,7 +1821,7 @@
       "title": "A555 | Bornheim (Rhld.) - Köln-Godorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.03.26 um 05:00 Uhr Ende: 30.06.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 30.06.27) A555: Bonn -> Köln, zwischen 5.4 km hinter AS Bornheim (Rhld.) und 4.6 km vor AS Köln-Godorf Länge: 0.9 km | Maximale Durchfahrtsbreite: 6.75 m Erhaltung K-Godorf - Wesseling (Abs. 1 Wesseling - L184)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A555:roadworks:2023-000224--vi-bs.2026-03-23_05-00-00-000.devi-zus.2022-04-29_09-00-00-000.f_001.de106",
@@ -1769,7 +1834,7 @@
       "title": "A555 | Köln-Godorf - Wesseling",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.03.26 um 05:00 Uhr Ende: 30.06.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 30.06.27) A555: Köln -> Bonn, zwischen 1.4 km hinter AS Köln-Godorf und 0.6 km vor AS Wesseling Länge: 3.19 km | Maximale Durchfahrtsbreite: 6.5 m Erhaltung K-Godorf - Wesseling (Abs. 1 Wesseling - L184)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A555:roadworks:2023-000224--vi-bs.2026-03-23_05-00-00-000.devi-zus.2022-04-29_09-00-00-000.f_001.de104",
@@ -1782,7 +1847,7 @@
       "title": "A555 | Köln-Rodenkirchen - Wesseling",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.03.26 um 05:00 Uhr Ende: 30.06.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 30.06.27) A555: Köln -> Bonn, zwischen 1.7 km hinter AS Köln-Rodenkirchen und 3.8 km vor AS Wesseling Länge: 1.52 km | Maximale Durchfahrtsbreite: 6.75 m Erhaltung K-Godorf - Wesseling (Abs. 1 Wesseling - L184)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A555:roadworks:2026-054647--vi-bs.2026-11-30_09-30-00-000.devi-bs.2026-11-25_09-30-00-000.de7",
@@ -1795,7 +1860,7 @@
       "title": "A555 | Köln-Süd - Köln-Rodenkirchen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 30.11.26 von 09:30 bis 15:00 Uhr 01.12.26 von 09:30 bis 15:00 Uhr A555: Köln -> Bonn, zwischen 0.3 km hinter AK Köln-Süd und 1.7 km vor AS Köln-Rodenkirchen Länge: 0.45 km | Maximale Durchfahrtsbreite: 3.75 m Grünpflege",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A555:roadworks:2023-000224--vi-bs.2026-03-23_05-00-00-000.devi-zus.2022-04-29_09-00-00-000.f_001.de108",
@@ -1808,7 +1873,7 @@
       "title": "A555 | Wesseling - Köln-Godorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.03.26 um 05:00 Uhr Ende: 30.06.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 30.06.27) A555: Bonn -> Köln, zwischen 0.6 km hinter AS Wesseling und 1.4 km vor AS Köln-Godorf Länge: 3.19 km | Maximale Durchfahrtsbreite: 6.5 m Erhaltung K-Godorf - Wesseling (Abs. 1 Wesseling - L184)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2026-004238--vi-fbm.2026-11-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de183",
@@ -1821,7 +1886,7 @@
       "title": "A565 | Bonn-Beuel - Bonn-Auerberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.11.26 um 15:00 Uhr Ende: 28.02.31 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) A565: Bonn -> Meckenheim, zwischen 0.1 km hinter AS Bonn-Beuel und AS Bonn-Auerberg Länge: konnte nicht ermittelt werden Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2026-004238--vi-fbm.2026-11-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de185",
@@ -1834,7 +1899,7 @@
       "title": "A565 | Bonn-Nord - Bonn-Beuel",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.11.26 um 15:00 Uhr Ende: 28.02.31 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) A565: Meckenheim -> Bonn, zwischen 1.3 km hinter AK Bonn-Nord und 0.1 km vor AS Bonn-Beuel Länge: konnte nicht ermittelt werden Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2023-000027--vi-fbm.2026-09-29_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de749",
@@ -1847,7 +1912,7 @@
       "title": "BW Endenicher Ei",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.09.26 um 06:00 Uhr Ende: 01.07.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) Abfahrt von der B56 (Endenicher Straße) Länge: konnte nicht ermittelt werden BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2023-000027--vi-fbm.2026-09-29_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de748",
@@ -1860,7 +1925,7 @@
       "title": "BW Endenicher Ei",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.09.26 um 06:00 Uhr Ende: 01.07.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) Auffahrt auf die B9 (Endenicher Straße) Länge: konnte nicht ermittelt werden BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2023-000027--vi-fbm.2026-11-18_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de759",
@@ -1873,7 +1938,7 @@
       "title": "BW Endenicher Ei",
       "detail": "Zeitraum dieser Bauphase: Beginn: 18.11.26 um 06:00 Uhr Ende: 02.02.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) Auffahrt auf die A565: AS Bonn-Endenich (aus Richtung Bonn-Poppelsdorf) Länge: konnte nicht ermittelt werden BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2023-000245--vi-fbm.2026-10-20_05-00-00-000.devi-zus.2026-02-07_09-00-00-000.f_001.de23",
@@ -1886,7 +1951,7 @@
       "title": "BW Tausendfüßler, 6-str. Ausbau",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 30.10.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.06.33) Abfahrt von der A565: AK Bonn-Nord (aus Richtung Bonn-Auerberg) Länge: konnte nicht ermittelt werden BW Tausendfüßler, 6-str. Ausbau",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2023-000245--vi-fbm.2026-10-20_05-00-00-000.devi-zus.2026-02-07_09-00-00-000.f_001.de22",
@@ -1899,7 +1964,7 @@
       "title": "BW Tausendfüßler, 6-str. Ausbau",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.10.26 um 05:00 Uhr Ende: 30.10.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.06.33) Abfahrt von der A565: AK Bonn-Nord (aus Richtung Bonn-Auerberg) Länge: konnte nicht ermittelt werden BW Tausendfüßler, 6-str. Ausbau",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2026-003515--vi-fbm.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de106",
@@ -1912,7 +1977,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von A565: Meckenheim -> Bonn, zwischen 6.2 km hinter AS Meckenheim-Nord und AS Bonn-Hardtberg nach Abfahrt von der A565: AS Bonn-Hardtberg (aus Richtung Meckenheim-Nord) Länge: konnte nicht ermittelt werden FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2026-003515--vi-fbm.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de105",
@@ -1925,7 +1990,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Meckenheim-Nord (aus Richtung Merl) nach A565: Meckenheim -> Bonn, zwischen AS Meckenheim-Nord und 6.0 km vor AS Bonn-Hardtberg Länge: konnte nicht ermittelt werden FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2026-003515--vi-fbm.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de76",
@@ -1938,7 +2003,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Meckenheim-Nord (aus Richtung Merl) nach A565: Meckenheim -> Bonn, zwischen AS Meckenheim-Nord und 6.0 km vor AS Bonn-Hardtberg Länge: konnte nicht ermittelt werden FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:closure:2026-004238--vi-fbm.2026-11-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de184",
@@ -1951,7 +2016,7 @@
       "title": "Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.11.26 um 15:00 Uhr Ende: 28.02.31 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) Von Auffahrt auf die A565: AS Bonn-Beuel (aus Richtung Bonn-Nordost) nach A565: Bonn -> Meckenheim, zwischen AS Bonn-Beuel und 1.5 km vor AS Bonn-Auerberg Länge: konnte nicht ermittelt werden Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000240--vi-bs.2025-10-16_05-00-00-000.devi-zus.2024-12-14_09-00-00-000.f.de64",
@@ -1964,7 +2029,7 @@
       "title": "A565 | Bonn-Hardtberg - Bonn-Lengsdorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.25 um 05:00 Uhr Ende: 30.06.28 um 15:00 Uhr (Ende der Gesamtmaßnahme: 30.06.28) A565: Meckenheim -> Bonn, zwischen 0.5 km hinter AS Bonn-Hardtberg und 0.4 km vor AS Bonn-Lengsdorf Länge: 0.62 km | Maximale Durchfahrtsbreite: 6.25 m BW Villemombler Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de68",
@@ -1977,7 +2042,7 @@
       "title": "A565 | Bonn-Hardtberg - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 0.4 km hinter AS Bonn-Hardtberg und 0.2 km vor AS Meckenheim-Nord Länge: 6.11 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de77",
@@ -1990,7 +2055,7 @@
       "title": "A565 | Bonn-Hardtberg - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen AS Bonn-Hardtberg und 6.3 km vor AS Meckenheim-Nord Länge: 0.35 km | Maximale Durchfahrtsbreite: 3.75 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de97",
@@ -2003,7 +2068,7 @@
       "title": "A565 | Bonn-Hardtberg - Merl",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 0.4 km hinter AS Bonn-Hardtberg und 0.7 km vor AS Merl Länge: 7.78 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-30_17-00-00-000.devi-zus.2026-07-24_22-00-00-000.de85",
@@ -2016,7 +2081,7 @@
       "title": "A565 | Bonn-Hardtberg - Merl",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 17:00 Uhr Ende: 15.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 0.4 km hinter AS Bonn-Hardtberg und 0.7 km vor AS Merl Länge: 7.78 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de79",
@@ -2029,7 +2094,7 @@
       "title": "A565 | Bonn-Hardtberg - Merl",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 6.5 km hinter AS Bonn-Hardtberg und 0.7 km vor AS Merl Länge: 1.67 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-23_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de36",
@@ -2042,7 +2107,7 @@
       "title": "A565 | Bonn-Hardtberg - Merl",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 05:00 Uhr Ende: 25.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 0.4 km hinter AS Bonn-Hardtberg und 0.7 km vor AS Merl Länge: 7.78 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000027--vi-bs.2026-09-29_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de750",
@@ -2055,7 +2120,7 @@
       "title": "A565 | Bonn-Lengsdorf - Bonn-Endenich",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.09.26 um 06:00 Uhr Ende: 01.07.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) A565: Meckenheim -> Bonn, zwischen 1.3 km hinter AS Bonn-Lengsdorf und 0.3 km vor AS Bonn-Endenich Länge: 0.59 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.75 m BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000240--vi-bs.2025-10-16_05-00-00-000.devi-zus.2024-12-14_09-00-00-000.f.de62",
@@ -2068,7 +2133,7 @@
       "title": "A565 | Bonn-Lengsdorf - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.25 um 05:00 Uhr Ende: 30.06.28 um 15:00 Uhr (Ende der Gesamtmaßnahme: 30.06.28) A565: Bonn -> Meckenheim, zwischen 0.4 km hinter AS Bonn-Lengsdorf und 0.5 km vor AS Bonn-Hardtberg Länge: 0.62 km | Maximale Durchfahrtsbreite: 3.25 m BW Villemombler Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de95",
@@ -2081,7 +2146,7 @@
       "title": "A565 | Bonn-Lengsdorf - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 1.1 km hinter AS Bonn-Lengsdorf und 6.3 km vor AS Meckenheim-Nord Länge: 0.81 km | Maximale Durchfahrtsbreite: 7.5 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-30_17-00-00-000.devi-zus.2026-07-24_22-00-00-000.de83",
@@ -2094,7 +2159,7 @@
       "title": "A565 | Bonn-Lengsdorf - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 17:00 Uhr Ende: 15.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 1.1 km hinter AS Bonn-Lengsdorf und 6.3 km vor AS Meckenheim-Nord Länge: 0.81 km | Maximale Durchfahrtsbreite: 7.5 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de66",
@@ -2107,7 +2172,7 @@
       "title": "A565 | Bonn-Lengsdorf - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 1.1 km hinter AS Bonn-Lengsdorf und 6.6 km vor AS Meckenheim-Nord Länge: 0.45 km | Maximale Durchfahrtsbreite: 7 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-23_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de34",
@@ -2120,7 +2185,7 @@
       "title": "A565 | Bonn-Lengsdorf - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 05:00 Uhr Ende: 25.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Bonn -> Meckenheim, zwischen 1.1 km hinter AS Bonn-Lengsdorf und 6.3 km vor AS Meckenheim-Nord Länge: 0.81 km | Maximale Durchfahrtsbreite: 7.5 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-004238--vi-bs.2026-11-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de190",
@@ -2133,7 +2198,7 @@
       "title": "A565 | Bonn-Nord - Bonn-Auerberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.11.26 um 15:00 Uhr Ende: 28.02.31 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) A565: Meckenheim -> Bonn, zwischen 0.4 km hinter AK Bonn-Nord und 0.3 km vor AS Bonn-Auerberg Länge: 0.6 km | Maximale Durchfahrtsbreite: 3.75 m Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-004238--vi-bs.2026-11-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de186",
@@ -2146,7 +2211,7 @@
       "title": "A565 | Bonn-Nordost - Bonn-Beuel",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.11.26 um 15:00 Uhr Ende: 28.02.31 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) A565: Bonn -> Meckenheim, zwischen 0.7 km hinter AD Bonn-Nordost und 0.6 km vor AS Bonn-Beuel Länge: 0.7 km | Maximale Durchfahrtsbreite: 7 m Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-004238--vi-bs.2026-11-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de188",
@@ -2159,7 +2224,7 @@
       "title": "A565 | Bonn-Nordost - Friedrich-Ebert-Brücke",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.11.26 um 15:00 Uhr Ende: 28.02.31 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) A565: Bonn -> Meckenheim, zwischen 1.4 km hinter AD Bonn-Nordost und 1.0 km vor Friedrich-Ebert-Brücke Länge: 0.76 km | Maximale Durchfahrtsbreite: 3.75 m Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000240--vi-bs.2025-10-16_05-00-00-000.devi-zus.2024-12-14_09-00-00-000.f.de60",
@@ -2172,7 +2237,7 @@
       "title": "A565 | Bonn-Poppelsdorf - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.25 um 05:00 Uhr Ende: 30.06.28 um 15:00 Uhr (Ende der Gesamtmaßnahme: 30.06.28) A565: Bonn -> Meckenheim, zwischen 1.1 km hinter AS Bonn-Poppelsdorf und 1.1 km vor AS Bonn-Hardtberg Länge: 0.7 km | Maximale Durchfahrtsbreite: 6.75 m BW Villemombler Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000027--vi-bs.2026-09-29_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de746",
@@ -2185,7 +2250,7 @@
       "title": "A565 | Bonn-Poppelsdorf - Bonn-Tannenbusch",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.09.26 um 06:00 Uhr Ende: 01.07.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) A565: Meckenheim -> Bonn, zwischen 0.5 km hinter AS Bonn-Poppelsdorf und 1.1 km vor AS Bonn-Tannenbusch Länge: 0.69 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 5.85 m BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000027--vi-bs.2026-09-29_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de742",
@@ -2198,7 +2263,7 @@
       "title": "A565 | Bonn-Tannenbusch - Bonn-Endenich",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.09.26 um 06:00 Uhr Ende: 01.07.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) A565: Bonn -> Meckenheim, zwischen 0.4 km hinter AS Bonn-Tannenbusch und 0.5 km vor AS Bonn-Endenich Länge: 0.68 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.75 m BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000245--vi-bs.2026-11-11_05-00-00-000.devi-zus.2026-02-07_09-00-00-000.f_001.de54",
@@ -2211,7 +2276,7 @@
       "title": "A565 | Bonn-Tannenbusch - Bonn-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 11.11.26 um 05:00 Uhr Ende: 31.01.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.06.33) A565: Meckenheim -> Bonn, zwischen 0.2 km hinter AS Bonn-Tannenbusch und 0.1 km vor AK Bonn-Nord Länge: 0.18 km | Maximale Durchfahrtsbreite: 3.75 m BW Tausendfüßler, 6-str. Ausbau",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000027--vi-bs.2026-09-29_06-00-00-000.devi-zus.2023-09-07_09-00-00-000_004.f.de744",
@@ -2224,7 +2289,7 @@
       "title": "A565 | Bonn-Tannenbusch - Bonn-Poppelsdorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 29.09.26 um 06:00 Uhr Ende: 01.07.27 um 21:00 Uhr (Ende der Gesamtmaßnahme: 01.07.27) A565: Bonn -> Meckenheim, zwischen 1.1 km hinter AS Bonn-Tannenbusch und 0.5 km vor AS Bonn-Poppelsdorf Länge: 0.69 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 5.85 m BW Endenicher Ei",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de101",
@@ -2237,7 +2302,7 @@
       "title": "A565 | Meckenheim - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 5.0 km hinter AK Meckenheim und 1.5 km vor AS Meckenheim-Nord Länge: 0.93 km | Maximale Durchfahrtsbreite: 6.75 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-30_17-00-00-000.devi-zus.2026-07-24_22-00-00-000.de89",
@@ -2250,7 +2315,7 @@
       "title": "A565 | Meckenheim - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 17:00 Uhr Ende: 15.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 5.0 km hinter AK Meckenheim und 1.5 km vor AS Meckenheim-Nord Länge: 0.93 km | Maximale Durchfahrtsbreite: 6.75 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de72",
@@ -2263,7 +2328,7 @@
       "title": "A565 | Meckenheim - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 5.0 km hinter AK Meckenheim und 1.5 km vor AS Meckenheim-Nord Länge: 0.93 km | Maximale Durchfahrtsbreite: 6.75 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-23_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de40",
@@ -2276,7 +2341,7 @@
       "title": "A565 | Meckenheim - Meckenheim-Nord",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 05:00 Uhr Ende: 25.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 5.0 km hinter AK Meckenheim und 1.5 km vor AS Meckenheim-Nord Länge: 0.93 km | Maximale Durchfahrtsbreite: 6.75 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de70",
@@ -2289,7 +2354,7 @@
       "title": "A565 | Meckenheim-Nord - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 0.2 km hinter AS Meckenheim-Nord und 0.4 km vor AS Bonn-Hardtberg Länge: 6.11 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000240--vi-bs.2025-10-16_05-00-00-000.devi-zus.2024-12-14_09-00-00-000.f.de66",
@@ -2302,7 +2367,7 @@
       "title": "A565 | Meckenheim-Nord - Bonn-Lengsdorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.25 um 05:00 Uhr Ende: 30.06.28 um 15:00 Uhr (Ende der Gesamtmaßnahme: 30.06.28) A565: Meckenheim -> Bonn, zwischen 6.3 km hinter AS Meckenheim-Nord und 1.0 km vor AS Bonn-Lengsdorf Länge: 0.8 km | Maximale Durchfahrtsbreite: 6.75 m BW Villemombler Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de99",
@@ -2315,7 +2380,7 @@
       "title": "A565 | Merl - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 0.7 km hinter AS Merl und 0.4 km vor AS Bonn-Hardtberg Länge: 7.78 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-30_17-00-00-000.devi-zus.2026-07-24_22-00-00-000.de87",
@@ -2328,7 +2393,7 @@
       "title": "A565 | Merl - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 17:00 Uhr Ende: 15.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 0.7 km hinter AS Merl und 0.4 km vor AS Bonn-Hardtberg Länge: 7.78 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de81",
@@ -2341,7 +2406,7 @@
       "title": "A565 | Merl - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 0.7 km hinter AS Merl und 6.5 km vor AS Bonn-Hardtberg Länge: 1.67 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-23_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de38",
@@ -2354,7 +2419,7 @@
       "title": "A565 | Merl - Bonn-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 05:00 Uhr Ende: 25.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) A565: Meckenheim -> Bonn, zwischen 0.7 km hinter AS Merl und 0.4 km vor AS Bonn-Hardtberg Länge: 7.78 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000245--vi-bs.2026-04-27_05-00-00-000.devi-zus.2026-02-07_09-00-00-000.f_001.de20",
@@ -2367,7 +2432,7 @@
       "title": "BW Tausendfüßler, 6-str. Ausbau",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.04.26 um 05:00 Uhr Ende: 31.01.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.06.33) Von A565: Meckenheim -> Bonn, zwischen 0.1 km hinter AS Bonn-Tannenbusch und AK Bonn-Nord nach Abfahrt von der A565: AS Bonn-Tannenbusch (aus Richtung Bonn-Endenich) Länge: 0.16 km | Maximale Durchfahrtsbreite: 3.25 m BW Tausendfüßler, 6-st",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000245--vi-bs.2026-11-11_05-00-00-000.devi-zus.2026-02-07_09-00-00-000.f_001.de52",
@@ -2380,7 +2445,7 @@
       "title": "BW Tausendfüßler, 6-str. Ausbau",
       "detail": "Zeitraum dieser Bauphase: Beginn: 11.11.26 um 05:00 Uhr Ende: 31.01.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.06.33) Abfahrt von der A555: AK Bonn-Nord (aus Richtung Bornheim (Rhld.)) Länge: 0.17 km | Maximale Durchfahrtsbreite: 6.5 m BW Tausendfüßler, 6-str. Ausbau",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2023-000245--vi-bs.2026-11-11_05-00-00-000.devi-zus.2026-02-07_09-00-00-000.f_001.de50",
@@ -2393,7 +2458,7 @@
       "title": "BW Tausendfüßler, 6-str. Ausbau",
       "detail": "Zeitraum dieser Bauphase: Beginn: 11.11.26 um 05:00 Uhr Ende: 31.01.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.06.33) Abfahrt von der A565: AK Bonn-Nord (aus Richtung Bonn-Auerberg) Länge: 0.11 km | Maximale Durchfahrtsbreite: 3.25 m BW Tausendfüßler, 6-str. Ausbau",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-25_07-00-00-000.devi-zus.2026-07-24_22-00-00-000.de103",
@@ -2406,7 +2471,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 25.11.26 um 07:00 Uhr Ende: 30.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Merl (aus Richtung Meckenheim) nach A565: Meckenheim -> Bonn, zwischen AK Meckenheim und 2.0 km vor AS Meckenheim-Nord Länge: 0.34 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-30_17-00-00-000.devi-zus.2026-07-24_22-00-00-000.de91",
@@ -2419,7 +2484,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 17:00 Uhr Ende: 15.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Merl (aus Richtung Meckenheim) nach A565: Meckenheim -> Bonn, zwischen AK Meckenheim und 2.0 km vor AS Meckenheim-Nord Länge: 0.34 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-10-16_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de74",
@@ -2432,7 +2497,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 16.10.26 um 05:00 Uhr Ende: 23.11.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Merl (aus Richtung Meckenheim) nach A565: Meckenheim -> Bonn, zwischen AK Meckenheim und 2.0 km vor AS Meckenheim-Nord Länge: 0.34 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-23_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de42",
@@ -2445,7 +2510,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 05:00 Uhr Ende: 25.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Merl (aus Richtung Meckenheim) nach A565: Meckenheim -> Bonn, zwischen AK Meckenheim und 2.0 km vor AS Meckenheim-Nord Länge: 0.34 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-30_17-00-00-000.devi-zus.2026-07-24_22-00-00-000.de93",
@@ -2458,7 +2523,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.11.26 um 17:00 Uhr Ende: 15.12.26 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Meckenheim-Nord (aus Richtung Merl) nach A565: Meckenheim -> Bonn, zwischen AS Meckenheim-Nord und 6.0 km vor AS Bonn-Hardtberg Länge: 0.22 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A565:roadworks:2026-003515--vi-bs.2026-11-23_05-00-00-000.devi-zus.2026-07-24_22-00-00-000.de44",
@@ -2471,7 +2536,7 @@
       "title": "FB-San. Merl - BN-Hardtberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 23.11.26 um 05:00 Uhr Ende: 25.11.26 um 07:00 Uhr (Ende der Gesamtmaßnahme: 15.12.26) Von Auffahrt auf die A565: AS Meckenheim-Nord (aus Richtung Merl) nach A565: Meckenheim -> Bonn, zwischen AS Meckenheim-Nord und 6.0 km vor AS Bonn-Hardtberg Länge: 0.22 km | Maximale Durchfahrtsbreite: 3.25 m FB-San. Merl - BN-Hardtberg",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de9",
@@ -2484,7 +2549,7 @@
       "title": "A59 | Monheim-Süd - Düsseldorf-Süd",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) A59: Köln -> Düsseldorf, zwischen 1.7 km hinter AD Monheim-Süd und 1.0 km vor AD Düsseldorf-Süd Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de18",
@@ -2497,7 +2562,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Abfahrt von der A59: AD Düsseldorf-Süd (aus Richtung Düsseldorf-Benrath) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de17",
@@ -2510,7 +2575,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Abfahrt von der A59: AD Düsseldorf-Süd (aus Richtung Düsseldorf-Benrath) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de16",
@@ -2523,7 +2588,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Auffahrt auf die A59: AS Düsseldorf-Benrath (aus Richtung Düsseldorf-Garath) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de15",
@@ -2536,7 +2601,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Abfahrt von der A59: AS Düsseldorf-Benrath (aus Richtung Düsseldorf-Garath) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de14",
@@ -2549,7 +2614,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Auffahrt auf die A59: AS Düsseldorf-Garath (aus Richtung Wolfhagen) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de13",
@@ -2562,7 +2627,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Abfahrt von der A59: AS Düsseldorf-Garath (aus Richtung Wolfhagen) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de12",
@@ -2575,7 +2640,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Von Auffahrt auf die A59: AS Richrath (aus Richtung Berghausen) nach A59: Köln -> Düsseldorf, zwischen AS Monheim und 0.1 km vor AS Richrath Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de11",
@@ -2588,7 +2653,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Abfahrt von der A59: Berghausen (aus Richtung Monheim) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-001678--vi-fbm.2026-10-02_09-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de10",
@@ -2601,7 +2666,7 @@
       "title": "Grundhafte Sanierung",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.10.26 um 09:00 Uhr Ende: 30.06.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) Auffahrt auf die A59: AS Monheim (aus Richtung Monheim-Süd) Länge: konnte nicht ermittelt werden Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:closure:2023-000192--vi-fbm.2026-05-20_09-00-00-000.devi-zus.2021-04-15_15-00-00-000_001.de718",
@@ -2614,7 +2679,7 @@
       "title": "Rheinbr. Leverkusen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.05.26 um 09:00 Uhr Ende: 19.05.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 19.05.28) Abfahrt von der A1: AK Leverkusen (aus Richtung Burscheid) Länge: konnte nicht ermittelt werden Rheinbr. Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-000264--vi-fbm.2026-11-23_09-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de255",
@@ -2627,7 +2692,7 @@
       "title": "(DEGES) Umbau AD Heumar",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 09:00 bis 15:00 Uhr Von A4: Olpe -> Heerlen/Aachen, zwischen 3.3 km hinter AK Köln-Ost und AD Köln-Heumar nach A59: km 6.04 Länge: 0.25 km | Maximale Durchfahrtsbreite: 3.75 m (DEGES) Umbau AD Heumar",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-000264--vi-bs.2024-11-22_15-00-00-000.devi-zus.2021-07-31_09-00-00-000.f_001.de132",
@@ -2640,7 +2705,7 @@
       "title": "(DEGES) Umbau AD Heumar",
       "detail": "Zeitraum dieser Bauphase: Beginn: 22.11.24 um 15:00 Uhr Ende: 31.01.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.01.27) A59: km 6.71 --> km 6.13 Länge: 0.59 km | Maximale Durchfahrtsbreite: 5.85 m (DEGES) Umbau AD Heumar",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001442--vi-bs.2025-10-06_15-00-00-000.devi-zus.2025-11-29_09-00-00-000.f_001.de7",
@@ -2653,7 +2718,7 @@
       "title": "8-str. Ausbau",
       "detail": "Zeitraum dieser Bauphase: Beginn: 06.10.25 um 15:00 Uhr Ende: 28.02.27 um 05:00 Uhr (Ende der Gesamtmaßnahme: 15.12.29) Von Auffahrt auf die A59: AD Bonn-Nordost (aus Richtung Bonn-Vilich) nach A59: Bonn -> Köln, zwischen AD Bonn-Nordost und 2.4 km vor AD Sankt Augustin-West Länge: 0.88 km | Maximale Durchfahrtsbreite: 3.75 m 8-str. Ausbau",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001712--vi-bs.2026-08-05_05-00-00-000.devi-zus.2017-11-15_09-00-00-000_005.de18",
@@ -2666,7 +2731,7 @@
       "title": "A59 | Ausbauende A59 (Rheinallee) - Leverkusen-Rheindorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 05.08.26 um 05:00 Uhr Ende: 31.12.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) A59: Köln -> Düsseldorf, zwischen 0.1 km hinter Ausbauende A59 (Rheinallee) und 2.7 km vor AS Leverkusen-Rheindorf Länge: 0.69 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 3.25 m Rheinbrücke Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2025-012898--vi-bs.2026-07-27_09-00-00-000.devi-zus.2023-08-04_09-00-00-000_001.de25",
@@ -2679,7 +2744,7 @@
       "title": "A59 | Bonn-Nordost - Bonn-Vilich",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.07.26 um 09:00 Uhr Ende: 30.11.26 um 14:00 Uhr (Ende der Gesamtmaßnahme: 30.11.26) A59: Köln -> Bonn, zwischen 0.5 km hinter AD Bonn-Nordost und 0.9 km vor AS Bonn-Vilich Länge: 0.1 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 11.25 m VZA DB-AG (S13)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2024-050470--vi-bs.2026-03-14_09-00-00-000.devi-zus.2025-08-16_09-00-00-000.f.de3",
@@ -2692,20 +2757,7 @@
       "title": "A59 | Bonn-Ost - Bonn-Pützchen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 14.03.26 um 09:00 Uhr Ende: 13.03.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 13.03.27) A59: Bonn -> Köln, zwischen AK Bonn-Ost und 1.8 km vor AS Bonn-Pützchen Länge: 0.98 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6 m BW Ankerbachtalbrücke",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A59:roadworks:2026-060017--vi-bs.2026-11-19_10-00-00-000_005.de0",
-      "autobahn": "A59",
-      "kind": "roadworks",
-      "coords": [
-        7.1481840214933285,
-        50.73585364944499
-      ],
-      "title": "A59 | Bonn-Ost - Bonn-Pützchen",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 10:00 bis 15:00 Uhr A59: Bonn -> Köln, zwischen 1.6 km hinter AK Bonn-Ost und 0.8 km vor AS Bonn-Pützchen Länge: 0.34 km | Maximale Durchfahrtsbreite: 7 m A59 von Bonn-Ost (AK) nach Bonn-Pützchen (AS) Grünpflege",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2026-004238--vi-bs.2026-08-04_15-00-00-000.devi-zus.2026-02-09_15-00-00-000.de155",
@@ -2718,20 +2770,7 @@
       "title": "A59 | Bonn-Pützchen - Bonn-Ost",
       "detail": "Zeitraum dieser Bauphase: Beginn: 04.08.26 um 15:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 28.02.31) A59: Köln -> Bonn, zwischen 1.0 km hinter AS Bonn-Pützchen und 0.8 km vor AK Bonn-Ost Länge: 1 km | Maximale Durchfahrtsbreite: 10.5 m Rheinbrücke Bonn-Nord (2026 - 20xx)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A59:roadworks:2026-059861--vi-bs.2026-11-19_10-00-00-000_003.de0",
-      "autobahn": "A59",
-      "kind": "roadworks",
-      "coords": [
-        7.14330595904745,
-        50.74293882406349
-      ],
-      "title": "A59 | Bonn-Pützchen - Bonn-Ost",
-      "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 20.11.26 von 10:00 bis 15:00 Uhr A59: Köln -> Bonn, zwischen 0.3 km hinter AS Bonn-Pützchen und 2.4 km vor AK Bonn-Ost Länge: 0.06 km | Maximale Durchfahrtsbreite: 7 m A59 von Bonn-Pützchen (AS) nach Bonn-Ost (AK) Grünpflege",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2024-050470--vi-bs.2026-03-14_09-00-00-000.devi-zus.2025-08-16_09-00-00-000.f.de1",
@@ -2744,7 +2783,7 @@
       "title": "A59 | Bonn-Pützchen - Bonn-Ost",
       "detail": "Zeitraum dieser Bauphase: Beginn: 14.03.26 um 09:00 Uhr Ende: 13.03.27 um 15:00 Uhr (Ende der Gesamtmaßnahme: 13.03.27) A59: Köln -> Bonn, zwischen 1.8 km hinter AS Bonn-Pützchen und AK Bonn-Ost Länge: 0.98 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6 m BW Ankerbachtalbrücke",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2025-012898--vi-bs.2026-07-27_09-00-00-000.devi-zus.2023-08-04_09-00-00-000_001.de27",
@@ -2757,7 +2796,7 @@
       "title": "A59 | Bonn-Vilich - Bonn-Nordost",
       "detail": "Zeitraum dieser Bauphase: Beginn: 27.07.26 um 09:00 Uhr Ende: 30.11.26 um 14:00 Uhr (Ende der Gesamtmaßnahme: 30.11.26) A59: Bonn -> Köln, zwischen 0.7 km hinter AS Bonn-Vilich und 0.4 km vor AD Bonn-Nordost Länge: 0.41 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 10.5 m VZA DB-AG (S13)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001678--vi-bs.2026-10-30_05-00-00-000.devi-zus.2027-09-25_05-00-00-000.f_001.de140",
@@ -2770,7 +2809,7 @@
       "title": "A59 | Düsseldorf-Süd - Monheim",
       "detail": "Zeitraum dieser Bauphase: Beginn: 30.10.26 um 05:00 Uhr Ende: 30.06.27 um 22:00 Uhr (Ende der Gesamtmaßnahme: 31.08.35) A59: Düsseldorf -> Köln, zwischen 0.6 km hinter AD Düsseldorf-Süd und 0.2 km vor AS Monheim Länge: 10.59 km | Maximale Durchfahrtsbreite: 7 m Grundhafte Sanierung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001733--vi-bs.2024-07-31_05-00-00-000.devi-zus.2022-02-09_05-00-00-000.f_001.de18",
@@ -2783,7 +2822,7 @@
       "title": "A59 | Köln-Heumar - Köln-Rath",
       "detail": "Zeitraum dieser Bauphase: Beginn: 31.07.24 um 05:00 Uhr Ende: 18.02.29 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.02.29) A59: Köln -> Bonn, zwischen 0.2 km hinter AD Köln-Heumar und 1.4 km vor AS Köln-Rath Länge: 0.19 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 5.85 m Umbau AD Heumar (DEGES)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001712--vi-bs.2026-08-05_05-00-00-000.devi-zus.2017-11-15_09-00-00-000_005.de14",
@@ -2796,7 +2835,7 @@
       "title": "A59 | Leverkusen-Rheindorf - Leverkusen-West",
       "detail": "Zeitraum dieser Bauphase: Beginn: 05.08.26 um 05:00 Uhr Ende: 31.12.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) A59: Düsseldorf -> Köln, zwischen 2.3 km hinter AS Leverkusen-Rheindorf und 0.5 km vor AK Leverkusen-West Länge: 0.46 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 6.5 m Rheinbrücke Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001712--vi-bs.2026-08-05_05-00-00-000.devi-zus.2017-11-15_09-00-00-000_005.de16",
@@ -2809,7 +2848,7 @@
       "title": "A59 | Leverkusen-West - Leverkusen-Rheindorf",
       "detail": "Zeitraum dieser Bauphase: Beginn: 05.08.26 um 05:00 Uhr Ende: 31.12.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) A59: Köln -> Düsseldorf, zwischen 0.2 km hinter AK Leverkusen-West und 2.7 km vor AS Leverkusen-Rheindorf Länge: 0.46 km | Max. 60 km/h | Maximale Durchfahrtsbreite: 3.25 m Rheinbrücke Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-000192--vi-bs.2026-05-20_09-00-00-000.devi-zus.2021-04-15_15-00-00-000_001.de721",
@@ -2822,7 +2861,7 @@
       "title": "Rheinbr. Leverkusen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.05.26 um 09:00 Uhr Ende: 19.05.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 19.05.28) Abfahrt von der A59 N 3 Länge: 0.15 km | Maximale Durchfahrtsbreite: 3.75 m Rheinbr. Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-000192--vi-bs.2026-05-20_09-00-00-000.devi-zus.2021-04-15_15-00-00-000_001.de719",
@@ -2835,7 +2874,7 @@
       "title": "Rheinbr. Leverkusen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 20.05.26 um 09:00 Uhr Ende: 19.05.28 um 22:00 Uhr (Ende der Gesamtmaßnahme: 19.05.28) Abfahrt von der A59: AK Leverkusen-West (aus Richtung Leverkusen-Rheindorf) Länge: 0.57 km | Maximale Durchfahrtsbreite: 3.75 m Rheinbr. Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001712--vi-bs.2026-08-05_05-00-00-000.devi-zus.2017-11-15_09-00-00-000_005.de22",
@@ -2848,7 +2887,7 @@
       "title": "Rheinbrücke Leverkusen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 05.08.26 um 05:00 Uhr Ende: 31.12.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) Abfahrt von der A59 N 3 Länge: 0.16 km | Maximale Durchfahrtsbreite: 3.25 m Rheinbrücke Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001712--vi-bs.2026-08-05_05-00-00-000.devi-zus.2017-11-15_09-00-00-000_005.de20",
@@ -2861,7 +2900,7 @@
       "title": "Rheinbrücke Leverkusen",
       "detail": "Zeitraum dieser Bauphase: Beginn: 05.08.26 um 05:00 Uhr Ende: 31.12.26 um 09:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) Abfahrt von der A59: AK Leverkusen-West (aus Richtung Leverkusen-Rheindorf) Länge: 0.6 km | Maximale Durchfahrtsbreite: 3.25 m Rheinbrücke Leverkusen",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A59:roadworks:2023-001733--vi-bs.2024-07-31_05-00-00-000.devi-zus.2022-02-09_05-00-00-000.f_001.de16",
@@ -2874,20 +2913,7 @@
       "title": "Umbau AD Heumar (DEGES)",
       "detail": "Zeitraum dieser Bauphase: Beginn: 31.07.24 um 05:00 Uhr Ende: 18.02.29 um 05:00 Uhr (Ende der Gesamtmaßnahme: 18.02.29) A59: km 6.30 --> km 6.01 Länge: 0.29 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6 m Umbau AD Heumar (DEGES)",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
-    },
-    {
-      "id": "A59:warning:INRIX--vi-avl.2026-11-20_05-31-00-000_011.de0",
-      "autobahn": "A59",
-      "kind": "warning",
-      "coords": [
-        6.891630371433875,
-        51.151941198515935
-      ],
-      "title": "A59 | Wolfhagen - Düsseldorf-Süd",
-      "detail": "Beginn: 20.11.26 um 06:31 Uhr Angespannte Verkehrslage, seit 20.11.2026, 05:31 A59: Köln -> Düsseldorf, zwischen 3.3 km hinter Wolfhagen und 0.8 km vor AD Düsseldorf-Süd Ereignismeldung: - Im Stillstand - Durchschnittsgeschwindigkeit: 20 km/h - Reisezeitverlust: 9 Minuten (abnehmend)",
-      "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:closure:2026-058539--vi-fbm.2026-11-23_18-30-00-000.devi-zus.2026-11-23_18-30-00-000.de1",
@@ -2900,7 +2926,7 @@
       "title": "A61 von Brohltal-Ost (Raststaette) nach In Dürpel (Parkplatz) Fahrbahninstandsetzung",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 18:30 bis zum 24.11.26 06:00 Uhr. 24.11.26 18:30 bis zum 25.11.26 06:00 Uhr. (Ende der Gesamtmaßnahme: 25.11.26) Von Auffahrt auf die A61: AS Wehr (aus Richtung Brohltal-Ost) nach A61: Mönchengladbach -> Koblenz, zwischen AS Wehr und 3.3 km vor AS Mendig Länge: konnte nicht ermittelt werden A61 von B",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-059141--vi-bs.2026-11-24_08-30-00-000_002.de0",
@@ -2913,7 +2939,7 @@
       "title": "A61 | Bedburg - Bergheim",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 24.11.26 von 08:30 bis 15:00 Uhr A61: Mönchengladbach -> Koblenz, zwischen 0.5 km hinter AS Bedburg und 5.5 km vor AS Bergheim Länge: 0.7 km | Maximale Durchfahrtsbreite: 3.75 m A61 von Bedburg (AS) nach Bergheim (AS) Arbeiten an Schutzeinrichtungen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-059129--vi-bs.2026-11-23_08-30-00-000.de0",
@@ -2926,7 +2952,7 @@
       "title": "A61 | Bedburg - Bergheim",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 08:30 bis 15:00 Uhr A61: Mönchengladbach -> Koblenz, zwischen 4.5 km hinter AS Bedburg und 1.2 km vor AS Bergheim Länge: 1 km | Maximale Durchfahrtsbreite: 3.75 m A61 von Bedburg (AS) nach Bergheim (AS) Arbeiten an Schutzeinrichtungen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-059131--vi-bs.2026-11-23_08-30-00-000_001.de0",
@@ -2939,7 +2965,7 @@
       "title": "A61 | Bergheim - Bedburg",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 von 08:30 bis 15:00 Uhr A61: Koblenz -> Mönchengladbach, zwischen 1.5 km hinter AS Bergheim und 4.5 km vor AS Bedburg Länge: 0.7 km | Maximale Durchfahrtsbreite: 3.75 m A61 von Bergheim (AS) nach Bedburg (AS) Arbeiten an Schutzeinrichtungen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-059136--vi-bs.2026-11-24_08-30-00-000_001.de0",
@@ -2952,7 +2978,7 @@
       "title": "A61 | Bergheim - Bedburg",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 24.11.26 von 08:30 bis 15:00 Uhr A61: Koblenz -> Mönchengladbach, zwischen 5.5 km hinter AS Bergheim und 0.5 km vor AS Bedburg Länge: 0.7 km | Maximale Durchfahrtsbreite: 3.75 m A61 von Bergheim (AS) nach Bedburg (AS) Arbeiten an Schutzeinrichtungen",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2023-000045--vi-bs.2026-11-09_03-00-00-000.devi-zus.2024-03-23_09-00-00-000_001.f.de151",
@@ -2965,7 +2991,7 @@
       "title": "A61 | Bliesheim - Erftstadt",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 03:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) A61: Koblenz -> Mönchengladbach, zwischen AK Bliesheim und 3.4 km vor AS Erftstadt Länge: 0.63 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6 m BW Merowingerstraße",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-058539--vi-bs.2026-11-23_18-30-00-000.devi-zus.2026-11-23_18-30-00-000.de2",
@@ -2978,7 +3004,7 @@
       "title": "A61 | Brohltal-Ost - In Dürpel",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 23.11.26 18:30 bis zum 24.11.26 06:00 Uhr. 24.11.26 18:30 bis zum 25.11.26 06:00 Uhr. A61: Mönchengladbach -> Koblenz, zwischen 3.2 km hinter Brohltal-Ost und 1.6 km vor In Dürpel Länge: 1.15 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.4 m A61 von Brohltal-Ost (Raststaette) nach In Dürpel (Parkplatz) Fa",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-058503--vi-bs.2026-11-20_19-00-00-000.de0",
@@ -2991,7 +3017,7 @@
       "title": "A61 | Harterscheid - Niederzissen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 27.11.26 18:30 bis zum 28.11.26 06:00 Uhr. A61: Mönchengladbach -> Koblenz, zwischen 2.7 km hinter Harterscheid und 2.9 km vor AS Niederzissen Länge: 0.65 km | Maximale Durchfahrtsbreite: 3.4 m A61 von Harterscheid (Rastplatz) nach Niederzissen (AS) Fahrbahninstandsetzung",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-058483--vi-bs.2026-11-25_18-30-00-000.devi-zus.2026-11-18_19-00-00-000.de1",
@@ -3004,7 +3030,7 @@
       "title": "A61 | Hummerich - Krufter Ofen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 18:30 bis zum 26.11.26 06:00 Uhr. 26.11.26 18:30 bis zum 27.11.26 06:00 Uhr. A61: Koblenz -> Mönchengladbach, zwischen 1.2 km hinter Hummerich und 1.7 km vor Krufter Ofen Länge: 0.3 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.5 m A61 von Hummerich (Parkplatz) nach Krufter Ofen (Parkplatz) Fahrb",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-058483--vi-bs.2026-11-25_18-30-00-000.devi-zus.2026-11-18_19-00-00-000.de3",
@@ -3017,7 +3043,7 @@
       "title": "A61 | Hummerich - Krufter Ofen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 18:30 bis zum 26.11.26 06:00 Uhr. 26.11.26 18:30 bis zum 27.11.26 06:00 Uhr. A61: Koblenz -> Mönchengladbach, zwischen 1.2 km hinter Hummerich und 1.7 km vor Krufter Ofen Länge: 0.3 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.5 m A61 von Hummerich (Parkplatz) nach Krufter Ofen (Parkplatz) Fahrb",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2025-057768--vi-bs.2026-11-23_09-00-00-000.devi-zus.2025-12-08_09-00-00-000_011.de5",
@@ -3030,7 +3056,7 @@
       "title": "A61 | Kerpen - Bergheim-Süd",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: Jeden Montag, Dienstag, Mittwoch, Donnerstag und Freitag zwischen dem 23.11.26 und dem 27.11.26 von 09:00 bis 15:00 Uhr. A61: Koblenz -> Mönchengladbach, zwischen 4.4 km hinter AK Kerpen und 1.3 km vor AS Bergheim-Süd Länge: 0.3 km | Maximale Durchfahrtsbreite: 3.75 m BW-Prüf.",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-032866--vi-bs.2026-06-09_00-00-00-000.devi-zus.2026-06-09_00-00-00-000_002.de3",
@@ -3043,7 +3069,7 @@
       "title": "A61 | Koblenz/Dieblich - Moseltal-West",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.06.26 um 00:00 Uhr Ende: 02.12.30 um 00:00 Uhr (Ende der Gesamtmaßnahme: 02.12.30) A61: Ludwigshafen -> Koblenz, zwischen 0.5 km hinter AS Koblenz/Dieblich und 0.1 km vor Moseltal-West Länge: 1.64 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7 m A61 Moseltalbrücke Winningen Akute Verkehrsgefährdung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2023-004472--vi-bs.2026-10-13_00-00-00-000.devi-bs.2025-04-04_00-00-00-000.de40",
@@ -3056,7 +3082,7 @@
       "title": "A61 | Mackenstein - Mönchengladbach",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.10.26 um 00:00 Uhr Ende: 24.12.26 um 00:00 Uhr (Ende der Gesamtmaßnahme: 24.12.26) A61: Venlo -> Mönchengladbach, zwischen 0.3 km hinter AS Mackenstein und 0.9 km vor AK Mönchengladbach Länge: 1.9 km | Maximale Durchfahrtsbreite: 5.85 m Brückeninstandsetzung BW Hardter Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2023-004472--vi-bs.2026-10-13_00-00-00-000.devi-bs.2025-04-04_00-00-00-000.de42",
@@ -3069,7 +3095,7 @@
       "title": "A61 | Mönchengladbach - Mackenstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.10.26 um 00:00 Uhr Ende: 24.12.26 um 00:00 Uhr (Ende der Gesamtmaßnahme: 24.12.26) A61: Mönchengladbach -> Venlo, zwischen 1.0 km hinter AK Mönchengladbach und 0.3 km vor AS Mackenstein Länge: 1.9 km | Maximale Durchfahrtsbreite: 5.85 m Brückeninstandsetzung BW Hardter Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2023-004472--vi-bs.2026-10-13_00-00-00-000.devi-bs.2025-04-04_00-00-00-000.de44",
@@ -3082,7 +3108,7 @@
       "title": "A61 | Mönchengladbach-Nordpark - Mackenstein",
       "detail": "Zeitraum dieser Bauphase: Beginn: 13.10.26 um 00:00 Uhr Ende: 24.12.26 um 00:00 Uhr (Ende der Gesamtmaßnahme: 24.12.26) A61: Mönchengladbach -> Venlo, zwischen 1.5 km hinter AS Mönchengladbach-Nordpark und 2.2 km vor AS Mackenstein Länge: 1.36 km | Maximale Durchfahrtsbreite: 5.85 m Brückeninstandsetzung BW Hardter Str.",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-032866--vi-bs.2026-06-09_00-00-00-000.devi-zus.2026-06-09_00-00-00-000_002.de1",
@@ -3095,7 +3121,7 @@
       "title": "A61 | Moseltal-West - Koblenz/Dieblich",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.06.26 um 00:00 Uhr Ende: 02.12.30 um 00:00 Uhr (Ende der Gesamtmaßnahme: 02.12.30) A61: Koblenz -> Ludwigshafen, zwischen 0.1 km hinter Moseltal-West und 0.5 km vor AS Koblenz/Dieblich Länge: 1.65 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 7 m A61 Moseltalbrücke Winningen Akute Verkehrsgefährdung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2025-025470--vi-bs.2025-06-01_00-00-00-000.devi-zus.2025-06-01_00-00-00-000_001.de1",
@@ -3108,7 +3134,7 @@
       "title": "A61 | Neufeld - Koblenz-Metternich",
       "detail": "Zeitraum dieser Bauphase: Beginn: 01.06.25 um 00:00 Uhr Ende: 12.06.27 um 00:00 Uhr (Ende der Gesamtmaßnahme: 12.06.27) A61: Ludwigshafen -> Koblenz, zwischen 1.4 km hinter Neufeld und 2.2 km vor AS Koblenz-Metternich Länge: 4.82 km | Maximale Durchfahrtsbreite: 6.5 m A61 Moselbrücke Winningen - Brückeninstandsetzung",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-054693--vi-bs.2026-11-02_00-00-00-000.de0",
@@ -3121,7 +3147,7 @@
       "title": "A61 | Sinzig - Mühlenberg",
       "detail": "Zeitraum dieser Bauphase: Beginn: 02.11.26 um 00:00 Uhr Ende: 22.11.26 um 00:00 Uhr (Ende der Gesamtmaßnahme: 22.11.26) A61: Koblenz -> Mönchengladbach, zwischen 0.2 km hinter AD Sinzig und 3.5 km vor Mühlenberg Länge: 2.4 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.75 m A61 Ahrtalbrücke",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2026-058626--vi-bs.2026-11-25_20-00-00-000_001.de0",
@@ -3134,7 +3160,7 @@
       "title": "A61 | Wehr - Niederzissen",
       "detail": "Die Baustelle ist zu folgenden Zeiträumen gültig: 25.11.26 20:00 bis zum 26.11.26 05:00 Uhr. A61: Koblenz -> Mönchengladbach, zwischen 0.2 km hinter AS Wehr und 0.3 km vor AS Niederzissen Länge: 6.39 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 3.75 m A61 von Wehr (AS) nach Niederzissen (AS) Markierungsarbeiten",
       "future": true,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     },
     {
       "id": "A61:roadworks:2023-000045--vi-bs.2026-11-09_03-00-00-000.devi-zus.2024-03-23_09-00-00-000_001.f.de149",
@@ -3147,7 +3173,7 @@
       "title": "A61 | Weilerswist - Bliesheim",
       "detail": "Zeitraum dieser Bauphase: Beginn: 09.11.26 um 03:00 Uhr Ende: 31.12.26 um 15:00 Uhr (Ende der Gesamtmaßnahme: 31.12.26) A61: Koblenz -> Mönchengladbach, zwischen 3.8 km hinter AS Weilerswist und AK Bliesheim Länge: 0.13 km | Maximale Durchfahrtsbreite: 6.75 m BW Merowingerstraße",
       "future": false,
-      "observedAt": "2026-11-20T08:16:33.987Z"
+      "observedAt": "2026-11-20T17:08:41.899Z"
     }
   ]
 }
